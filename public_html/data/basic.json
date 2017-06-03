@@ -1,0 +1,9 @@
+{
+    "myBoat": { "type": "dinghy" },
+    
+    "buoys": [
+        { "image": "can", "x": 100, "y": 200 },
+        { "image": "can", "x": 100, "y":400 }
+    ]
+    
+}
