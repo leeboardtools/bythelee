@@ -24,8 +24,7 @@ Leeboard.ClCd = function(cl, cd, cm) {
      * @property {number} cl The lift coefficient, Cl
      */
     this.cl = cl || 0;
-    
-    
+        
     /**
      * @property {number} cd The drag coefficient, Cd
      */
@@ -37,6 +36,7 @@ Leeboard.ClCd = function(cl, cd, cm) {
      */
     this.cm = cm || 0;
 };
+
 Leeboard.ClCd.prototype = {
     constructor: Leeboard.ClCd,
     
@@ -44,17 +44,18 @@ Leeboard.ClCd.prototype = {
      * Calculates the lift and drag forces and the moment from the coefficients.
      * @param {number} rho    The density.
      * @param {number} area   The area.
-     * @param {number} qInf   The magnitude of the free stream velocity.
+     * @param {number} qInfSpeed   The magnitude of the free stream velocity.
      * @param {number} chordLength The chord length, used for calculating the moment.
      * @param {number} aspectRatio  Optional aspect ratio, used for calculating the induced drag.
      * @param {object} store  Optional object to store the lift, drag, and moment into.
      * @returns {object}    The object containing the calculated lift, drag, and moment.
      */
-    calcLiftDragMoment : function(rho, area, qInf, chordLength, aspectRatio, store) {
-        var scale = 0.5 * rho * area * qInf * qInf;
+    calcLiftDragMoment : function(rho, area, qInfSpeed, chordLength, aspectRatio, store) {
+        var scale = 0.5 * rho * area * qInfSpeed * qInfSpeed;
         store = store || {};
         store.lift = this.cl * scale;
         store.drag = this.cd * scale;
+        chordLength = chordLength || 1;
         store.moment = this.cm * scale * chordLength;
         if (Leeboard.isVar(aspectRatio)) {
             var ci = this.cl * this.cl / (Math.PI * aspectRatio);
@@ -95,7 +96,7 @@ Leeboard.ClCdStall.prototype = {
     
     /**
      * Loader method.
-     * @param {type} data
+     * @param {object} data   The data, typically loaded from a JSON file.
      */
     load: function(data) {
         this.cl45Deg = data.cl45Deg || this.cl45Deg;
@@ -158,8 +159,9 @@ Leeboard.ClCdInterp.prototype = {
     constructor: Leeboard.ClCdInterp,
     
     /**
-     * Loads the interpolation data.
-     * @param {type} data 
+     * Loads the interpolation data. Note that this stores the coefficient arrays
+     * by reference, not as copies.
+     * @param {object} data   The data, typically loaded from a JSON file.
      */
     load: function(data) {
         this.alphas = data.alphas;
@@ -230,8 +232,8 @@ Leeboard.ClCdCurve.prototype = {
     constructor: Leeboard.ClCdCurve,
     
     /**
-     * The main loading function.
-     * @param {type} data
+     * The main loading method.
+     * @param {object} data   The data, typically loaded from a JSON file.
      */
     load: function(data) {
         if (!Leeboard.isVar(data)) {
@@ -347,7 +349,11 @@ Leeboard.Foil = function() {
 
 Leeboard.Foil.prototype = {
     constructor: Leeboard.Foil,
-    
+        
+    /**
+     * The main loading method.
+     * @param {object} data   The data, typically loaded from a JSON file.
+     */
     load: function(data) {
         this.chordLine = Leeboard.copyCommonProperties(this.chordLine, data.chordLine);
         this.sliceZ = data.sliceZ || this.sliceZ;

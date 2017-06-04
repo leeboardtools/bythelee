@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global Leeboard */
+/* global Leeboard, Phaser */
 
 /**
  * The main sailing environment, basically the sailing world.

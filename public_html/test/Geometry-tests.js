@@ -15,7 +15,7 @@
  */
 
 
-/* global QUnit, THREE, Leeboard */
+/* global QUnit, Leeboard */
 
 function checkVector3D(assert, vector, x, y, z, msg, tolerance) {
     if (!Leeboard.isVar(msg)) {
@@ -26,13 +26,13 @@ function checkVector3D(assert, vector, x, y, z, msg, tolerance) {
     assert.nearEqual(vector.z, z, msg + " Z OK", tolerance);
 }
 
-QUnit.test( "THREE.Vector3.applyMatrix4Rotation", function( assert ) {
-    var m = new THREE.Matrix4();
+QUnit.test( "applyMatrix4Rotation", function( assert ) {
+    var m = Leeboard.createMatrix4();
     var a = 30 * Leeboard.DEG_TO_RAD;
     m.makeRotationZ(a);
-    m.setPosition(new THREE.Vector3(10, 20, 30));
+    m.setPosition(Leeboard.createVector3D(10, 20, 30));
     
-    var v = new THREE.Vector3(10, 0, 0);
+    var v = Leeboard.createVector3D(10, 0, 0);
     v.applyMatrix4(m);
     checkVector3D(assert, v, 10*Math.cos(a) + 10, 10*Math.sin(a) + 20, 30, "applyMatrix4");
     

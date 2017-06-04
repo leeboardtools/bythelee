@@ -16,6 +16,13 @@
 
 /* global Leeboard, THREE */
 
+/**
+ * This file contains our Three.js based geometry implementation, Three.js is 
+ * directly referenced only by this file in Leeboard. Should we one day want to 
+ * replace Three.js with a lighter weight alternative, though to do that we'd 
+ * have to reimplement all the various object methods from Three.js. Of course we
+ * should be able to copy most of the implementations from Three.js.
+ */
 
 /**
  * Calculates a 2D normal from a tangent.
@@ -248,3 +255,13 @@ Leeboard.getLinePlaneIntersection = function(plane, line) {
     delta.add(line.start);
     return delta;
 };
+
+
+/**
+ * Creates a 4x4 matrix for performing coordinate transformations.
+ * @returns {object}
+ */
+Leeboard.createMatrix4 = function() {
+    return new THREE.Matrix4();
+}
+

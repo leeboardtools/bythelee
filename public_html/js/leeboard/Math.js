@@ -17,6 +17,9 @@
 /* global Leeboard */
 
 
+/**
+ * @type Number The default zero tolerance used by isLikeZero() and isNearEqual().
+ */
 Leeboard.defZeroTolerance = 1e-10;
 
 /**

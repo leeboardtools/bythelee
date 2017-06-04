@@ -20,7 +20,7 @@
  * Calculates the moment about the origin of a force applied at a position.
  * @param {type} force  The force.
  * @param {type} position   The application point of the force.
- * @returns {THREE.Vector3} Vector representing the moment about the origin from 
+ * @returns {object} Vector representing the moment about the origin from 
  * force being applied at position.
  */
 Leeboard.calcMoment = function(force, position) {
