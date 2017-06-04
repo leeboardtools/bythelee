@@ -43,3 +43,74 @@ QUnit.test( "ClCd.calcLiftDragMoment()", function( assert ) {
     assert.nearEqual(liftDragMoment.inducedDrag, 0.5 * rho * area * qInfSpeed * qInfSpeed * cdi, "basic Cl");
 });
 
+function createTestFoil(assert) {
+    var foil = new Leeboard.Foil();
+    var foilData = {
+        'chordLine': {
+            'start': { 'x': 3, 'y': 0 },
+            'end': { 'x':13, 'y': 0 }
+        },
+        'sliceZ': 5,
+        'area': 15,
+        'aspectRatio': 4,
+        'clCdCurve': {
+            'stallStartDeg': 25,
+            'liftEndDeg': 35,
+            'clCdStall': {},
+            'clCdInterp': {
+                'alphas': [ 0, 10, 30 ],
+                'cls': [ 0, 1.1, 1.2 ],
+                'cds': [ 0.1, 0.3, 0.5 ]
+            }
+        }
+    };
+    foil.load(foilData);
+    
+    if (Leeboard.isVar(assert)) {
+        var msg = "TestFoil: ";
+        checkVector2D(assert, foil.chordLine.start, 3, 0, msg + "chordStart");
+        checkVector2D(assert, foil.chordLine.end, 13, 0, msg + "chordEnd");
+        assert.equal(foil.sliceZ, 5, msg + "sliceZ");
+        assert.equal(foil.area, 15, msg + "area");
+        assert.equal(foil.aspectRatio, 4, msg + "aspectRatio");
+    }
+    return foil;
+}
+
+QUnit.test( "Foil.calcLocalForce", function( assert ) {
+    var testFoil = createTestFoil(assert);
+    
+    var details = {};
+    
+    var rho = 1.204;
+    var alphaDeg = 10;
+    var cosAlpha = Math.cos(Leeboard.DEG_TO_RAD * alphaDeg);
+    var sinAlpha = Math.sin(Leeboard.DEG_TO_RAD * alphaDeg);
+    var qInfSpeed = 2;
+    var qInf = Leeboard.createVector2D(qInfSpeed * cosAlpha, qInfSpeed * sinAlpha);
+    var localForceResultant = testFoil.calcLocalForce(rho, qInf, details);
+    
+    var forceScale = 0.5 * rho * qInfSpeed * qInfSpeed * 15;
+    var refLift = Leeboard.createVector2DMagDeg(1.1 * forceScale, alphaDeg + 90);
+    var refDrag = Leeboard.createVector2DMagDeg(0.3 * forceScale, alphaDeg);
+    var refInducedDrag = Leeboard.createVector2DMagDeg(1.1 * 1.1 / (Math.PI * testFoil.aspectRatio) * forceScale, alphaDeg);
+    
+    assert.nearEqual(details.angleDeg, alphaDeg, "angle: ");
+    assert.nearEqual(details.lift, refLift.length(), "lift: ");
+    assert.nearEqual(details.drag, refDrag.length(), "drag: ");
+    assert.nearEqual(details.inducedDrag, refInducedDrag.length(), "induced drag:");
+    
+    var refForce = refLift.clone();
+    refForce.add(refDrag);
+    refForce.add(refInducedDrag);
+    
+    checkVector2D(assert, localForceResultant.force, refForce.x, refForce.y, "Force: ");    
+    checkVector2D(assert, localForceResultant.applPoint, 3, 0, "applPoint: ");
+    
+    // The force is applied at the 25% chord point...
+    refForce.sub(refInducedDrag);
+    var refR = Leeboard.createVector2D(2.5, 0);
+    var refMoment = Leeboard.calcMoment(refForce, refR);
+    
+    checkVector3D(assert, localForceResultant.moment, refMoment.x, refMoment.y, refMoment.z, "moment: ");
+});

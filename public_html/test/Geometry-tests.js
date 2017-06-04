@@ -17,6 +17,26 @@
 
 /* global QUnit, Leeboard */
 
+function checkVector2D(assert, vector, x, y, msg, tolerance) {
+    if (!Leeboard.isVar(msg)) {
+        msg = "";
+    }
+    assert.nearEqual(vector.x, x, msg + " X OK", tolerance);
+    assert.nearEqual(vector.y, y, msg + " Y OK", tolerance);
+};
+
+function checkVectorMagAngle(assert, vector, mag, angleRad, tolerance, msg) {
+    if (!Leeboard.isVar(msg)) {
+        msg = "";
+    }
+    if (Leeboard.isVar(mag)) {
+        assert.nearEqual(vector.length(), mag, msg + " Mag OK", tolerance);
+    }
+    if (Leeboard.isVar(angleRad)) {
+        assert.nearEqual(vector.angle(), angleRad, msg + " Angle OK", tolerance);
+    }
+}
+
 function checkVector3D(assert, vector, x, y, z, msg, tolerance) {
     if (!Leeboard.isVar(msg)) {
         msg = "";
@@ -24,7 +44,7 @@ function checkVector3D(assert, vector, x, y, z, msg, tolerance) {
     assert.nearEqual(vector.x, x, msg + " X OK", tolerance);
     assert.nearEqual(vector.y, y, msg + " Y OK", tolerance);
     assert.nearEqual(vector.z, z, msg + " Z OK", tolerance);
-}
+};
 
 QUnit.test( "applyMatrix4Rotation", function( assert ) {
     var m = Leeboard.createMatrix4();
@@ -41,3 +61,27 @@ QUnit.test( "applyMatrix4Rotation", function( assert ) {
     checkVector3D(assert, v, 10*Math.cos(a), 10*Math.sin(a), 0, "applyMatrix4Rotation");
 });
     
+QUnit.test( "createVector2DMagDeg", function( assert ) {
+    var vec = Leeboard.createVector2DMagDeg(10, 20);
+    checkVectorMagAngle(assert, vec, 10, 20 * Leeboard.DEG_TO_RAD);
+});
+
+    
+QUnit.test( "normalTangent", function( assert ) {
+    var refTangent = Leeboard.createVector2D(10, 0);
+    var normal = Leeboard.tangentToNormalXY(refTangent);
+    
+    checkVector2D(assert, normal, 0, 1, "normal");
+    
+    var tangent = Leeboard.normalToTangentXY(normal);
+    checkVector2D(assert, tangent, 1, 0, "tangent");
+    
+    var refNormal = Leeboard.createVector2D(10, 20);
+    var normFactor = 1 / refNormal.length();
+    
+    tangent = Leeboard.normalToTangentXY(refNormal);
+    checkVector2D(assert, tangent, 20 * normFactor, -10 * normFactor, "tangent 2");
+    
+    normal = Leeboard.tangentToNormalXY(tangent);
+    checkVector2D(assert, normal, 10 * normFactor, 20 * normFactor, "normal 2");
+});

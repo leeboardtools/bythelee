@@ -30,7 +30,7 @@
  * @returns {object}    The normal.
  */
 Leeboard.tangentToNormalXY = function(tangent) {
-    return new THREE.Vector2(tangent.y, -tangent.x).normalize();
+    return new THREE.Vector2(-tangent.y, tangent.x).normalize();
 }
 
 /**
@@ -39,7 +39,7 @@ Leeboard.tangentToNormalXY = function(tangent) {
  * @returns {object}    The tangent.
  */
 Leeboard.normalToTangentXY = function(normal) {
-    return new THREE.Vector2(-normal.y, normal.x).normalize();
+    return new THREE.Vector2(normal.y, -normal.x).normalize();
 }
 
 /**
@@ -58,14 +58,70 @@ THREE.Vector3.prototype.applyMatrix4Rotation = function(m) {
 }
 
 /**
+ * Creates a 2D vector/point.
+ * @constructor
+ * @param {number} x    Initial x coordinate value.
+ * @param {number} y    Initial y coordinate value.
+ */
+Leeboard.createVector2D = function(x, y) {
+    return new THREE.Vector2(x, y);
+};
+
+/**
+ * Creates a 2D vector from a magnitude and angle in degrees.
+ * @param {number} mag  The magnitude.
+ * @param {number} deg  The angle, in degrees, of the vector relative to the x axis.
+ */
+Leeboard.createVector2DMagDeg = function(mag, deg) {
+    var rad = Leeboard.DEG_TO_RAD * deg;
+    var cos = Math.cos(rad);
+    var sin = Math.sin(rad);
+    return new THREE.Vector2(cos * mag, sin * mag);
+};
+
+/**
+ * Returns the angle, in radians, between this vector and another vector.
+ * @param {object} v    The other vector.
+ * @returns {Number}    The angle.
+ */
+THREE.Vector2.prototype.angleTo = function(v) {
+    // Straight from THREE.js' Vector3.js
+    var theta = this.dot( v ) / ( Math.sqrt( this.lengthSq() * v.lengthSq() ) );
+    return Math.acos( Leeboard.clamp( theta, - 1, 1 ) );
+}
+
+
+/**
+ * Logs a 2D vector to the console.
+ * @param {object} vec  The vector to log.
+ * @param {String} msg  The optional message to precede the vector.
+ */
+Leeboard.logVector2D = function(vec, msg) {
+    msg = msg || "";
+    console.log(msg + vec.x + "\t" + vec.y);
+};
+
+/**
  * Creates a 3D vector/point.
  * @constructor
  * @param {number} x    Initial x coordinate value.
  * @param {number} y    Initial y coordinate value.
- * @param {type} z      Initial z coordinate value.
+ * @param {number} z      Initial z coordinate value.
  */
 Leeboard.createVector3D = function(x, y, z) {
     return new THREE.Vector3(x, y, z);
+};
+
+/**
+ * Adds two 2D vectors.
+ * @param {object} vecA The first vector.
+ * @param {object} vecB The second vectorl
+ * @returns {object}    A new vector representing vecA + vecB
+ */
+Leeboard.addVectors2D = function(vecA, vecB) {
+    var vec = new THREE.Vector2(vecA.x, vecA.y);
+    vec.add(vecB);
+    return vec;
 };
 
 /**
@@ -77,6 +133,18 @@ Leeboard.createVector3D = function(x, y, z) {
 Leeboard.addVectors3D = function(vecA, vecB) {
     var vec = new THREE.Vector3(vecA.x, vecA.y, vecA.z);
     vec.add(vecB);
+    return vec;
+};
+
+/**
+ * Subtracts two 2D vectors.
+ * @param {object} vecA The first vector.
+ * @param {object} vecB The second vectorl
+ * @returns {object}    A new vector representing vecA - vecB
+ */
+Leeboard.subVectors2D = function(vecA, vecB) {
+    var vec = new THREE.Vector2(vecA.x, vecA.y);
+    vec.sub(vecB);
     return vec;
 };
 
@@ -93,6 +161,16 @@ Leeboard.subVectors3D = function(vecA, vecB) {
 };
 
 /**
+ * Returns the cross product of two 2D vectors, which is a 3D vector..
+ * @param {object} vecA The first vector.
+ * @param {object} vecB The second vectorl
+ * @returns {object}    A new 3D vector representing vecA X vecB
+ */
+Leeboard.crossVectors2D = function(vecA, vecB) {
+    return new THREE.Vector3(0, 0, vecA.x * vecB.y - vecA.y * vecB.x);
+};
+
+/**
  * Returns the cross product of two 3D vectors.
  * @param {object} vecA The first vector.
  * @param {object} vecB The second vectorl
@@ -102,6 +180,15 @@ Leeboard.crossVectors3D = function(vecA, vecB) {
     var vec = new THREE.Vector3(vecA.x, vecA.y, vecA.z);
     vec.cross(vecB);
     return vec;
+};
+
+/**
+ * Determines if all the components of a vector are near zero.
+ * @param {object} vec  The vector of interest.
+ * @returns {Boolean}   True if all three components can be treated as 0.
+ */
+Leeboard.isVectors2DLikeZero = function(vec) {
+    return Leeboard.isLikeZero(vec.x) && Leeboard.isLikeZero(vec.y);
 };
 
 /**

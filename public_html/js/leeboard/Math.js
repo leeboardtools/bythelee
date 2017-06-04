@@ -31,7 +31,7 @@ Leeboard.defZeroTolerance = 1e-10;
 Leeboard.isLikeZero = function(x, tolerance) {
     tolerance = tolerance || Leeboard.defZeroTolerance;
     return x < tolerance && x > -tolerance;
-}
+};
 
 /**
  * Determines if two numbers are approximately equal.
@@ -54,7 +54,18 @@ Leeboard.isNearEqual = function(a, b, tolerance) {
     var scaledA = a * scale;
     var scaledB = b * scale;
     return (Math.abs(scaledA - scaledB) <= tolerance);
-}
+};
+
+/**
+ * Adjusts a value as necessary to ensure it is between two limits.
+ * @param {number} val  The value to clamp if necessary.
+ * @param {number} low  The minimum value to allow, must be &le; high, no test is made.
+ * @param {number} high The maximum value to allow, must be &ge; low.
+ * @returns {number} The value clamped to the limits.
+ */
+Leeboard.clamp = function(val, low, high) {
+    return Math.min(Math.max(val, low), high);
+};
 
 /**
  * Third order smoothstep function per https://en.wikipedia.org/wiki/Smoothstep

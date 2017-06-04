@@ -24,6 +24,9 @@
  * force being applied at position.
  */
 Leeboard.calcMoment = function(force, position) {
+    if (!Leeboard.isVar(force.z)) {
+        return Leeboard.crossVectors2D(position, force);
+    }
     return Leeboard.crossVectors3D(position, force);
 };
 

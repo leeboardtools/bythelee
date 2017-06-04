@@ -68,6 +68,39 @@ Leeboard.ClCd.prototype = {
     }
 }
 
+/**
+ * Calculates the moment coefficient for a given angle of attack, coefficients of lift,
+ * drag, and force application point relative to the leading edge.
+ * @param {number} degrees  The angle of attack in degrees.
+ * @param {number} cl   The coefficient of lift at the angle of attack.
+ * @param {number} cd   The coefficient of drag at the angle of attack.
+ * @param {number} chordFraction    The point where the force is applied along the chord
+ * as a fraction of the chord from the leading edge.
+ * @returns {Number}    The moment coefficient.
+ */
+Leeboard.calcCmForClCd = function(degrees, cl, cd, chordFraction) {
+    // Would like the moment to be such that the force is applied at the
+    // quarter chord point.
+    // For that we have the force:
+    // fx = (qInfNorm.x * cl + qInfDir.x * cd) * 1/2 * rho * QInf^2
+    // fy = (qInfNorm.y * cl + qInfDir.y * cd) * 1/2 * rho * QInf^2
+    // Rx = 0.25
+    // Ry = 0
+    // c = 1
+    // m = Rx * fy - Ry * fx, but Ry = 0 so m = Rx * fy
+    // m = 1/4 * (qInfNorm.y * cl + qInfDir.y * cd) * 1/2 * rho * QInf^2
+    // cm = m / (1/2 * rho * QInf^2 * c^2)
+    // cm = 1/4 * (qInfNorm.y * cl + qInfDir.y * cd)
+    // qInfDir.x = cos(alpha)
+    // qInfDir.y = sin(alpha)
+    // qInfNorm.x = -qInfDir.y = -sin(alpha)
+    // qInfNorm.y = qInfDir.y = cos(alpha)
+    var alphaRad = degrees * Leeboard.DEG_TO_RAD;
+    var cosAlpha = Math.cos(alphaRad);
+    var sinAlpha = Math.sin(alphaRad);            
+    return chordFraction * (cosAlpha * cl + sinAlpha * cd);
+}
+
 
 /**
  * Object that computes an approximation of the lift/drag/moment coefficients
@@ -133,7 +166,7 @@ Leeboard.ClCdStall.prototype = {
         store.cd = this.cd45Deg + 4 * (this.cd90Deg - this.cd45Deg) * x * (1 - x);   
         
         // 45 degrees is our 0 point...
-        store.cl = this.cl45Deg * Math.cos(2 * (degrees - 45) * Leeboard.DEG_TO_RAD) * sign;        
+        store.cl = this.cl45Deg * Math.cos(2 * (degrees - 45) * Leeboard.DEG_TO_RAD) * sign;    
         store.cm = (0.46 + 0.04 * (degrees - 30) / 60) * sign;
         
         return store;
@@ -189,24 +222,15 @@ Leeboard.ClCdInterp.prototype = {
     calcCoefsDeg: function(degrees, store) {
         store = store || new Leeboard.ClCd();
         
-        var sign;
-        if (degrees < 0) {
-            degrees = -degrees;
-            sign = -1;
-        }
-        else {
-            sign = 1;
-        }
-        
         var lowIn = this.interpCls.findLowIndex(degrees);
-        store.cl = this.interpCls.interpolate(degrees, lowIn) * sign;
+        store.cl = this.interpCls.interpolate(degrees, lowIn);
         store.cd = this.interpCds.interpolate(degrees, lowIn);
         
         if (this.interpCms !== null) {
-            store.cm = this.interpCms.interpolate(degrees, lowIn) * sign;
+            store.cm = this.interpCms.interpolate(degrees, lowIn);
         }
         else {
-            store.cm = 0.25 * sign;
+            store.cm = Leeboard.calcCmForClCd(degrees, store.cl, store.cd, 0.25);
         }
         
         return store;
@@ -223,6 +247,7 @@ Leeboard.ClCdInterp.prototype = {
 Leeboard.ClCdCurve = function() {
     this.clCdLifting = new Leeboard.ClCdInterp();
     this.liftingEndDeg = 90;
+    this.isSymmetric = true;
     
     this.stallStartDeg = 90;
     this.clCdStall = null;
@@ -234,10 +259,11 @@ Leeboard.ClCdCurve.prototype = {
     /**
      * The main loading method.
      * @param {object} data   The data, typically loaded from a JSON file.
+     * @return {object} this.
      */
     load: function(data) {
         if (!Leeboard.isVar(data)) {
-            return;
+            return this;
         }
         
         if (typeof data.clCdStall === "clCdStall") {
@@ -247,15 +273,17 @@ Leeboard.ClCdCurve.prototype = {
             this.clCdStall.load(data.clCdStall);
         }
         else {
-            this.liftEndDeg = 90;
-            this.stallStartDeg = 90;
             this.clCdStall = null;
         }
+        
+        this.isSymmetric = data.isSymmetric || true;
         
         if (Leeboard.isVar(data.clCdInterp)) {
             this.clCdLifting = new Leeboard.ClCdInterp();
             this.clCdLifting.load(data.clCdInterp);
         }
+        
+        return this;
     },
     
     
@@ -267,7 +295,7 @@ Leeboard.ClCdCurve.prototype = {
      */
     calcCoefsDeg: function(degrees, store) {
         var sign;
-        if (degrees < 0) {
+        if (this.isSymmetric && (degrees < 0)) {
             sign = -1;
             degrees = -degrees;
         }
@@ -275,6 +303,7 @@ Leeboard.ClCdCurve.prototype = {
             sign = 1;
         }
         
+        // TODO: To support a non-symmetric clCdStall, we need to add liftStartDeg and stallEndDeg.
         if ((degrees <= this.stallStartDeg) || (this.clCdStall === null)) {
             store = this.clCdLifting.calcCoefsDeg(degrees, store);
         }
@@ -353,6 +382,7 @@ Leeboard.Foil.prototype = {
     /**
      * The main loading method.
      * @param {object} data   The data, typically loaded from a JSON file.
+     * @return {object} this.
      */
     load: function(data) {
         this.chordLine = Leeboard.copyCommonProperties(this.chordLine, data.chordLine);
@@ -361,6 +391,8 @@ Leeboard.Foil.prototype = {
         this.aspectRatio = data.aspectRatio || this.aspectRatio;
         
         this.clCdCurve.load(data.clCdCurve);
+        
+        return this;
     },
     
     /**
@@ -377,6 +409,12 @@ Leeboard.Foil.prototype = {
         var coefs = this.clCdCurve.calcCoefsDeg(angleDeg);
         var qInfSpeed = qInfLocal.length();
         var chordLength = chord.length();
+        
+        if (Leeboard.isVar(store)) {
+            store.angleDeg = angleDeg;
+            store.qInfLocal = qInfLocal.clone();
+            Object.assign(store, coefs);            
+        }
         return coefs.calcLiftDragMoment(rho, this.area, qInfSpeed, chordLength, this.aspectRatio, store);
     },
     
@@ -385,23 +423,25 @@ Leeboard.Foil.prototype = {
      * The moment is about the leading edge, or this.chordLine.start.
      * @param {number} rho  The fluid density.
      * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
-     * @param {object} liftDragMoment   If defined, the object to receive the lift and
-     * drag forces and the moment.
+     * @param {object} details   If defined, an object that will receive details such
+     * as lift, drag, induced drag, moment.
      * @returns {Leeboard.Resultant3D}  The resultant force in local coordinates.
      */
-    calcLocalForce: function(rho, qInfLocal, liftDragMoment) {
-        liftDragMoment = this.calcLocalLiftDragMoment(rho, qInfLocal, liftDragMoment);
+    calcLocalForce: function(rho, qInfLocal, details) {
+        details = this.calcLocalLiftDragMoment(rho, qInfLocal, details);
         
-        var drag = liftDragMoment.drag;
-        if (Leeboard.isVar(liftDragMoment.inducedDrag)) {
-            drag += liftDragMoment.inducedDrag;
+        var drag = details.drag;
+        if (Leeboard.isVar(details.inducedDrag)) {
+            drag += details.inducedDrag;
         }
         
-        var qInfNormal = Leeboard.tangentToNormal(qInfLocal);
-        var fx = qInfNormal.x * liftDragMoment.lift + qInfLocal.x * drag;
-        var fy = qInfNormal.y * liftDragMoment.lift + qInfLocal.y * drag;
+        var qInfSpeed = qInfLocal.length();
+        var qInfNormal = Leeboard.tangentToNormalXY(qInfLocal);
+        var fx = qInfNormal.x * details.lift + qInfLocal.x * drag / qInfSpeed;
+        var fy = qInfNormal.y * details.lift + qInfLocal.y * drag / qInfSpeed;
+        
         var force = Leeboard.createVector3D(fx, fy, 0);
-        var moment = Leeboard.createVector3D(0, 0, liftDragMoment.moment);
-        return Leeboard.Resultant3D(force, moment, this.chordLine.start);
+        var moment = Leeboard.createVector3D(0, 0, details.moment);
+        return new Leeboard.Resultant3D(force, moment, this.chordLine.start);
     }
 };
