@@ -19,21 +19,76 @@
 /**
  * Object holding lift, drag, and moment coefficients.
  */
-Leeboard.ClCd = function() {
-    this.cl = 0;
-    this.cd = 0;
-    this.cm = 0;
+Leeboard.ClCd = function(cl, cd, cm) {
+    /**
+     * @property {number} cl The lift coefficient, Cl
+     */
+    this.cl = cl || 0;
+    
+    
+    /**
+     * @property {number} cd The drag coefficient, Cd
+     */
+    this.cd = cd || 0;
+
+    
+    /**
+     * @property {number} cm The moment coefficient, Cm
+     */
+    this.cm = cm || 0;
 };
+Leeboard.ClCd.prototype = {
+    constructor: Leeboard.ClCd,
+    
+    /**
+     * Calculates the lift and drag forces and the moment from the coefficients.
+     * @param {number} rho    The density.
+     * @param {number} area   The area.
+     * @param {number} qInf   The magnitude of the free stream velocity.
+     * @param {number} chordLength The chord length, used for calculating the moment.
+     * @param {number} aspectRatio  Optional aspect ratio, used for calculating the induced drag.
+     * @param {object} store  Optional object to store the lift, drag, and moment into.
+     * @returns {object}    The object containing the calculated lift, drag, and moment.
+     */
+    calcLiftDragMoment : function(rho, area, qInf, chordLength, aspectRatio, store) {
+        var scale = 0.5 * rho * area * qInf * qInf;
+        store = store || {};
+        store.lift = this.cl * scale;
+        store.drag = this.cd * scale;
+        store.moment = this.cm * scale * chordLength;
+        if (Leeboard.isVar(aspectRatio)) {
+            var ci = this.cl * this.cl / (Math.PI * aspectRatio);
+            store.inducedDrag = scale * ci;
+        }
+        else {
+            store.inducedDrag = undefined;
+        }
+        return store;
+    }
+}
 
 
 /**
- * Computes an approximate stalled Cl/Cd polar curve.
+ * Object that computes an approximation of the lift/drag/moment coefficients
+ * of a flat plate when stalled.
  * @returns {Leeboard.ClCdStall}
  */
-Leeboard.ClCdStall = function() {
-    this.cl45Deg = 1.08;
-    this.cd45Deg = 1.11;
-    this.cd90Deg = 1.80;
+Leeboard.ClCdStall = function(cl45Deg, cd45Deg, cd90Deg) {
+    /**
+     * @property {number} cl45Deg The coefficient of lift at 45 degrees angle of attack.
+     */
+    this.cl45Deg = cl45Deg || 1.08;
+    
+    /**
+     * @@property {number} cd45Deg The coefficient of drag at 45 degrees angle of attack.
+     */
+    this.cd45Deg = cd45Deg || 1.11;
+    
+    /**
+     * @property {number} cd90Deg The coefficient of drag at 90 degrees angle of attack (the
+     * lift is 0 at 90 degrees).
+     */
+    this.cd90Deg = cd90Deg || 1.80;
 };
 Leeboard.ClCdStall.prototype = {
     constructor: Leeboard.ClCdStall,
@@ -43,9 +98,9 @@ Leeboard.ClCdStall.prototype = {
      * @param {type} data
      */
     load: function(data) {
-        this.cl45Deg = Leeboard.assign(data.cl45Deg, this.cl45Deg);
-        this.cd45Deg = Leeboard.assign(data.cd45Deg, this.cd45Deg);
-        this.cd90Deg = Leeboard.assign(data.cl90Deg, this.cd90Deg);
+        this.cl45Deg = data.cl45Deg || this.cl45Deg;
+        this.cd45Deg = data.cd45Deg || this.cd45Deg;
+        this.cd90Deg = data.cl90Deg || this.cd90Deg;
     },
     
     /**
@@ -55,9 +110,7 @@ Leeboard.ClCdStall.prototype = {
      * @returns {object}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
      */
     calcCoefsDeg: function(degrees, store) {        
-        if (!Leeboard.isVar(store)) {
-            store = new Leeboard.ClCd();
-        }
+        store = store || new Leeboard.ClCd();
         
         var sign;
         if (degrees < 0) {
@@ -88,7 +141,7 @@ Leeboard.ClCdStall.prototype = {
 
 
 /**
- * Interpolator based Cl/Cd polar curve calculator.
+ * Interpolator based Cl/Cd/Cm calculator.
  * @returns {Leeboard.ClCdInterp}
  */
 Leeboard.ClCdInterp = function() {    
@@ -132,9 +185,7 @@ Leeboard.ClCdInterp.prototype = {
      * @returns {object}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
      */
     calcCoefsDeg: function(degrees, store) {
-        if (!Leeboard.isVar(store)) {
-            store = new Leeboard.ClCd();
-        }
+        store = store || new Leeboard.ClCd();
         
         var sign;
         if (degrees < 0) {
@@ -162,8 +213,8 @@ Leeboard.ClCdInterp.prototype = {
 
 
 /**
- * A Cl/Cd curve calculates lift (Cl) and drag (Cd) coeffiecients given an angle
- * of attack in radians.
+ * A Cl/Cd curve calculates lift (Cl), drag (Cd), and moment (Cm) coeffiecients given an angle
+ * of attack.
  * @constructor
  * @returns {Leeboard.ClCdCurve}
  */
@@ -188,8 +239,8 @@ Leeboard.ClCdCurve.prototype = {
         }
         
         if (typeof data.clCdStall === "clCdStall") {
-            this.stallStartDeg = Leeboard.assign(data.stallStartDeg, 90);
-            this.liftEndDeg = Leeboard.assign(data.liftEndDeg, this.stallStartDeg);
+            this.stallStartDeg = data.stallStartDeg || 90;
+            this.liftEndDeg = data.liftEndDeg || this.stallStartDeg;
             
             this.clCdStall.load(data.clCdStall);
         }
@@ -243,7 +294,7 @@ Leeboard.ClCdCurve.prototype = {
         store.cm *= sign;
         return store;
     },
-    
+
     test: function(start, end, delta) {
         console.log("Test ClCdCurve:");
         var clCd;
@@ -252,40 +303,41 @@ Leeboard.ClCdCurve.prototype = {
             console.log(i + "\t" + clCd.cl + "\t" + clCd.cd + "\t" + clCd.cm);
         }
     }
+    
 };
 
 
 /**
- * A foil generates a force in a fluid flow.
+ * A foil generates a 3D force in a fluid flow, using a 2D slice within a local coordinate
+ * frame to calculate the force. The 2D slice lies within the local x-y plane, while the 
+ * foil's span lies along the z-axis.
  * <p>
- * The foil is modeled as a 2D slice in the local x-y plane, but with a span dimension
- * along the z axis. The 2D slice is where the lift/drag/moment coefficients are applied.
- * The leading edge of the foil within this slice is at x=0, y=0, the chord is along the x axis.
- * <p>
- * The z coordinate of the 2D slice is the z coordinate of the center of effort of the foil.
+ * The force generated by the foil is presumed to lie within the 2D slice's plane, therefore
+ * its local z coordinate will be the same as the z coordinate of the 2D slice in the
+ * local coordinate system.
  * @returns {Leeboard.Foil}
  */
 Leeboard.Foil = function() {
     /**
-     * @property {object} position The 3D position of the base of the foil.
+     * @property {object} chord A line describing the chord, with the chord.start treated as the
+     * leading edge of the chord. This is used to resolve the angle of attack.
      */
-    this.position = Leeboard.createVector3D();
+    this.chordLine = Leeboard.createLine2D();
     
     /**
-     * @property {object} orientation The quaternion defining the orientation of the leading edge.
+     * @property {number} sliceZ The z coordinate of the 2D slice.
      */
-    this.orientation = Leeboard.createQuaternion();
+    this.sliceZ = 0;
     
     /**
-     * @property {number} centerOfEffortZ The position along the z axis of the x-y plane
-     * containing the center of effort.
-     */
-    this.centerOfEffortZ = 1;
-    
-    /**
-     * @property {number} area The area to use for the force generation.
+     * @property {number} area The area to use in computing the forces from the coefficients.
      */
     this.area = 1;
+    
+    /**
+     * @property {number} aspectRatio The aspect ratio of the foil, this may be null.
+     */
+    this.aspectRatio = null;
     
     /**
      * @property {Leeboard.ClCdCurve} clCdCurve The coefficient of lift/drag/moment curve.
@@ -297,15 +349,53 @@ Leeboard.Foil.prototype = {
     constructor: Leeboard.Foil,
     
     load: function(data) {
-        Leeboard.copyCommonProperties(this.position, data.position);
-        Leeboard.copyCommonProperties(this.orientation, data.orientation);
-        this.centerOfEffortZ = Leeboard.assign(data.centerOfEffortZ, this.centerOfEffortZ);
-        this.area = Leeboard.assign(data.area, this.area);
+        this.chordLine = Leeboard.copyCommonProperties(this.chordLine, data.chordLine);
+        this.sliceZ = data.sliceZ || this.sliceZ;
+        this.area = data.area || this.area;
+        this.aspectRatio = data.aspectRatio || this.aspectRatio;
         
         this.clCdCurve.load(data.clCdCurve);
     },
     
-    calcForce: function(rho, fluidVel, foilVel, store) {
-    }
+    /**
+     * Calculates the lift and drag forces, and the moment, all in local coordinates.
+     * The moment is about the leading edge, or this.chordLine.start.
+     * @param {number} rho  The fluid density.
+     * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
+     * @param {type} store  If defined, the object to receive the forces and moment.
+     * @returns {object}    The object containing the forces and moment.
+     */
+    calcLocalLiftDragMoment: function(rho, qInfLocal, store) {
+        var chord = this.chordLine.delta();
+        var angleDeg = chord.angleTo(qInfLocal) * Leeboard.RAD_TO_DEG;
+        var coefs = this.clCdCurve.calcCoefsDeg(angleDeg);
+        var qInfSpeed = qInfLocal.length();
+        var chordLength = chord.length();
+        return coefs.calcLiftDragMoment(rho, this.area, qInfSpeed, chordLength, this.aspectRatio, store);
+    },
     
+    /**
+     * Calculates the forces and moment in the local x-y plane coordinates.
+     * The moment is about the leading edge, or this.chordLine.start.
+     * @param {number} rho  The fluid density.
+     * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
+     * @param {object} liftDragMoment   If defined, the object to receive the lift and
+     * drag forces and the moment.
+     * @returns {Leeboard.Resultant3D}  The resultant force in local coordinates.
+     */
+    calcLocalForce: function(rho, qInfLocal, liftDragMoment) {
+        liftDragMoment = this.calcLocalLiftDragMoment(rho, qInfLocal, liftDragMoment);
+        
+        var drag = liftDragMoment.drag;
+        if (Leeboard.isVar(liftDragMoment.inducedDrag)) {
+            drag += liftDragMoment.inducedDrag;
+        }
+        
+        var qInfNormal = Leeboard.tangentToNormal(qInfLocal);
+        var fx = qInfNormal.x * liftDragMoment.lift + qInfLocal.x * drag;
+        var fy = qInfNormal.y * liftDragMoment.lift + qInfLocal.y * drag;
+        var force = Leeboard.createVector3D(fx, fy, 0);
+        var moment = Leeboard.createVector3D(0, 0, liftDragMoment.moment);
+        return Leeboard.Resultant3D(force, moment, this.chordLine.start);
+    }
 };

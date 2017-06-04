@@ -21,6 +21,8 @@
 var Leeboard = Leeboard || {
     DEG_TO_RAD: Math.PI / 180,
     RAD_TO_DEG: 180 / Math.PI,
+    
+    TWO_PI: Math.PI * 2,
 
     /**
     * Convert p2 physics value (meters) to pixel scale, overloads Phaser.Physics.P2#mpx.
@@ -110,20 +112,7 @@ var Leeboard = Leeboard || {
         return low;
     },
 
-    
-    /**
-     * Returns a value if it is not undefined, a default value otherwise.
-     * @param {type} value  The value of interest.
-     * @param {type} defValue   The default value.
-     * @returns {unresolved}    defValue if value is undefined, value if value is defined.
-     */
-    assign: function(value, defValue) {
-        if (!Leeboard.isVar(value)) {
-            return defValue;
-        }
-        return value;
-    },
-    
+        
     /**
      * Copies properties that are common to two objects from one object to another.
      * @param {object} dst  The object to copy to.
@@ -144,8 +133,9 @@ var Leeboard = Leeboard || {
         return dst;
     },
     
+    
     /**
-     * Determines if a value is defined and not null.
+     * Determines if a value is both defined and not null.
      * @param {type} v  The value to check.
      * @returns {Boolean}   true if v is defined and not null.
      */

@@ -308,6 +308,7 @@ PlayState._updateHUD = function() {
     this.appWindBearingText.text = "App Wind Bearing: " + bearing.toFixed();
 };
 
+
 //------------------------------ --------------------
 PlayState._handleInput = function() {
     if (this.cursorKeys.left.isDown) {
@@ -331,21 +332,10 @@ PlayState._handleInput = function() {
     else if (this.debounceT && this.keys.t.isUp) {
         this.debounceT = false;
         
-        var vecA = { 'x': 10, 'b': 11};
-        
-        var vecB = Leeboard.createVector3D();
-        Leeboard.copyCommonProperties(vecB, null);
-        
-        var vec = vecB;
-        Object.getOwnPropertyNames(vec).forEach(
-                function(val, idx, array) {
-                    console.log(val + "\t" + idx + "\t" + vec[val]);
-                });
-        
         //var cspline = new Leeboard.CSpline();
         //cspline.test();
-        //var clCdCurve = this.sailEnv.clCdCurves["FlatPlateAR5"];
-        //clCdCurve.test(0, 180, 2);
+        var clCdCurve = this.sailEnv.clCdCurves["FlatPlateAR5"];
+        clCdCurve.test(0, 180, 2);
     }
 };
 

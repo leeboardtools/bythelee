@@ -16,16 +16,29 @@
     
 /* global Leeboard */
 
-Leeboard.zeroTolerance = 1e-10;
 
-Leeboard.isLikeZero = function(x) {
-    return x < Leeboard.zeroTolerance && x > -Leeboard.zeroTolerance;
+Leeboard.defZeroTolerance = 1e-10;
+
+/**
+ * Determines if a number should be treated as zero (usually for avoiding divide by zero)
+ * @param {number} x  The number.
+ * @param {number} tolerance    The optional tolerance.
+ * @returns {Boolean}   True if x can be considered zero.
+ */
+Leeboard.isLikeZero = function(x, tolerance) {
+    tolerance = tolerance || Leeboard.defZeroTolerance;
+    return x < tolerance && x > -tolerance;
 }
 
+/**
+ * Determines if two numbers are approximately equal.
+ * @param {number} a    The first number.
+ * @param {number} b    The second number.
+ * @param {number} tolerance    The optional tolerance.
+ * @returns {Boolean}   True if the numbers can be considered equal.
+ */
 Leeboard.isNearEqual = function(a, b, tolerance) {
-    if (!Leeboard.isVar(tolerance)) {
-        tolerance = 1e-10;
-    }
+    tolerance = tolerance || Leeboard.defZeroTolerance;
     
     if (Leeboard.isLikeZero(a)) {
         return Leeboard.isLikeZero(b);
@@ -146,25 +159,6 @@ Leeboard.CSpline.prototype = {
         }
     },
         
-    test: function() {
-        console.log("CSpline test:");
-        var xs = [10, 20, 25, 27, 30];
-        var ys = [10, 5, 15, 7, 21];
-        this.setup(xs, ys);
-        
-        console.log("y2s:");
-        for (var i = 0; i < this.y2s.length; ++i) {
-            console.log(i + "\t" + this.y2s[i]);
-        }
-        
-        console.log("\ninterpolate:");
-        for (var i = 5; i <= 30; ++i) {
-            var y = this.interpolate(i);
-            //var y = Leeboard.bsearch(this.xs, i);
-            console.log(i + "\t" + y);
-        }
-        console.log("End");
-    },
     
     /**
      * Helper to finding the lower index in this.xs bounding a value. Use for caching
@@ -185,14 +179,7 @@ Leeboard.CSpline.prototype = {
      * @returns {Number}    The interpolated value.
      */
     interpolate: function(x, lowIn) {
-        var low;
-        if (!Leeboard.isVar(lowIn)) {
-            low = findLowIndex(x);
-        }
-        else {
-            low = lowIn;
-        }
-               
+        var low = lowIn || this.findLowIndex(x);               
         var high = low + 1;
         if (low < 0) {
             low = 0;

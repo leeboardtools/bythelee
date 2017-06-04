@@ -17,23 +17,6 @@
 
 /* global QUnit, Leeboard */
 
-QUnit.assert.nearEqual = function(value, expected, msg, tolerance) {
-    this.pushResult({
-        result: Leeboard.isNearEqual(value, expected, tolerance),
-        actual: value,
-        expected: expected,
-        message: msg
-    });
-}
-
-function checkVector3D(assert, vector, x, y, z, msg, tolerance) {
-    if (!Leeboard.isVar(msg)) {
-        msg = "";
-    }
-    assert.nearEqual(vector.x, x, msg + " X OK", tolerance);
-    assert.nearEqual(vector.y, y, msg + " Y OK", tolerance);
-    assert.nearEqual(vector.z, z, msg + " Z OK", tolerance);
-}
 
 function checkResultant3D(assert, resultant, fx, fy, fz, mx, my, mz, px, py, pz, msg, tolerance) {
     if (!Leeboard.isVar(msg)) {
@@ -133,26 +116,27 @@ function checkMoment7Test(assert, resultant, msg) {
     
     checkResultant3D(assert, resultant, fx, fy, fz, mx, my, mz, resultant.applPoint.x, resultant.applPoint.y, resultant.applPoint.z, msg, 1e-4);
     checkVector3D(assert, p, 0, 0.4137931, 8.689655, "P: ", 1e-4);
-/*
-        GeometryUtilTest.checkVector(new float [] { -40, -60, -80 }, force);
-        final float testTolerance = 1e-4f;
-        assertEquals(231.72418f, moment.getX(), testTolerance);
-        assertEquals(347.58627f, moment.getY(), testTolerance);
-        assertEquals(463.44836f, moment.getZ(), testTolerance);
-        
-        Vector3f u = force.normalize();
-        Line line = new Line(applicationPoint, force.normalize());
-        Plane plane = new Plane(new Vector3f(1, 0, 0), 0f);
-        float a = PlaneUtil.intersect(plane, line);
-        Vector3f p = applicationPoint.add(u.mult(a));
-        assertEquals(0f, p.getX(), testTolerance);
-        assertEquals(0.4137931f, p.getY(), testTolerance);
-        assertEquals(8.689655f, p.getZ(), testTolerance);
- */    
 }
 
 QUnit.test( "Resultant-convertToWrench", function( assert ) {
     var resultant = setupMoment7Test();
     resultant.convertToWrench();
     checkMoment7Test(assert, resultant);
+});
+
+QUnit.test( "Resultant-applyQuaternion", function( assert ) {
+    var force = Leeboard.createVector3D(10, 0, 0);
+    var applPoint = Leeboard.createVector3D(5, 10, 15);
+    var moment = Leeboard.calcMoment(force, applPoint);
+    var resultant = new Leeboard.Resultant3D();
+    
+    resultant.addForce(force, applPoint);
+    checkResultant3D(assert, resultant, force.x, force.y, force.z, moment.x, moment.y, moment.z,
+        0, 0, 0, "Sanity: ");
+        
+    var rotation = Leeboard.createQuaternionFromEulerRad(0, 0, -90 * Leeboard.DEG_TO_RAD);
+    resultant.applyQuaternion(rotation);
+    checkResultant3D(assert, resultant, force.y, -force.x, force.z, moment.y, -moment.x, moment.z,
+        0, 0, 0, "Rot Z 90");
+    
 });
