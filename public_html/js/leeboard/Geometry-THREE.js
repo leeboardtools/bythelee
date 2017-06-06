@@ -31,7 +31,7 @@
  */
 Leeboard.tangentToNormalXY = function(tangent) {
     return new THREE.Vector2(-tangent.y, tangent.x).normalize();
-}
+};
 
 /**
  * Calculates a 2D tangent from a normal.
@@ -40,22 +40,7 @@ Leeboard.tangentToNormalXY = function(tangent) {
  */
 Leeboard.normalToTangentXY = function(normal) {
     return new THREE.Vector2(normal.y, -normal.x).normalize();
-}
-
-/**
- * Extension to THREE.Vector, applies only the rotation portion of a Matrix4 to the vector.
- * @param {type} m  The matrix to apply.
- * @returns {THREE.Vector3} this.
- */
-THREE.Vector3.prototype.applyMatrix4Rotation = function(m) {
-    var x = this.x, y = this.y, z = this.z;
-    var e = m.elements;
-
-    this.x = e[ 0 ] * x + e[ 4 ] * y + e[ 8 ]  * z;
-    this.y = e[ 1 ] * x + e[ 5 ] * y + e[ 9 ]  * z;
-    this.z = e[ 2 ] * x + e[ 6 ] * y + e[ 10 ] * z;
-    return this;
-}
+};
 
 /**
  * Creates a 2D vector/point.
@@ -63,7 +48,7 @@ THREE.Vector3.prototype.applyMatrix4Rotation = function(m) {
  * @param {number} x    Initial x coordinate value.
  * @param {number} y    Initial y coordinate value.
  */
-Leeboard.createVector2D = function(x, y) {
+Leeboard.createVector2 = function(x, y) {
     return new THREE.Vector2(x, y);
 };
 
@@ -72,7 +57,7 @@ Leeboard.createVector2D = function(x, y) {
  * @param {number} mag  The magnitude.
  * @param {number} deg  The angle, in degrees, of the vector relative to the x axis.
  */
-Leeboard.createVector2DMagDeg = function(mag, deg) {
+Leeboard.createVector2MagDeg = function(mag, deg) {
     var rad = Leeboard.DEG_TO_RAD * deg;
     var cos = Math.cos(rad);
     var sin = Math.sin(rad);
@@ -88,7 +73,17 @@ THREE.Vector2.prototype.angleTo = function(v) {
     // Straight from THREE.js' Vector3.js
     var theta = this.dot( v ) / ( Math.sqrt( this.lengthSq() * v.lengthSq() ) );
     return Math.acos( Leeboard.clamp( theta, - 1, 1 ) );
-}
+};
+
+/**
+ * Sets the vector's components to all zero.
+ * @returns {object} this.
+ */
+THREE.Vector2.prototype.zero = function() {
+    this.x = 0;
+    this.y = 0;
+    return this;
+};
 
 
 /**
@@ -96,10 +91,22 @@ THREE.Vector2.prototype.angleTo = function(v) {
  * @param {object} vec  The vector to log.
  * @param {String} msg  The optional message to precede the vector.
  */
-Leeboard.logVector2D = function(vec, msg) {
+Leeboard.logVector2 = function(vec, msg) {
     msg = msg || "";
     console.log(msg + vec.x + "\t" + vec.y);
 };
+
+
+/**
+ * Logs a 3D vector to the console.
+ * @param {object} vec  The vector to log.
+ * @param {String} msg  The optional message to precede the vector.
+ */
+Leeboard.logVector3 = function(vec, msg) {
+    msg = msg || "";
+    console.log(msg + vec.x + "\t" + vec.y + "\t" + vec.z);
+};
+
 
 /**
  * Creates a 3D vector/point.
@@ -108,8 +115,47 @@ Leeboard.logVector2D = function(vec, msg) {
  * @param {number} y    Initial y coordinate value.
  * @param {number} z      Initial z coordinate value.
  */
-Leeboard.createVector3D = function(x, y, z) {
+Leeboard.createVector3 = function(x, y, z) {
     return new THREE.Vector3(x, y, z);
+};
+
+/**
+ * Extension to THREE.Vector3, applies only the rotation portion of a Matrix4 to the vector.
+ * @param {type} m  The matrix to apply.
+ * @returns {THREE.Vector3} this.
+ */
+THREE.Vector3.prototype.applyMatrix4Rotation = function(m) {
+    var x = this.x, y = this.y, z = this.z;
+    var e = m.elements;
+
+    this.x = e[ 0 ] * x + e[ 4 ] * y + e[ 8 ]  * z;
+    this.y = e[ 1 ] * x + e[ 5 ] * y + e[ 9 ]  * z;
+    this.z = e[ 2 ] * x + e[ 6 ] * y + e[ 10 ] * z;
+    return this;
+};
+
+/**
+ * Override of THREE.Vector3.copy(), supports copying a Vector2 by setting the
+ * z coordinate to 0 if the object being copied does not have a z.
+ * @param {object} vec  The vector to copy.
+ * @returns {object}    this.
+ */
+THREE.Vector3.prototype.copy = function(vec) {
+    this.x = vec.x;
+    this.y = vec.y;
+    this.z = vec.z || 0;
+    return this;
+}
+
+/**
+ * Extension to THREE.Vector3, sets the vector's components to all zero.
+ * @returns {object} this.
+ */
+THREE.Vector3.prototype.zero = function() {
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
+    return this;
 };
 
 /**
@@ -214,9 +260,9 @@ Leeboard.createQuaternion = function(x, y, z, w) {
 
 /**
  * Creates a quaternion representing three Euler angles, in radians.
- * @param {type} xRad   The rotation about the x axis, in radians.
- * @param {type} yRad   The rotation about the y axis, in radians.
- * @param {type} zRad   The rotation about the z axis, in radians.
+ * @param {number} xRad   The rotation about the x axis, in radians.
+ * @param {number} yRad   The rotation about the y axis, in radians.
+ * @param {number} zRad   The rotation about the z axis, in radians.
  * @returns {Leeboard.createQuaternionFromEuler.quaternion|THREE.Quaternion}
  */
 Leeboard.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
@@ -271,7 +317,7 @@ Leeboard.Line2D.prototype = {
     
     length: function() {
         return this.start.distanceTo(this.end);
-    },
+    }
 };
 
 /**
@@ -350,5 +396,55 @@ Leeboard.getLinePlaneIntersection = function(plane, line) {
  */
 Leeboard.createMatrix4 = function() {
     return new THREE.Matrix4();
-}
+};
 
+/**
+ * Extension to THREE.Matrix4, sets the position components of the matrix using
+ * separate x,y, and z coordinates.
+ * @param {number} x    The x coordinate.
+ * @param {number} y    The y coordinate.
+ * @param {number} z    The z coordinate.
+ * @returns {Leeboard.Matrix4}  this.
+ */
+THREE.Matrix4.prototype.setXYZ = function(x, y, z) {
+    var te = this.elements;
+    te[ 12 ] = x;
+    te[ 13 ] = y;
+    te[ 14 ] = z;
+    return this;
+};
+
+/**
+ * Extension to THREE.Matrix4, sets the matrix to a rotation defined by Euler angles
+ * followed by a translation to x,y,z coordinates.
+ * @param {number} xRad   The rotation about the x axis, in radians.
+ * @param {number} yRad   The rotation about the y axis, in radians.
+ * @param {number} zRad   The rotation about the z axis, in radians.
+ * @param {number} px    The x coordinate.
+ * @param {number} py    The y coordinate.
+ * @param {number} pz    The z coordinate.
+ * @returns {Leeboard.Matrix4}  this.
+ */
+THREE.Matrix4.prototype.makeFromEulerAndXYZ = function(xRad, yRad, zRad, px, py, pz) {
+    this.makeRotationFromEuler(new THREE.Euler(xRad, yRad, zRad));
+    this.setXYZ(px, py, pz);
+    return this;
+};
+
+Leeboard.logMatrix4 = function(mat, msg) {
+    var text = "";
+    if (Leeboard.isVar(msg)) {
+        text = "\n" + msg + "\n";
+    }
+    
+    var row;
+    for (row = 0; row < 4; ++row) {
+        var col;
+        for (col = 0; col < 4; ++col) {
+            text = text + "\t" + mat.elements[col * 4 + row];
+        }
+        text = text + "\n";
+    }
+    
+    console.log(text);
+};

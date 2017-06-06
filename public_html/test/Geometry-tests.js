@@ -17,7 +17,7 @@
 
 /* global QUnit, Leeboard */
 
-function checkVector2D(assert, vector, x, y, msg, tolerance) {
+function checkVector2(assert, vector, x, y, msg, tolerance) {
     if (!Leeboard.isVar(msg)) {
         msg = "";
     }
@@ -37,7 +37,7 @@ function checkVectorMagAngle(assert, vector, mag, angleRad, tolerance, msg) {
     }
 }
 
-function checkVector3D(assert, vector, x, y, z, msg, tolerance) {
+function checkVector3(assert, vector, x, y, z, msg, tolerance) {
     if (!Leeboard.isVar(msg)) {
         msg = "";
     }
@@ -50,38 +50,38 @@ QUnit.test( "applyMatrix4Rotation", function( assert ) {
     var m = Leeboard.createMatrix4();
     var a = 30 * Leeboard.DEG_TO_RAD;
     m.makeRotationZ(a);
-    m.setPosition(Leeboard.createVector3D(10, 20, 30));
+    m.setPosition(Leeboard.createVector3(10, 20, 30));
     
-    var v = Leeboard.createVector3D(10, 0, 0);
+    var v = Leeboard.createVector3(10, 0, 0);
     v.applyMatrix4(m);
-    checkVector3D(assert, v, 10*Math.cos(a) + 10, 10*Math.sin(a) + 20, 30, "applyMatrix4");
+    checkVector3(assert, v, 10*Math.cos(a) + 10, 10*Math.sin(a) + 20, 30, "applyMatrix4");
     
     v.set(10, 0, 0);
     v.applyMatrix4Rotation(m);
-    checkVector3D(assert, v, 10*Math.cos(a), 10*Math.sin(a), 0, "applyMatrix4Rotation");
+    checkVector3(assert, v, 10*Math.cos(a), 10*Math.sin(a), 0, "applyMatrix4Rotation");
 });
     
-QUnit.test( "createVector2DMagDeg", function( assert ) {
-    var vec = Leeboard.createVector2DMagDeg(10, 20);
+QUnit.test( "createVector2MagDeg", function( assert ) {
+    var vec = Leeboard.createVector2MagDeg(10, 20);
     checkVectorMagAngle(assert, vec, 10, 20 * Leeboard.DEG_TO_RAD);
 });
 
     
 QUnit.test( "normalTangent", function( assert ) {
-    var refTangent = Leeboard.createVector2D(10, 0);
+    var refTangent = Leeboard.createVector2(10, 0);
     var normal = Leeboard.tangentToNormalXY(refTangent);
     
-    checkVector2D(assert, normal, 0, 1, "normal");
+    checkVector2(assert, normal, 0, 1, "normal");
     
     var tangent = Leeboard.normalToTangentXY(normal);
-    checkVector2D(assert, tangent, 1, 0, "tangent");
+    checkVector2(assert, tangent, 1, 0, "tangent");
     
-    var refNormal = Leeboard.createVector2D(10, 20);
+    var refNormal = Leeboard.createVector2(10, 20);
     var normFactor = 1 / refNormal.length();
     
     tangent = Leeboard.normalToTangentXY(refNormal);
-    checkVector2D(assert, tangent, 20 * normFactor, -10 * normFactor, "tangent 2");
+    checkVector2(assert, tangent, 20 * normFactor, -10 * normFactor, "tangent 2");
     
     normal = Leeboard.tangentToNormalXY(tangent);
-    checkVector2D(assert, normal, 10 * normFactor, 20 * normFactor, "normal 2");
+    checkVector2(assert, normal, 10 * normFactor, 20 * normFactor, "normal 2");
 });

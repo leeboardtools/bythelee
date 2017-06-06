@@ -38,9 +38,9 @@ Leeboard.calcMoment = function(force, position) {
  * @returns {Leeboard.Resultant3D}  The resultant.
  */
 Leeboard.Resultant3D = function(force, moment, position) {
-    this.force = Leeboard.copyCommonProperties(Leeboard.createVector3D(), force);
-    this.moment = Leeboard.copyCommonProperties(Leeboard.createVector3D(), moment);
-    this.applPoint = Leeboard.copyCommonProperties(Leeboard.createVector3D(), position);
+    this.force = Leeboard.copyCommonProperties(Leeboard.createVector3(), force);
+    this.moment = Leeboard.copyCommonProperties(Leeboard.createVector3(), moment);
+    this.applPoint = Leeboard.copyCommonProperties(Leeboard.createVector3(), position);
 };
 
 Leeboard.Resultant3D.prototype = {
@@ -50,6 +50,21 @@ Leeboard.Resultant3D.prototype = {
      */
     clone: function() {
         return new Leeboard.Resultant3D(this.force, this.moment, this.applPoint);
+    },
+    
+    
+    /**
+     * Sets this resultant to match the settings of another.
+     * @param {object} toCopy   The resultant to copy.
+     * @returns {Leeboard.Resultant3D}  this.
+     */
+    copy: function(toCopy) {
+        if (this !== toCopy) {
+            this.force.copy(toCopy.force);
+            this.moment.copy(toCopy.moment);
+            this.applPoint.copy(toCopy.applPoint);
+        }
+        return this;
     },
     
     /**
@@ -115,7 +130,7 @@ Leeboard.Resultant3D.prototype = {
         
         // Find the parallel moment.
         var normScale = 1./Math.sqrt(forceMagSq);
-        var forceDir = Leeboard.createVector3D(this.force.x * normScale, this.force.y * normScale, this.force.z * normScale);        
+        var forceDir = Leeboard.createVector3(this.force.x * normScale, this.force.y * normScale, this.force.z * normScale);        
         var pMoment = forceDir.multiplyScalar(this.moment.dot(forceDir));
 
         // And then the perpendicular moment, which is moment - parallel moment.
@@ -137,12 +152,138 @@ Leeboard.Resultant3D.prototype = {
     
     /**
      * Rotates the force and moment vectors by applying a quaternion.
-     * @param {type} quaternion The quaternion defining the rotation.
+     * @param {object} quaternion The quaternion defining the rotation.
      * @returns {Leeboard.Resultant3D}  this.
      */
     applyQuaternion: function(quaternion) {
         this.force.applyQuaternion(quaternion);
         this.moment.applyQuaternion(quaternion);
         return this;
+    },
+    
+    
+    /**
+     * Applies a 4x4 matrix represnting a transformation to the resultant. The
+     * force and monent vectors are rotated, while the application point is tranlsated
+     * and rotated.
+     * @param {object} mat  The 4x4 matrix to apply.
+     * @returns {Leeboard.Resultant3D}  this.
+     */
+    applyMatrix4: function(mat) {
+        this.force.applyMatrix4Rotation(mat);
+        this.moment.applyMatrix4Rotation(mat);
+        this.applPoint.applyMatrix4(mat);
+        return this;
     }
+};
+
+
+/**
+ * This is used to track the transforms for converting between a world coordinate
+ * system and a local coordinate system. It keeps track of the previous transforms
+ * so it may calculate the world and local velocities of points in either coordinate
+ * system.
+ * @returns {Leeboard.coordSystemState}
+ */
+Leeboard.CoordSystemState = function() {
+    this.worldXfrm = Leeboard.createMatrix4();
+    this.localXfrm = Leeboard.createMatrix4();
+    this.prevWorldXfrm = Leeboard.createMatrix4();
+    this.prevLocalXfrm = Leeboard.createMatrix4();
+    this.dt = 0;
+    
+    this.workingPos = Leeboard.createVector3();
+    this.workingPrevPos = Leeboard.createVector3();
+    this.workingWorldVel = Leeboard.createVector3();
+    this.workingLocalVel = Leeboard.createVector3();
+};
+
+Leeboard.CoordSystemState.prototype = {
+    setXfrms: function(worldXfrm, dt, localXfrm) {
+        if (Leeboard.isVar(dt) && (dt > 0)) {
+            // Save the current transforms...
+            this.dt = dt;
+            this.prevWorldXfrm.copy(this.worldXfrm);
+            this.prevLocalXfrm.copy(this.localXfrm);
+        }
+        else {
+            this.dt = 0;
+        }
+        
+        if (!Leeboard.isVar(localXfrm)) {
+            if (!Leeboard.isVar(worldXfrm)) {
+                // Presume they're both going to be identity...
+                this.worldXfrm.identity();
+                this.localXfrm.identity();
+            }
+            else {
+                this.localXfrm.getInverse(worldXfrm);
+                this.worldXfrm.copy(worldXfrm);
+            }
+        }
+        else if (!Leeboard.isVar(worldXfrm)) {
+            this.localXfrm.copy(localXfrm);
+            this.worldXfrm.getInverse(localXfrm);
+        }
+        else {
+            this.localXfrm.copy(localXfrm);
+            this.worldXfrm.copy(worldXfrm);
+        }
+        
+        if (this.dt === 0) {
+            // No time change, make the previous transforms match the current transforms.
+            this.prevWorldXfrm.copy(this.worldXfrm);
+            this.prevLocalXfrm.copy(this.localXfrm);
+        }
+    },
+    
+    
+    /**
+     * Calculates world position, world velocity, and local velocity for a given local
+     * point.
+     * @param {object} localPos The local coordinates of the point of interest.
+     * @param {object} results  The object to receive the results. Results are stored
+     * in keys, and are only computed if the key exists:
+     *      worldPos: The world coordinates of localPos.
+     *      worldVel:   The velocity of localPos in world coordinates.
+     *      localVel:   The velocity of localPos in local coordinates.
+     * @param {object} prevLocalPos If defined, the previous local position, used for velocity calculation,
+     * if not defined then the previous position is presumed to be localPos.
+     * @returns {Leeboard.CoordSystemState} this.
+     */
+    calcVectorLocalToWorld: function(localPos, results, prevLocalPos) {
+        var worldPos = Leeboard.isVar(results.worldPos) ? results.worldPos : this.workingPos;
+        worldPos.copy(localPos);
+        worldPos.applyMatrix4(this.worldXfrm);
+
+        var isWorldVel = Leeboard.isVar(results.worldVel);
+        var isLocalVel = Leeboard.isVar(results.localVel);
+        if (isWorldVel || isLocalVel) {
+            if (this.dt <= 0) {
+                // No time change, no velocity.
+                if (isWorldVel) {
+                    results.worldVel.zero();
+                }
+                if (isLocalVel) {
+                    results.localVel.zero();
+                }
+            }
+            else {
+                prevLocalPos = prevLocalPos || localPos;
+                this.workingPrevPos.copy(prevLocalPos);
+                this.workingPrevPos.applyMatrix4(this.prevWorldXfrm);
+                
+                var worldVel = (isWorldVel) ? results.worldVel : this.workingWorldVel;
+                worldVel.subVectors(worldPos, this.workingPrevPos).multiplyScalar(1/this.dt);
+                
+                if (isLocalVel) {
+                    results.localVel.copy(worldVel);
+                    results.localVel.applyMatrix4Rotation(this.localXfrm);
+                }
+            }
+        }
+        
+        return this;
+    },
+    
 };

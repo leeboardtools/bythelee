@@ -374,6 +374,11 @@ Leeboard.Foil = function() {
      * @property {Leeboard.ClCdCurve} clCdCurve The coefficient of lift/drag/moment curve.
      */
     this.clCdCurve = new Leeboard.ClCdCurve();
+    
+    this.workingVel = Leeboard.createVector3();
+    this.workingVelResults = {
+        'worldVel': Leeboard.createVector3()
+    };
 };
 
 Leeboard.Foil.prototype = {
@@ -403,17 +408,17 @@ Leeboard.Foil.prototype = {
      * @param {type} store  If defined, the object to receive the forces and moment.
      * @returns {object}    The object containing the forces and moment.
      */
-    calcLocalLiftDragMoment: function(rho, qInfLocal, store) {
+    calcLocalLiftDragMoment: function(rho, qInfLocal, store, details) {
         var chord = this.chordLine.delta();
         var angleDeg = chord.angleTo(qInfLocal) * Leeboard.RAD_TO_DEG;
         var coefs = this.clCdCurve.calcCoefsDeg(angleDeg);
         var qInfSpeed = qInfLocal.length();
         var chordLength = chord.length();
         
-        if (Leeboard.isVar(store)) {
-            store.angleDeg = angleDeg;
-            store.qInfLocal = qInfLocal.clone();
-            Object.assign(store, coefs);            
+        if (Leeboard.isVar(details)) {
+            details.angleDeg = angleDeg;
+            details.qInfLocal = qInfLocal.clone();
+            Object.assign(details, coefs);            
         }
         return coefs.calcLiftDragMoment(rho, this.area, qInfSpeed, chordLength, this.aspectRatio, store);
     },
@@ -428,7 +433,7 @@ Leeboard.Foil.prototype = {
      * @returns {Leeboard.Resultant3D}  The resultant force in local coordinates.
      */
     calcLocalForce: function(rho, qInfLocal, details) {
-        details = this.calcLocalLiftDragMoment(rho, qInfLocal, details);
+        details = this.calcLocalLiftDragMoment(rho, qInfLocal, details, details);
         
         var drag = details.drag;
         if (Leeboard.isVar(details.inducedDrag)) {
@@ -440,8 +445,41 @@ Leeboard.Foil.prototype = {
         var fx = qInfNormal.x * details.lift + qInfLocal.x * drag / qInfSpeed;
         var fy = qInfNormal.y * details.lift + qInfLocal.y * drag / qInfSpeed;
         
-        var force = Leeboard.createVector3D(fx, fy, 0);
-        var moment = Leeboard.createVector3D(0, 0, details.moment);
-        return new Leeboard.Resultant3D(force, moment, this.chordLine.start);
+        var force = Leeboard.createVector3(fx, fy, 0);
+        var moment = Leeboard.createVector3(0, 0, details.moment);
+        var applPoint = Leeboard.createVector3(this.chordLine.start.x, this.chordLine.start.y, this.sliceZ);
+        return new Leeboard.Resultant3D(force, moment, applPoint);
+    },
+    
+    
+    /**
+     * Calculates the force and moment in world coordinates. Note that because we treat
+     * the foil as a 2D slice, we end up projecting the apparent wind onto the local
+     * x-y plane. Cross wind effects are ignored for now.
+     * @param {number} rho    The fluid density.
+     * @param {object} qInfWorld  The free stream velocity in world coordinates.
+     * @param {Leeboard.CoordSystemState} coordSystemState   The coordinate system state, this defines the
+     *  world-local transformations as well as the change in world position/orientation.
+     * @param {object} details   If defined, an object that will receive details such
+     * as lift, drag, induced drag, moment.
+     * @returns {Leeboard.Resultant3D}  The resultant force in world coordinates.
+     */
+    calcWorldForce: function(rho, qInfWorld, coordSystemState, details) {
+        coordSystemState.calcVectorLocalToWorld(this.chordLine.start, this.workingVelResults);
+        
+        this.workingVel.copy(this.workingVelResults.worldVel);
+        
+        coordSystemState.calcVectorLocalToWorld(this.chordLine.end, this.workingVelResults);
+        this.workingVel.add(this.workingVelResults.worldVel).multiplyScalar(0.5);
+        
+        this.workingVel.negate();
+        this.workingVel.add(qInfWorld);
+        
+        this.workingVel.applyMatrix4Rotation(coordSystemState.localXfrm);
+        
+        var resultant = this.calcLocalForce(rho, this.workingVel, details);
+        resultant.applyMatrix4(coordSystemState.worldXfrm);
+        
+        return resultant;
     }
 };
