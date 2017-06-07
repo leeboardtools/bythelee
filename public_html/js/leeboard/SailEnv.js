@@ -20,13 +20,11 @@
  * The main sailing environment, basically the sailing world.
  * @class SailEnv
  * @constructor
- * @param {Phaser.Game} game
  * @returns {Leeboard.SailEnv}
  */
-Leeboard.SailEnv = function(game) {
-    this.game = game;
-    this.wind = new Leeboard.Wind(game);
-    this.water = new Leeboard.Water(game);
+Leeboard.SailEnv = function() {
+    this.wind = new Leeboard.Wind();
+    this.water = new Leeboard.Water();
     
     this.clCdCurves = [];
 };
@@ -53,23 +51,21 @@ Leeboard.SailEnv.prototype = {
 
 /**
  * The wind manager.
- * @param {Phaser.Game} game
  * @returns {Leeboard.Wind}
  */
-Leeboard.Wind = function(game) {
-    this.game = game;
+Leeboard.Wind = function() {
     this.density = 1.204;
 };
 
 Leeboard.Wind.prototype = {
     constructor: Leeboard.Wind,
     
-    getFlowVelocity: function(x, y, vel) {
+    getFlowVelocity: function(x, y, z, vel) {
         var vx = 4;
         var vy = 0;
 
         if (!Leeboard.isVar(vel)) {
-            return new Phaser.Point(vx, vy);
+            return Leeboard.createVector2(vx, vy);
         }
         vel.x = vx;
         vel.y = vy;
@@ -84,23 +80,21 @@ Leeboard.Wind.prototype = {
 
 /**
  * The water manager, its primary responsibility is water currents.
- * @param {Phaser.Game} game
  * @returns {Leeboard.Water}
  */
-Leeboard.Water = function(game) {
-    this.game = game;
+Leeboard.Water = function() {
     this.density = 1000;
 };
 
 Leeboard.Water.prototype = {
     constructor: Leeboard.Water,
     
-    getFlowVelocity: function(x, y, vel) {
+    getFlowVelocity: function(x, y, z, vel) {
         var vx = 0;
         var vy = 0.1;
 
         if (!Leeboard.isVar(vel)) {
-            return new Phaser.Point(vx, vy);
+            return new Leeboard.createVector2(vx, vy);
         }
         vel.x = vx;
         vel.y = vy;
@@ -110,4 +104,10 @@ Leeboard.Water.prototype = {
     update: function() {
         
     }
+};
+
+
+Leeboard.getFlowVelocity = function(flow, pos, vel) {
+    var z = pos.z || 0;
+    return flow.getFlowVelocity(pos.x, pos.y, pos.z, vel);
 };

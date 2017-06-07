@@ -21,8 +21,8 @@
 
 
 //--------------------------------------------------
-function Boat(sailingEnv, x, y, data) {
-    Phaser.Sprite.call(this, sailingEnv.game, x, y, data.type);
+function Boat(game, sailingEnv, x, y, data) {
+    Phaser.Sprite.call(this, game, x, y, data.type);
     
     this.sailingEnv = sailingEnv;
     this.anchor.set(0.5, 0.5);
@@ -167,7 +167,7 @@ PlayState.init = function() {
     });
     this.debounceT = false;
     
-    this.sailEnv = new Leeboard.SailEnv(this.game);
+    this.sailEnv = new Leeboard.SailEnv();
 };
 
 
@@ -220,7 +220,7 @@ PlayState._spawnBuoys = function(data) {
 PlayState._spawnCharacters = function (data) {
     var centerX = 0;
     var centerY = 0;
-    this.myBoat = new Boat(this.sailEnv, centerX, centerY, data.myBoat);
+    this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
     this.worldGroup.add(this.myBoat);
 };
 

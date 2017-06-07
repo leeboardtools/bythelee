@@ -73,8 +73,8 @@ QUnit.test( "Resultant-AddResultant", function( assert ) {
     var result = resultantA.clone();
     result.addResultant(resultantB);
     
-    var refForce = Leeboard.addVectors3D(resultantA.force, resultantB.force);
-    var refMoment = Leeboard.addVectors3D(resultantA.moment, resultantC.moment);
+    var refForce = Leeboard.addVectors3(resultantA.force, resultantB.force);
+    var refMoment = Leeboard.addVectors3(resultantA.moment, resultantC.moment);
     checkResultant3D(assert, result, refForce.x, refForce.y, refForce.z, refMoment.x, refMoment.y, refMoment.z,
         applPointA.x, applPointA.y, applPointA.z);
 });
@@ -110,7 +110,7 @@ function checkMoment7Test(assert, resultant, msg) {
     
     var end = resultant.force.clone().normalize();
     end.add(resultant.applPoint);
-    var line = Leeboard.createLine3D(resultant.applPoint, end);
+    var line = Leeboard.createLine3(resultant.applPoint, end);
     var plane = Leeboard.createPlane(Leeboard.createVector3(1, 0, 0), 0);
     var p = Leeboard.getLinePlaneIntersection(plane, line);
     
@@ -198,4 +198,52 @@ QUnit.test( "CoordSystemState.calcVectorLocalToWorld()", function( assert ) {
     checkVector3(assert, resultsB.worldVel, refWorldVel.x, refWorldVel.y, refWorldVel.z, "ResultsB T1 worldVel");
     checkVector3(assert, resultsB.localVel, refLocalVel.x, refLocalVel.y, refLocalVel.z, "ResultsB T1 localVel");
     
+});
+
+QUnit.test( "RigidBody()", function( assert ) {
+    var obj3DA = Leeboard.createObject3D();
+    var bodyA = new Leeboard.RigidBody(obj3DA, 10);
+    
+    obj3DA.translateX(5);
+    obj3DA.translateY(6);
+    obj3DA.translateZ(7);
+    obj3DA.updateMatrixWorld();
+    
+    bodyA.updateCoords(0.1);
+    
+    assert.equal(bodyA.getTotalMass(), 10, "Total Mass A");
+    checkVector3(assert, bodyA.getTotalCenterOfMass(), 5, 6, 7, "Total CenterOfMass A");
+    
+    var obj3DB = Leeboard.createObject3D();
+    var bodyB = new Leeboard.RigidBody(obj3DB, 5, Leeboard.createVector3(10, 3, 1));
+    bodyA.addPart(bodyB);
+
+    obj3DB.rotateX(90 * Leeboard.DEG_TO_RAD);
+    // COM is now 10, -1, 3
+    obj3DB.translateX(2);
+    // COM is now 12, -1, 3
+    // Relative to bodyA, so world COM is:
+    // 12+5, -1+6, 3+7
+    // 17, 5, 10
+    //obj3DB.updateMatrixWorld();
+    obj3DA.add(obj3DB);
+    obj3DA.updateMatrixWorld(true);
+    bodyA.updateCoords(0.1);
+
+    var a = bodyB.centerOfMass.clone();
+    a.applyMatrix4(obj3DB.matrix);
+    // 
+    a.applyMatrix4(obj3DA.matrixWorld);
+    
+    assert.equal(bodyA.getTotalMass(), 15, "Total Mass A+B");
+    
+    // COG is:
+    // x = (10 * 5 + 5 * 17) / 15
+    // y = (10 * 6 + 5 * 5) / 15
+    // z = (10 * 7 + 5 * 10) / 15
+    checkVector3(assert, bodyA.getTotalCenterOfMass(), 
+        (10 * 5 + 5 * 17) / 15,
+        (10 * 6 + 5 * 5) / 15,
+        (10 * 7 + 5 * 10) / 15,
+        "Total CenterOfMass A+B");
 });

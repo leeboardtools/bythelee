@@ -85,6 +85,14 @@ THREE.Vector2.prototype.zero = function() {
     return this;
 };
 
+/**
+ * Determines if all the components of the vector are zero.
+ * @returns {Boolean}   True if all components of the vector are zero.
+ */
+THREE.Vector2.prototype.isZero = function() {
+    return this.x === 0 && this.y === 0;
+};
+
 
 /**
  * Logs a 2D vector to the console.
@@ -145,7 +153,7 @@ THREE.Vector3.prototype.copy = function(vec) {
     this.y = vec.y;
     this.z = vec.z || 0;
     return this;
-}
+};
 
 /**
  * Extension to THREE.Vector3, sets the vector's components to all zero.
@@ -159,12 +167,20 @@ THREE.Vector3.prototype.zero = function() {
 };
 
 /**
+ * Determines if all the components of the vector are zero.
+ * @returns {Boolean}   True if all components of the vector are zero.
+ */
+THREE.Vector3.prototype.isZero = function() {
+    return this.x === 0 && this.y === 0 && this.z === 0;
+};
+
+/**
  * Adds two 2D vectors.
  * @param {object} vecA The first vector.
  * @param {object} vecB The second vectorl
  * @returns {object}    A new vector representing vecA + vecB
  */
-Leeboard.addVectors2D = function(vecA, vecB) {
+Leeboard.addVectors2 = function(vecA, vecB) {
     var vec = new THREE.Vector2(vecA.x, vecA.y);
     vec.add(vecB);
     return vec;
@@ -176,7 +192,7 @@ Leeboard.addVectors2D = function(vecA, vecB) {
  * @param {object} vecB The second vectorl
  * @returns {object}    A new vector representing vecA + vecB
  */
-Leeboard.addVectors3D = function(vecA, vecB) {
+Leeboard.addVectors3 = function(vecA, vecB) {
     var vec = new THREE.Vector3(vecA.x, vecA.y, vecA.z);
     vec.add(vecB);
     return vec;
@@ -188,7 +204,7 @@ Leeboard.addVectors3D = function(vecA, vecB) {
  * @param {object} vecB The second vectorl
  * @returns {object}    A new vector representing vecA - vecB
  */
-Leeboard.subVectors2D = function(vecA, vecB) {
+Leeboard.subVectors2 = function(vecA, vecB) {
     var vec = new THREE.Vector2(vecA.x, vecA.y);
     vec.sub(vecB);
     return vec;
@@ -200,7 +216,7 @@ Leeboard.subVectors2D = function(vecA, vecB) {
  * @param {object} vecB The second vectorl
  * @returns {object}    A new vector representing vecA - vecB
  */
-Leeboard.subVectors3D = function(vecA, vecB) {
+Leeboard.subVectors3 = function(vecA, vecB) {
     var vec = new THREE.Vector3(vecA.x, vecA.y, vecA.z);
     vec.sub(vecB);
     return vec;
@@ -212,7 +228,7 @@ Leeboard.subVectors3D = function(vecA, vecB) {
  * @param {object} vecB The second vectorl
  * @returns {object}    A new 3D vector representing vecA X vecB
  */
-Leeboard.crossVectors2D = function(vecA, vecB) {
+Leeboard.crossVectors2 = function(vecA, vecB) {
     return new THREE.Vector3(0, 0, vecA.x * vecB.y - vecA.y * vecB.x);
 };
 
@@ -222,7 +238,7 @@ Leeboard.crossVectors2D = function(vecA, vecB) {
  * @param {object} vecB The second vectorl
  * @returns {object}    A new vector representing vecA X vecB
  */
-Leeboard.crossVectors3D = function(vecA, vecB) {
+Leeboard.crossVectors3 = function(vecA, vecB) {
     var vec = new THREE.Vector3(vecA.x, vecA.y, vecA.z);
     vec.cross(vecB);
     return vec;
@@ -233,7 +249,7 @@ Leeboard.crossVectors3D = function(vecA, vecB) {
  * @param {object} vec  The vector of interest.
  * @returns {Boolean}   True if all three components can be treated as 0.
  */
-Leeboard.isVectors2DLikeZero = function(vec) {
+Leeboard.isVectors2LikeZero = function(vec) {
     return Leeboard.isLikeZero(vec.x) && Leeboard.isLikeZero(vec.y);
 };
 
@@ -242,7 +258,7 @@ Leeboard.isVectors2DLikeZero = function(vec) {
  * @param {object} vec  The vector of interest.
  * @returns {Boolean}   True if all three components can be treated as 0.
  */
-Leeboard.isVectors3DLikeZero = function(vec) {
+Leeboard.isVectors3LikeZero = function(vec) {
     return Leeboard.isLikeZero(vec.x) && Leeboard.isLikeZero(vec.y) && Leeboard.isLikeZero(vec.z);
 };
 
@@ -277,8 +293,8 @@ Leeboard.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
  * @param {object} start    The start of the line segment.
  * @param {object} end  The end of the line segment.
  */
-Leeboard.createLine2D = function(start, end) {
-    return new Leeboard.Line2D(start, end);
+Leeboard.createLine2 = function(start, end) {
+    return new Leeboard.Line2(start, end);
 };
 
 /**
@@ -286,18 +302,18 @@ Leeboard.createLine2D = function(start, end) {
  * @constructor
  * @param {object} start    The start of the line segment.
  * @param {object} end  The end of the line segment.
- * @returns {Leeboard.Line2D}
+ * @returns {Leeboard.Line2}
  */
-Leeboard.Line2D = function(start, end) {
+Leeboard.Line2 = function(start, end) {
     this.start = Leeboard.copyCommonProperties(new THREE.Vector2(), start);
     this.end = Leeboard.copyCommonProperties(new THREE.Vector2(), end);
 };
 
-Leeboard.Line2D.prototype = {
-    constructor: Leeboard.Line2D,
+Leeboard.Line2.prototype = {
+    constructor: Leeboard.Line2,
     
     clone: function() {
-        return new Leeboard.Line2D(this.start, this.end);
+        return new Leeboard.Line2(this.start, this.end);
     },
     
     copy: function(other) {
@@ -326,7 +342,7 @@ Leeboard.Line2D.prototype = {
  * @param {object} end  The ending point of the line.
  * @returns {THREE.Line3}   The line.
  */
-Leeboard.createLine3D = function(start, end) {
+Leeboard.createLine3 = function(start, end) {
     return new THREE.Line3(start, end);
 };
 
@@ -391,8 +407,15 @@ Leeboard.getLinePlaneIntersection = function(plane, line) {
 
 
 /**
+ * Creates a 3x3 matrix.
+ */
+Leeboard.createMatrix3 = function() {
+    return new THREE.Matrix3();
+};
+
+
+/**
  * Creates a 4x4 matrix for performing coordinate transformations.
- * @returns {object}
  */
 Leeboard.createMatrix4 = function() {
     return new THREE.Matrix4();
@@ -431,6 +454,12 @@ THREE.Matrix4.prototype.makeFromEulerAndXYZ = function(xRad, yRad, zRad, px, py,
     return this;
 };
 
+
+/**
+ * Logs a 4x4 matrix to the console.
+ * @param {object} mat  The matrix to log.
+ * @param {String} msg  The optional message to precede the vector.
+ */
 Leeboard.logMatrix4 = function(mat, msg) {
     var text = "";
     if (Leeboard.isVar(msg)) {
@@ -448,3 +477,13 @@ Leeboard.logMatrix4 = function(mat, msg) {
     
     console.log(text);
 };
+
+
+Leeboard.createObject3D = function() {
+    return new THREE.Object3D();
+};
+
+Leeboard.createGroup = function() {
+    return new THREE.Group();
+};
+

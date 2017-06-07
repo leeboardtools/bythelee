@@ -353,7 +353,7 @@ Leeboard.Foil = function() {
      * @property {object} chord A line describing the chord, with the chord.start treated as the
      * leading edge of the chord. This is used to resolve the angle of attack.
      */
-    this.chordLine = Leeboard.createLine2D();
+    this.chordLine = Leeboard.createLine2();
     
     /**
      * @property {number} sliceZ The z coordinate of the 2D slice.

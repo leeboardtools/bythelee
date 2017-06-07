@@ -1,2 +1,10 @@
-Requirements:
+Dev Requirements:
+
+
+
+
+
+
+TODO:
+Add means of looking up foils.
 
