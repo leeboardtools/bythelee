@@ -332,7 +332,7 @@ Leeboard.CoordSystemState.prototype = {
  * rigid body, a reference to this object is kept, the object is expected to change
  * position and orientation during a simulation. This presumes that the object's world
  * reference frame is the same as the base's world reference frame.
- * @param {number} mass The mass of the body.
+ * @param {number} mass The mass of the body, may be 0.
  * @param {object} centerOfMass The center of mass relative to the local reference 
  * frame, if not defined it will be set to {0,0,0}.
  * @param {object} momentInertia    The moment of inertia tensor, not yet fully supported.
@@ -368,6 +368,36 @@ Leeboard.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
 };
 
 Leeboard.RigidBody.prototype = {
+    /**
+     * Loads the rigid body's properties from the properties in a data object.
+     * This currently does not load the parts of the rigid body, though it may in
+     * the future.
+     * @param {object} data The data object to load from.
+     * @returns {object}    this.
+     */
+    load: function(data) {
+        this.loadBase(data);
+        
+        if (Leeboard.isVar(data.obj3D)) {
+            this.obj3D = Leeboard.createObject3DFromData(data.obj3D);
+        }
+        return this;
+    },
+    
+    /**
+     * Loads only the basic settings of the rigid body from a data object. The 3D
+     * object and the parts are not loaded.
+     * @param {object} data The data object to load from.
+     * @returns {object}    this.
+     */
+    loadBase: function(data) {
+        this.mass = data.mass || this.mass;
+        Leeboard.loadVector3(data.centerOfMass, this.centerOfMass);
+        Leeboard.loadMatrix3(data.momentInertia, this.momentInertia);
+        this.physicalPropertiesDirty = true;
+        return this;
+    },
+    
     /**
      * Adds a part to the rigid body. If the part is part of another rigid
      * body it is removed from that other rigid body.
@@ -507,11 +537,20 @@ Leeboard.RigidBody.prototype = {
         return this;
     },
     
+    /**
+     * Retrieves the total mass of the rigid body and all its parts.
+     * @returns {Number}    The total mass.
+     */
     getTotalMass: function() {
         this.updatePhysicalProperties();
         return this.totalMass;
     },
     
+    /**
+     * Retrieves the composit center of mass of the rigid body and all its parts,
+     * in world coordinates.
+     * @returns {object}    The center of mass in world coordinates.
+     */
     getTotalCenterOfMass: function() {
         this.updatePhysicalProperties();
         return this.totalCenterOfMass;

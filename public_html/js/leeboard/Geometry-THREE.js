@@ -174,6 +174,47 @@ THREE.Vector3.prototype.isZero = function() {
     return this.x === 0 && this.y === 0 && this.z === 0;
 };
 
+
+/**
+ * Loads a 2D vector from a data object. If appropriate data does not exist
+ * for a field that field is set to 0.
+ * @param {object} data The data to load from.
+ * @param {object} vec  If defined the 2D vector to load into.
+ * @returns {object}    The loaded vector.
+ */
+Leeboard.loadVector2 = function(data, vec) {
+    vec = vec || new THREE.Vector2();
+    if (!Leeboard.isVar(data)) {
+        vec.zero();
+    }
+    else {
+        vec.x = data.x || 0;
+        vec.y = data.y || 0;
+    }
+    return vec;
+};
+
+
+/**
+ * Loads a 3D vector from a data object. If appropriate data does not exist
+ * for a field that field is set to 0.
+ * @param {object} data The data to load from.
+ * @param {object} vec  If defined the 2D vector to load into.
+ * @returns {object}    The loaded vector.
+ */
+Leeboard.loadVector3 = function(data, vec) {
+    vec = vec || new THREE.Vector3();
+    if (!Leeboard.isVar(data)) {
+        vec.zero();
+    }
+    else {
+        vec.x = data.x || 0;
+        vec.y = data.y || 0;
+        vec.z = data.z || 0;
+    }
+    return vec;
+};
+
 /**
  * Adds two 2D vectors.
  * @param {object} vecA The first vector.
@@ -275,11 +316,31 @@ Leeboard.createQuaternion = function(x, y, z, w) {
 };
 
 /**
+ * Loads a quaternion from a data object.
+ * @param {object} data The data object, the looked for fields are 'qx', 'qy', 'qz', and 'qw'.
+ * @param {object} quat If defined the quaternion to be set.
+ * @returns {object}    The quaternion.
+ */
+Leeboard.loadQuaternion = function(data, quat) {
+    quat = quat || new THREE.Quaternion();
+    if (!Leeboard.isVar(data)) {
+        quat.set(0, 0, 0, 1);
+    }
+    else {
+        quat.x = data.qx || 0;
+        quat.y = data.qy || 0;
+        quat.z = data.qz || 0;
+        quat.w = data.qw || 1;
+    }
+    return quat;
+};
+
+/**
  * Creates a quaternion representing three Euler angles, in radians.
  * @param {number} xRad   The rotation about the x axis, in radians.
  * @param {number} yRad   The rotation about the y axis, in radians.
  * @param {number} zRad   The rotation about the z axis, in radians.
- * @returns {Leeboard.createQuaternionFromEuler.quaternion|THREE.Quaternion}
+ * @returns {object}    The THREE.Quaternion compatible quaternion.
  */
 Leeboard.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
     var euler = new THREE.Euler(xRad, yRad, zRad);
@@ -287,6 +348,58 @@ Leeboard.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
     quaternion.setFromEuler(euler);
     return quaternion;
 };
+
+/**
+ * Creates an object representing Euler angles.
+ * @param {number} xRad The rotation about the x axis in radians.
+ * @param {number} yRad The rotation about the y axis in radians.
+ * @param {number} zRad The rotation about the z axis in radians.
+ * @param {object} order    The order of rotation.
+ * @returns {object}    The THREE.Euler compatible quaternion.
+ */
+Leeboard.createEuler = function(xRad, yRad, zRad, order) {
+    return new THREE.Euler(xRad, yRad, zRad, order);
+};
+
+/**
+ * Creates an object representing Euler angles given the angles in degrees.
+ * @param {number} xDeg The rotation about the x axis in degrees.
+ * @param {number} yDeg The rotation about the y axis in degrees.
+ * @param {number} zDeg The rotation about the z axis in degrees.
+ * @param {object} order    The order of rotation.
+ * @returns {object}    The THREE.Euler compatible quaternion.
+ */
+Leeboard.createEuler = function(xDeg, yDeg, zDeg, order) {
+    return new THREE.Euler(xDeg * Leeboard.DEG_TO_RAD, yDeg * Leeboard.DEG_TO_RAD, zDeg * Leeboard.DEG_TO_RAD, order);
+};
+
+/**
+ * Loads an Euler object from a data object.
+ * @param {object} data The data to load from, the looked for fields are 'ex', 'ey', 'ez', and 'order'.
+ * @param {object} euler    If defined the object to be loaded into.
+ * @returns {object}    The euler object.
+ */
+Leeboard.loadEuler = function(data, euler) {
+    euler = euler || new THREE.Euler();
+    if (!Leeboard.isVar(data)) {
+        euler.set(0, 0, 0, THREE.Euler.DefaultOrder);
+    }
+    else {
+        if (Leeboard.isVar(data.exd)) {
+            euler.x = (data.exd || 0) * Leeboard.DEG_TO_RAD;
+            euler.y = (data.eyd || 0) * Leeboard.DEG_TO_RAD;
+            euler.z = (data.ezd || 0) * Leeboard.DEG_TO_RAD;
+        }
+        else {
+            euler.x = data.ex || 0;
+            euler.y = data.ey || 0;
+            euler.z = data.ez || 0;
+        }
+        euler.order = data.order || THREE.Euler.DefaultOrder;
+    }
+    return euler;
+}
+
 
 /**
  * Creates a 2D line segment.
@@ -337,13 +450,53 @@ Leeboard.Line2.prototype = {
 };
 
 /**
- * Creates a line.
+ * Loads a 2D line from a data object.
+ * @param {object} data The data to load from.
+ * @param {object} line If defined the line to be loaded.
+ * @returns {object}    The loaded line.
+ */
+Leeboard.loadLine2 = function(data, line) {
+    line = line || Leeboard.createLine2();
+    if (!Leeboard.isVar(data)) {
+        line.start.zero();
+        line.end.zero();
+    }
+    else {
+        Leeboard.loadVector2(data.start, line.start);
+        Leeboard.loadVector2(data.end, line.end);
+    }
+    
+    return line;
+};
+
+/**
+ * Creates a 3D line.
  * @param {object} start    The starting point of the line.
  * @param {object} end  The ending point of the line.
  * @returns {THREE.Line3}   The line.
  */
 Leeboard.createLine3 = function(start, end) {
     return new THREE.Line3(start, end);
+};
+
+/**
+ * Loads a 3D line from a data object.
+ * @param {object} data The data to load from.
+ * @param {object} line If defined the line to be loaded.
+ * @returns {object}    The loaded line.
+ */
+Leeboard.loadLine3 = function(data, line) {
+    line = line || Leeboard.createLine3();
+    if (!Leeboard.isVar(data)) {
+        line.start.zero();
+        line.end.zero();
+    }
+    else {
+        Leeboard.loadVector3(data.start, line.start);
+        Leeboard.loadVector3(data.end, line.end);
+    }
+    
+    return line;
 };
 
 /**
@@ -413,6 +566,31 @@ Leeboard.createMatrix3 = function() {
     return new THREE.Matrix3();
 };
 
+Leeboard.loadMatrix3 = function(data, mat) {
+    if (Leeboard.isVar(mat)) {
+        mat.identity();
+    }
+    else {
+        mat = new THREE.Matrix3();
+    }
+    
+    if (!Leeboard.isVar(data)) {
+        return mat;
+    }
+    
+    if (Leeboard.isVar(data.elements)) {
+        var count = Math.min(data.elements.length, mat.elements.length);
+        for (var i = 0; i < count; ++i) {
+            mat.elements[i] = data.elements[i];
+        }
+        for (var i = count; i < mat.elements.length; ++i) {
+            mat.elements[i] = 0;
+        }
+    }
+
+    return mat;
+};
+
 
 /**
  * Creates a 4x4 matrix for performing coordinate transformations.
@@ -420,6 +598,57 @@ Leeboard.createMatrix3 = function() {
 Leeboard.createMatrix4 = function() {
     return new THREE.Matrix4();
 };
+
+/**
+ * Loads a 4x4 matrix from a data object.
+ * @param {object} data The data to load from.
+ * @param {object} mat  If defined the matrix to load into.
+ * @returns {object}    The matrix.
+ */
+Leeboard.loadMatrix4 = function(data, mat) {
+    if (Leeboard.isVar(mat)) {
+        mat.identity();
+    }
+    else {
+        mat = new THREE.Matrix4();
+    }
+    
+    if (!Leeboard.isVar(data)) {
+        return mat;
+    }
+    
+    if (Leeboard.isVar(data.elements)) {
+        var count = Math.min(data.elements.length, mat.elements.length);
+        for (var i = 0; i < count; ++i) {
+            mat.elements[i] = data.elements[i];
+        }
+        for (var i = count; i < mat.elements.length; ++i) {
+            mat.elements[i] = 0;
+        }
+    }
+    else {
+        if (Leeboard.isVar(data.rotation)) {
+            if (Leeboard.isVar(data.rotation.ex) || Leeboard.isVar(data.rotation.exd)) {
+                // Euler angles...
+                var euler = Leeboard.loadEuler(data.rotation);
+                mat.makeRotationFromEuler(euler);
+            }
+            else if (Leeboard.isVar(data.rotation.qx)) {
+                // Quaternion...
+                var quaternion = Leeboard.loadQuaternion(data.rotation);
+                mat.makeRotationFromQuaternion(quaternion);
+            }
+        }
+        
+        if (Leeboard.isVar(data.origin)) {
+            var origin = Leeboard.loadVector3(data.origin);
+            mat.setPosition(origin);
+        }
+    }
+    
+    return mat;
+};
+
 
 /**
  * Extension to THREE.Matrix4, sets the position components of the matrix using
@@ -479,11 +708,66 @@ Leeboard.logMatrix4 = function(mat, msg) {
 };
 
 
+/**
+ * Creates a 3D object.
+ * @returns {object}
+ */
 Leeboard.createObject3D = function() {
     return new THREE.Object3D();
 };
 
-Leeboard.createGroup = function() {
-    return new THREE.Group();
+/**
+ * Loads the basic settings of a 3D object from a data object.
+ * @param {object} data The data containing the settings.
+ * @param {object} obj3D    If defined the 3D object to be loaded into.
+ * @returns {object}    this.
+ */
+Leeboard.loadObject3DBasic = function(data, obj3D) {
+    if (!Leeboard.isVar(obj3D)) {
+        obj3D = Leeboard.createObject3D();
+    }
+    
+    obj3D.name = data.name || "";
+    
+    Leeboard.loadVector3(data.position, obj3D.position);
+    if (Leeboard.isVar(data.rotation)) {
+        Leeboard.loadEuler(data.rotation, obj3D.rotation);
+    }
+    else {
+        Leeboard.loadQuaternion(data.quaternion, obj3D.quaternion);
+    }
+    obj3D.matrixWorldNeedsUpdate = true;
+    
+    return obj3D;
 };
+
+/**
+ * Helper that creates and loads a 3D object from a data object. If the data object contains
+ * a 'construct' property, the value of that property is passed directly to eval() to create
+ * the 3D object object, otherwise Leeboard.createObject3D() is used.
+ * @param {object} data The data to load from.
+ * @returns {object}    The 3D object.
+ */
+Leeboard.createObject3DFromData = function(data) {
+    if (!Leeboard.isVar(data)) {
+        return Leeboard.createObject3D();
+    }
+    
+    var obj3D;
+    if (Leeboard.isVar(data.construct)) {
+        obj3D = eval(data.construct);
+    }
+    else {
+        obj3D = Leeboard.createObject3D();
+    }
+    
+    if (Leeboard.isVar(obj3D.load)) {
+        obj3D.load(data);
+    }
+    else {
+        Leeboard.loadObject3DBasic(data, obj3D);
+    }
+    return obj3D;
+};
+
 

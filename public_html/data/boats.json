@@ -1,0 +1,28 @@
+{
+    "Tubby": {
+        "mass": 100,
+        "centerOfMass": { "x": 0, "y": 0, "z": 0 },
+        "momentInertia": {},
+        "aeroFoils": [],
+        "hydroFoils": [ {
+                "construct": "new Leeboard.FoilInstance()",
+                "name": "keel",
+                "type": "fixed",
+                "mass": 20,
+                "centerOfMass": { "x": 0, "y": 0, "z": 0 },
+                "origin" : { "x": 0, "y": 0, "z": 0 },
+                "rotation": { "ex": 0, "ey": 0, "ez": 0 },
+                "foil": {
+                    "chordLine": {
+                        "start": { "x": 0, "y": 0 },
+                        "end": { "x": 0.5, "y": 0 }
+                    },
+                    "sliceZ": 0.2,
+                    "area": 1,
+                    "aspectRatio": 3,
+                    "libClCdCurve": "FlatPlate"
+                }
+        }],
+        "propulsors": []
+    }
+}

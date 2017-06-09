@@ -246,4 +246,5 @@ QUnit.test( "RigidBody()", function( assert ) {
         (10 * 6 + 5 * 5) / 15,
         (10 * 7 + 5 * 10) / 15,
         "Total CenterOfMass A+B");
+    
 });

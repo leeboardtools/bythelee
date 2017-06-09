@@ -22,7 +22,7 @@
 
 Leeboard.FoilInstance = function(foil, obj3D, mass, centerOfMass) {
     Leeboard.RigidBody.call(this, obj3D, mass, centerOfMass);
-    this.foil = foil;
+    this.foil = foil || new Leeboard.Foil();
     this.workingPos = Leeboard.createVector3();
 };
 
@@ -39,9 +39,22 @@ Leeboard.FoilInstance.prototype.updateFoilForce = function(dt, flow) {
     this.addWorldResultant(this.workingResultant);
 };
 
+Leeboard.FoilInstance.prototype.load = function(data, sailEnv) {
+    Leeboard.RigidBody.prototype.load.call(this, data);
+    if (Leeboard.isVar(data.foil)) {
+        this.foil = Leeboard.createFoilFromData(data.foil, sailEnv);
+    }
+    return this;
+};
 
-Leeboard.Propulsor = function(obj3D) {
+
+Leeboard.Propulsor = function(obj3D, maxForce) {
+    Leeboard.RigidBody.call(this, obj3D, 0);
     this.forceMag = 0;
+    this.forceDir = Leeboard.createVector3(1, 0, 0);
+    this.maxForce = maxForce || Number.MAX_VALUE;
+    
+    this.workingForce = Leeboard.createVector3();
     this.workingPos = Leeboard.createVector3();
 };
 
@@ -49,11 +62,27 @@ Leeboard.Propulsor.prototype = Object.create(Leeboard.RigidBody.prototype);
 Leeboard.Propulsor.prototype.constructor = Leeboard.Propulsor;
 
 Leeboard.Propulsor.prototype.updateForce = function(dt) {
+    var forceMag = Leeboard.clamp(this.forceMag, 0, this.maxForce);
+    if (forceMag === 0) {
+        return this;
+    }
     
+    this.workingForce.copy(this.forceDir);
+    this.workingForce.multiplyScalar(forceMag);
+    this.workingForce.applyMatrix4Rotation(this.coords.worldXfrm);
+    
+    this.workingPos.zero();
+    this.workingPos.applyMatrix4(this.coords.worldXfrm);
+    
+    this.addWorldForce(this.workingForce, this.workingPos);
+            
+    return this;
 };
 
 
-Leeboard.Vessel = function() {
+Leeboard.Vessel = function(obj3D) {
+    Leeboard.RigidBody.call(this, obj3D);
+
     this.hydroFoils = [];
     this.aeroFoils = [];
     this.propulsors = [];
@@ -79,12 +108,71 @@ Leeboard.Vessel.prototype.addHydroFoil = function(foilInstance) {
     return this;
 };
 
-Leeboard.Vessel.prototype.load = function(data) {
+Leeboard.Vessel.prototype.addPropulsor = function(propulsor) {
+    this.propulsors.push(propulsor);
+    this.addPart(propulsor);
+    return this;
+};
+
+Leeboard.Vessel.prototype.removeParts = function(foils) {
+    for (var i = 0; i < foils.length; ++i) {
+        this.removePart(foils[i]);
+    }
+    foils.splice(0, foils.length);
+    return foils;
+};
+
+Leeboard.Vessel.prototype.createFoilInstanceForLoad = function(data, sailEnv) {
+    if (Leeboard.isVar(data.construct)) {
+        return eval(data.construct);
+    }
+    
+    return new FoilInstance();
+};
+
+Leeboard.Vessel.prototype.loadFoilInstance = function(data, sailEnv) {    
+    var foilInstance = this.createFoilInstanceForLoad(data, sailEnv);
+    if (Leeboard.isVar(foilInstance)) {
+        foilInstance.load(data, sailEnv);
+    }    
+    return foilInstance;
+};
+
+Leeboard.Vessel.prototype.loadFoils = function(data, foils, sailEnv) {
+    if (!Leeboard.isVar(data)) {
+        return;
+    }
+    
+    for (var i = 0; i < data.length; ++i) {
+        var foilData = data[i];
+        var foilInstance = this.loadFoilInstance(foilData, sailEnv);
+        if (Leeboard.isVar(foilInstance)) {
+            foils.push(foilInstance);
+            this.addPart(foilInstance);
+        }
+    }
+}
+
+Leeboard.Vessel.prototype.loadPropulsors = function(data) {
+    
+}
+
+Leeboard.Vessel.prototype.load = function(data, sailEnv) {
+    // Clear out the existing settings...
+    this.aeroFoils = this.removeParts(this.aeroFoils);
+    this.hydroFoils = this.removeParts(this.hydroFoils);
+    this.propulsors = this.removeParts(this.propulsors);
+    
+    Leeboard.RigidBody.prototype.load.call(this, data);
+    
+    this.loadFoils(data.aeroFoils, this.aeroFoils, sailEnv);
+    this.loadFoils(data.hydroFoils, this.hydroFoils, sailEnv);
+    this.loadPropulsors(data.propulsors);
     
     return this;
 };
 
-Leeboard.Vessel.prototyp.updateFoilForces = function(dt, sailEnv, flow, foils) {
+Leeboard.Vessel.prototype.updateFoilForces = function(dt, sailEnv, flow, foils) {
     for (var i = 0; i < foils.length; ++i) {
         foils[i].updateFoilForce(dt, flow);
     }
@@ -92,10 +180,16 @@ Leeboard.Vessel.prototyp.updateFoilForces = function(dt, sailEnv, flow, foils) {
 };
 
 Leeboard.Vessel.prototype.updateForces = function(dt, sailEnv) {
+    this.clearForces();
+    
     this.updateCoords(dt);
     
     this.updateFoilForces(dt, sailEnv, sailEnv.wind, this.aeroFoils);
     this.updateFoilForces(dt, sailEnv, sailEnv.water, this.hydroFoils);
+    
+    for (var i = 0; i < this.propulsors.length; ++i) {
+        this.propulsors[i].updateForce(dt);
+    }
     
     // Need the hull resistance...
     

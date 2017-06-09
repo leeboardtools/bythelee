@@ -38,8 +38,12 @@ Leeboard.SailEnv.prototype = {
     
     _loadClCdCurve: function(data) {
         var clCdCurve = new Leeboard.ClCdCurve();
-        clCdCurve.load(data.data);
-        this.clCdCurves[data.name] = clCdCurve;
+        clCdCurve.load(data);
+        this.clCdCurves[clCdCurve.name] = clCdCurve;
+    },
+    
+    getClCdCurve: function(name) {
+        return this.clCdCurves[name];
     },
     
     update: function() {

@@ -125,7 +125,7 @@ var Leeboard = Leeboard || {
         }
         Object.getOwnPropertyNames(dst).forEach(
                 function(val, idx, array) {
-                    if (typeof src[val] !== 'undefined') {
+                    if (src[val] !== undefined) {
                         dst[val] = src[val];
                     }
                 }
@@ -140,7 +140,7 @@ var Leeboard = Leeboard || {
      * @returns {Boolean}   true if v is defined and not null.
      */
     isVar: function(v) {
-        return (typeof v !== 'undefined') && (v !== null);
+        return (v !== undefined) && (v !== null);
     }
 };
 

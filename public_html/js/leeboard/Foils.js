@@ -245,6 +245,9 @@ Leeboard.ClCdInterp.prototype = {
  * @returns {Leeboard.ClCdCurve}
  */
 Leeboard.ClCdCurve = function() {
+    this.name = "";
+    this.aspectRatio = Number.POSITIVE_INFINITY;
+    this.re = Number.POSITIVE_INFINITY;
     this.clCdLifting = new Leeboard.ClCdInterp();
     this.liftingEndDeg = 90;
     this.isSymmetric = true;
@@ -265,6 +268,10 @@ Leeboard.ClCdCurve.prototype = {
         if (!Leeboard.isVar(data)) {
             return this;
         }
+        
+        this.name = data.name || "";
+        this.aspectRatio = data.aspectRatio || Number.POSITIVE_INFINITY;
+        this.re = data.re || Number.POSITIVE_INFINITY;
         
         if (typeof data.clCdStall === "clCdStall") {
             this.stallStartDeg = data.stallStartDeg || 90;
@@ -387,15 +394,24 @@ Leeboard.Foil.prototype = {
     /**
      * The main loading method.
      * @param {object} data   The data, typically loaded from a JSON file.
+     * @param {object} curveLib The optional curve library used to obtain pre-loaded
+     * ClCdCurves, used for 'libClCdCurve' properties.
      * @return {object} this.
      */
-    load: function(data) {
+    load: function(data, curveLib) {
         this.chordLine = Leeboard.copyCommonProperties(this.chordLine, data.chordLine);
         this.sliceZ = data.sliceZ || this.sliceZ;
         this.area = data.area || this.area;
         this.aspectRatio = data.aspectRatio || this.aspectRatio;
         
-        this.clCdCurve.load(data.clCdCurve);
+        this.clCdCurve = undefined;
+        if (Leeboard.isVar(data.libClCdCurve)) {
+            this.clCdCurve = curveLib.getClCdCurve(data.libClCdCurve);
+        }
+        if (!Leeboard.isVar(this.clCdCurve)) {
+            this.clCdCurve = new Leeboard.ClCdCurve();
+            this.clCdCurve.load(data.clCdCurve);
+        }
         
         return this;
     },
@@ -482,4 +498,30 @@ Leeboard.Foil.prototype = {
         
         return resultant;
     }
+};
+
+
+/**
+ * Helper that creates and loads a foil from a data object. If the data object contains
+ * a 'construct' property, the value of that property is passed directly to eval() to create
+ * the foil object, otherwise Leeboard.Foil() is used.
+ * @param {object} data The data to load from.
+ * @param {object} curveLib The optional curve library used to obtain pre-loaded
+ * ClCdCurves, used for 'libClCdCurve' properties.
+ * @returns {Leeboard.Foil|object|Leeboard.Foil.prototype}
+ */
+Leeboard.createFoilFromData = function(data, curveLib) {
+    if (!Leeboard.isVar(data)) {
+        return new Leeboard.Foil();
+    }
+    
+    var foil;
+    if (Leeboard.isVar(data.construct)) {
+        foil = eval(data.construct);
+    }
+    else {
+        foil = new Leeboard.Foil();
+    }
+    
+    return foil.load(data, curveLib);
 };
