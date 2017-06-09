@@ -82,44 +82,53 @@ var clCdCurvesJSON_Test = {
     ]
 };
 
-var BoatsJSON_Test = {
-    "Tubby": {
-        "mass": 100,
-        "centerOfMass": { "x": 1, "y": 5, "z": 10 },
-        "momentInertia": {},
-        "aeroFoils": [],
-        "hydroFoils": [ {
-                "construct": "new Leeboard.FoilInstance()",
-                "name": "keel",
-                "type": "fixed",
-                "mass": 20,
-                "centerOfMass": { "x": 0, "y": 0, "z": -3 },
-                "obj3D": {
-                    "position" : { "x": 0, "y": 3, "z": 0 },
-                    "rotation": { "exd": 0, "eyd": 15, "ezd": 0 }
-                },
-                "foil": {
-                    "chordLine": {
-                        "start": { "x": 0, "y": 0 },
-                        "end": { "x": 0.5, "y": 0 }
+var boatsJSON_Test = {
+    "boats": [
+        {
+            "name": "Tubby",
+            "mass": 100,
+            "centerOfMass": { "x": 1, "y": 5, "z": 10 },
+            "momentInertia": {},
+            "aeroFoils": [],
+            "hydroFoils": [ {
+                    "construct": "new LBFoils.FoilInstance()",
+                    "name": "keel",
+                    "mass": 20,
+                    "centerOfMass": { "x": 0, "y": 0, "z": -3 },
+                    "obj3D": {
+                        "position" : { "x": 0, "y": 3, "z": 0 },
+                        "rotation": { "exd": 0, "eyd": 15, "ezd": 0 }
                     },
-                    "sliceZ": 0.2,
-                    "area": 1.2,
-                    "aspectRatio": 3,
-                    "libClCdCurve": "FlatPlate"
+                    "foil": {
+                        "chordLine": {
+                            "start": { "x": 0, "y": 0 },
+                            "end": { "x": 0.5, "y": 0 }
+                        },
+                        "sliceZ": 0.2,
+                        "area": 1.2,
+                        "aspectRatio": 3,
+                        "libClCdCurve": "FlatPlate"
+                    }
+            }],
+            "propulsors": [],
+            "ballasts": [ { 
+                    "mass": 30,
+                    "centerOfMass": { "x": 0, "y": 0, "z": -5 } 
                 }
-        }],
-        "propulsors": []
-    }
+            ]
+        }
+    ]
 };
 
 QUnit.test( "Vessel-load", function( assert ) {
-    var sailEnv = new Leeboard.SailEnv();
-    sailEnv.load(clCdCurvesJSON_Test);
+    var sailEnv = new LBSailEnv.Env();
+    sailEnv.loadClCdCurves(clCdCurvesJSON_Test);
     
-    var vessel = new Leeboard.Vessel();    
-    vessel.load(BoatsJSON_Test.Tubby, sailEnv);
+    sailEnv.loadBoatDatas(boatsJSON_Test);
     
+    var vessel = Leeboard.Vessel.createFromData(sailEnv.boatDatas[0], sailEnv);
+    
+    assert.equal(vessel.name, "Tubby", "name");
     assert.equal(vessel.mass, 100, "mass");
     checkVector3(assert, vessel.centerOfMass, 1, 5, 10, "centerOfMass");
     
@@ -131,7 +140,7 @@ QUnit.test( "Vessel-load", function( assert ) {
     
     checkVector3(assert, hydroFoil.obj3D.position, 0, 3, 0, "hydroFoil[0].obj3D.position");
     
-    var quaternion = Leeboard.createQuaternionFromEulerRad(0, 15 * Leeboard.DEG_TO_RAD, 0);
+    var quaternion = LBGeometry.createQuaternionFromEulerRad(0, 15 * LBMath.DEG_TO_RAD, 0);
     checkQuaternion(assert, hydroFoil.obj3D.quaternion, quaternion.x, quaternion.y, quaternion.z, quaternion.w, "hydroFoil[0].obj3D.quaternion");
     
     var foil = hydroFoil.foil;
@@ -140,4 +149,6 @@ QUnit.test( "Vessel-load", function( assert ) {
     assert.equal(foil.area, 1.2, "hydroFoil[0].foil.area");
     assert.equal(foil.aspectRatio, 3, "hydroFoil[0].foil.aspectRatio");
     assert.equal(foil.clCdCurve, sailEnv.getClCdCurve("FlatPlate"), "hydroFoil[0].foil.clCdCurve");
+    
+    assert.equal(vessel.ballasts.length, 1, "ballasts.length");
 });

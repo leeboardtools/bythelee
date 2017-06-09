@@ -23,7 +23,7 @@ QUnit.test( "ClCd.calcLiftDragMoment()", function( assert ) {
     var rho = 1.204;
     var area = 12;
     var qInfSpeed = 10;
-    var clCd = new Leeboard.ClCd(cl, cd, 0);
+    var clCd = new LBFoils.ClCd(cl, cd, 0);
     var liftDragMoment = clCd.calcLiftDragMoment(rho, area, qInfSpeed);
     assert.nearEqual(liftDragMoment.lift, 0.5 * rho * area * qInfSpeed * qInfSpeed * cl, "basic Cl");
     assert.nearEqual(liftDragMoment.drag, 0.5 * rho * area * qInfSpeed * qInfSpeed * cd, "basic Cd");
@@ -44,7 +44,7 @@ QUnit.test( "ClCd.calcLiftDragMoment()", function( assert ) {
 });
 
 function createTestFoil(assert) {
-    var foil = new Leeboard.Foil();
+    var foil = new LBFoils.Foil();
     var foilData = {
         'chordLine': {
             'start': { 'x': 3, 'y': 0 },
@@ -84,16 +84,16 @@ QUnit.test( "Foil.calcLocalForce", function( assert ) {
     
     var rho = 1.204;
     var alphaDeg = 10;
-    var cosAlpha = Math.cos(Leeboard.DEG_TO_RAD * alphaDeg);
-    var sinAlpha = Math.sin(Leeboard.DEG_TO_RAD * alphaDeg);
+    var cosAlpha = Math.cos(LBMath.DEG_TO_RAD * alphaDeg);
+    var sinAlpha = Math.sin(LBMath.DEG_TO_RAD * alphaDeg);
     var qInfSpeed = 2;
-    var qInf = Leeboard.createVector2(qInfSpeed * cosAlpha, qInfSpeed * sinAlpha);
+    var qInf = LBGeometry.createVector2(qInfSpeed * cosAlpha, qInfSpeed * sinAlpha);
     var localForceResultant = testFoil.calcLocalForce(rho, qInf, details);
     
     var forceScale = 0.5 * rho * qInfSpeed * qInfSpeed * 15;
-    var refLift = Leeboard.createVector2MagDeg(1.1 * forceScale, alphaDeg + 90);
-    var refDrag = Leeboard.createVector2MagDeg(0.3 * forceScale, alphaDeg);
-    var refInducedDrag = Leeboard.createVector2MagDeg(1.1 * 1.1 / (Math.PI * testFoil.aspectRatio) * forceScale, alphaDeg);
+    var refLift = LBGeometry.createVector2MagDeg(1.1 * forceScale, alphaDeg + 90);
+    var refDrag = LBGeometry.createVector2MagDeg(0.3 * forceScale, alphaDeg);
+    var refInducedDrag = LBGeometry.createVector2MagDeg(1.1 * 1.1 / (Math.PI * testFoil.aspectRatio) * forceScale, alphaDeg);
     
     assert.nearEqual(details.angleDeg, alphaDeg, "angle: ");
     assert.nearEqual(details.lift, refLift.length(), "lift: ");
@@ -109,8 +109,8 @@ QUnit.test( "Foil.calcLocalForce", function( assert ) {
     
     // The force is applied at the 25% chord point...
     refForce.sub(refInducedDrag);
-    var refR = Leeboard.createVector2(2.5, 0);
-    var refMoment = Leeboard.calcMoment(refForce, refR);
+    var refR = LBGeometry.createVector2(2.5, 0);
+    var refMoment = LBPhysics.calcMoment(refForce, refR);
     
     checkVector3(assert, localForceResultant.moment, refMoment.x, refMoment.y, refMoment.z, "moment: ");
 });
@@ -119,14 +119,14 @@ QUnit.test( "Foil.calcLocalForce", function( assert ) {
 QUnit.test( "Foil.calcWorldForce", function( assert ) {
     var testFoil = createTestFoil();
     
-    var coordSystemState = new Leeboard.CoordSystemState();
+    var coordSystemState = new LBPhysics.CoordSystemState();
 
-    var worldXfrmT0 = Leeboard.createMatrix4();
-    worldXfrmT0.makeFromEulerAndXYZ(90 * Leeboard.DEG_TO_RAD, 0, 90 * Leeboard.DEG_TO_RAD, 100, 0, 0);
+    var worldXfrmT0 = LBGeometry.createMatrix4();
+    worldXfrmT0.makeFromEulerAndXYZ(90 * LBMath.DEG_TO_RAD, 0, 90 * LBMath.DEG_TO_RAD, 100, 0, 0);
     coordSystemState.setXfrms(worldXfrmT0);
     
-    var worldXfrmT1 = Leeboard.createMatrix4();
-    worldXfrmT1.makeFromEulerAndXYZ(90 * Leeboard.DEG_TO_RAD, 0, 90 * Leeboard.DEG_TO_RAD, 100, 0, -1);
+    var worldXfrmT1 = LBGeometry.createMatrix4();
+    worldXfrmT1.makeFromEulerAndXYZ(90 * LBMath.DEG_TO_RAD, 0, 90 * LBMath.DEG_TO_RAD, 100, 0, -1);
     // For this rotation we have:
     // xW = -yL
     // yW = -zL
@@ -138,13 +138,13 @@ QUnit.test( "Foil.calcWorldForce", function( assert ) {
     var rho = 1.204;
     var alpha = 15;
     var qInfSpeed = 3;
-    var qInfWorld = Leeboard.createVector3();
-    qInfWorld.z = qInfSpeed * Math.cos(alpha * Leeboard.DEG_TO_RAD);
-    qInfWorld.x = -qInfSpeed * Math.sin(alpha * Leeboard.DEG_TO_RAD);
+    var qInfWorld = LBGeometry.createVector3();
+    qInfWorld.z = qInfSpeed * Math.cos(alpha * LBMath.DEG_TO_RAD);
+    qInfWorld.x = -qInfSpeed * Math.sin(alpha * LBMath.DEG_TO_RAD);
     
     var resultant = testFoil.calcWorldForce(rho, qInfWorld, coordSystemState);
     
-    var qInfLocal = Leeboard.createVector2(qInfWorld.z + 10, -qInfWorld.x);
+    var qInfLocal = LBGeometry.createVector2(qInfWorld.z + 10, -qInfWorld.x);
     var refResultant = testFoil.calcLocalForce(rho, qInfLocal);
     
     assert.nearEqual(resultant.force.x, -refResultant.force.y, "World Fx");

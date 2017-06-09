@@ -29,10 +29,10 @@ function checkResultant3D(assert, resultant, fx, fy, fz, mx, my, mz, px, py, pz,
 }
 
 QUnit.test( "Resultant-AddForce", function( assert ) {
-    var resultant = new Leeboard.Resultant3D(
-            Leeboard.createVector3(1, 2, 3),   // force
-            Leeboard.createVector3(2, 3, 4),   // moment
-            Leeboard.createVector3(3, 4, 5));  // position
+    var resultant = new LBPhysics.Resultant3D(
+            LBGeometry.createVector3(1, 2, 3),   // force
+            LBGeometry.createVector3(2, 3, 4),   // moment
+            LBGeometry.createVector3(3, 4, 5));  // position
     checkResultant3D(assert, resultant, 1, 2, 3, 2, 3, 4, 3, 4, 5, "Constructor: ");
     
     resultant.force.set(0, 0, 0);
@@ -40,8 +40,8 @@ QUnit.test( "Resultant-AddForce", function( assert ) {
     resultant.applPoint.set(0, 0, 0);
     checkResultant3D(assert, resultant, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Zero: ");
     
-    var vec_1_2_3 = Leeboard.createVector3(1, 2, 3);
-    var vec_2_0_0 = Leeboard.createVector3(2, 0, 0);
+    var vec_1_2_3 = LBGeometry.createVector3(1, 2, 3);
+    var vec_2_0_0 = LBGeometry.createVector3(2, 0, 0);
     resultant.addForce(vec_1_2_3, vec_2_0_0);
     checkResultant3D(assert, resultant, 1, 2, 3, 0, -6, 4, 0, 0, 0, "Simple AddForce: ");
     
@@ -57,15 +57,15 @@ QUnit.test( "Resultant-AddForce", function( assert ) {
 });
 
 QUnit.test( "Resultant-AddResultant", function( assert ) {
-    var forceA = Leeboard.createVector3(10, 5, -20);
-    var momentA = Leeboard.createVector3(0, -10, 0);
-    var applPointA = Leeboard.createVector3(10, 20, 30);
-    var resultantA = new Leeboard.Resultant3D(forceA, momentA, applPointA);
+    var forceA = LBGeometry.createVector3(10, 5, -20);
+    var momentA = LBGeometry.createVector3(0, -10, 0);
+    var applPointA = LBGeometry.createVector3(10, 20, 30);
+    var resultantA = new LBPhysics.Resultant3D(forceA, momentA, applPointA);
 
-    var forceB = Leeboard.createVector3(5, 0, 10);
-    var momentB = Leeboard.createVector3(0, 0, 3);
-    var applPointB = Leeboard.createVector3(25, 3, 35);
-    var resultantB = new Leeboard.Resultant3D(forceB, momentB, applPointB);
+    var forceB = LBGeometry.createVector3(5, 0, 10);
+    var momentB = LBGeometry.createVector3(0, 0, 3);
+    var applPointB = LBGeometry.createVector3(25, 3, 35);
+    var resultantB = new LBPhysics.Resultant3D(forceB, momentB, applPointB);
     
     var resultantC = resultantB.clone();
     resultantC.moveApplPoint(resultantA.applPoint);
@@ -73,21 +73,21 @@ QUnit.test( "Resultant-AddResultant", function( assert ) {
     var result = resultantA.clone();
     result.addResultant(resultantB);
     
-    var refForce = Leeboard.addVectors3(resultantA.force, resultantB.force);
-    var refMoment = Leeboard.addVectors3(resultantA.moment, resultantC.moment);
+    var refForce = LBGeometry.addVectors3(resultantA.force, resultantB.force);
+    var refMoment = LBGeometry.addVectors3(resultantA.moment, resultantC.moment);
     checkResultant3D(assert, result, refForce.x, refForce.y, refForce.z, refMoment.x, refMoment.y, refMoment.z,
         applPointA.x, applPointA.y, applPointA.z);
 });
 
 function setupMoment7Test() {
-    var resultant = new Leeboard.Resultant3D();
+    var resultant = new LBPhysics.Resultant3D();
     
-    var fa = Leeboard.createVector3(0, 0, -80);
-    var pa = Leeboard.createVector3(0, 0, 0);
-    var fb = Leeboard.createVector3(0, -60, 0);
-    var pb = Leeboard.createVector3(0, 12, 12);
-    var fc = Leeboard.createVector3(-40, 0, 0);
-    var pc = Leeboard.createVector3(0, 12, 0);
+    var fa = LBGeometry.createVector3(0, 0, -80);
+    var pa = LBGeometry.createVector3(0, 0, 0);
+    var fb = LBGeometry.createVector3(0, -60, 0);
+    var pb = LBGeometry.createVector3(0, 12, 12);
+    var fc = LBGeometry.createVector3(-40, 0, 0);
+    var pc = LBGeometry.createVector3(0, 12, 0);
     
     resultant.addForce(fa, pa);
     resultant.addForce(fb, pb);
@@ -110,9 +110,9 @@ function checkMoment7Test(assert, resultant, msg) {
     
     var end = resultant.force.clone().normalize();
     end.add(resultant.applPoint);
-    var line = Leeboard.createLine3(resultant.applPoint, end);
-    var plane = Leeboard.createPlane(Leeboard.createVector3(1, 0, 0), 0);
-    var p = Leeboard.getLinePlaneIntersection(plane, line);
+    var line = LBGeometry.createLine3(resultant.applPoint, end);
+    var plane = LBGeometry.createPlane(LBGeometry.createVector3(1, 0, 0), 0);
+    var p = LBGeometry.getLinePlaneIntersection(plane, line);
     
     checkResultant3D(assert, resultant, fx, fy, fz, mx, my, mz, resultant.applPoint.x, resultant.applPoint.y, resultant.applPoint.z, msg, 1e-4);
     checkVector3(assert, p, 0, 0.4137931, 8.689655, "P: ", 1e-4);
@@ -125,16 +125,16 @@ QUnit.test( "Resultant-convertToWrench", function( assert ) {
 });
 
 QUnit.test( "Resultant-applyQuaternion", function( assert ) {
-    var force = Leeboard.createVector3(10, 0, 0);
-    var applPoint = Leeboard.createVector3(5, 10, 15);
-    var moment = Leeboard.calcMoment(force, applPoint);
-    var resultant = new Leeboard.Resultant3D();
+    var force = LBGeometry.createVector3(10, 0, 0);
+    var applPoint = LBGeometry.createVector3(5, 10, 15);
+    var moment = LBPhysics.calcMoment(force, applPoint);
+    var resultant = new LBPhysics.Resultant3D();
     
     resultant.addForce(force, applPoint);
     checkResultant3D(assert, resultant, force.x, force.y, force.z, moment.x, moment.y, moment.z,
         0, 0, 0, "Sanity: ");
         
-    var rotation = Leeboard.createQuaternionFromEulerRad(0, 0, -90 * Leeboard.DEG_TO_RAD);
+    var rotation = LBGeometry.createQuaternionFromEulerRad(0, 0, -90 * LBMath.DEG_TO_RAD);
     resultant.applyQuaternion(rotation);
     checkResultant3D(assert, resultant, force.y, -force.x, force.z, moment.y, -moment.x, moment.z,
         0, 0, 0, "Rot Z 90");
@@ -142,15 +142,15 @@ QUnit.test( "Resultant-applyQuaternion", function( assert ) {
 });
 
 QUnit.test( "Resultant-applyMatrix4", function( assert ) {
-    var force = Leeboard.createVector3(10, 0, 0);
-    var applPoint = Leeboard.createVector3(5, 10, 15);
-    var moment = Leeboard.calcMoment(force, applPoint);
-    var resultant = new Leeboard.Resultant3D(force, moment, applPoint);
+    var force = LBGeometry.createVector3(10, 0, 0);
+    var applPoint = LBGeometry.createVector3(5, 10, 15);
+    var moment = LBPhysics.calcMoment(force, applPoint);
+    var resultant = new LBPhysics.Resultant3D(force, moment, applPoint);
     
-    var matrix = Leeboard.createMatrix4();
-    var rotation = Leeboard.createQuaternionFromEulerRad(0, 0, -90 * Leeboard.DEG_TO_RAD);
+    var matrix = LBGeometry.createMatrix4();
+    var rotation = LBGeometry.createQuaternionFromEulerRad(0, 0, -90 * LBMath.DEG_TO_RAD);
     matrix.makeRotationFromQuaternion(rotation);
-    matrix.setPosition(Leeboard.createVector3(5, 6, 7));
+    matrix.setPosition(LBGeometry.createVector3(5, 6, 7));
     
     resultant.applyMatrix4(matrix);
     checkResultant3D(assert, resultant, force.y, -force.x, force.z, moment.y, -moment.x, moment.z,
@@ -159,28 +159,28 @@ QUnit.test( "Resultant-applyMatrix4", function( assert ) {
 });
 
 QUnit.test( "CoordSystemState.calcVectorLocalToWorld()", function( assert ) {
-    var worldMatrixT0 = Leeboard.createMatrix4();
-    worldMatrixT0.makeFromEulerAndXYZ(0, 0, -90 * Leeboard.DEG_TO_RAD, 5, 6, 7);
+    var worldMatrixT0 = LBGeometry.createMatrix4();
+    worldMatrixT0.makeFromEulerAndXYZ(0, 0, -90 * LBMath.DEG_TO_RAD, 5, 6, 7);
     
-    var worldMatrixT1 = Leeboard.createMatrix4();
-    worldMatrixT1.makeFromEulerAndXYZ(0, 0, -180 * Leeboard.DEG_TO_RAD, 5, 6, 17);
+    var worldMatrixT1 = LBGeometry.createMatrix4();
+    worldMatrixT1.makeFromEulerAndXYZ(0, 0, -180 * LBMath.DEG_TO_RAD, 5, 6, 17);
     
-    var localP0 = Leeboard.createVector3(10, 0, 0);
-    var localP1 = Leeboard.createVector3(10, 3, 0);
+    var localP0 = LBGeometry.createVector3(10, 0, 0);
+    var localP1 = LBGeometry.createVector3(10, 3, 0);
     
     var refWorldP0 = localP0.clone().applyMatrix4(worldMatrixT0);
     var refWorldP1 = localP1.clone().applyMatrix4(worldMatrixT1);
     
-    var coordSystemState = new Leeboard.CoordSystemState();
+    var coordSystemState = new LBPhysics.CoordSystemState();
     coordSystemState.setXfrms(worldMatrixT0);
     
-    var resultsA = { 'worldPos': Leeboard.createVector3() };
+    var resultsA = { 'worldPos': LBGeometry.createVector3() };
     coordSystemState.calcVectorLocalToWorld(localP0, resultsA);
     checkVector3(assert, resultsA.worldPos, refWorldP0.x, refWorldP0.y, refWorldP0.z, "ResultsA");
     
-    var resultsB = { 'worldPos': Leeboard.createVector3(7, 8, 9),
-        'worldVel': Leeboard.createVector3(1, 2, 3),
-        'localVel': Leeboard.createVector3(4, 5, 6)
+    var resultsB = { 'worldPos': LBGeometry.createVector3(7, 8, 9),
+        'worldVel': LBGeometry.createVector3(1, 2, 3),
+        'localVel': LBGeometry.createVector3(4, 5, 6)
     };
     coordSystemState.calcVectorLocalToWorld(localP0, resultsB);
     checkVector3(assert, resultsB.worldPos, refWorldP0.x, refWorldP0.y, refWorldP0.z, "ResultsB T0 worldPos");
@@ -201,8 +201,8 @@ QUnit.test( "CoordSystemState.calcVectorLocalToWorld()", function( assert ) {
 });
 
 QUnit.test( "RigidBody()", function( assert ) {
-    var obj3DA = Leeboard.createObject3D();
-    var bodyA = new Leeboard.RigidBody(obj3DA, 10);
+    var obj3DA = LBGeometry.createObject3D();
+    var bodyA = new LBPhysics.RigidBody(obj3DA, 10);
     
     obj3DA.translateX(5);
     obj3DA.translateY(6);
@@ -214,11 +214,11 @@ QUnit.test( "RigidBody()", function( assert ) {
     assert.equal(bodyA.getTotalMass(), 10, "Total Mass A");
     checkVector3(assert, bodyA.getTotalCenterOfMass(), 5, 6, 7, "Total CenterOfMass A");
     
-    var obj3DB = Leeboard.createObject3D();
-    var bodyB = new Leeboard.RigidBody(obj3DB, 5, Leeboard.createVector3(10, 3, 1));
+    var obj3DB = LBGeometry.createObject3D();
+    var bodyB = new LBPhysics.RigidBody(obj3DB, 5, LBGeometry.createVector3(10, 3, 1));
     bodyA.addPart(bodyB);
 
-    obj3DB.rotateX(90 * Leeboard.DEG_TO_RAD);
+    obj3DB.rotateX(90 * LBMath.DEG_TO_RAD);
     // COM is now 10, -1, 3
     obj3DB.translateX(2);
     // COM is now 12, -1, 3

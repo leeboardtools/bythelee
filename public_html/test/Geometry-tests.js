@@ -85,12 +85,12 @@ function checkMatrix4(assert, mat, refMat, msg, tolerance) {
 }
 
 QUnit.test( "applyMatrix4Rotation", function( assert ) {
-    var m = Leeboard.createMatrix4();
-    var a = 30 * Leeboard.DEG_TO_RAD;
+    var m = LBGeometry.createMatrix4();
+    var a = 30 * LBMath.DEG_TO_RAD;
     m.makeRotationZ(a);
-    m.setPosition(Leeboard.createVector3(10, 20, 30));
+    m.setPosition(LBGeometry.createVector3(10, 20, 30));
     
-    var v = Leeboard.createVector3(10, 0, 0);
+    var v = LBGeometry.createVector3(10, 0, 0);
     v.applyMatrix4(m);
     checkVector3(assert, v, 10*Math.cos(a) + 10, 10*Math.sin(a) + 20, 30, "applyMatrix4");
     
@@ -100,91 +100,91 @@ QUnit.test( "applyMatrix4Rotation", function( assert ) {
 });
     
 QUnit.test( "createVector2MagDeg", function( assert ) {
-    var vec = Leeboard.createVector2MagDeg(10, 20);
-    checkVectorMagAngle(assert, vec, 10, 20 * Leeboard.DEG_TO_RAD);
+    var vec = LBGeometry.createVector2MagDeg(10, 20);
+    checkVectorMagAngle(assert, vec, 10, 20 * LBMath.DEG_TO_RAD);
 });
 
     
 QUnit.test( "normalTangent", function( assert ) {
-    var refTangent = Leeboard.createVector2(10, 0);
-    var normal = Leeboard.tangentToNormalXY(refTangent);
+    var refTangent = LBGeometry.createVector2(10, 0);
+    var normal = LBGeometry.tangentToNormalXY(refTangent);
     
     checkVector2(assert, normal, 0, 1, "normal");
     
-    var tangent = Leeboard.normalToTangentXY(normal);
+    var tangent = LBGeometry.normalToTangentXY(normal);
     checkVector2(assert, tangent, 1, 0, "tangent");
     
-    var refNormal = Leeboard.createVector2(10, 20);
+    var refNormal = LBGeometry.createVector2(10, 20);
     var normFactor = 1 / refNormal.length();
     
-    tangent = Leeboard.normalToTangentXY(refNormal);
+    tangent = LBGeometry.normalToTangentXY(refNormal);
     checkVector2(assert, tangent, 20 * normFactor, -10 * normFactor, "tangent 2");
     
-    normal = Leeboard.tangentToNormalXY(tangent);
+    normal = LBGeometry.tangentToNormalXY(tangent);
     checkVector2(assert, normal, 10 * normFactor, 20 * normFactor, "normal 2");
 });
 
 
 QUnit.test( "Vector2 Load", function( assert ) {
-    var vec2 = Leeboard.loadVector2({ 'x': 1, 'y': 2, 'z': 3 });
+    var vec2 = LBGeometry.loadVector2({ 'x': 1, 'y': 2, 'z': 3 });
     checkVector2(assert, vec2, 1, 2, "All values");
     
-    Leeboard.loadVector2({ 'y': 4 }, vec2);
+    LBGeometry.loadVector2({ 'y': 4 }, vec2);
     checkVector2(assert, vec2, 0, 4, "Missing Values");
 
 });
     
     
 QUnit.test( "Vector3 Load", function( assert ) {
-    var vec3 = Leeboard.loadVector3({ 'x': 1, 'y': 2, 'z': 3 });
+    var vec3 = LBGeometry.loadVector3({ 'x': 1, 'y': 2, 'z': 3 });
     checkVector3(assert, vec3, 1, 2, 3, "All Values");
     
-    vec3 = Leeboard.loadVector3({ 'y': 4 }, vec3);
+    vec3 = LBGeometry.loadVector3({ 'y': 4 }, vec3);
     checkVector3(assert, vec3, 0, 4, 0, "Missing Values");
     
 });
 
 
 QUnit.test( "Quaternion Load", function( assert ) {
-    var quat = Leeboard.loadQuaternion({ 'qx': 1, 'qy': 2, 'qz': 3, 'qw':4});
+    var quat = LBGeometry.loadQuaternion({ 'qx': 1, 'qy': 2, 'qz': 3, 'qw':4});
     checkQuaternion(assert, quat, 1, 2, 3, 4, "All Values");
     
-    quat = Leeboard.loadQuaternion({ 'qx': -1, 'qy' : -2 });
+    quat = LBGeometry.loadQuaternion({ 'qx': -1, 'qy' : -2 });
     checkQuaternion(assert, quat, -1, -2, 0, 1, "Missing Values");
 });
 
 
 QUnit.test( "Quaternion Load", function( assert ) {
-    var euler = Leeboard.loadEuler({ 'ex': 1, 'ey': 2, 'ez': 3});
+    var euler = LBGeometry.loadEuler({ 'ex': 1, 'ey': 2, 'ez': 3});
     checkEuler(assert, euler, 1, 2, 3, "XYZ", "All Values");
     
-    Leeboard.loadEuler({ 'ey': -2, 'order': "YZX" }, euler);
+    LBGeometry.loadEuler({ 'ey': -2, 'order': "YZX" }, euler);
     checkEuler(assert, euler, 0, -2, 0, "YZX", "Missing Values");
 });
 
 
 QUnit.test( "Matrix4 Load", function( assert ) {
     var elements = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
-    var mat = Leeboard.loadMatrix4({ "elements": [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]});
+    var mat = LBGeometry.loadMatrix4({ "elements": [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]});
     
-    var refMat = Leeboard.createMatrix4();
+    var refMat = LBGeometry.createMatrix4();
     for (var i = 0; i < elements.length; ++i) {
         refMat.elements[i] = elements[i];
     }
     checkMatrix4(assert, mat, refMat, "Elements");
     
-    mat = Leeboard.loadMatrix4({ "origin": { 'x': 10, 'y': 11, 'z': 12 } }, mat);
+    mat = LBGeometry.loadMatrix4({ "origin": { 'x': 10, 'y': 11, 'z': 12 } }, mat);
     refMat.identity();
-    refMat.setPosition(Leeboard.createVector3(10, 11, 12));
+    refMat.setPosition(LBGeometry.createVector3(10, 11, 12));
     checkMatrix4(assert, mat, refMat, "Origin");
     
     
-    Leeboard.loadMatrix4({ 'rotation': { 'ex': .1, 'ey': .2, 'ez': .3 }}, mat);
+    LBGeometry.loadMatrix4({ 'rotation': { 'ex': .1, 'ey': .2, 'ez': .3 }}, mat);
     refMat.makeFromEulerAndXYZ(.1, .2, .3, 0, 0, 0);
     checkMatrix4(assert, mat, refMat, "Euler");
     
-    Leeboard.loadMatrix4({ 'origin': { 'x':10, 'y':11, 'z':15}, 'rotation': { 'qx': 1, 'qy':2, 'qz':3, 'qw':4}}, mat);
-    refMat.makeRotationFromQuaternion(Leeboard.createQuaternion(1, 2, 3, 4));
-    refMat.setPosition(Leeboard.createVector3(10, 11, 15));
+    LBGeometry.loadMatrix4({ 'origin': { 'x':10, 'y':11, 'z':15}, 'rotation': { 'qx': 1, 'qy':2, 'qz':3, 'qw':4}}, mat);
+    refMat.makeRotationFromQuaternion(LBGeometry.createQuaternion(1, 2, 3, 4));
+    refMat.setPosition(LBGeometry.createVector3(10, 11, 15));
     checkMatrix4(assert, mat, refMat, "Quaternion-Origin");
 });

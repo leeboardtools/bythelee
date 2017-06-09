@@ -16,7 +16,7 @@
 
 /* global Leeboard */
 
-Leeboard.CSpline.test = function() {
+LBMath.CSpline.test = function() {
     console.log("CSpline test:");
     var xs = [10, 20, 25, 27, 30];
     var ys = [10, 5, 15, 7, 21];

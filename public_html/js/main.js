@@ -16,7 +16,7 @@
 
 
 /* global Phaser */
-/* global Leeboard */
+/* global Leeboard, LBSailEnv */
 
 
 
@@ -138,7 +138,8 @@ LoadingState.init = function() {
 //--------------------------------------------------
 LoadingState.preload = function() {
     this.game.load.json('clCdCurves', 'data/clcdcurves.json');
-    this.game.load.json('basic', 'data/basic.json');
+    this.game.load.json('boats', 'data/boats.json');
+    this.game.load.json('basic', 'data/basic.json');    
     
     this.game.load.image('bkgd_water', 'images/bkgd_water.png');
     this.game.load.image('dinghy', 'images/dinghy.png');
@@ -167,7 +168,7 @@ PlayState.init = function() {
     });
     this.debounceT = false;
     
-    this.sailEnv = new Leeboard.SailEnv();
+    this.sailEnv = new LBSailEnv.Env();
 };
 
 
@@ -177,12 +178,14 @@ PlayState.create = function() {
     this.camera.flash('#000000');
     this.world.setBounds(-this.game.width / 2, -this.game.height / 2, this.game.width, this.game.height);
     this.camera.focusOnXY(0, 0);
-    
+        
     var clCdCurvesJSON = this.game.cache.getJSON('clCdCurves');
+    this.sailEnv.loadClCdCurves(clCdCurvesJSON);
+    
+    var boatsJSON = this.game.cache.getJSON('boats');
+    this.sailEnv.loadBoatDatas(boatsJSON);
+    
     var basicJSON = this.game.cache.getJSON('basic');
-    
-    this.sailEnv.load(clCdCurvesJSON);
-    
     this._loadLevel(basicJSON);
 };
 
@@ -332,7 +335,7 @@ PlayState._handleInput = function() {
     else if (this.debounceT && this.keys.t.isUp) {
         this.debounceT = false;
         
-        //var cspline = new Leeboard.CSpline();
+        //var cspline = new LBMath.CSpline();
         //cspline.test();
         var clCdCurve = this.sailEnv.clCdCurves["FlatPlateAR5"];
         clCdCurve.test(0, 180, 2);

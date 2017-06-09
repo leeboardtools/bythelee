@@ -1,4 +1,32 @@
-/* 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Math.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Math.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* 
  * Copyright 2017 Albert Santos.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,7 +79,7 @@ LBMath.defZeroTolerance = 1e-10;
  */
 LBMath.isLikeZero = function(x, tolerance) {
     tolerance = tolerance || LBMath.defZeroTolerance;
-    return x < tolerance && x > -tolerance;
+    return x &lt; tolerance &amp;&amp; x > -tolerance;
 };
 
 /**
@@ -74,14 +102,14 @@ LBMath.isNearEqual = function(a, b, tolerance) {
     var scale = Math.pow(10., -Math.log10(Math.abs(a)));
     var scaledA = a * scale;
     var scaledB = b * scale;
-    return (Math.abs(scaledA - scaledB) <= tolerance);
+    return (Math.abs(scaledA - scaledB) &lt;= tolerance);
 };
 
 /**
  * Adjusts a value as necessary to ensure it is between two limits.
  * @param {number} val  The value to clamp if necessary.
- * @param {number} low  The minimum value to allow, must be &le; high, no test is made.
- * @param {number} high The maximum value to allow, must be &ge; low.
+ * @param {number} low  The minimum value to allow, must be &amp;le; high, no test is made.
+ * @param {number} high The maximum value to allow, must be &amp;ge; low.
  * @returns {number} The value clamped to the limits.
  */
 LBMath.clamp = function(val, low, high) {
@@ -92,10 +120,10 @@ LBMath.clamp = function(val, low, high) {
  * Third order smoothstep function per https://en.wikipedia.org/wiki/Smoothstep
  * s(x) = -2*x^3 + 3*x^2
  * @param {Number} x The x value.
- * @returns {Number} The smoothstep value, which is 0 if x &le; 0 and 1 if x &ge; 1.
+ * @returns {Number} The smoothstep value, which is 0 if x &amp;le; 0 and 1 if x &amp;ge; 1.
  */
 LBMath.smoothstep3 = function(x) {
-    if (x < 0) {
+    if (x &lt; 0) {
         return 0;
     }
     else if (x > 1) {
@@ -108,10 +136,10 @@ LBMath.smoothstep3 = function(x) {
  * Fifth order smoothstep function per https://en.wikipedia.org/wiki/Smoothstep
  * s(x) = 6*x^5 - 15*x^4 + 10*x^3
  * @param {Number} x The x value.
- * @returns {Number} The smoothstep value, which is 0 if x &le; 0 and 1 if x &ge; 1.
+ * @returns {Number} The smoothstep value, which is 0 if x &amp;le; 0 and 1 if x &amp;ge; 1.
  */
 LBMath.smoothstep5 = function(x) {
-    if (x < 0) {
+    if (x &lt; 0) {
         return 0;
     }
     else if (x > 1) {
@@ -124,10 +152,10 @@ LBMath.smoothstep5 = function(x) {
  * Seventh order smoothstep function, https://en.wikipedia.org/wiki/Smoothstep
  * s(x) = -20*x^7 + 70*x^5 - 84*x^4 +35*x^3
  * @param {Number} x The x value.
- * @returns {Number} The smoothstep value, which is 0 if x &le; 0 and 1 if x &ge; 1.
+ * @returns {Number} The smoothstep value, which is 0 if x &amp;le; 0 and 1 if x &amp;ge; 1.
  */
 LBMath.smoothstep7 = function(x) {
-    if (x < 0) {
+    if (x &lt; 0) {
         return 0;
     }
     else if (x > 1) {
@@ -139,8 +167,8 @@ LBMath.smoothstep7 = function(x) {
 /**
  * Transitions between two values by applying a function.
  * @param {type} x  The transition value to pass to smoothFunc
- * @param {type} ya The output for x &le; 0.
- * @param {type} yb The output for x &ge; 1.
+ * @param {type} ya The output for x &amp;le; 0.
+ * @param {type} yb The output for x &amp;ge; 1.
  * @param {type} smoothFunc The smoothing function, should smoothly transition
  * between 0 when x is 0 and 1 when x is 1, see one of the smoothstep functions.
  * @returns {Number}    The y value smoothly transitioning between ya and yb.
@@ -164,7 +192,7 @@ LBMath.CSpline.prototype = {
     
     /**
      * Sets up the interpolator with the values ot interpolate.
-     * @param {Array} xs    The array of x values, this must be sorted such that xs[i] &lt; xs[i+1].
+     * @param {Array} xs    The array of x values, this must be sorted such that xs[i] &amp;lt; xs[i+1].
      * @param {Array} ys    The array of y values corresponding to the xs.
      */
     setup: function(xs, ys) {
@@ -181,7 +209,7 @@ LBMath.CSpline.prototype = {
         this.y2s[end] = 0;
         
         var i;
-        for (i = 1; i < end; ++i) {
+        for (i = 1; i &lt; end; ++i) {
             var sig = (xs[i] - xs[i - 1]) / (xs[i + 1] - xs[i - 1]);
             var p = sig * this.y2s[i - 1] + 2;
             this.y2s[i] = (sig - 1) / p;
@@ -199,8 +227,8 @@ LBMath.CSpline.prototype = {
      * Helper to finding the lower index in this.xs bounding a value. Use for caching
      * the index for calls to interpolate() for multi-dimensional data.
      * @param {Number} x    The x value to look for.
-     * @returns {Number} The smallest index in this.xs such that this.xs[index] &le; x,
-     * -1 if x &lt; this.xs[0].
+     * @returns {Number} The smallest index in this.xs such that this.xs[index] &amp;le; x,
+     * -1 if x &amp;lt; this.xs[0].
      */
     findLowIndex: function(x) {
         return Leeboard.bsearch(this.xs, x);
@@ -209,14 +237,14 @@ LBMath.CSpline.prototype = {
     /**
      * Interpolates a y value given an x value.
      * @param {Number} x  The x value to interpolate.
-     * @param {Number} lowIn If not undefined, the smallest index in this.xs such that this.xs[lowIn] &le; x,
+     * @param {Number} lowIn If not undefined, the smallest index in this.xs such that this.xs[lowIn] &amp;le; x,
      * used to avoid the binary search for multiple dimensions.
      * @returns {Number}    The interpolated value.
      */
     interpolate: function(x, lowIn) {
         var low = lowIn || this.findLowIndex(x);               
         var high = low + 1;
-        if (low < 0) {
+        if (low &lt; 0) {
             low = 0;
             high = 1;
         }
@@ -232,3 +260,26 @@ LBMath.CSpline.prototype = {
         return y;
     }
 };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBFoils.FoilInstance.html">FoilInstance</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailEnv.Env.html">Env</a></li><li><a href="LBSailEnv.Water.html">Water</a></li><li><a href="LBSailEnv.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailEnv.html">LBSailEnv</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 09 2017 18:51:52 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

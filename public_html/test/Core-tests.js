@@ -18,7 +18,7 @@
 
 QUnit.assert.nearEqual = function(value, expected, msg, tolerance) {
     this.pushResult({
-        result: Leeboard.isNearEqual(value, expected, tolerance),
+        result: LBMath.isNearEqual(value, expected, tolerance),
         actual: value,
         expected: expected,
         message: msg
