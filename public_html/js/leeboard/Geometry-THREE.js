@@ -16,17 +16,14 @@
 
 /* global Leeboard, THREE, LBMath */
 
-/**
- * This file contains our Three.js based geometry implementation, Three.js is 
- * directly referenced only by this file in Leeboard. Should we one day want to 
- * replace Three.js with a lighter weight alternative, though to do that we'd 
- * have to reimplement all the various object methods from Three.js. Of course we
- * should be able to copy most of the implementations from Three.js.
- */
 
 /**
- * 
- * @namespace LBGeometry
+ * The geometry components are primarily based upon the THREE.js
+ * geometry objects. The main purpose of our set of components is to isolate the direct
+ * references to THREE.js, the rest of Leeboard should not make direct references to
+ * THREE.js. This way should we want to something other than the full blown THREE.js
+ * we can simply replace this file.
+ * @namespace LBGeometry    
  */
 var LBGeometry = LBGeometry || {};
 
@@ -183,7 +180,7 @@ THREE.Vector3.prototype.isZero = function() {
  * Loads a 2D vector from a data object. If appropriate data does not exist
  * for a field that field is set to 0.
  * @param {object} data The data to load from.
- * @param {object} vec  If defined the 2D vector to load into.
+ * @param {object} [vec]  If defined the 2D vector to load into.
  * @returns {object}    The loaded vector.
  */
 LBGeometry.loadVector2 = function(data, vec) {
@@ -203,7 +200,7 @@ LBGeometry.loadVector2 = function(data, vec) {
  * Loads a 3D vector from a data object. If appropriate data does not exist
  * for a field that field is set to 0.
  * @param {object} data The data to load from.
- * @param {object} vec  If defined the 2D vector to load into.
+ * @param {object} [vec]  If defined the 2D vector to load into.
  * @returns {object}    The loaded vector.
  */
 LBGeometry.loadVector3 = function(data, vec) {
@@ -322,7 +319,7 @@ LBGeometry.createQuaternion = function(x, y, z, w) {
 /**
  * Loads a quaternion from a data object.
  * @param {object} data The data object, the looked for fields are 'qx', 'qy', 'qz', and 'qw'.
- * @param {object} quat If defined the quaternion to be set.
+ * @param {object} [quat] If defined the quaternion to be set.
  * @returns {object}    The quaternion.
  */
 LBGeometry.loadQuaternion = function(data, quat) {
@@ -380,7 +377,7 @@ LBGeometry.createEuler = function(xDeg, yDeg, zDeg, order) {
 /**
  * Loads an Euler object from a data object.
  * @param {object} data The data to load from, the looked for fields are 'ex', 'ey', 'ez', and 'order'.
- * @param {object} euler    If defined the object to be loaded into.
+ * @param {object} [euler]    If defined the object to be loaded into.
  * @returns {object}    The euler object.
  */
 LBGeometry.loadEuler = function(data, euler) {
@@ -456,7 +453,7 @@ LBGeometry.Line2.prototype = {
 /**
  * Loads a 2D line from a data object.
  * @param {object} data The data to load from.
- * @param {object} line If defined the line to be loaded.
+ * @param {object} [line] If defined the line to be loaded.
  * @returns {object}    The loaded line.
  */
 LBGeometry.loadLine2 = function(data, line) {
@@ -486,7 +483,7 @@ LBGeometry.createLine3 = function(start, end) {
 /**
  * Loads a 3D line from a data object.
  * @param {object} data The data to load from.
- * @param {object} line If defined the line to be loaded.
+ * @param {object} [line] If defined the line to be loaded.
  * @returns {object}    The loaded line.
  */
 LBGeometry.loadLine3 = function(data, line) {
@@ -573,7 +570,7 @@ LBGeometry.createMatrix3 = function() {
 /**
  * Loads a 3x3 matrix from a data object.
  * @param {object} data The data to load from.
- * @param {object} mat  If defined the matrix to load into.
+ * @param {object} [mat]  If defined the matrix to load into.
  * @returns {object}    The loaded matrix.
  */
 LBGeometry.loadMatrix3 = function(data, mat) {
@@ -612,7 +609,7 @@ LBGeometry.createMatrix4 = function() {
 /**
  * Loads a 4x4 matrix from a data object.
  * @param {object} data The data to load from.
- * @param {object} mat  If defined the matrix to load into.
+ * @param {object} [mat]  If defined the matrix to load into.
  * @returns {object}    The matrix.
  */
 LBGeometry.loadMatrix4 = function(data, mat) {
@@ -729,7 +726,7 @@ LBGeometry.createObject3D = function() {
 /**
  * Loads the basic settings of a 3D object from a data object.
  * @param {object} data The data containing the settings.
- * @param {object} obj3D    If defined the 3D object to be loaded into.
+ * @param {object} [obj3D]    If defined the 3D object to be loaded into.
  * @returns {object}    this.
  */
 LBGeometry.loadObject3DBasic = function(data, obj3D) {

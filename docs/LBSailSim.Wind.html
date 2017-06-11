@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: LBPhysics</title>
+    <title>JSDoc: Class: Wind</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: LBPhysics</h1>
+    <h1 class="page-title">Class: Wind</h1>
 
     
 
@@ -28,7 +28,8 @@
 
 <header>
     
-        <h2>LBPhysics</h2>
+        <h2>
+            <span class="ancestors"><a href="LBSailSim.html">LBSailSim</a>.</span>Wind</h2>
         
     
 </header>
@@ -38,7 +39,28 @@
     
         
 
-        
+    
+
+    <h4 class="name" id="Wind"><span class="type-signature"></span>new Wind<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBSailSim.Wind.html">LBSailSim.Wind</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    The wind manager.
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -70,7 +92,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line19">line 19</a>
+        <a href="sailsim_SailEnv.js.html">sailsim/SailEnv.js</a>, <a href="sailsim_SailEnv.js.html#line249">line 249</a>
     </li></ul></dd>
     
 
@@ -82,7 +104,38 @@
 </dl>
 
 
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
         
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBSailSim.Wind.html">LBSailSim.Wind</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
     
     </div>
 
@@ -90,19 +143,6 @@
 
     
 
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></dt>
-            <dd></dd>
-        
-            <dt><a href="LBPhysics.Resultant3D.html">Resultant3D</a></dt>
-            <dd></dd>
-        
-            <dt><a href="LBPhysics.RigidBody.html">RigidBody</a></dt>
-            <dd></dd>
-        </dl>
     
 
      
@@ -119,14 +159,14 @@
 
     
 
-    <h4 class="name" id=".calcMoment"><span class="type-signature">(static) </span>calcMoment<span class="signature">(force, position)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="getFlowVelocity"><span class="type-signature"></span>getFlowVelocity<span class="signature">(x, y, z, vel)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
 
 
 <div class="description">
-    Calculates the moment about the origin of a force applied at a position.
+    Retrieves the wind velocity at a given point
 </div>
 
 
@@ -162,13 +202,13 @@
 
         <tr>
             
-                <td class="name"><code>force</code></td>
+                <td class="name"><code>x</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">type</span>
+<span class="param-type">number</span>
 
 
             
@@ -178,20 +218,20 @@
 
             
 
-            <td class="description last">The force.</td>
+            <td class="description last">The x coordinate.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>position</code></td>
+                <td class="name"><code>y</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">type</span>
+<span class="param-type">number</span>
 
 
             
@@ -201,7 +241,53 @@
 
             
 
-            <td class="description last">The application point of the force.</td>
+            <td class="description last">The y coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>z</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The z coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The object to receive the velocity.</td>
         </tr>
 
     
@@ -242,7 +328,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line31">line 31</a>
+        <a href="sailsim_SailEnv.js.html">sailsim/SailEnv.js</a>, <a href="sailsim_SailEnv.js.html#line264">line 264</a>
     </li></ul></dd>
     
 
@@ -269,8 +355,7 @@
 
         
 <div class="param-desc">
-    Vector representing the moment about the origin from 
-force being applied at position.
+    The object containing the velocity.
 </div>
 
 
@@ -282,6 +367,159 @@ force being applied at position.
     <dd>
         
 <span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(dt)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.Wind.html">LBSailSim.Wind</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called to update the state of the wind.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The simulation time step.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailEnv.js.html">sailsim/SailEnv.js</a>, <a href="sailsim_SailEnv.js.html#line282">line 282</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBSailSim.Wind.html">LBSailSim.Wind</a></span>
 
 
     </dd>

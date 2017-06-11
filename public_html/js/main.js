@@ -16,7 +16,7 @@
 
 
 /* global Phaser */
-/* global Leeboard, LBSailEnv */
+/* global Leeboard, LBSailSim, LBGeometry */
 
 
 
@@ -30,7 +30,7 @@ function Boat(game, sailingEnv, x, y, data) {
     this.game.physics.enable(this);
     this.body.collideWorldBounds = true;
     
-    this.appWind = new Phaser.Point(0, 0);
+    this.appWind = LBGeometry.createVector2(0, 0);
 }
 
 // inherit from Phaser.Sprite
@@ -110,7 +110,7 @@ Boat.prototype.getLeeway = function() {
 
 //--------------------------------------------------
 Boat.prototype.getAppWindKnots = function() {
-    var speed = this.appWind.getMagnitude();
+    var speed = this.appWind.length();
     speed = Leeboard.pxm(speed);
     return Leeboard.mps2kt(speed);
 };
@@ -168,7 +168,9 @@ PlayState.init = function() {
     });
     this.debounceT = false;
     
-    this.sailEnv = new LBSailEnv.Env();
+    this.game.physics.startSystem(Phaser.Physics.P2JS);
+
+    this.sailEnv = new LBSailSim.P2Env(this.game);
 };
 
 
@@ -275,7 +277,8 @@ PlayState.update = function() {
 
     this._handleInput();
     
-    this.sailEnv.update();
+    var dt = Leeboard.P2Link.getP2TimeStep(this.game.physics.p2);
+    this.sailEnv.update(dt);
 };
 
 //------------------------------ --------------------
@@ -378,6 +381,7 @@ window.onload = function() {
     };
     
     game = new Phaser.Game(config);
+
     game.state.add('play', PlayState);
     game.state.add('loading', LoadingState);
     game.state.start('loading');

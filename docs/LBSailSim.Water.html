@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: ClCdCurve</title>
+    <title>JSDoc: Class: Water</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: ClCdCurve</h1>
+    <h1 class="page-title">Class: Water</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="LBFoils.html">LBFoils</a>.</span>ClCdCurve</h2>
+            <span class="ancestors"><a href="LBSailSim.html">LBSailSim</a>.</span>Water</h2>
         
     
 </header>
@@ -41,15 +41,14 @@
 
     
 
-    <h4 class="name" id="ClCdCurve"><span class="type-signature"></span>new ClCdCurve<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBFoils.ClCdCurve.html">LBFoils.ClCdCurve</a>}</span></h4>
+    <h4 class="name" id="Water"><span class="type-signature"></span>new Water<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBSailSim.Water.html">LBSailSim.Water</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    A Cl/Cd curve calculates lift (Cl), drag (Cd), and moment (Cm) coeffiecients given an angle
-of attack.
+    The water manager, its primary responsibility is water currents.
 </div>
 
 
@@ -93,7 +92,7 @@ of attack.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line263">line 263</a>
+        <a href="sailsim_SailEnv.js.html">sailsim/SailEnv.js</a>, <a href="sailsim_SailEnv.js.html#line293">line 293</a>
     </li></ul></dd>
     
 
@@ -127,7 +126,7 @@ of attack.
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBFoils.ClCdCurve.html">LBFoils.ClCdCurve</a></span>
+<span class="param-type"><a href="LBSailSim.Water.html">LBSailSim.Water</a></span>
 
 
     </dd>
@@ -160,14 +159,14 @@ of attack.
 
     
 
-    <h4 class="name" id="calcCoefsDeg"><span class="type-signature"></span>calcCoefsDeg<span class="signature">(degrees, store)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="getFlowVelocity"><span class="type-signature"></span>getFlowVelocity<span class="signature">(x, y, z, vel<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
 
 
 <div class="description">
-    Calculates the coefficients of lift, drag and moment for a given angle of attack in degrees.
+    Retrieves the water current velocity at a given point
 </div>
 
 
@@ -191,6 +190,8 @@ of attack.
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -203,7 +204,7 @@ of attack.
 
         <tr>
             
-                <td class="name"><code>degrees</code></td>
+                <td class="name"><code>x</code></td>
             
 
             <td class="type">
@@ -216,17 +217,87 @@ of attack.
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">The angle of attack in degrees.</td>
+            <td class="description last">The x coordinate.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>store</code></td>
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The y coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>z</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The z coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vel</code></td>
             
 
             <td class="type">
@@ -239,10 +310,20 @@ of attack.
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">If not undefined, the object to store the coefficients in.</td>
+            <td class="description last">If defined the object to receive the velocity.</td>
         </tr>
 
     
@@ -283,7 +364,7 @@ of attack.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line319">line 319</a>
+        <a href="sailsim_SailEnv.js.html">sailsim/SailEnv.js</a>, <a href="sailsim_SailEnv.js.html#line308">line 308</a>
     </li></ul></dd>
     
 
@@ -310,7 +391,7 @@ of attack.
 
         
 <div class="param-desc">
-    The object with the lift, drag, and moment coefficients (cl, cd, cm).
+    The object containing the velocity.
 </div>
 
 
@@ -336,14 +417,14 @@ of attack.
 
     
 
-    <h4 class="name" id="load"><span class="type-signature"></span>load<span class="signature">(data)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(dt)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.Water.html">LBSailSim.Water</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    The main loading method.
+    Called to update the state of the water.
 </div>
 
 
@@ -379,13 +460,13 @@ of attack.
 
         <tr>
             
-                <td class="name"><code>data</code></td>
+                <td class="name"><code>dt</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">number</span>
 
 
             
@@ -395,7 +476,7 @@ of attack.
 
             
 
-            <td class="description last">The data, typically loaded from a JSON file.</td>
+            <td class="description last">The simulation time step.</td>
         </tr>
 
     
@@ -436,7 +517,7 @@ of attack.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line283">line 283</a>
+        <a href="sailsim_SailEnv.js.html">sailsim/SailEnv.js</a>, <a href="sailsim_SailEnv.js.html#line325">line 325</a>
     </li></ul></dd>
     
 
@@ -474,7 +555,7 @@ of attack.
     </dt>
     <dd>
         
-<span class="param-type">object</span>
+<span class="param-type"><a href="LBSailSim.Water.html">LBSailSim.Water</a></span>
 
 
     </dd>

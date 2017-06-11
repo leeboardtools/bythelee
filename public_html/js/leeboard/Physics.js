@@ -232,10 +232,10 @@ LBPhysics.CoordSystemState.prototype = {
      * process. If either Xfrm matrix is not defined it is obtained by inverting the
      * other matrix, if both are not defined then the matrices are set to the identity
      * matrix.
-     * @param {object} worldXfrm    If defined, the 4x4 matrix for transforming from local to world coordinaes.
-     * @param {number} dt   The simulation time change from the last call to this, used
+     * @param {object} [worldXfrm]    If defined, the 4x4 matrix for transforming from local to world coordinaes.
+     * @param {number} [dt]   The simulation time change from the last call to this, used
      * to compute velocity.
-     * @param {object} localXfrm    If defined, the 4x4 matrix for transforming from world to local coordinates.
+     * @param {object} [localXfrm]    If defined, the 4x4 matrix for transforming from world to local coordinates.
      * @returns {LBPhysics.CoordSystemState} this.
      */
     setXfrms: function(worldXfrm, dt, localXfrm) {
@@ -288,7 +288,7 @@ LBPhysics.CoordSystemState.prototype = {
      *      worldPos: The world coordinates of localPos.
      *      worldVel:   The velocity of localPos in world coordinates.
      *      localVel:   The velocity of localPos in local coordinates.
-     * @param {object} prevLocalPos If defined, the previous local position, used for velocity calculation,
+     * @param {object} [prevLocalPos] If defined, the previous local position, used for velocity calculation,
      * if not defined then the previous position is presumed to be localPos.
      * @returns {LBPhysics.CoordSystemState} this.
      */
@@ -335,15 +335,15 @@ LBPhysics.CoordSystemState.prototype = {
  * A rigid body for purposes of force calculations. A rigid body has mass, a position
  * and orientation, and may have additional rigid body parts attached to it.
  * @constructor
- * @param {object} obj3D    The object defining the location and orientation of the
+ * @param {object} [obj3D]    The object defining the location and orientation of the
  * rigid body, a reference to this object is kept, the object is expected to change
  * position and orientation during a simulation. This presumes that the object's world
  * reference frame is the same as the base's world reference frame.
- * @param {number} mass The mass of the body, may be 0.
- * @param {object} centerOfMass The center of mass relative to the local reference 
+ * @param {number} [mass] The mass of the body, may be 0.
+ * @param {object} [centerOfMass] The center of mass relative to the local reference 
  * frame, if not defined it will be set to {0,0,0}.
- * @param {object} momentInertia    The moment of inertia tensor, not yet fully supported.
- * @param {object} base If defined, the rigid body to which this is attached, and which
+ * @param {object} [momentInertia]    The moment of inertia tensor, not yet fully supported.
+ * @param {object} [base] If defined, the rigid body to which this is attached, and which
  * is the base of this rigid body. The coordinates of this rigid body are then in the
  * local coordinates of the base.
  */
@@ -439,6 +439,29 @@ LBPhysics.RigidBody.prototype = {
             part.base = undefined;
             this.physicalPropertiesDirty = true;
         }
+        return this;
+    },
+    
+    /**
+     * Sets the position of the rigid body.
+     * @param {number} x    The x-coordinate.
+     * @param {number} y    The y-coordinate.
+     * @param {number} z    The z-coordinate.
+     * @returns {LBPhysics.RigidBody}    this.
+     */
+    setXYZ: function(x, y, z) {
+        this.obj3D.position.set(x, y, z);
+        return this;
+    },
+    
+    /**
+     * Sets the rotation of the rigid body about the z-axis, in radians.
+     * @param {number} rad  The rotation about the z-axis, in radians. The rotation
+     * is absolute with respect to the base's coordinate system.
+     * @returns {LBPhysics.RigidBody}   this.
+     */
+    setZRotationRad: function(rad) {
+        this.obj3D.rotateZ(rad);
         return this;
     },
 
@@ -579,9 +602,9 @@ LBPhysics.RigidBody.prototype = {
  * Helper that creates and loads a rigid body from a data object. If the data object contains
  * a 'construct' property, the value of that property is passed directly to eval() to create
  * the rigid body object, otherwise if defCreatorFunc is defined it is called to create
- * the rigid body object, otherwise {LBPhysics.RigidBody} is used.
+ * the rigid body object, otherwise {@link LBPhysics.RigidBody} is used.
  * @param {object} data The data to load from.
- * @param {object} defCreatorFunc If defined the function used to create the rigid body if the
+ * @param {object} [defCreatorFunc] If defined the function used to create the rigid body if the
  * data object does not contain a construct property, or data is not defined. The argument
  * passed to this function is the data argument.
  * @returns {object}    The foil object, undefined if both data and defCreatorFunc are not defined.

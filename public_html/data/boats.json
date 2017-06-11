@@ -1,7 +1,8 @@
 {
     "boats": [
         {
-            "name": "Tubby",
+            "typeName": "Tubby",
+            "instances": [ "TubbyA", "TubbyB", "TubbyC" ],
             "mass": 100,
             "centerOfMass": { "x": 0, "y": 0, "z": 0 },
             "momentInertia": {},

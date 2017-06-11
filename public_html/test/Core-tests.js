@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global QUnit, Leeboard */
+/* global QUnit, Leeboard, LBMath */
 
 QUnit.assert.nearEqual = function(value, expected, msg, tolerance) {
     this.pushResult({
@@ -37,4 +37,22 @@ QUnit.test( "Core-bsearch", function( assert ) {
     assert.equal(4, Leeboard.bsearch(data, 3.9), "At last seg");
     assert.equal(5, Leeboard.bsearch(data, 4), "At last");
     assert.equal(5, Leeboard.bsearch(data, 4.1), "After last");
+    });
+    
+    
+QUnit.test( "copyCmmonProperties", function( assert ) {
+    var objA = { 'a': 0, 'b': 1, 'c': 2, 'd': 3 };
+    var objB = { 'x': 3, 'b': 4, 'c': 5, 'y': 6 };
+    
+    var objTest = {};
+    Object.assign(objTest, objA);
+    Leeboard.copyCommonProperties(objTest, objB);
+    assert.deepEqual(objTest, { 'a': 0, 'b': 4, 'c': 5, 'd': 3 }, "default Copy");
+    
+    objTest = {};
+    Object.assign(objTest, objA);
+    Leeboard.copyCommonProperties(objTest, objB, function(propName, a, b) {
+        return (propName !== 'c');
+    });
+    assert.deepEqual(objTest, { 'a': 0, 'b': 4, 'c': 2, 'd': 3 }, "default Copy");
     });

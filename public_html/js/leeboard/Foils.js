@@ -438,8 +438,8 @@ LBFoils.Foil.prototype = {
      * The moment is about the leading edge, or this.chordLine.start.
      * @param {number} rho  The fluid density.
      * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
-     * @param {object} store  If defined, the object to receive the forces and moment.
-     * @param {object} details  If defined, an object to receive details about the calculation.
+     * @param {object} [store]  If defined, the object to receive the forces and moment.
+     * @param {object} [details]  If defined, an object to receive details about the calculation.
      * @returns {object}    The object containing the forces and moment.
      */
     calcLocalLiftDragMoment: function(rho, qInfLocal, store, details) {
@@ -462,7 +462,7 @@ LBFoils.Foil.prototype = {
      * The moment is about the leading edge, or this.chordLine.start.
      * @param {number} rho  The fluid density.
      * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
-     * @param {object} details   If defined, an object that will receive details such
+     * @param {object} [details]   If defined, an object that will receive details such
      * as lift, drag, induced drag, moment.
      * @returns {LBPhysics.Resultant3D}  The resultant force in local coordinates.
      */
@@ -494,7 +494,7 @@ LBFoils.Foil.prototype = {
      * @param {object} qInfWorld  The free stream velocity in world coordinates.
      * @param {LBPhysics.CoordSystemState} coordSystemState   The coordinate system state, this defines the
      *  world-local transformations as well as the change in world position/orientation.
-     * @param {object} details   If defined, an object that will receive details such
+     * @param {object} [details]  If defined, an object that will receive details such
      * as lift, drag, induced drag, moment.
      * @returns {LBPhysics.Resultant3D}  The resultant force in world coordinates.
      */
@@ -527,7 +527,7 @@ LBFoils.Foil.prototype = {
  * @param {object} data The data to load from.
  * @param {object} curveLib The optional curve library used to obtain pre-loaded
  * ClCdCurves, used for 'libClCdCurve' properties.
- * @param {object} defCreatorFunc If defined the function used to create the foil if the
+ * @param {object} [defCreatorFunc] If defined the function used to create the foil if the
  * data object does not contain a construct property, or data is not defined. The argument
  * passed to this function is the data argument.
  * @returns {object}    The foil object, undefined if both data and defCreatorFunc are not defined.

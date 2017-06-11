@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: LBPhysics</title>
+    <title>JSDoc: Class: Vessel</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: LBPhysics</h1>
+    <h1 class="page-title">Class: Vessel</h1>
 
     
 
@@ -28,7 +28,8 @@
 
 <header>
     
-        <h2>LBPhysics</h2>
+        <h2>
+            <span class="ancestors"><a href="LBSailSim.html">LBSailSim</a>.</span>Vessel</h2>
         
     
 </header>
@@ -38,95 +39,20 @@
     
         
 
-        
-
-
-<dl class="details">
-
     
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line19">line 19</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></dt>
-            <dd></dd>
-        
-            <dt><a href="LBPhysics.Resultant3D.html">Resultant3D</a></dt>
-            <dd></dd>
-        
-            <dt><a href="LBPhysics.RigidBody.html">RigidBody</a></dt>
-            <dd></dd>
-        </dl>
-    
-
-     
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id=".calcMoment"><span class="type-signature">(static) </span>calcMoment<span class="signature">(force, position)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="Vessel"><span class="type-signature"></span>new Vessel<span class="signature">(sailEnv, obj3D)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.Vessel.html">LBSailSim.Vessel</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Calculates the moment about the origin of a force applied at a position.
+    Container representing a vessel that floats. Vessels support:
+<li>Aerofoils, which are <a href="LBSailSim.FoilInstance.html">LBSailSim.FoilInstance</a> based objects that are driven by the atmosphere.
+<li>Hydrofoils,which are <a href="LBSailSim.FoilInstance.html">LBSailSim.FoilInstance</a> based objects that are driven by the water.
+<li>Propulsors, which are <a href="LBSailSim.Propulsor.html">LBSailSim.Propulsor</a> based objects.
+TODO: Add ballast, which is just a LBPhysics.RigidBody.
 </div>
 
 
@@ -162,13 +88,13 @@
 
         <tr>
             
-                <td class="name"><code>force</code></td>
+                <td class="name"><code>sailEnv</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">type</span>
+<span class="param-type">object</span>
 
 
             
@@ -178,14 +104,14 @@
 
             
 
-            <td class="description last">The force.</td>
+            <td class="description last">The sailing environment.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>position</code></td>
+                <td class="name"><code>obj3D</code></td>
             
 
             <td class="type">
@@ -201,7 +127,7 @@
 
             
 
-            <td class="description last">The application point of the force.</td>
+            <td class="description last"></td>
         </tr>
 
     
@@ -242,7 +168,197 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line31">line 31</a>
+        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line145">line 145</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBSailSim.Vessel.html">LBSailSim.Vessel</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".createFromData"><span class="type-signature">(static) </span>createFromData<span class="signature">(data, sailEnv)</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Creates a vessel object based upon properties in a data object.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sailEnv</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line313">line 313</a>
     </li></ul></dd>
     
 
@@ -269,8 +385,7 @@
 
         
 <div class="param-desc">
-    Vector representing the moment about the origin from 
-force being applied at position.
+    The created vessel, {undefined} if data is not defined.
 </div>
 
 

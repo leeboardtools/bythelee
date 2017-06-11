@@ -39,7 +39,7 @@ LBMath.TWO_PI = Math.PI * 2;
 
 
 /**
- * @property {number} The default zero tolerance used by {LBMath.isLikeZero} and {LBMath.isNearEqual}.
+ * @property {number} The default zero tolerance used by {@link LBMath.isLikeZero} and {@link LBMath.isNearEqual}.
  */
 LBMath.defZeroTolerance = 1e-10;
 

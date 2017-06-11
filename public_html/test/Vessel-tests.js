@@ -15,7 +15,7 @@
  */
 
 
-/* global Leeboard, QUnit */
+/* global Leeboard, QUnit, LBSailSim */
 
 var clCdCurvesJSON_Test = {
     "clCdCurves": [
@@ -85,13 +85,13 @@ var clCdCurvesJSON_Test = {
 var boatsJSON_Test = {
     "boats": [
         {
-            "name": "Tubby",
+            "typeName": "Tubby",
             "mass": 100,
             "centerOfMass": { "x": 1, "y": 5, "z": 10 },
             "momentInertia": {},
             "aeroFoils": [],
             "hydroFoils": [ {
-                    "construct": "new LBFoils.FoilInstance()",
+                    "construct": "new LBSailSim.FoilInstance()",
                     "name": "keel",
                     "mass": 20,
                     "centerOfMass": { "x": 0, "y": 0, "z": -3 },
@@ -121,14 +121,14 @@ var boatsJSON_Test = {
 };
 
 QUnit.test( "Vessel-load", function( assert ) {
-    var sailEnv = new LBSailEnv.Env();
+    var sailEnv = new LBSailSim.Env();
     sailEnv.loadClCdCurves(clCdCurvesJSON_Test);
     
     sailEnv.loadBoatDatas(boatsJSON_Test);
     
-    var vessel = Leeboard.Vessel.createFromData(sailEnv.boatDatas[0], sailEnv);
+    var vessel = LBSailSim.Vessel.createFromData(sailEnv.boatDatas["Tubby"], sailEnv);
     
-    assert.equal(vessel.name, "Tubby", "name");
+    assert.equal(vessel.typeName, "Tubby", "typeName");
     assert.equal(vessel.mass, 100, "mass");
     checkVector3(assert, vessel.centerOfMass, 1, 5, 10, "centerOfMass");
     

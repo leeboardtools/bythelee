@@ -15,7 +15,7 @@
  */
 
 
-/* global QUnit, Leeboard */
+/* global QUnit, Leeboard, LBGeometry, LBMath */
 
 function checkVector2(assert, vector, x, y, msg, tolerance) {
     if (!Leeboard.isVar(msg)) {

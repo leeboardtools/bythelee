@@ -112,19 +112,35 @@ Leeboard.bsearch = function(array, value) {
  * Copies properties that are common to two objects from one object to another.
  * @param {object} dst  The object to copy to.
  * @param {object} src  The obejct to copyf from.
+ * @param {object} [filter] If defined, a filter function that should return true
+ * if a property should be copied. The function has the call signature of
+ * func(propName, dst, src).
  * @returns {object}    dst.
  */
-Leeboard.copyCommonProperties = function(dst, src) {
+Leeboard.copyCommonProperties = function(dst, src, filter) {
     if (!Leeboard.isVar(src)) {
         return dst;
     }
-    Object.getOwnPropertyNames(dst).forEach(
-            function(val, idx, array) {
-                if (src[val] !== undefined) {
-                    dst[val] = src[val];
+    if (Leeboard.isVar(filter)) {
+        Object.getOwnPropertyNames(dst).forEach(
+                function(val, idx, array) {
+                    if (src[val] !== undefined) {
+                        if (filter(val, dst, src)) {
+                            dst[val] = src[val];
+                        }
+                    }
                 }
-            }
-    );
+        );
+    }
+    else {
+        Object.getOwnPropertyNames(dst).forEach(
+                function(val, idx, array) {
+                    if (src[val] !== undefined) {
+                        dst[val] = src[val];
+                    }
+                }
+        );
+    }
     return dst;
 };
 

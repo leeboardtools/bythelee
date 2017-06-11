@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: CoordSystemState</title>
+    <title>JSDoc: Namespace: LBSailSim</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: CoordSystemState</h1>
+    <h1 class="page-title">Namespace: LBSailSim</h1>
 
     
 
@@ -28,8 +28,7 @@
 
 <header>
     
-        <h2>
-            <span class="ancestors"><a href="LBPhysics.html">LBPhysics</a>.</span>CoordSystemState</h2>
+        <h2>LBSailSim</h2>
         
     
 </header>
@@ -39,31 +38,7 @@
     
         
 
-    
-
-    <h4 class="name" id="CoordSystemState"><span class="type-signature"></span>new CoordSystemState<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBPhysics.CoordSystemState.html">LBPhysics.CoordSystemState</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    This is used to track the transforms for converting between a world coordinate
-system and a local coordinate system. It can also keep track of the previous transforms
-so it may calculate the world and local velocities of points in either coordinate
-system.
-</div>
-
-
-
-
-
-
-
-
-
-
-
+        
 
 
 <dl class="details">
@@ -95,7 +70,7 @@ system.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line216">line 216</a>
+        <a href="sailsim_SailSim.js.html">sailsim/SailSim.js</a>, <a href="sailsim_SailSim.js.html#line17">line 17</a>
     </li></ul></dd>
     
 
@@ -107,38 +82,7 @@ system.
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
         
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="LBPhysics.CoordSystemState.html">LBPhysics.CoordSystemState</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
     
     </div>
 
@@ -146,6 +90,31 @@ system.
 
     
 
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="LBSailSim.Env.html">Env</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.FoilInstance.html">FoilInstance</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.P2Env.html">P2Env</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.Propulsor.html">Propulsor</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.Vessel.html">Vessel</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.Water.html">Water</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.Wind.html">Wind</a></dt>
+            <dd></dd>
+        </dl>
     
 
      
@@ -162,15 +131,14 @@ system.
 
     
 
-    <h4 class="name" id="calcVectorLocalToWorld"><span class="type-signature"></span>calcVectorLocalToWorld<span class="signature">(localPos, results, prevLocalPos<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.CoordSystemState.html">LBPhysics.CoordSystemState</a>}</span></h4>
+    <h4 class="name" id=".getFlowVelocity"><span class="type-signature">(static) </span>getFlowVelocity<span class="signature">(flow, pos, vel<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
 
 
 <div class="description">
-    Calculates world position, world velocity, and local velocity for a given local
-point.
+    Helper that retreives the flow velocity for a given position.
 </div>
 
 
@@ -208,7 +176,7 @@ point.
 
         <tr>
             
-                <td class="name"><code>localPos</code></td>
+                <td class="name"><code>flow</code></td>
             
 
             <td class="type">
@@ -232,14 +200,14 @@ point.
 
             
 
-            <td class="description last">The local coordinates of the point of interest.</td>
+            <td class="description last">The flow object, such as LBSailEnv.Wind or LBSailEnv.Water.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>results</code></td>
+                <td class="name"><code>pos</code></td>
             
 
             <td class="type">
@@ -263,18 +231,14 @@ point.
 
             
 
-            <td class="description last">The object to receive the results. Results are stored
-in keys, and are only computed if the key exists:
-     worldPos: The world coordinates of localPos.
-     worldVel:   The velocity of localPos in world coordinates.
-     localVel:   The velocity of localPos in local coordinates.</td>
+            <td class="description last">The coordinates of the position of interest.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>prevLocalPos</code></td>
+                <td class="name"><code>vel</code></td>
             
 
             <td class="type">
@@ -300,8 +264,7 @@ in keys, and are only computed if the key exists:
 
             
 
-            <td class="description last">If defined, the previous local position, used for velocity calculation,
-if not defined then the previous position is presumed to be localPos.</td>
+            <td class="description last">If defined the object to receive the velocity.</td>
         </tr>
 
     
@@ -342,7 +305,7 @@ if not defined then the previous position is presumed to be localPos.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line295">line 295</a>
+        <a href="sailsim_SailEnv.js.html">sailsim/SailEnv.js</a>, <a href="sailsim_SailEnv.js.html#line338">line 338</a>
     </li></ul></dd>
     
 
@@ -369,7 +332,7 @@ if not defined then the previous position is presumed to be localPos.</td>
 
         
 <div class="param-desc">
-    this.
+    The flow velocity.
 </div>
 
 
@@ -380,7 +343,7 @@ if not defined then the previous position is presumed to be localPos.</td>
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBPhysics.CoordSystemState.html">LBPhysics.CoordSystemState</a></span>
+<span class="param-type">object</span>
 
 
     </dd>
@@ -391,21 +354,136 @@ if not defined then the previous position is presumed to be localPos.</td>
 
 
         
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>LBSailSim</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailEnv.js.html">sailsim/SailEnv.js</a>, <a href="sailsim_SailEnv.js.html#line19">line 19</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="LBSailSim.Env.html">Env</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.FoilInstance.html">FoilInstance</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.P2Env.html">P2Env</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.Propulsor.html">Propulsor</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.Vessel.html">Vessel</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.Water.html">Water</a></dt>
+            <dd></dd>
+        
+            <dt><a href="LBSailSim.Wind.html">Wind</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
             
 
     
 
-    <h4 class="name" id="setXfrms"><span class="type-signature"></span>setXfrms<span class="signature">(worldXfrm<span class="signature-attributes">opt</span>, dt<span class="signature-attributes">opt</span>, localXfrm<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.CoordSystemState.html">LBPhysics.CoordSystemState</a>}</span></h4>
+    <h4 class="name" id=".getFlowVelocity"><span class="type-signature">(static) </span>getFlowVelocity<span class="signature">(flow, pos, vel<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
 
 
 <div class="description">
-    Sets the world and local transforms, saving the previous transforms in the
-process. If either Xfrm matrix is not defined it is obtained by inverting the
-other matrix, if both are not defined then the matrices are set to the identity
-matrix.
+    Helper that retreives the flow velocity for a given position.
 </div>
 
 
@@ -443,7 +521,69 @@ matrix.
 
         <tr>
             
-                <td class="name"><code>worldXfrm</code></td>
+                <td class="name"><code>flow</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The flow object, such as LBSailEnv.Wind or LBSailEnv.Water.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pos</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The coordinates of the position of interest.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vel</code></td>
             
 
             <td class="type">
@@ -469,74 +609,7 @@ matrix.
 
             
 
-            <td class="description last">If defined, the 4x4 matrix for transforming from local to world coordinaes.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>dt</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The simulation time change from the last call to this, used
-to compute velocity.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>localXfrm</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">If defined, the 4x4 matrix for transforming from world to local coordinates.</td>
+            <td class="description last">If defined the object to receive the velocity.</td>
         </tr>
 
     
@@ -577,7 +650,7 @@ to compute velocity.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line241">line 241</a>
+        <a href="sailsim_SailEnv.js.html">sailsim/SailEnv.js</a>, <a href="sailsim_SailEnv.js.html#line338">line 338</a>
     </li></ul></dd>
     
 
@@ -604,7 +677,7 @@ to compute velocity.</td>
 
         
 <div class="param-desc">
-    this.
+    The flow velocity.
 </div>
 
 
@@ -615,7 +688,7 @@ to compute velocity.</td>
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBPhysics.CoordSystemState.html">LBPhysics.CoordSystemState</a></span>
+<span class="param-type">object</span>
 
 
     </dd>

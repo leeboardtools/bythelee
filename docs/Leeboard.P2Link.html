@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Resultant3D</title>
+    <title>JSDoc: Class: P2Link</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Resultant3D</h1>
+    <h1 class="page-title">Class: P2Link</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="LBPhysics.html">LBPhysics</a>.</span>Resultant3D</h2>
+            <span class="ancestors"><a href="Leeboard.html">Leeboard</a>.</span>P2Link</h2>
         
     
 </header>
@@ -41,14 +41,16 @@
 
     
 
-    <h4 class="name" id="Resultant3D"><span class="type-signature"></span>new Resultant3D<span class="signature">(force, moment, position)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
+    <h4 class="name" id="P2Link"><span class="type-signature"></span>new P2Link<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Leeboard.P2Link.html">Leeboard.P2Link</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    A 3D resultant force, which is a force vector, a moment vector, and an application point.
+    Manages linking a Phaser.Physics.P2.Body and a <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a>, updating
+the position/rotation of the rigid body from the P2 body and applying the forces
+from the rigid body to the P2 body.
 </div>
 
 
@@ -57,101 +59,6 @@
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>force</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">type</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The force vector.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>moment</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">type</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The moment vector.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>position</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">type</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The application point.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -187,7 +94,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line46">line 46</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line27">line 27</a>
     </li></ul></dd>
     
 
@@ -213,10 +120,6 @@
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    The resultant.
-</div>
-
 
 
 <dl>
@@ -225,7 +128,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a></span>
+<span class="param-type"><a href="Leeboard.P2Link.html">Leeboard.P2Link</a></span>
 
 
     </dd>
@@ -258,15 +161,14 @@
 
     
 
-    <h4 class="name" id="addForce"><span class="type-signature"></span>addForce<span class="signature">(force, position)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
+    <h4 class="name" id=".createP2BodyFromData"><span class="type-signature">(static) </span>createP2BodyFromData<span class="signature">(game, data)</span><span class="type-signature"> &rarr; {Phaser.Physics.P2.Body}</span></h4>
 
     
 
 
 
 <div class="description">
-    Adds a force applied at a position to the resultant. The application point of the
-resultant is not changed.
+    Creates and loads a {Phaser.Physics.P2.Body} object based on properties in a data object.
 </div>
 
 
@@ -302,13 +204,13 @@ resultant is not changed.
 
         <tr>
             
-                <td class="name"><code>force</code></td>
+                <td class="name"><code>game</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">Phaser.Game</span>
 
 
             
@@ -318,14 +220,14 @@ resultant is not changed.
 
             
 
-            <td class="description last">The force to add.</td>
+            <td class="description last">The game to which the body will belong.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>position</code></td>
+                <td class="name"><code>data</code></td>
             
 
             <td class="type">
@@ -341,7 +243,7 @@ resultant is not changed.
 
             
 
-            <td class="description last">The position at which the force is added.</td>
+            <td class="description last">The data object.</td>
         </tr>
 
     
@@ -382,7 +284,7 @@ resultant is not changed.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line83">line 83</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line181">line 181</a>
     </li></ul></dd>
     
 
@@ -409,7 +311,7 @@ resultant is not changed.
 
         
 <div class="param-desc">
-    this.
+    The created/loaded body.
 </div>
 
 
@@ -420,7 +322,7 @@ resultant is not changed.
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a></span>
+<span class="param-type">Phaser.Physics.P2.Body</span>
 
 
     </dd>
@@ -435,15 +337,14 @@ resultant is not changed.
 
     
 
-    <h4 class="name" id="addResultant"><span class="type-signature"></span>addResultant<span class="signature">(other)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
+    <h4 class="name" id=".createSpriteFromData"><span class="type-signature">(static) </span>createSpriteFromData<span class="signature">(game, data)</span><span class="type-signature"> &rarr; {Phaser.Sprite}</span></h4>
 
     
 
 
 
 <div class="description">
-    Adds a resultant to this resultant. The application point of this resultant is
-not changed.
+    Creates and loads a {Phaser.Sprite} object based on properties in a data object.
 </div>
 
 
@@ -479,7 +380,30 @@ not changed.
 
         <tr>
             
-                <td class="name"><code>other</code></td>
+                <td class="name"><code>game</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Phaser.Game</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The game to which the sprite will belong.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
             
 
             <td class="type">
@@ -495,7 +419,7 @@ not changed.
 
             
 
-            <td class="description last">The resultant to be added.</td>
+            <td class="description last">The data object.</td>
         </tr>
 
     
@@ -536,7 +460,7 @@ not changed.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line100">line 100</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line169">line 169</a>
     </li></ul></dd>
     
 
@@ -563,7 +487,7 @@ not changed.
 
         
 <div class="param-desc">
-    this.
+    Th created/loaded sprite.
 </div>
 
 
@@ -574,7 +498,7 @@ not changed.
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a></span>
+<span class="param-type">Phaser.Sprite</span>
 
 
     </dd>
@@ -589,16 +513,14 @@ not changed.
 
     
 
-    <h4 class="name" id="applyMatrix4"><span class="type-signature"></span>applyMatrix4<span class="signature">(mat)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
+    <h4 class="name" id=".getP2TimeStep"><span class="type-signature">(static) </span>getP2TimeStep<span class="signature">(p2)</span><span class="type-signature"> &rarr; {number}</span></h4>
 
     
 
 
 
 <div class="description">
-    Applies a 4x4 matrix represnting a transformation to the resultant. The
-force and monent vectors are rotated, while the application point is tranlsated
-and rotated.
+    Retrieves the appropriate tie step to use based on the settings of Phaser.Physics.P2.
 </div>
 
 
@@ -634,13 +556,13 @@ and rotated.
 
         <tr>
             
-                <td class="name"><code>mat</code></td>
+                <td class="name"><code>p2</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">Phaser.Physics.P2</span>
 
 
             
@@ -650,7 +572,7 @@ and rotated.
 
             
 
-            <td class="description last">The 4x4 matrix to apply.</td>
+            <td class="description last">The P2 physics object.</td>
         </tr>
 
     
@@ -691,7 +613,7 @@ and rotated.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line178">line 178</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line159">line 159</a>
     </li></ul></dd>
     
 
@@ -718,7 +640,7 @@ and rotated.
 
         
 <div class="param-desc">
-    this.
+    The time step.
 </div>
 
 
@@ -729,7 +651,7 @@ and rotated.
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a></span>
+<span class="param-type">number</span>
 
 
     </dd>
@@ -744,14 +666,14 @@ and rotated.
 
     
 
-    <h4 class="name" id="applyQuaternion"><span class="type-signature"></span>applyQuaternion<span class="signature">(quaternion)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
+    <h4 class="name" id="addLinkedObjects"><span class="type-signature"></span>addLinkedObjects<span class="signature">(p2Body, lb3Body)</span><span class="type-signature"> &rarr; {<a href="Leeboard.P2Link.html">Leeboard.P2Link</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Rotates the force and moment vectors by applying a quaternion.
+    Adds a Phaser.Physics.P2.Body and a <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a> pair to the manager.
 </div>
 
 
@@ -787,7 +709,7 @@ and rotated.
 
         <tr>
             
-                <td class="name"><code>quaternion</code></td>
+                <td class="name"><code>p2Body</code></td>
             
 
             <td class="type">
@@ -803,7 +725,30 @@ and rotated.
 
             
 
-            <td class="description last">The quaternion defining the rotation.</td>
+            <td class="description last">The P2 body.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>lb3Body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
         </tr>
 
     
@@ -844,7 +789,7 @@ and rotated.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line164">line 164</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line39">line 39</a>
     </li></ul></dd>
     
 
@@ -882,7 +827,7 @@ and rotated.
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a></span>
+<span class="param-type"><a href="Leeboard.P2Link.html">Leeboard.P2Link</a></span>
 
 
     </dd>
@@ -897,219 +842,14 @@ and rotated.
 
     
 
-    <h4 class="name" id="clone"><span class="type-signature"></span>clone<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
+    <h4 class="name" id="applyToP2"><span class="type-signature"></span>applyToP2<span class="signature">(dt)</span><span class="type-signature"> &rarr; {<a href="Leeboard.P2Link.html">Leeboard.P2Link</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Creates a copy of the resultant.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line57">line 57</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="convertToWrench"><span class="type-signature"></span>convertToWrench<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Moves the application point such that the moment vector is parallel to the
-force vector. The application point and moment may be modified, the force vector is not.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line131">line 131</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    this.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="copy"><span class="type-signature"></span>copy<span class="signature">(toCopy)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Sets this resultant to match the settings of another.
+    Call to apply the forces from the rigid bodies to the P2 bodies.
 </div>
 
 
@@ -1145,13 +885,13 @@ force vector. The application point and moment may be modified, the force vector
 
         <tr>
             
-                <td class="name"><code>toCopy</code></td>
+                <td class="name"><code>dt</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">number</span>
 
 
             
@@ -1161,7 +901,7 @@ force vector. The application point and moment may be modified, the force vector
 
             
 
-            <td class="description last">The resultant to copy.</td>
+            <td class="description last">The simulation time step.</td>
         </tr>
 
     
@@ -1202,7 +942,7 @@ force vector. The application point and moment may be modified, the force vector
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line67">line 67</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line132">line 132</a>
     </li></ul></dd>
     
 
@@ -1240,7 +980,7 @@ force vector. The application point and moment may be modified, the force vector
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a></span>
+<span class="param-type"><a href="Leeboard.P2Link.html">Leeboard.P2Link</a></span>
 
 
     </dd>
@@ -1255,14 +995,14 @@ force vector. The application point and moment may be modified, the force vector
 
     
 
-    <h4 class="name" id="isZero"><span class="type-signature"></span>isZero<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id="indexOfP2Body"><span class="type-signature"></span>indexOfP2Body<span class="signature">(p2Body)</span><span class="type-signature"> &rarr; {Number}</span></h4>
 
     
 
 
 
 <div class="description">
-    Determines if the resultant does not apply a force or moment.
+    Retrieves the index of a P2 body in the manager.
 </div>
 
 
@@ -1271,6 +1011,55 @@ force vector. The application point and moment may be modified, the force vector
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>p2Body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The P2 body of interest.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -1306,7 +1095,7 @@ force vector. The application point and moment may be modified, the force vector
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line190">line 190</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line87">line 87</a>
     </li></ul></dd>
     
 
@@ -1333,7 +1122,313 @@ force vector. The application point and moment may be modified, the force vector
 
         
 <div class="param-desc">
-    True if both the force and moment are zero.
+    The index, -1 if p2Body is not in the manager.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="indexOfRigidBody"><span class="type-signature"></span>indexOfRigidBody<span class="signature">(lb3Body)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Retrieves the index of a rigid body in the manager.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>lb3Body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line101">line 101</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The index, -1 if lb3Body is not in the manager.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="removeLinkByP2Body"><span class="type-signature"></span>removeLinkByP2Body<span class="signature">(p2Body)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Removes a P2 body/rigid body link via the P2 body.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>p2Body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The P2 body of the link.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line59">line 59</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true if a link with the P2 body was removed.
 </div>
 
 
@@ -1359,14 +1454,14 @@ force vector. The application point and moment may be modified, the force vector
 
     
 
-    <h4 class="name" id="moveApplPoint"><span class="type-signature"></span>moveApplPoint<span class="signature">(position)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
+    <h4 class="name" id="removeLinkByRigidBody"><span class="type-signature"></span>removeLinkByRigidBody<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
 
     
 
 
 
 <div class="description">
-    Moves the application point of the resultant, the moment is adjusted accordingly.
+    Removes a P2 body/rigid body link via the rigid body.
 </div>
 
 
@@ -1402,13 +1497,13 @@ force vector. The application point and moment may be modified, the force vector
 
         <tr>
             
-                <td class="name"><code>position</code></td>
+                <td class="name"><code>rigidBody</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">type</span>
+<span class="param-type">object</span>
 
 
             
@@ -1418,7 +1513,7 @@ force vector. The application point and moment may be modified, the force vector
 
             
 
-            <td class="description last">The new application point.</td>
+            <td class="description last">The rigid body of the link.</td>
         </tr>
 
     
@@ -1459,7 +1554,160 @@ force vector. The application point and moment may be modified, the force vector
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line115">line 115</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line73">line 73</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true if a link with the rigid body was removed.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="removeLinkedObject"><span class="type-signature"></span>removeLinkedObject<span class="signature">(index)</span><span class="type-signature"> &rarr; {<a href="Leeboard.P2Link.html">Leeboard.P2Link</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Removes a P2 body/rigid body link via index.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The index of the entry to remove.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line49">line 49</a>
     </li></ul></dd>
     
 
@@ -1497,7 +1745,7 @@ force vector. The application point and moment may be modified, the force vector
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a></span>
+<span class="param-type"><a href="Leeboard.P2Link.html">Leeboard.P2Link</a></span>
 
 
     </dd>
@@ -1512,14 +1760,15 @@ force vector. The application point and moment may be modified, the force vector
 
     
 
-    <h4 class="name" id="zero"><span class="type-signature"></span>zero<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
+    <h4 class="name" id="updateFromP2"><span class="type-signature"></span>updateFromP2<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Leeboard.P2Link.html">Leeboard.P2Link</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Sets all the terms of the resultant to all zeroes.
+    Call to update the rigid bodies from the P2 bodies. This updates the position and
+orientation of the rigid body from that of the linked P2 body.
 </div>
 
 
@@ -1563,7 +1812,7 @@ force vector. The application point and moment may be modified, the force vector
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line199">line 199</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line115">line 115</a>
     </li></ul></dd>
     
 
@@ -1601,7 +1850,7 @@ force vector. The application point and moment may be modified, the force vector
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a></span>
+<span class="param-type"><a href="Leeboard.P2Link.html">Leeboard.P2Link</a></span>
 
 
     </dd>

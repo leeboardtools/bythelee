@@ -41,7 +41,7 @@
 
     
 
-    <h4 class="name" id="RigidBody"><span class="type-signature"></span>new RigidBody<span class="signature">(obj3D, mass, centerOfMass, momentInertia, base)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="RigidBody"><span class="type-signature"></span>new RigidBody<span class="signature">(obj3D<span class="signature-attributes">opt</span>, mass<span class="signature-attributes">opt</span>, centerOfMass<span class="signature-attributes">opt</span>, momentInertia<span class="signature-attributes">opt</span>, base<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
 
     
 
@@ -73,6 +73,8 @@ and orientation, and may have additional rigid body parts attached to it.
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -97,6 +99,16 @@ and orientation, and may have additional rigid body parts attached to it.
             
             </td>
 
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -124,6 +136,16 @@ reference frame is the same as the base's world reference frame.</td>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -146,6 +168,16 @@ reference frame is the same as the base's world reference frame.</td>
             
             </td>
 
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -171,6 +203,16 @@ frame, if not defined it will be set to {0,0,0}.</td>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -193,6 +235,16 @@ frame, if not defined it will be set to {0,0,0}.</td>
             
             </td>
 
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -289,7 +341,7 @@ local coordinates of the base.</td>
 
     
 
-    <h4 class="name" id=".createFromData"><span class="type-signature">(static) </span>createFromData<span class="signature">(data, defCreatorFunc)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id=".createFromData"><span class="type-signature">(static) </span>createFromData<span class="signature">(data, defCreatorFunc<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
@@ -299,7 +351,7 @@ local coordinates of the base.</td>
     Helper that creates and loads a rigid body from a data object. If the data object contains
 a 'construct' property, the value of that property is passed directly to eval() to create
 the rigid body object, otherwise if defCreatorFunc is defined it is called to create
-the rigid body object, otherwise {LBPhysics.RigidBody} is used.
+the rigid body object, otherwise <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a> is used.
 </div>
 
 
@@ -322,6 +374,8 @@ the rigid body object, otherwise {LBPhysics.RigidBody} is used.
 
         <th>Type</th>
 
+        
+        <th>Attributes</th>
         
 
         
@@ -348,6 +402,14 @@ the rigid body object, otherwise {LBPhysics.RigidBody} is used.
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -370,6 +432,16 @@ the rigid body object, otherwise {LBPhysics.RigidBody} is used.
             
             </td>
 
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -417,7 +489,7 @@ passed to this function is the data argument.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line589">line 589</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line612">line 612</a>
     </li></ul></dd>
     
 
@@ -748,7 +820,7 @@ applied.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line485">line 485</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line508">line 508</a>
     </li></ul></dd>
     
 
@@ -901,7 +973,7 @@ applied.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line495">line 495</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line518">line 518</a>
     </li></ul></dd>
     
 
@@ -1006,7 +1078,7 @@ part of it.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line450">line 450</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line473">line 473</a>
     </li></ul></dd>
     
 
@@ -1110,7 +1182,7 @@ part of it.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line504">line 504</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line527">line 527</a>
     </li></ul></dd>
     
 
@@ -1215,7 +1287,7 @@ in world coordinates.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line563">line 563</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line586">line 586</a>
     </li></ul></dd>
     
 
@@ -1319,7 +1391,7 @@ in world coordinates.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line553">line 553</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line576">line 576</a>
     </li></ul></dd>
     
 
@@ -1834,6 +1906,359 @@ object and the parts are not loaded.
 
     
 
+    <h4 class="name" id="setXYZ"><span class="type-signature"></span>setXYZ<span class="signature">(x, y, z)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Sets the position of the rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The x-coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The y-coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>z</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The z-coordinate.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line452">line 452</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setZRotationRad"><span class="type-signature"></span>setZRotationRad<span class="signature">(rad)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Sets the rotation of the rigid body about the z-axis, in radians.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rad</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rotation about the z-axis, in radians. The rotation
+is absolute with respect to the base's coordinate system.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line463">line 463</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
     <h4 class="name" id="updateCoords"><span class="type-signature"></span>updateCoords<span class="signature">(dt)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a>}</span></h4>
 
     
@@ -1937,7 +2362,7 @@ was updated, passed to the coordinate system state.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line466">line 466</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line489">line 489</a>
     </li></ul></dd>
     
 
@@ -2001,13 +2426,13 @@ was updated, passed to the coordinate system state.</td>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBFoils.FoilInstance.html">FoilInstance</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailEnv.Env.html">Env</a></li><li><a href="LBSailEnv.Water.html">Water</a></li><li><a href="LBSailEnv.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailEnv.html">LBSailEnv</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 09 2017 18:51:52 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 11 2017 10:44:51 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
