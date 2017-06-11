@@ -33,21 +33,26 @@ LBSailSim.P2Env = function(game) {
 LBSailSim.P2Env.prototype = Object.create(LBSailSim.Env.prototype);
 LBSailSim.P2Env.prototype.constructor = LBSailSim.P2Env;
 
-LBSailSim.P2Env._createBoatInstance = function(typeName, boatName, data) {
-    var boat = LBSailSim.Env.prototype._createBoatInstance(typeName, boatName, data);
+LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, data) {
+    var boat = LBSailSim.Env.prototype._createBoatInstance.call(this, typeName, boatName, data);
     
     // Tack on a P2 body...
-    boat.p2Body = Leeboard.P2Link.createP2BodyFromData(data.p2Body, this.game);
-    
+    boat.p2Body = Leeboard.P2Link.createP2BodyFromData(this.game, data.p2Body, this.game);
+    boat.p2Body.mass = boat.getTotalMass();
     return boat;
 };
 
-LBSailSim.P2Env._boatCheckedOut = function(boat) {
+LBSailSim.P2Env.prototype._boatCheckedOut = function(boat) {
     this.p2Link.addLinkedObjects(boat.p2Body, boat);
 };
 
-LBSailSim.P2Env._boatReturned = function(boat) {
+LBSailSim.P2Env.prototype._boatReturned = function(boat) {
     this.p2Link.removeLinkByRigidBody(boat);
 };
 
+LBSailSim.P2Env.prototype.update = function(dt) {
+    LBSailSim.Env.prototype.update.call(this, dt);
+    this.p2Link.updateFromP2();
+    this.p2Link.applyToP2(dt);
+};
 

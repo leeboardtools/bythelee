@@ -43,12 +43,12 @@ LBSailSim.FoilInstance.prototype = Object.create(LBPhysics.RigidBody.prototype);
 LBSailSim.FoilInstance.prototype.constructor = LBSailSim.FoilInstance;
 
 LBSailSim.FoilInstance.prototype.updateFoilForce = function(dt, flow) {
-    this.workingPos.copy(0, 0, this.foil.sliceZ);
-    this.workingPos.applyMatrix4(this.coords.worldXfrm);
+    this.workingPos.set(0, 0, this.foil.sliceZ);
+    this.workingPos.applyMatrix4(this.coordSystem.worldXfrm);
     
     this.workingQInf = LBSailSim.getFlowVelocity(flow, this.workingPos, this.workingQInf);
     this.workingResultant = this.foil.calcWorldForce(flow.density, this.workingQInf,
-            this.coords);
+            this.coordSystem);
     this.addWorldResultant(this.workingResultant);
 };
 
@@ -111,32 +111,12 @@ LBSailSim.Propulsor.prototype.updateForce = function(dt) {
 };
 
 
-//
-// For controls:
-// Need:
-// LBControls.xxxController, which defines the limits.
-// Maybe add XYController
-// 
-// Controllee:
-// For vessels have:
-//      AngleControllee:
-//          Orientation axis? Or just x,y,z and angle.
-//          Controls an Object3D.rotation
-//
-//      TranslationControllee:
-//          A line defines the position of the 3D object, could be a parametric curve.
-//          Controls an Object3D.position
-//
-//      ValueControllee:
-//          Throttle.
-//
-
 /**
  * Container representing a vessel that floats. Vessels support:
  * <li>Aerofoils, which are {@link LBSailSim.FoilInstance} based objects that are driven by the atmosphere.
  * <li>Hydrofoils,which are {@link LBSailSim.FoilInstance} based objects that are driven by the water.
  * <li>Propulsors, which are {@link LBSailSim.Propulsor} based objects.
- * TODO: Add ballast, which is just a LBPhysics.RigidBody.
+ * <li>Ballasts, which are {@link LBPhysics.RigidBody} based objects.
  * @constructor
  * @param {object} sailEnv  The sailing environment.
  * @param {type} obj3D
@@ -155,43 +135,78 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
     
     // Later:
     //this.crew = [];
+    
+    this.apparentWind = LBGeometry.createVector3();
 
 };
 
 LBSailSim.Vessel.prototype = Object.create(LBPhysics.RigidBody.prototype);
 LBSailSim.Vessel.prototype.constructor = LBSailSim.Vessel;
 
+/**
+ * Adds an aerofoil to the vessel.
+ * @param {object} foilInstance The foil instance representing the aerofoil.
+ * @returns {LBSailSim.Vessel}  this.
+ */
 LBSailSim.Vessel.prototype.addAeroFoil = function(foilInstance) {
     this.aeroFoils.push(foilInstance);
     this.addPart(foilInstance);
     return this;
 };
 
+/**
+ * Adds a hydrofoil to the vessel.
+ * @param {object} foilInstance The foil instance representing the hydrofoil.
+ * @returns {LBSailSim.Vessel}  this.
+ */
 LBSailSim.Vessel.prototype.addHydroFoil = function(foilInstance) {
     this.hydroFoils.push(foilInstance);
     this.addPart(foilInstance);
     return this;
 };
 
+/**
+ * Adds a propulsor to the vessel.
+ * @param {object} propulsor    The propulsor.
+ * @returns {LBSailSim.Vessel}  this.
+ */
 LBSailSim.Vessel.prototype.addPropulsor = function(propulsor) {
     this.propulsors.push(propulsor);
     this.addPart(propulsor);
     return this;
 };
 
+/**
+ * Adds ballast to the vessel.
+ * @param {object} ballast  The ballast.
+ * @returns {LBSailSim.Vessel}  this.
+ */
 LBSailSim.Vessel.prototype.addBallast = function(ballast) {
     this.ballasts.push(ballast);
     this.addPart(ballast);
     return this;
 };
 
+/**
+ * Adds a controller and what it controls to the vessel.
+ * @param {object} controller   The controller.
+ * @param {object} controllee   The object controlled by the controller.
+ * @returns {LBSailSim.Vessel.prototype}
+ */
 LBSailSim.Vessel.prototype.addController = function(controller, controllee) {
     controller.controllee = controllee;
     this.controllers.push(controller);
     return this;
 };
 
-LBSailSim.Vessel.prototype.removeParts = function(foils) {
+/**
+ * Removes the rigid bodies in a parts array from the vessel.
+ * @protected
+ * @param {object} foils    The array containing the rigid body parts, all items are
+ * removed from the array.
+ * @returns {object}    foils.
+ */
+LBSailSim.Vessel.prototype._removeParts = function(foils) {
     for (var i = 0; i < foils.length; ++i) {
         this.removePart(foils[i]);
     }
@@ -199,7 +214,7 @@ LBSailSim.Vessel.prototype.removeParts = function(foils) {
     return foils;
 };
 
-LBSailSim.Vessel.prototype.createFoilInstanceForLoad = function(data) {
+LBSailSim.Vessel.prototype._createFoilInstanceForLoad = function(data) {
     // We're not using {@link LBPhysics.RigidBody#createFromData() because we need to pass
     // sailEnv to {@link LBFoils.Foil#load()}.
     if (Leeboard.isVar(data.construct)) {
@@ -209,22 +224,22 @@ LBSailSim.Vessel.prototype.createFoilInstanceForLoad = function(data) {
     return new FoilInstance();
 };
 
-LBSailSim.Vessel.prototype.loadFoilInstance = function(data) {    
-    var foilInstance = this.createFoilInstanceForLoad(data);
+LBSailSim.Vessel.prototype._loadFoilInstance = function(data) {    
+    var foilInstance = this._createFoilInstanceForLoad(data);
     if (Leeboard.isVar(foilInstance)) {
         foilInstance.load(data, this.sailEnv);
     }    
     return foilInstance;
 };
 
-LBSailSim.Vessel.prototype.loadFoils = function(data, foils) {
+LBSailSim.Vessel.prototype._loadFoils = function(data, foils) {
     if (!Leeboard.isVar(data)) {
         return this;
     }
     
     for (var i = 0; i < data.length; ++i) {
         var foilData = data[i];
-        var foilInstance = this.loadFoilInstance(foilData);
+        var foilInstance = this._loadFoilInstance(foilData);
         if (Leeboard.isVar(foilInstance)) {
             foils.push(foilInstance);
             this.addPart(foilInstance);
@@ -233,24 +248,24 @@ LBSailSim.Vessel.prototype.loadFoils = function(data, foils) {
     return this;
 };
 
-LBSailSim.Vessel.prototype.loadPropulsors = function(data) {
+LBSailSim.Vessel.prototype._loadPropulsors = function(data) {
     if (!Leeboard.isVar(data)) {
         return this;
     }
     return this;
 };
 
-LBSailSim.Vessel.prototype.createBallastForLoad = function(data) {
+LBSailSim.Vessel.prototype._createBallastForLoad = function(data) {
     return LBPhysics.RigidBody.createFromData(data);
 };
 
-LBSailSim.Vessel.prototype.loadBallasts = function(data) {
+LBSailSim.Vessel.prototype._loadBallasts = function(data) {
     if (!Leeboard.isVar(data)) {
         return this;
     }
     
     for (var i = 0; i < data.length; ++i) {
-        var ballast = this.createBallastForLoad(data[i]);
+        var ballast = this._createBallastForLoad(data[i]);
         if (ballast !== undefined) {
             this.addBallast(ballast);
         }
@@ -260,24 +275,24 @@ LBSailSim.Vessel.prototype.loadBallasts = function(data) {
 
 LBSailSim.Vessel.prototype.load = function(data) {
     // Clear out the existing settings...
-    this.aeroFoils = this.removeParts(this.aeroFoils);
-    this.hydroFoils = this.removeParts(this.hydroFoils);
-    this.propulsors = this.removeParts(this.propulsors);
-    this.ballasts = this.removeParts(this.ballasts);
+    this.aeroFoils = this._removeParts(this.aeroFoils);
+    this.hydroFoils = this._removeParts(this.hydroFoils);
+    this.propulsors = this._removeParts(this.propulsors);
+    this.ballasts = this._removeParts(this.ballasts);
     
     LBPhysics.RigidBody.prototype.load.call(this, data);
     this.typeName = data.typeName;
     this.instances = data.instances;
     
-    this.loadFoils(data.aeroFoils, this.aeroFoils);
-    this.loadFoils(data.hydroFoils, this.hydroFoils);
-    this.loadPropulsors(data.propulsors);
-    this.loadBallasts(data.ballasts);
+    this._loadFoils(data.aeroFoils, this.aeroFoils);
+    this._loadFoils(data.hydroFoils, this.hydroFoils);
+    this._loadPropulsors(data.propulsors);
+    this._loadBallasts(data.ballasts);
     
     return this;
 };
 
-LBSailSim.Vessel.prototype.updateFoilForces = function(dt, flow, foils) {
+LBSailSim.Vessel.prototype._updateFoilForces = function(dt, flow, foils) {
     for (var i = 0; i < foils.length; ++i) {
         foils[i].updateFoilForce(dt, flow);
     }
@@ -289,8 +304,12 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
     
     this.updateCoords(dt);
     
-    this.updateFoilForces(dt, this.sailEnv.wind, this.aeroFoils);
-    this.updateFoilForces(dt, this.sailEnv.water, this.hydroFoils);
+    var wind = this.sailEnv.wind;
+    this.sailEnv.wind.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, this.apparentWind);
+    this.apparentWind.sub(this.worldLinearVelocity);
+    
+    this._updateFoilForces(dt, this.sailEnv.wind, this.aeroFoils);
+    this._updateFoilForces(dt, this.sailEnv.water, this.hydroFoils);
     
     for (var i = 0; i < this.propulsors.length; ++i) {
         this.propulsors[i].updateForce(dt);
@@ -301,6 +320,78 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
     // Need to add gravity.
     
     return this;
+};
+
+LBSailSim.Vessel.prototype.moveTiller = function(deltaDeg) {
+    
+};
+
+LBSailSim.Vessel.prototype.moveMainsheet = function(delta) {
+    
+};
+
+
+/**
+ * Retrieves the current position of the veseel.
+ * @returns {object}    The vessel's position.
+ */
+LBSailSim.Vessel.prototype.getPosition = function() {
+    return this.obj3D.position;
+};
+
+/**
+ * Retrieves the heading of the vessel in compass degrees.
+ * @param {Boolean} [isRound]   If true the heading is rounded to 0 decimal digits.
+ * @returns {Number}    The heading in compass degrees.
+ */
+LBSailSim.Vessel.prototype.getHeadingDeg = function(isRound) {
+    var degrees = this.obj3D.rotation.z * LBMath.RAD_TO_DEG;
+    if (isRound) {
+        degrees = degrees.toFixed();
+    }
+    return LBSailSim.compassDegrees(degrees);
+};
+
+/**
+ * Retrieves the speed of the vessel in knots.
+ * @returns {Number}    The speed of the vessel in knots.
+ */
+LBSailSim.Vessel.prototype.getKnots = function() {
+    return Leeboard.mps2kt(this.worldLinearVelocity.length());
+};
+
+/**
+ * Returns the leeway angle in degrees. The leeway angle is the angular difference between
+ * the velocity direction and the x-axis of the vessel.
+ * @returns {Number}    The leeway angle in degrees.
+ */
+LBSailSim.Vessel.prototype.getLeewayDeg = function() {
+    if ((this.worldLinearVelocity.x === 0) && (this.worldLinearVelocity.y === 0)) {
+        return 0;
+    }
+    
+    var heading = this.obj3D.rotation.z * LBMath.RAD_TO_DEG;
+    var boatDir = Math.atan2(this.worldLinearVelocity.y, this.worldLinearVelocity.x) * LBMath.RAD_TO_DEG;
+    var leeway = boatDir - heading;
+    return LBMath.wrapDegrees(leeway);
+};
+
+/**
+ * Retrieves the apparent wind speed of the vessel in knots.
+ * @returns {Number}    The apparent wind speed in knots.
+ */
+LBSailSim.Vessel.prototype.getApparentWindKnots = function() {
+    return Leeboard.mps2kt(this.apparentWind.length());
+};
+
+/**
+ * Returns the bearing of the apparent wind relative to the bow of the boat (which 
+ * is in the +x direction.
+ * @returns {Number}    The bearing in degrees.
+ */
+LBSailSim.Vessel.prototype.getApparentWindBearingDeg = function() {
+    var degrees = Math.atan2(this.apparentWind.y, this.apparentWind.x) * LBMath.RAD_TO_DEG;
+    return LBMath.wrapDegrees(degrees);
 };
 
 

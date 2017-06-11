@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global Leeboard */
+/* global Leeboard, LBMath, QUnit */
 
 LBMath.CSpline.test = function() {
     console.log("CSpline test:");
@@ -35,3 +35,12 @@ LBMath.CSpline.test = function() {
     }
     console.log("End");
 };
+
+
+QUnit.test( "wrapDegrees", function( assert ) {
+   assert.equal(LBMath.wrapDegrees(-181), 179, "-181 => 179");
+   assert.equal(LBMath.wrapDegrees(-180), -180, "-180 => 180"); 
+   assert.equal(LBMath.wrapDegrees(-179), -179, "-179 => -179");
+   assert.equal(LBMath.wrapDegrees(179), 179, "179 => 179");
+   assert.equal(LBMath.wrapDegrees(180), -180, "180 => -180");
+});

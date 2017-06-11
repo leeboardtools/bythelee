@@ -18,3 +18,17 @@
  * @namespace LBSailSim
  */
 var LBSailSim = LBSailSim || {};
+
+/**
+ * Converts an angle in degrees to a compass format (0 &le; angle &lt; 360).
+ * @param {number} degrees  The degrees to convert.
+ * @returns {Number}    The degrees in compass format.
+ */
+LBSailSim.compassDegrees = function(degrees) {
+    degrees %= 360;
+    if (degrees < 0) {
+        degrees += 360;
+    }
+    return (degrees === 360) ? 0 : degrees;
+};
+

@@ -33,11 +33,11 @@ Leeboard.P2Link.prototype = {
     /**
      * Adds a {@link Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody} pair to the manager.
      * @param {object} p2Body   The P2 body.
-     * @param {object} lb3Body The rigid body.
+     * @param {object} rigidBody The rigid body.
      * @returns {Leeboard.P2Link}   this.
      */
-    addLinkedObjects: function(p2Body, lb3Body) {
-        this.linkedObjects.push({ 'p2Body': p2Body, 'lb3Body': lb3Body });
+    addLinkedObjects: function(p2Body, rigidBody) {
+        this.linkedObjects.push({ 'p2Body': p2Body, 'rigidBody': rigidBody });
         return this;
     },
     
@@ -95,12 +95,12 @@ Leeboard.P2Link.prototype = {
     
     /**
      * Retrieves the index of a rigid body in the manager.
-     * @param {object} lb3Body  The rigid body.
-     * @returns {Number}    The index, -1 if lb3Body is not in the manager.
+     * @param {object} rigidBody  The rigid body.
+     * @returns {Number}    The index, -1 if rigidBody is not in the manager.
      */
-    indexOfRigidBody: function(lb3Body) {
+    indexOfRigidBody: function(rigidBody) {
         for (var i = 0; i < this.linkedObjects.length; ++i) {
-            if (this.linkedObjects[i].lb3Body === lb3Body) {
+            if (this.linkedObjects[i].rigidBody === rigidBody) {
                 return i;
             }
         }
@@ -119,9 +119,9 @@ Leeboard.P2Link.prototype = {
     
     _updateLB3BodyFromP2: function(entry) {
         var p2Body = entry.p2Body;
-        var lb3Body = entry.lb3Body;
-        lb3Body.setXYZ(p2Body.x, p2Body.y, lb3Body.position.x);
-        lb3Body.setZRotationRad(p2Body.rotation);
+        var rigidBody = entry.rigidBody;
+        rigidBody.setXYZ(p2Body.x, p2Body.y, rigidBody.obj3D.position.x);
+        rigidBody.setZRotationRad(p2Body.rotation);
     },
     
     /**
@@ -136,15 +136,15 @@ Leeboard.P2Link.prototype = {
     
     _updateP2BodyFromLB3: function(entry) {
         var p2Body = entry.p2Body;
-        var lb3Body = entry.lb3Body;
-        lb3Body.updateForces(this.dt);
+        var rigidBody = entry.rigidBody;
+        rigidBody.updateForces(this.dt);
         
-        var resultant = lb3Body.resultant;
+        var resultant = rigidBody.resultant;
         resultant.convertToWrench();
-        var x = resultant.position.x / this.pixelsToMeters;
-        var y = resultant.position.y / this.pixelsToMeters;
+        var x = resultant.applPoint.x / this.pixelsToMeters;
+        var y = resultant.applPoint.y / this.pixelsToMeters;
 
-        p2Body.mass = lb3Body.getTotalMass();
+        p2Body.mass = rigidBody.getTotalMass();
         p2Body.applyForce([resultant.force.x, resultant.force.y], x, y);        
     },
 
@@ -180,11 +180,26 @@ Leeboard.P2Link.createSpriteFromData = function(game, data) {
  */
 Leeboard.P2Link.createP2BodyFromData = function(game, data) {
     var sprite = Leeboard.P2Link.createSpriteFromData(game, data.sprite);
-    var p2Body = new Phaser.Physics.P2.Body(game, sprite.x, sprite.y, data.mass);
+    sprite.game.physics.enable(sprite, Phaser.Physics.P2JS);
+    sprite.body.collideWorldBounds = true;
+
+    var p2Body = sprite.body;
+    p2Body.mass = data.mass || p2Body.mass;
 
     Leeboard.copyCommonProperties(p2Body, data.p2Body, function(val) {
         return val !== 'sprite';
     });
     
     return p2Body;
+};
+
+/**
+ * Extension of {Phaser.Point}, adding a copy function.
+ * @param {object} src  The object to be copied.
+ * @returns {Phaser.Point}  this.   
+ */
+Phaser.Point.prototype.copy = function(src) {
+    this.x = src.x || this.x;
+    this.y = src.y || this.y;
+    return this;
 };

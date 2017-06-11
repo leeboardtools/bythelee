@@ -285,9 +285,9 @@ LBPhysics.CoordSystemState.prototype = {
      * @param {object} localPos The local coordinates of the point of interest.
      * @param {object} results  The object to receive the results. Results are stored
      * in keys, and are only computed if the key exists:
-     *      worldPos: The world coordinates of localPos.
-     *      worldVel:   The velocity of localPos in world coordinates.
-     *      localVel:   The velocity of localPos in local coordinates.
+     *      <li>worldPos: The world coordinates of localPos.
+     *      <li>worldVel:   The velocity of localPos in world coordinates.
+     *      <li>localVel:   The velocity of localPos in local coordinates.
      * @param {object} [prevLocalPos] If defined, the previous local position, used for velocity calculation,
      * if not defined then the previous position is presumed to be localPos.
      * @returns {LBPhysics.CoordSystemState} this.
@@ -354,7 +354,13 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     this.centerOfMass = centerOfMass || LBGeometry.createVector3();
     
     this.obj3D = obj3D || LBGeometry.createObject3D();
-    this.coords = new LBPhysics.CoordSystemState();
+    this.coordSystem = new LBPhysics.CoordSystemState();
+    this.coordSystemResults = {
+        "worldVel": LBGeometry.createVector3(),
+        "localVel": LBGeometry.createVector3()
+    };
+    this.worldLinearVelocity = this.coordSystemResults.worldVel;
+    this.localLinearVelocity = this.coordSystemResults.localVel;
     
     this.resultant = new LBPhysics.Resultant3D();
 
@@ -489,7 +495,8 @@ LBPhysics.RigidBody.prototype = {
     updateCoords: function(dt) {
         this.physicalPropertiesDirty = true;
 
-        this.coords.setXfrms(this.obj3D.matrixWorld, dt);
+        this.coordSystem.setXfrms(this.obj3D.matrixWorld, dt);
+        this.coordSystem.calcVectorLocalToWorld(this.centerOfMass, this.coordSystemResults);
         
         // Don't forget the parts...
         for (var i = 0; i < this.parts.length; ++i) {
@@ -543,7 +550,7 @@ LBPhysics.RigidBody.prototype = {
             this.totalMass = this.mass;
             
             this.totalCenterOfMass.copy(this.centerOfMass);
-            this.totalCenterOfMass.applyMatrix4(this.coords.worldXfrm);            
+            this.totalCenterOfMass.applyMatrix4(this.coordSystem.worldXfrm);            
             this.totalCenterOfMass.multiplyScalar(this.mass);
             
             this.totalMomentInertia.copy(this.momentInertia);

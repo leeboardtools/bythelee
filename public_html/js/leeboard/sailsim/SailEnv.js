@@ -130,7 +130,7 @@ LBSailSim.Env.prototype = {
      * @returns {Boolean}   True if the boat is available for checkout.
      */
     isBoatAvailable: function(typeName, boatName) {
-        var boatData = getBoatData(typeName);
+        var boatData = this.getBoatData(typeName);
         if (!Leeboard.isVar(boatData)) {
             return false;
         }
@@ -163,20 +163,20 @@ LBSailSim.Env.prototype = {
             return undefined;
         }
 
-        var boatData = getBoatData(typeName);
+        var boatData = this.getBoatData(typeName);
         if (!Leeboard.isVar(boatData)) {
             return undefined;
         }
 
-        boat.boatName = boatName || "";
-        var boat = _createBoatInstance(typeName, boatName, boatData);
+        boatName = boatName || "";
+        var boat = this._createBoatInstance(typeName, boatName, boatData);
         if (!Leeboard.isVar(boat)) {
             return undefined;
         }
 
         this.boatsByType[typeName][boatName] = boat;
         this._boatCheckedOut(boat);
-        return this;
+        return boat;
     },
     
     /**
@@ -212,7 +212,7 @@ LBSailSim.Env.prototype = {
         if (Leeboard.isVar(boatsOfType)) {
             if (boatsOfType[boat.boatName] === boat) {
                 boatsOfType[boat.boatName] = "";
-                _boatReturned(boat);
+                this._boatReturned(boat);
                 return true;
             }
         }
@@ -232,11 +232,12 @@ LBSailSim.Env.prototype = {
     /**
      * Call to update the sailing environment state for a new simulation time step.
      * @param {number} dt   The simulation time step.
-     * @returns {undefined}
+     * @returns {object}    this.
      */
     update: function(dt) {
         this.wind.update(dt);
         this.water.update(dt);
+        return this;
     }
 };
 
@@ -315,6 +316,7 @@ LBSailSim.Water.prototype = {
         vel.x = vx;
         vel.y = vy;
         vel.z = 0;
+        return vel;
     },
     
     /**

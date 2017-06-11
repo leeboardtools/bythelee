@@ -89,6 +89,22 @@ LBMath.clamp = function(val, low, high) {
 };
 
 /**
+ * Adjusts an angle in degrees so it satisfies -180 &le; degrees &gt; 180.
+ * @param {number} degrees  The anngle in degrees to wrap.
+ * @returns {number}    degrees wrapped to -180 &le; degrees &gt; 180.
+ */
+LBMath.wrapDegrees = function(degrees) {
+    degrees %= 360;
+    if (degrees >= 180) {
+        degrees -= 360;
+    }
+    else if (degrees < -180) {
+        degrees += 360;
+    }
+    return degrees;
+};
+
+/**
  * Third order smoothstep function per https://en.wikipedia.org/wiki/Smoothstep
  * s(x) = -2*x^3 + 3*x^2
  * @param {Number} x The x value.

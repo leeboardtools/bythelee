@@ -80,13 +80,17 @@ Boat.prototype.moveMainsheet = function(amount) {
 };
 
 //--------------------------------------------------
-Boat.prototype.getHeading = function() {
-    var heading = this.body.rotation;
-    if (heading < 0) {
-        heading += 360;
+Boat.prototype.getPosition = function() {
+    return this.body.position;
+};
+
+//--------------------------------------------------
+Boat.prototype.getHeadingDeg = function(isRound) {
+    var degrees = this.body.rotation;
+    if (isRound) {
+        degrees = degrees.toFixed();
     }
-    
-    return heading;
+    return LBSailSim.compassDegrees(degrees);
 };
 
 //--------------------------------------------------
@@ -97,7 +101,7 @@ Boat.prototype.getKnots = function() {
 };
 
 //--------------------------------------------------
-Boat.prototype.getLeeway = function() {
+Boat.prototype.getLeewayDeg = function() {
     if ((this.body.velocity.x === 0) && (this.body.velocity.y === 0)) {
         return 0;
     }
@@ -109,14 +113,14 @@ Boat.prototype.getLeeway = function() {
 };
 
 //--------------------------------------------------
-Boat.prototype.getAppWindKnots = function() {
+Boat.prototype.getApparentWindKnots = function() {
     var speed = this.appWind.length();
     speed = Leeboard.pxm(speed);
     return Leeboard.mps2kt(speed);
 };
 
 //--------------------------------------------------
-Boat.prototype.getAppWindBearing = function() {
+Boat.prototype.getApparentWindBearingDeg = function() {
     var angle = Math.atan2(this.appWind.y, this.appWind.x) * this.game.math.DEG_TO_RAD;
     var bearing = angle - this.body.rotation;
     return this.game.math.wrapAngle(bearing, false);
@@ -225,8 +229,11 @@ PlayState._spawnBuoys = function(data) {
 PlayState._spawnCharacters = function (data) {
     var centerX = 0;
     var centerY = 0;
-    this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
-    this.worldGroup.add(this.myBoat);
+    //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
+    this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA");
+    this.myBoat.p2Body.x = centerX;
+    this.myBoat.p2Body.y = centerY;
+    this.worldGroup.add(this.myBoat.p2Body.sprite);    
 };
 
 //--------------------------------------------------
@@ -288,13 +295,13 @@ PlayState._handleCollisions = function() {
 
 //------------------------------ --------------------
 PlayState._updateHUD = function() {
-    var heading = this.myBoat.getHeading();
+    var heading = this.myBoat.getHeadingDeg(true);
     this.headingText.text = "Heading: " + heading.toFixed();
     
     var speed = this.myBoat.getKnots();
     this.speedText.text = "Speed: " + speed.toFixed(2);
     
-    var leewayAngle = this.myBoat.getLeeway();
+    var leewayAngle = this.myBoat.getLeewayDeg();
     if (leewayAngle < 0) {
         this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Port";
     }
@@ -305,12 +312,13 @@ PlayState._updateHUD = function() {
         this.leewayText.text = "Leeway: 0";
     }
     
-    this.positionText.text = "Position: " + this.myBoat.position.x.toFixed() + " " + -this.myBoat.position.y.toFixed();
+    var position = this.myBoat.getPosition();
+    this.positionText.text = "Position: " + position.x.toFixed() + " " + -position.y.toFixed();
    
-    speed = this.myBoat.getAppWindKnots();
+    speed = this.myBoat.getApparentWindKnots();
     this.appWindSpeedText.text = "App Wind Speed: " + speed.toFixed(2);
     
-    var bearing = this.myBoat.getAppWindBearing();
+    var bearing = this.myBoat.getApparentWindBearingDeg();
     this.appWindBearingText.text = "App Wind Bearing: " + bearing.toFixed();
 };
 
@@ -347,11 +355,15 @@ PlayState._handleInput = function() {
 
 //--------------------------------------------------
 PlayState._updateCamera = function() {
-    this.water.tilePosition.x = -this.myBoat.position.x;
-    this.water.tilePosition.y = -this.myBoat.position.y;
+    var position = this.myBoat.getPosition();
+    var x = Leeboard.mpx(position.x);
+    var y = Leeboard.mpx(position.y);
 
-    this.worldGroup.position.x = -this.myBoat.position.x;
-    this.worldGroup.position.y = -this.myBoat.position.y;
+    this.water.tilePosition.x = -x;
+    this.water.tilePosition.y = -y;
+
+    this.worldGroup.position.x = -x;
+    this.worldGroup.position.y = -y;
 /*    
     var cosBoat = Math.cos(this.myBoat.body.rotation);
     var sinBoat = Math.sin(this.myBoat.body.rotation);

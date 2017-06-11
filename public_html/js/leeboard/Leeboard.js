@@ -126,7 +126,7 @@ Leeboard.copyCommonProperties = function(dst, src, filter) {
                 function(val, idx, array) {
                     if (src[val] !== undefined) {
                         if (filter(val, dst, src)) {
-                            dst[val] = src[val];
+                            dst[val] = Leeboard.copyObject(dst[val], src[val]);
                         }
                     }
                 }
@@ -136,12 +136,22 @@ Leeboard.copyCommonProperties = function(dst, src, filter) {
         Object.getOwnPropertyNames(dst).forEach(
                 function(val, idx, array) {
                     if (src[val] !== undefined) {
-                        dst[val] = src[val];
+                        dst[val] = Leeboard.copyObject(dst[val], src[val]);
                     }
                 }
         );
     }
     return dst;
+};
+
+Leeboard.copyObject = function(dst, src) {
+    if (typeof dst === "object") {
+        if (typeof dst.copy === "function") {
+            dst.copy(src);
+            return dst;
+        }
+    }
+    return src;
 };
 
 

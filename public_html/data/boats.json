@@ -3,12 +3,21 @@
         {
             "typeName": "Tubby",
             "instances": [ "TubbyA", "TubbyB", "TubbyC" ],
+            "p2Body": {
+                "sprite": {
+                    "key": "dinghy",
+                    "anchor": {
+                        "x": 0.5,
+                        "y": 0.5
+                    }
+                }
+            },
             "mass": 100,
             "centerOfMass": { "x": 0, "y": 0, "z": 0 },
             "momentInertia": {},
             "aeroFoils": [],
             "hydroFoils": [ {
-                    "construct": "new Leeboard.FoilInstance()",
+                    "construct": "new LBSailSim.FoilInstance()",
                     "name": "keel",
                     "mass": 20,
                     "centerOfMass": { "x": 0, "y": 0, "z": 0 },
