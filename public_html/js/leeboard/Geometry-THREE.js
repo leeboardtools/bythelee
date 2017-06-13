@@ -356,9 +356,9 @@ LBGeometry.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
  * @param {number} yRad The rotation about the y axis in radians.
  * @param {number} zRad The rotation about the z axis in radians.
  * @param {object} order    The order of rotation.
- * @returns {object}    The THREE.Euler compatible quaternion.
+ * @returns {object}    The THREE.Euler compatible object.
  */
-LBGeometry.createEuler = function(xRad, yRad, zRad, order) {
+LBGeometry.createEulerRad = function(xRad, yRad, zRad, order) {
     return new THREE.Euler(xRad, yRad, zRad, order);
 };
 
@@ -368,9 +368,9 @@ LBGeometry.createEuler = function(xRad, yRad, zRad, order) {
  * @param {number} yDeg The rotation about the y axis in degrees.
  * @param {number} zDeg The rotation about the z axis in degrees.
  * @param {object} order    The order of rotation.
- * @returns {object}    The THREE.Euler compatible quaternion.
+ * @returns {object}    The THREE.Euler compatible object.
  */
-LBGeometry.createEuler = function(xDeg, yDeg, zDeg, order) {
+LBGeometry.createEulerDeg = function(xDeg, yDeg, zDeg, order) {
     return new THREE.Euler(xDeg * LBMath.DEG_TO_RAD, yDeg * LBMath.DEG_TO_RAD, zDeg * LBMath.DEG_TO_RAD, order);
 };
 

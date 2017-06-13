@@ -184,6 +184,20 @@ LBPhysics.Resultant3D.prototype = {
     
     
     /**
+     * Applies a scale to all the distance related components of the resultant,
+     * used for changing distance units.
+     * @param {number} scale    The scale to apply.
+     * @returns {LBPhysics.Resultant3D} this.
+     */
+    applyDistanceScale: function(scale) {
+        this.force.multiplyScalar(scale);
+        this.moment.multiplyScalar(scale);
+        this.applPoint.multiplyScalar(scale);
+        return this;
+    },
+    
+    
+    /**
      * Determines if the resultant does not apply a force or moment.
      * @returns {Boolean}   True if both the force and moment are zero.
      */
@@ -369,12 +383,15 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
         base.addPart(this);
     }
     
+    this.isAddPartObj3DsAsChildren = true;
+    
     this.isEnabled = true;
     
     this.physicalPropertiesDirty = true;
     this.totalMass = 0;
     this.totalMomentInertia = LBGeometry.createVector3();
     this.totalCenterOfMass = LBGeometry.createVector3();
+    this.totalResultant = new LBPhysics.Resultant3D();
     
     if (Leeboard.isVar(obj3D)) {
         this.updateCoords(0);
@@ -428,6 +445,10 @@ LBPhysics.RigidBody.prototype = {
         part.base = this;
         this.physicalPropertiesDirty = true;
         
+        if (this.isAddPartObj3DsAsChildren) {
+            this.obj3D.add(part.obj3D);
+        }
+        
         return this;
     },
     
@@ -441,6 +462,9 @@ LBPhysics.RigidBody.prototype = {
             var index = this.parts.indexOf(part);
             if (index >= 0) {
                 this.parts.splice(index, 1);
+                if (this.isAddPartObj3DsAsChildren) {
+                    this.obj3D.remove(part.obj3D);
+                }
             }
             part.base = undefined;
             this.physicalPropertiesDirty = true;
@@ -467,7 +491,7 @@ LBPhysics.RigidBody.prototype = {
      * @returns {LBPhysics.RigidBody}   this.
      */
     setZRotationRad: function(rad) {
-        this.obj3D.rotateZ(rad);
+        this.obj3D.setRotationFromEuler(LBGeometry.createEulerRad(0, 0, rad));
         return this;
     },
 
@@ -478,6 +502,7 @@ LBPhysics.RigidBody.prototype = {
      */
     clearForces: function() {
         this.resultant.zero();
+        this.totalResultant.zero();
         for (var i = 0; i < this.parts.length; ++i) {
             this.parts[i].clearForces();
         }
@@ -529,14 +554,22 @@ LBPhysics.RigidBody.prototype = {
     
     /**
      * Retrieves the resultant in world coordinates.
+     * @param {Boolean} convertToWrench If true the resultant is converted to a wrench,
+     * otherwise its application point is set to the total center of mass.
      * @returns {LBPhysics.Resultant3D} The resultant in world coordinates.
      */
-    getResultant: function() {
+    getResultant: function(convertToWrench) {
+        this.totalResultant.copy(this.resultant);
         for (var i = 0; i < this.parts.length; ++i) {
-            this.resultant.addResultant(this.parts[i].getResultant());
+            this.totalResultant.addResultant(this.parts[i].getResultant());
         }
-        this.resultant.moveApplPoint(getTotalCenterOfMass());
-        return this.resultant;
+        if (convertToWrench) {
+            this.totalResultant.convertToWrench();
+        }
+        else {
+            this.totalResultant.moveApplPoint(this.getTotalCenterOfMass());
+        }
+        return this.totalResultant;
     },
     
     /**

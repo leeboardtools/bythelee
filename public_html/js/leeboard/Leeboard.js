@@ -20,7 +20,7 @@
 var Leeboard = Leeboard || {};
 
 /**
-* Convert p2 physics value (meters) to pixel scale, overloads Phaser.Physics.P2#mpx.
+* Convert p2 physics value (meters) to pixel scale, replaces Phaser.Physics.P2#mpx.
 * @param {number} v - The value to convert.
 * @return {number} The scaled value.
 */
@@ -29,7 +29,7 @@ Leeboard.mpx = function (v) {
 };
 
 /**
-* Convert pixel value to p2 physics scale (meters), overloads Phaser.Physics.P2#pxm
+* Convert pixel value to p2 physics scale (meters), replaces Phaser.Physics.P2#pxm
 * @param {number} v - The value to convert.
 * @return {number} The scaled value.
 */
@@ -38,7 +38,7 @@ Leeboard.pxm = function (v) {
 };
 
 /**
-* Convert p2 physics value (meters) to pixel scale and inverses it, overloads Phaser.Physics.P2#mpxi
+* Convert p2 physics value (meters) to pixel scale and inverses it, replaces Phaser.Physics.P2#mpxi
 * @param {number} v - The value to convert.
 * @return {number} The scaled value.
 */
@@ -47,7 +47,7 @@ Leeboard.mpxi = function (v) {
 };
 
 /**
-* Convert pixel value to p2 physics scale (meters) and inverses it, overloads Phaser.Physics.P2#pxmi.
+* Convert pixel value to p2 physics scale (meters) and inverses it, replaces Phaser.Physics.P2#pxmi.
 * @param {number} v - The value to convert.
 * @return {number} The scaled value.
 */

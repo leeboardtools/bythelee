@@ -2,6 +2,7 @@
     "clCdCurves": [
         { 
             "name": "FlatPlate", 
+            "isSymmetric": true,
             "stallStartDeg": 25,
             "liftEndDeg": 35,
             "clCdStall": {},
@@ -19,6 +20,7 @@
         },
         {
             "name": "FlatPlateAR5",
+            "isSymmetric": true,
             "aspectRatio": 5,
             "clCdInterp": {
                 "alphas": [
@@ -41,6 +43,7 @@
         },
         {
             "name": "NACA0012",
+            "isSymmetric": true,
             "re": 0.86e6,
             "stallStartDeg": 25,
             "liftEndDeg": 35,

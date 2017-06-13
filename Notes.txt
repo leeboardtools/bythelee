@@ -13,6 +13,7 @@ Delete the docs directory.
 Run:
     jsdoc public_html/js -r -d docs
 
+
 TODO:
-Add means of looking up foils.
+Question: Is the chord velocity used for apparent wind correct with the obj3D as child?
 

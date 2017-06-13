@@ -15,7 +15,7 @@
  */
 
 
-/* global Leeboard, Phaser */
+/* global Leeboard, Phaser, LBPhysics */
 
 /**
  * Manages linking a {@link Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody}, updating
@@ -26,7 +26,9 @@
  */
 Leeboard.P2Link = function() {
     this.linkedObjects = [];
-    this.pixelsToMeters = 1;
+    this.metersToPixels = 20;
+    this.pixelsToMeters = 1/this.metersToPixels;
+    this.workingResultant = new LBPhysics.Resultant3D();
 };
 
 Leeboard.P2Link.prototype = {
@@ -120,8 +122,10 @@ Leeboard.P2Link.prototype = {
     _updateLB3BodyFromP2: function(entry) {
         var p2Body = entry.p2Body;
         var rigidBody = entry.rigidBody;
-        rigidBody.setXYZ(p2Body.x, p2Body.y, rigidBody.obj3D.position.x);
+        rigidBody.setXYZ(-p2Body.x * this.pixelsToMeters, -p2Body.y * this.pixelsToMeters, 
+            rigidBody.obj3D.position.z);
         rigidBody.setZRotationRad(p2Body.rotation);
+        rigidBody.obj3D.updateMatrixWorld();
     },
     
     /**
@@ -139,13 +143,14 @@ Leeboard.P2Link.prototype = {
         var rigidBody = entry.rigidBody;
         rigidBody.updateForces(this.dt);
         
-        var resultant = rigidBody.resultant;
-        resultant.convertToWrench();
-        var x = resultant.applPoint.x / this.pixelsToMeters;
-        var y = resultant.applPoint.y / this.pixelsToMeters;
-
+        var resultant = this.p2link.workingResultant;
+        resultant.copy(rigidBody.getResultant(true));
+        resultant.applyDistanceScale(this.p2link.metersToPixels);
+        
         p2Body.mass = rigidBody.getTotalMass();
-        p2Body.applyForce([resultant.force.x, resultant.force.y], x, y);        
+        
+        p2Body.applyForce([resultant.force.x, resultant.force.y], 
+            resultant.applPoint.x, resultant.applPoint.y);        
     },
 
     constructor: Leeboard.P2Link

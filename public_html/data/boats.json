@@ -28,7 +28,7 @@
                     "foil": {
                         "chordLine": {
                             "start": { "x": 0, "y": 0 },
-                            "end": { "x": 0.5, "y": 0 }
+                            "end": { "x": -1, "y": 0 }
                         },
                         "sliceZ": 0.2,
                         "area": 1,

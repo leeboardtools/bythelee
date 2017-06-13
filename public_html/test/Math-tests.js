@@ -44,3 +44,13 @@ QUnit.test( "wrapDegrees", function( assert ) {
    assert.equal(LBMath.wrapDegrees(179), 179, "179 => 179");
    assert.equal(LBMath.wrapDegrees(180), -180, "180 => -180");
 });
+
+QUnit.test( "round", function( assert ) {
+    assert.equal(LBMath.round(123.456, 2), 123.46, "123.456 => 123.46");
+    assert.equal(LBMath.round(123.456), 123, "123.456 => 123");
+    assert.equal(LBMath.round(123.456, -1), 120, "123.456 => 120");
+    
+    assert.equal(LBMath.round(-123.456, 2), -123.46, "-123.456 => -123.46");
+    assert.equal(LBMath.round(-123.456), -123, "-123.456 => -123");
+    assert.equal(LBMath.round(-123.456, -1), -120, "-123.456 => -120");
+});

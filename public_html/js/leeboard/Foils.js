@@ -45,6 +45,12 @@ LBFoils.ClCd = function(cl, cd, cm) {
      * @property {number} cm The moment coefficient, Cm
      */
     this.cm = cm || 0;
+    
+    /**
+     * @property {number} cmIsChordFraction If true then cm represents the chord fraction
+     * rather than the true moment coefficient.
+     */
+    this.cmIsChordFraction = false;
 };
 
 LBFoils.ClCd.prototype = {
@@ -66,7 +72,13 @@ LBFoils.ClCd.prototype = {
         store.lift = this.cl * scale;
         store.drag = this.cd * scale;
         chordLength = chordLength || 1;
-        store.moment = this.cm * scale * chordLength;
+        
+        var cm = this.cm;
+        if (this.cmIsChordFraction) {
+            cm *= Math.sqrt(this.cl * this.cl + this.cd * this.cd);
+        }
+        store.moment = cm * scale * chordLength;
+
         if (Leeboard.isVar(aspectRatio)) {
             var ci = this.cl * this.cl / (Math.PI * aspectRatio);
             store.inducedDrag = scale * ci;
@@ -145,11 +157,13 @@ LBFoils.ClCdStall.prototype = {
     /**
      * Loader method.
      * @param {object} data   The data, typically loaded from a JSON file.
+     * @returns {object} this.
      */
     load: function(data) {
         this.cl45Deg = data.cl45Deg || this.cl45Deg;
         this.cd45Deg = data.cd45Deg || this.cd45Deg;
         this.cd90Deg = data.cl90Deg || this.cd90Deg;
+        return this;
     },
     
     /**
@@ -183,9 +197,31 @@ LBFoils.ClCdStall.prototype = {
         // 45 degrees is our 0 point...
         store.cl = this.cl45Deg * Math.cos(2 * (degrees - 45) * LBMath.DEG_TO_RAD) * sign;    
         store.cm = (0.46 + 0.04 * (degrees - 30) / 60) * sign;
+        store.cmIsChordFraction = true;
         
         return store;
     }
+};
+
+/**
+ * Creates and load a {@link LBFoils.ClCdStall} object from properties in a data object.
+ * @param {object} data The data object.
+ * @returns {object}    The loaded object, undefined if data is undefined.
+ */
+LBFoils.ClCdStall.createFromData = function(data) {
+    if (!Leeboard.isVar(data)) {
+        return undefined;
+    }
+    
+    var clCdStall;
+    if (Leeboard.isVar(data.construct)) {
+        clCdStall = eval(data.construct);
+    }
+    else {
+        clCdStall = new LBFoils.ClCdStall();
+    }
+    
+    return clCdStall.load(data);
 };
 
 
@@ -202,6 +238,7 @@ LBFoils.ClCdInterp = function() {
     this.interpCls = new LBMath.CSpline();
     this.interpCds = new LBMath.CSpline();
     this.interpCms = null;
+    this.cmIsChordFraction = false;
 };
 
 LBFoils.ClCdInterp.prototype = {
@@ -211,6 +248,7 @@ LBFoils.ClCdInterp.prototype = {
      * Loads the interpolation data. Note that this stores the coefficient arrays
      * by reference, not as copies.
      * @param {object} data   The data, typically loaded from a JSON file.
+     * @returns {object} this.
      */
     load: function(data) {
         this.alphas = data.alphas;
@@ -223,10 +261,12 @@ LBFoils.ClCdInterp.prototype = {
         if (Leeboard.isVar(this.cms) && (this.cms.length === this.alphas.length)) {
             this.interpCms = new LBMath.CSpline();
             this.interpCms.setup(this.alphas, this.cms);
+            this.cmIsChordFraction = data.cmIsChordFraction || false;
         }
         else {
             this.interpCms = null;
         }
+        return this;
     },
     
     /**
@@ -240,10 +280,11 @@ LBFoils.ClCdInterp.prototype = {
         
         var lowIn = this.interpCls.findLowIndex(degrees);
         store.cl = this.interpCls.interpolate(degrees, lowIn);
-        store.cd = this.interpCds.interpolate(degrees, lowIn);
+        store.cd = this.interpCds.interpolate(degrees, lowIn);        
         
         if (this.interpCms !== null) {
             store.cm = this.interpCms.interpolate(degrees, lowIn);
+            store.cmIsChordFraction = this.cmIsChordFraction;
         }
         else {
             store.cm = LBFoils.calcCmForClCd(degrees, store.cl, store.cd, 0.25);
@@ -289,14 +330,10 @@ LBFoils.ClCdCurve.prototype = {
         this.aspectRatio = data.aspectRatio || Number.POSITIVE_INFINITY;
         this.re = data.re || Number.POSITIVE_INFINITY;
         
-        if (typeof data.clCdStall === "clCdStall") {
+        this.clCdStall = LBFoils.ClCdStall.createFromData(data.clCdStall);
+        if (Leeboard.isVar(this.clCdStall)) {
             this.stallStartDeg = data.stallStartDeg || 90;
             this.liftEndDeg = data.liftEndDeg || this.stallStartDeg;
-            
-            this.clCdStall.load(data.clCdStall);
-        }
-        else {
-            this.clCdStall = null;
         }
         
         this.isSymmetric = data.isSymmetric || true;

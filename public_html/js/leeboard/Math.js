@@ -105,6 +105,21 @@ LBMath.wrapDegrees = function(degrees) {
 };
 
 /**
+ * Rounds a value to a certain number of decimal places.
+ * @param {number} val  The value to be rounded.
+ * @param {number} [decimalPlaces]  The number of decimal places, less than zero rounds
+ * above the decimal place.
+ * @returns {Number}    The rounded value.
+ */
+LBMath.round = function(val, decimalPlaces) {
+    if (decimalPlaces) {
+        var scale = Math.pow(10, decimalPlaces);
+        return Math.round(val * scale) / scale;
+    }
+    return Math.round(val);
+};
+
+/**
  * Third order smoothstep function per https://en.wikipedia.org/wiki/Smoothstep
  * s(x) = -2*x^3 + 3*x^2
  * @param {Number} x The x value.

@@ -16,116 +16,7 @@
 
 
 /* global Phaser */
-/* global Leeboard, LBSailSim, LBGeometry */
-
-
-
-//--------------------------------------------------
-function Boat(game, sailingEnv, x, y, data) {
-    Phaser.Sprite.call(this, game, x, y, data.type);
-    
-    this.sailingEnv = sailingEnv;
-    this.anchor.set(0.5, 0.5);
-    
-    this.game.physics.enable(this);
-    this.body.collideWorldBounds = true;
-    
-    this.appWind = LBGeometry.createVector2(0, 0);
-}
-
-// inherit from Phaser.Sprite
-Boat.prototype = Object.create(Phaser.Sprite.prototype);
-Boat.prototype.constructor = Boat;
-
-//--------------------------------------------------
-Boat.prototype.update = function() {
-    this.sailingEnv.wind.getFlowVelocity(this.body.x, this.body.y, this.appWind);
-    this.appWind.x -= this.body.velocity.x;
-    this.appWind.y -= this.body.velocity.y;
-};
-
-//--------------------------------------------------
-Boat.prototype.moveTiller = function(amount) {
-    if (this.isFrozen) {
-        return;
-    }
-    
-    if (amount === 0) {
-        this.body.angularVelocity = 0;
-    }
-    else {
-        this.body.angularVelocity += amount;
-    }
-};
-
-//--------------------------------------------------
-Boat.prototype.moveMainsheet = function(amount) {
-    if (this.isFrozen) {
-        return;
-    }
-    
-    if (amount === 0) {
-        this.body.velocity.x = 0;
-        this.body.velocity.y = 0;
-    }
-    else {
-        var dx = -Math.sin(this.body.rotation * Math.PI / 180);
-        var dy = Math.cos(this.body.rotation * Math.PI / 180);
-        
-        amount = Leeboard.kt2mps(amount);
-        amount = Leeboard.mpx(amount);
-        this.body.velocity.x += amount * dx;
-        this.body.velocity.y += amount * dy;
-    }
-};
-
-//--------------------------------------------------
-Boat.prototype.getPosition = function() {
-    return this.body.position;
-};
-
-//--------------------------------------------------
-Boat.prototype.getHeadingDeg = function(isRound) {
-    var degrees = this.body.rotation;
-    if (isRound) {
-        degrees = degrees.toFixed();
-    }
-    return LBSailSim.compassDegrees(degrees);
-};
-
-//--------------------------------------------------
-Boat.prototype.getKnots = function() {
-    var speed = this.body.velocity.getMagnitude();
-    speed = Leeboard.pxm(speed);
-    return Leeboard.mps2kt(speed);
-};
-
-//--------------------------------------------------
-Boat.prototype.getLeewayDeg = function() {
-    if ((this.body.velocity.x === 0) && (this.body.velocity.y === 0)) {
-        return 0;
-    }
-    
-    var heading = this.body.rotation;
-    var boatDir = Math.atan2(this.body.velocity.y, this.body.velocity.x) * this.game.math.DEG_TO_RAD + 90;
-    var leeway = boatDir - heading;
-    return this.game.math.wrapAngle(leeway, false);
-};
-
-//--------------------------------------------------
-Boat.prototype.getApparentWindKnots = function() {
-    var speed = this.appWind.length();
-    speed = Leeboard.pxm(speed);
-    return Leeboard.mps2kt(speed);
-};
-
-//--------------------------------------------------
-Boat.prototype.getApparentWindBearingDeg = function() {
-    var angle = Math.atan2(this.appWind.y, this.appWind.x) * this.game.math.DEG_TO_RAD;
-    var bearing = angle - this.body.rotation;
-    return this.game.math.wrapAngle(bearing, false);
-};
-
+/* global Leeboard, LBSailSim, LBGeometry, LBMath */
 
 
 //
@@ -278,14 +169,12 @@ PlayState._setupHUD = function() {
 PlayState.update = function() {
     this._handleCollisions();
     
-    // Update the HUD/camera after collisions but before input.
-    this._updateHUD();
     this._updateCamera();
-
     this._handleInput();
     
     var dt = Leeboard.P2Link.getP2TimeStep(this.game.physics.p2);
     this.sailEnv.update(dt);
+    this._updateHUD();
 };
 
 //------------------------------ --------------------
@@ -301,7 +190,7 @@ PlayState._updateHUD = function() {
     var speed = this.myBoat.getKnots();
     this.speedText.text = "Speed: " + speed.toFixed(2);
     
-    var leewayAngle = this.myBoat.getLeewayDeg();
+    var leewayAngle = this.myBoat.getLeewayDeg(true);
     if (leewayAngle < 0) {
         this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Port";
     }
@@ -313,12 +202,12 @@ PlayState._updateHUD = function() {
     }
     
     var position = this.myBoat.getPosition();
-    this.positionText.text = "Position: " + position.x.toFixed() + " " + -position.y.toFixed();
+    this.positionText.text = "Position: " + LBMath.round(position.x, 1) + " " + LBMath.round(-position.y, 1);
    
     speed = this.myBoat.getApparentWindKnots();
     this.appWindSpeedText.text = "App Wind Speed: " + speed.toFixed(2);
     
-    var bearing = this.myBoat.getApparentWindBearingDeg();
+    var bearing = this.myBoat.getApparentWindBearingDeg(true);
     this.appWindBearingText.text = "App Wind Bearing: " + bearing.toFixed();
 };
 
@@ -355,10 +244,9 @@ PlayState._handleInput = function() {
 
 //--------------------------------------------------
 PlayState._updateCamera = function() {
-    var position = this.myBoat.getPosition();
-    var x = Leeboard.mpx(position.x);
-    var y = Leeboard.mpx(position.y);
-
+    var x = this.myBoat.p2Body.x;
+    var y = this.myBoat.p2Body.y;
+    
     this.water.tilePosition.x = -x;
     this.water.tilePosition.y = -y;
 

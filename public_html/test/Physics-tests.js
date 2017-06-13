@@ -15,7 +15,7 @@
  */
 
 
-/* global QUnit, Leeboard */
+/* global QUnit, Leeboard, LBPhysics, LBGeometry, LBMath */
 
 
 function checkResultant3D(assert, resultant, fx, fy, fz, mx, my, mz, px, py, pz, msg, tolerance) {
@@ -156,6 +156,21 @@ QUnit.test( "Resultant-applyMatrix4", function( assert ) {
     checkResultant3D(assert, resultant, force.y, -force.x, force.z, moment.y, -moment.x, moment.z,
         applPoint.y + 5, -applPoint.x + 6, applPoint.z + 7, "Rot Z 90 Move (5,6,7)");
     
+});
+
+QUnit.test( "Resultant-applyDistanceScale", function( assert ) {
+    var forceM = LBGeometry.createVector3(10, 20, 30);
+    var applPointM = LBGeometry.createVector3(3, 4, 0);
+    var momentM = LBGeometry.createVector3(5, 4, 3);
+    var resultant = new LBPhysics.Resultant3D(forceM, momentM, applPointM);
+    
+    var forceKM = forceM.clone().multiplyScalar(1e-3);
+    var applPointKM = applPointM.clone().multiplyScalar(1e-3);
+    var momentKM = momentM.clone().multiplyScalar(1e-3);
+    
+    resultant.applyDistanceScale(1e-3);
+    checkResultant3D(assert, resultant, forceKM.x, forceKM.y, forceKM.z,
+        momentKM.x, momentKM.y, momentKM.z, applPointKM.x, applPointKM.y, applPointKM.z, "applyDistanceScale");
 });
 
 QUnit.test( "CoordSystemState.calcVectorLocalToWorld()", function( assert ) {
