@@ -15,7 +15,7 @@
  */
 
 
-/* global Leeboard, QUnit */
+/* global Leeboard, QUnit, LBPhysics, LBGeometry, LBMath */
 
 QUnit.test( "ClCd.calcLiftDragMoment()", function( assert ) {
     var cl = 1;
@@ -109,7 +109,7 @@ QUnit.test( "Foil.calcLocalForce", function( assert ) {
     
     // The force is applied at the 25% chord point...
     refForce.sub(refInducedDrag);
-    var refR = LBGeometry.createVector2(2.5, 0);
+    var refR = LBGeometry.createVector2(-2.5, 0);
     var refMoment = LBPhysics.calcMoment(refForce, refR);
     
     checkVector3(assert, localForceResultant.moment, refMoment.x, refMoment.y, refMoment.z, "moment: ");

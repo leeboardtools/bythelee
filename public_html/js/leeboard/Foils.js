@@ -120,7 +120,7 @@ LBFoils.calcCmForClCd = function(degrees, cl, cd, chordFraction) {
     var alphaRad = degrees * LBMath.DEG_TO_RAD;
     var cosAlpha = Math.cos(alphaRad);
     var sinAlpha = Math.sin(alphaRad);            
-    return chordFraction * (cosAlpha * cl + sinAlpha * cd);
+    return -chordFraction * (cosAlpha * cl + sinAlpha * cd);
 };
 
 
@@ -196,7 +196,7 @@ LBFoils.ClCdStall.prototype = {
         
         // 45 degrees is our 0 point...
         store.cl = this.cl45Deg * Math.cos(2 * (degrees - 45) * LBMath.DEG_TO_RAD) * sign;    
-        store.cm = (0.46 + 0.04 * (degrees - 30) / 60) * sign;
+        store.cm = -(0.46 + 0.04 * (degrees - 30) / 60) * sign;
         store.cmIsChordFraction = true;
         
         return store;
@@ -288,6 +288,7 @@ LBFoils.ClCdInterp.prototype = {
         }
         else {
             store.cm = LBFoils.calcCmForClCd(degrees, store.cl, store.cd, 0.25);
+            store.cmIsChordFraction = false;
         }
         
         return store;

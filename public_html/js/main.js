@@ -202,7 +202,7 @@ PlayState._updateHUD = function() {
     }
     
     var position = this.myBoat.getPosition();
-    this.positionText.text = "Position: " + LBMath.round(position.x, 1) + " " + LBMath.round(-position.y, 1);
+    this.positionText.text = "Position: " + LBMath.round(position.x, 1) + " " + LBMath.round(position.y, 1);
    
     speed = this.myBoat.getApparentWindKnots();
     this.appWindSpeedText.text = "App Wind Speed: " + speed.toFixed(2);
