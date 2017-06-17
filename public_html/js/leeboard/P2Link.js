@@ -27,6 +27,7 @@
  */
 Leeboard.P2Link = function(game) {
     this.game = game;
+    this.game.physics.p2.world.applyGravity = false;
     
     /**
      * Set this to -1 to make the y-axis going up, otherwise set it to +1 to make the y-axis
@@ -159,7 +160,7 @@ Leeboard.P2Link.prototype = {
         var y = resultant.applPoint.y - rigidBody.obj3D.position.y;
         
         // Phaser negates the coordinate system between P2 and {@link PHaser.Physics.P2}.
-        p2Body.applyForce([-resultant.force.x, -this.p2link.ySign * resultant.force.x], 
+        p2Body.applyForce([-resultant.force.x, -this.p2link.ySign * resultant.force.y], 
             p2Body.world.mpxi(-x), p2Body.world.mpxi(-this.p2link.ySign * y));
     },
 

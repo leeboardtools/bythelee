@@ -235,10 +235,10 @@ PlayState._updateHUD = function() {
 //------------------------------ --------------------
 PlayState._handleInput = function() {
     if (this.cursorKeys.left.isDown) {
-        this.myBoat.moveRudder(-0.1, true);
+        this.myBoat.moveRudder(0.5, true);
     }
     else if (this.cursorKeys.right.isDown) {
-        this.myBoat.moveRudder(0.1, true);
+        this.myBoat.moveRudder(-0.5, true);
     }
     else if (this.cursorKeys.up.isDown) {
         //this.myBoat.moveMainsheet(-1);
