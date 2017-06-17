@@ -58,19 +58,37 @@ var LBGeometry = LBGeometry || {};
 /**
  * Calculates a 2D normal from a tangent.
  * @param {object} tangent  The tangent of interest.
+ * @param {object} [store] Optional object to store the normal into.
  * @returns {object}    The normal.
  */
-LBGeometry.tangentToNormalXY = function(tangent) {
-    return new THREE.Vector2(-tangent.y, tangent.x).normalize();
+LBGeometry.tangentToNormalXY = function(tangent, store) {
+    var nx = -tangent.y;
+    var ny = tangent.x;
+    if (!store) {
+        store = new THREE.Vector2(nx, ny);
+    }
+    else {
+        store.set(nx, ny);
+    }
+    return store.normalize();
 };
 
 /**
  * Calculates a 2D tangent from a normal.
  * @param {object} normal  The normal of interest.
+ * @param {object} [store]  Optional object to store the tangent into.
  * @returns {object}    The tangent.
  */
-LBGeometry.normalToTangentXY = function(normal) {
-    return new THREE.Vector2(normal.y, -normal.x).normalize();
+LBGeometry.normalToTangentXY = function(normal, store) {
+    var tx = normal.y;
+    var ty = -normal.x;
+    if (!store) {
+        store = new THREE.Vector2(tx, ty);
+    }
+    else {
+        store.set(tx, ty);
+    }
+    return store.normalize();
 };
 
 /**
@@ -95,14 +113,35 @@ LBGeometry.createVector2MagDeg = function(mag, deg) {
 };
 
 /**
- * Returns the angle, in radians, between this vector and another vector.
+ * Returns the angle, in radians, between this vector and another vector with the sign
+ * appropriate for the direction towards the other vector.
  * @param {object} v    The other vector.
  * @returns {Number}    The angle.
  */
-THREE.Vector2.prototype.angleTo = function(v) {
-    // Straight from THREE.js' Vector3.js
-    var theta = this.dot( v ) / ( Math.sqrt( this.lengthSq() * v.lengthSq() ) );
-    return Math.acos( LBMath.clamp( theta, - 1, 1 ) );
+THREE.Vector2.prototype.angleToSigned = function(v) {
+    var lengthSquards = this.lengthSq() * v.lengthSq();
+    if (LBMath.isLikeZero(lengthSquards)) {
+        return 0;
+    }
+    var cosTheta = this.dot( v ) / ( Math.sqrt(lengthSquards) );
+    cosTheta = LBMath.clamp( cosTheta, -1, 1);
+    
+    var theta;
+    if (LBMath.isNearEqual(cosTheta, -1)) {
+        theta = -Math.PI;
+    }
+    else if (LBMath.isNearEqual(cosTheta, 1)) {
+        theta = Math.PI;
+    }
+    else {
+        theta = Math.acos(cosTheta);
+    }
+    
+    // Now handle the sign...
+    if ((this.x * v.y - this.y * v.x) &lt; 0) {
+        theta = -theta;
+    }
+    return theta;
 };
 
 /**
@@ -213,7 +252,7 @@ THREE.Vector3.prototype.isZero = function() {
  */
 LBGeometry.loadVector2 = function(data, vec) {
     vec = vec || new THREE.Vector2();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         vec.zero();
     }
     else {
@@ -233,7 +272,7 @@ LBGeometry.loadVector2 = function(data, vec) {
  */
 LBGeometry.loadVector3 = function(data, vec) {
     vec = vec || new THREE.Vector3();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         vec.zero();
     }
     else {
@@ -319,7 +358,7 @@ LBGeometry.crossVectors3 = function(vecA, vecB) {
  * @param {object} vec  The vector of interest.
  * @returns {Boolean}   True if all three components can be treated as 0.
  */
-LBGeometry.isVectors2LikeZero = function(vec) {
+LBGeometry.isVector2LikeZero = function(vec) {
     return LBMath.isLikeZero(vec.x) &amp;&amp; LBMath.isLikeZero(vec.y);
 };
 
@@ -332,6 +371,18 @@ LBGeometry.isVector3LikeZero = function(vec) {
     return LBMath.isLikeZero(vec.x) &amp;&amp; LBMath.isLikeZero(vec.y) &amp;&amp; LBMath.isLikeZero(vec.z);
 };
 
+/**
+ * Limits the magnitude of a vector.
+ * @param {object} vec  The 2D or 3D vector.
+ * @param {number} mag  The maximum magnitude.
+ * @returns {object}    vec.
+ */
+LBGeometry.clampVectorMag = function(vec, mag) {
+    if (vec.lengthSq() > mag * mag) {
+        vec.setLength(mag);
+    }
+    return vec;
+};
 
 /**
  * Creates a quaternion.
@@ -352,7 +403,7 @@ LBGeometry.createQuaternion = function(x, y, z, w) {
  */
 LBGeometry.loadQuaternion = function(data, quat) {
     quat = quat || new THREE.Quaternion();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         quat.set(0, 0, 0, 1);
     }
     else {
@@ -384,9 +435,9 @@ LBGeometry.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
  * @param {number} yRad The rotation about the y axis in radians.
  * @param {number} zRad The rotation about the z axis in radians.
  * @param {object} order    The order of rotation.
- * @returns {object}    The THREE.Euler compatible quaternion.
+ * @returns {object}    The THREE.Euler compatible object.
  */
-LBGeometry.createEuler = function(xRad, yRad, zRad, order) {
+LBGeometry.createEulerRad = function(xRad, yRad, zRad, order) {
     return new THREE.Euler(xRad, yRad, zRad, order);
 };
 
@@ -396,9 +447,9 @@ LBGeometry.createEuler = function(xRad, yRad, zRad, order) {
  * @param {number} yDeg The rotation about the y axis in degrees.
  * @param {number} zDeg The rotation about the z axis in degrees.
  * @param {object} order    The order of rotation.
- * @returns {object}    The THREE.Euler compatible quaternion.
+ * @returns {object}    The THREE.Euler compatible object.
  */
-LBGeometry.createEuler = function(xDeg, yDeg, zDeg, order) {
+LBGeometry.createEulerDeg = function(xDeg, yDeg, zDeg, order) {
     return new THREE.Euler(xDeg * LBMath.DEG_TO_RAD, yDeg * LBMath.DEG_TO_RAD, zDeg * LBMath.DEG_TO_RAD, order);
 };
 
@@ -410,10 +461,11 @@ LBGeometry.createEuler = function(xDeg, yDeg, zDeg, order) {
  */
 LBGeometry.loadEuler = function(data, euler) {
     euler = euler || new THREE.Euler();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         euler.set(0, 0, 0, THREE.Euler.DefaultOrder);
     }
     else {
+        // Need to use Leeboard.isVar(), data.exd might be 0.
         if (Leeboard.isVar(data.exd)) {
             euler.x = (data.exd || 0) * LBMath.DEG_TO_RAD;
             euler.y = (data.eyd || 0) * LBMath.DEG_TO_RAD;
@@ -486,7 +538,7 @@ LBGeometry.Line2.prototype = {
  */
 LBGeometry.loadLine2 = function(data, line) {
     line = line || LBGeometry.createLine2();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         line.start.zero();
         line.end.zero();
     }
@@ -516,7 +568,7 @@ LBGeometry.createLine3 = function(start, end) {
  */
 LBGeometry.loadLine3 = function(data, line) {
     line = line || LBGeometry.createLine3();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         line.start.zero();
         line.end.zero();
     }
@@ -602,18 +654,18 @@ LBGeometry.createMatrix3 = function() {
  * @returns {object}    The loaded matrix.
  */
 LBGeometry.loadMatrix3 = function(data, mat) {
-    if (Leeboard.isVar(mat)) {
+    if (mat) {
         mat.identity();
     }
     else {
         mat = new THREE.Matrix3();
     }
     
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         return mat;
     }
     
-    if (Leeboard.isVar(data.elements)) {
+    if (data.elements) {
         var count = Math.min(data.elements.length, mat.elements.length);
         for (var i = 0; i &lt; count; ++i) {
             mat.elements[i] = data.elements[i];
@@ -641,18 +693,18 @@ LBGeometry.createMatrix4 = function() {
  * @returns {object}    The matrix.
  */
 LBGeometry.loadMatrix4 = function(data, mat) {
-    if (Leeboard.isVar(mat)) {
+    if (mat) {
         mat.identity();
     }
     else {
         mat = new THREE.Matrix4();
     }
     
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         return mat;
     }
     
-    if (Leeboard.isVar(data.elements)) {
+    if (data.elements) {
         var count = Math.min(data.elements.length, mat.elements.length);
         for (var i = 0; i &lt; count; ++i) {
             mat.elements[i] = data.elements[i];
@@ -662,7 +714,8 @@ LBGeometry.loadMatrix4 = function(data, mat) {
         }
     }
     else {
-        if (Leeboard.isVar(data.rotation)) {
+        if (data.rotation) {
+            // Need to use Leeboard.isVar() here because the values may be 0..
             if (Leeboard.isVar(data.rotation.ex) || Leeboard.isVar(data.rotation.exd)) {
                 // Euler angles...
                 var euler = LBGeometry.loadEuler(data.rotation);
@@ -675,7 +728,7 @@ LBGeometry.loadMatrix4 = function(data, mat) {
             }
         }
         
-        if (Leeboard.isVar(data.origin)) {
+        if (data.origin) {
             var origin = LBGeometry.loadVector3(data.origin);
             mat.setPosition(origin);
         }
@@ -758,14 +811,14 @@ LBGeometry.createObject3D = function() {
  * @returns {object}    this.
  */
 LBGeometry.loadObject3DBasic = function(data, obj3D) {
-    if (!Leeboard.isVar(obj3D)) {
+    if (!obj3D) {
         obj3D = LBGeometry.createObject3D();
     }
     
     obj3D.name = data.name || "";
     
     LBGeometry.loadVector3(data.position, obj3D.position);
-    if (Leeboard.isVar(data.rotation)) {
+    if (data.rotation) {
         LBGeometry.loadEuler(data.rotation, obj3D.rotation);
     }
     else {
@@ -784,19 +837,19 @@ LBGeometry.loadObject3DBasic = function(data, obj3D) {
  * @returns {object}    The 3D object.
  */
 LBGeometry.createObject3DFromData = function(data) {
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         return LBGeometry.createObject3D();
     }
     
     var obj3D;
-    if (Leeboard.isVar(data.construct)) {
+    if (data.construct) {
         obj3D = eval(data.construct);
     }
     else {
         obj3D = LBGeometry.createObject3D();
     }
     
-    if (Leeboard.isVar(obj3D.load)) {
+    if (obj3D.load) {
         obj3D.load(data);
     }
     else {
@@ -816,13 +869,13 @@ LBGeometry.createObject3DFromData = function(data) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 11 2017 10:44:51 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:49 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

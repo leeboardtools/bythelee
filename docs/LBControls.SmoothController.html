@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: ClCdStall</title>
+    <title>JSDoc: Class: SmoothController</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: ClCdStall</h1>
+    <h1 class="page-title">Class: SmoothController</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="LBFoils.html">LBFoils</a>.</span>ClCdStall</h2>
+            <span class="ancestors"><a href="LBControls.html">LBControls</a>.</span>SmoothController</h2>
         
     
 </header>
@@ -41,15 +41,14 @@
 
     
 
-    <h4 class="name" id="ClCdStall"><span class="type-signature"></span>new ClCdStall<span class="signature">(cl45Deg, cd45Deg, cd90Deg)</span><span class="type-signature"> &rarr; {<a href="LBFoils.ClCdStall.html">LBFoils.ClCdStall</a>}</span></h4>
+    <h4 class="name" id="SmoothController"><span class="type-signature"></span>new SmoothController<span class="signature">(name<span class="signature-attributes">opt</span>, minValue<span class="signature-attributes">opt</span>, maxValue<span class="signature-attributes">opt</span>, initialValue<span class="signature-attributes">opt</span>, controllee)</span><span class="type-signature"> &rarr; {<a href="LBControls.SmoothController.html">LBControls.SmoothController</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Object that computes an approximation of the lift/drag/moment coefficients
-of a flat plate when stalled.
+    A controller whose value is any value between a minimum and a maximum value.
 </div>
 
 
@@ -73,7 +72,11 @@ of a flat plate when stalled.
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -85,30 +88,46 @@ of a flat plate when stalled.
 
         <tr>
             
-                <td class="name"><code>cl45Deg</code></td>
+                <td class="name"><code>name</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">string</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">The Cl value at 45 degrees angle of attack.</td>
+            
+                <td class="default">
+                
+                    ""
+                
+                </td>
+            
+
+            <td class="description last">The name for the controller, used to identify the controller.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>cd45Deg</code></td>
+                <td class="name"><code>minValue</code></td>
             
 
             <td class="type">
@@ -121,17 +140,33 @@ of a flat plate when stalled.
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">The Cd value at 45 degrees angle of attack.</td>
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">The minimum value allowed.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>cd90Deg</code></td>
+                <td class="name"><code>maxValue</code></td>
             
 
             <td class="type">
@@ -144,10 +179,100 @@ of a flat plate when stalled.
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">The Cd value at 90 degrees angle of attachk.</td>
+            
+                <td class="default">
+                
+                    100
+                
+                </td>
+            
+
+            <td class="description last">The maximum value allowed.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>initialValue</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    minValue
+                
+                </td>
+            
+
+            <td class="description last">The initial value.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>controllee</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The function called whenever the controller's value is changed.</td>
         </tr>
 
     
@@ -188,7 +313,7 @@ of a flat plate when stalled.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line149">line 149</a>
+        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line35">line 35</a>
     </li></ul></dd>
     
 
@@ -222,7 +347,7 @@ of a flat plate when stalled.
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBFoils.ClCdStall.html">LBFoils.ClCdStall</a></span>
+<span class="param-type"><a href="LBControls.SmoothController.html">LBControls.SmoothController</a></span>
 
 
     </dd>
@@ -250,26 +375,18 @@ of a flat plate when stalled.
 
         
             
-<h4 class="name" id="cd45Deg"><span class="type-signature"></span>cd45Deg<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="controllee"><span class="type-signature"></span>controllee<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    The coefficient of drag at 45 degrees angle of attack.
+    The function that is called whenever the value of the controller changes.
+It should have the signature:<p>
+controllee = function(currentValue, controller) {}
 </div>
 
 
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
 
 
 
@@ -304,7 +421,7 @@ of a flat plate when stalled.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line160">line 160</a>
+        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line66">line 66</a>
     </li></ul></dd>
     
 
@@ -322,13 +439,13 @@ of a flat plate when stalled.
 
         
             
-<h4 class="name" id="cd90Deg"><span class="type-signature"></span>cd90Deg<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="currentValue"><span class="type-signature"></span>currentValue<span class="type-signature"> :number</span></h4>
 
 
 
 
 <div class="description">
-    The coefficient of drag at 90 degrees angle of attack (the lift is 0 at 90 degrees).
+    The current value of the controller.
 </div>
 
 
@@ -376,7 +493,7 @@ of a flat plate when stalled.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line166">line 166</a>
+        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line59">line 59</a>
     </li></ul></dd>
     
 
@@ -394,13 +511,13 @@ of a flat plate when stalled.
 
         
             
-<h4 class="name" id="cl45Deg"><span class="type-signature"></span>cl45Deg<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="maxValue"><span class="type-signature"></span>maxValue<span class="type-signature"> :number</span></h4>
 
 
 
 
 <div class="description">
-    The coefficient of lift at 45 degrees angle of attack.
+    The maximum value allowed by the controller.
 </div>
 
 
@@ -448,7 +565,79 @@ of a flat plate when stalled.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line154">line 154</a>
+        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line48">line 48</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="minValue"><span class="type-signature"></span>minValue<span class="type-signature"> :number</span></h4>
+
+
+
+
+<div class="description">
+    The minimum value allowed by the controller.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line42">line 42</a>
     </li></ul></dd>
     
 
@@ -475,14 +664,114 @@ of a flat plate when stalled.
 
     
 
-    <h4 class="name" id=".createFromData"><span class="type-signature">(static) </span>createFromData<span class="signature">(data)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="getValue"><span class="type-signature"></span>getValue<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
 
     
 
 
 
 <div class="description">
-    Creates and load a <a href="LBFoils.ClCdStall.html">LBFoils.ClCdStall</a> object from properties in a data object.
+    Retrieves the current value of the controller.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line76">line 76</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="load"><span class="type-signature"></span>load<span class="signature">(data, owner)</span><span class="type-signature"> &rarr; {<a href="LBControls.SmoothController.html">LBControls.SmoothController</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Loads the controller from properties in a data object.
 </div>
 
 
@@ -538,163 +827,10 @@ of a flat plate when stalled.
         </tr>
 
     
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line226">line 226</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The loaded object, undefined if data is undefined.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="calcCoefsDeg"><span class="type-signature"></span>calcCoefsDeg<span class="signature">(degrees, store)</span><span class="type-signature"> &rarr; {object}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Calculates the coefficients of lift, drag and moment for a given angle of attack in degrees.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
 
         <tr>
             
-                <td class="name"><code>degrees</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The angle of attack in degrees.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>store</code></td>
+                <td class="name"><code>owner</code></td>
             
 
             <td class="type">
@@ -710,7 +846,7 @@ of a flat plate when stalled.
 
             
 
-            <td class="description last">If not undefined, the object to store the coefficients in.</td>
+            <td class="description last">An object for use by derived implementations.</td>
         </tr>
 
     
@@ -751,160 +887,7 @@ of a flat plate when stalled.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line190">line 190</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The object with the lift, drag, and moment coefficients (cl, cd, cm).
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="load"><span class="type-signature"></span>load<span class="signature">(data)</span><span class="type-signature"> &rarr; {object}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Loader method.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The data, typically loaded from a JSON file.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line177">line 177</a>
+        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line108">line 108</a>
     </li></ul></dd>
     
 
@@ -942,7 +925,184 @@ of a flat plate when stalled.
     </dt>
     <dd>
         
-<span class="param-type">object</span>
+<span class="param-type"><a href="LBControls.SmoothController.html">LBControls.SmoothController</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setValue"><span class="type-signature"></span>setValue<span class="signature">(value, isOffset)</span><span class="type-signature"> &rarr; {<a href="LBControls.SmoothController.html">LBControls.SmoothController</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Sets the value for the controller.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The new value.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>isOffset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If true value is an offset to be added to the
+current value of the controller.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line87">line 87</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBControls.SmoothController.html">LBControls.SmoothController</a></span>
 
 
     </dd>

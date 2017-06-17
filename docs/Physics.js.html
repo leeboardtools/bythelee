@@ -57,6 +57,7 @@ var LBPhysics = LBPhysics || {};
  * force being applied at position.
  */
 LBPhysics.calcMoment = function(force, position) {
+    // Need to use Leeboard.isVar() because z is numeric.
     if (!Leeboard.isVar(force.z)) {
         return LBGeometry.crossVectors2(position, force);
     }
@@ -212,6 +213,20 @@ LBPhysics.Resultant3D.prototype = {
     
     
     /**
+     * Applies a scale to all the distance related components of the resultant,
+     * used for changing distance units.
+     * @param {number} scale    The scale to apply.
+     * @returns {LBPhysics.Resultant3D} this.
+     */
+    applyDistanceScale: function(scale) {
+        this.force.multiplyScalar(scale);
+        this.moment.multiplyScalar(scale);
+        this.applPoint.multiplyScalar(scale);
+        return this;
+    },
+    
+    
+    /**
      * Determines if the resultant does not apply a force or moment.
      * @returns {Boolean}   True if both the force and moment are zero.
      */
@@ -247,6 +262,7 @@ LBPhysics.CoordSystemState = function() {
     this.prevWorldXfrm = LBGeometry.createMatrix4();
     this.prevLocalXfrm = LBGeometry.createMatrix4();
     this.dt = 0;
+    this.isXfrmsValid = false;
     
     this.workingPos = LBGeometry.createVector3();
     this.workingPrevPos = LBGeometry.createVector3();
@@ -267,6 +283,7 @@ LBPhysics.CoordSystemState.prototype = {
      * @returns {LBPhysics.CoordSystemState} this.
      */
     setXfrms: function(worldXfrm, dt, localXfrm) {
+        // Need to use Leeboard.isVar() because dt is numeric.
         if (Leeboard.isVar(dt) &amp;&amp; (dt > 0)) {
             // Save the current transforms...
             this.dt = dt;
@@ -277,8 +294,8 @@ LBPhysics.CoordSystemState.prototype = {
             this.dt = 0;
         }
         
-        if (!Leeboard.isVar(localXfrm)) {
-            if (!Leeboard.isVar(worldXfrm)) {
+        if (!localXfrm){
+            if (!worldXfrm) {
                 // Presume they're both going to be identity...
                 this.worldXfrm.identity();
                 this.localXfrm.identity();
@@ -288,7 +305,7 @@ LBPhysics.CoordSystemState.prototype = {
                 this.worldXfrm.copy(worldXfrm);
             }
         }
-        else if (!Leeboard.isVar(worldXfrm)) {
+        else if (!worldXfrm) {
             this.localXfrm.copy(localXfrm);
             this.worldXfrm.getInverse(localXfrm);
         }
@@ -297,13 +314,22 @@ LBPhysics.CoordSystemState.prototype = {
             this.worldXfrm.copy(worldXfrm);
         }
         
-        if (this.dt === 0) {
+        if ((this.dt === 0) || !this.isXfrmsValid) {
             // No time change, make the previous transforms match the current transforms.
             this.prevWorldXfrm.copy(this.worldXfrm);
             this.prevLocalXfrm.copy(this.localXfrm);
         }
+        this.isXfrmsValid = true;
         
         return this;
+    },
+    
+    /**
+     * Marks the coordinate transforms as invalid so the initial transforms are not
+     * saved for velocity calculations.
+     */
+    reset: function() {
+        this.isXfrmsValid = false;
     },
     
     
@@ -313,20 +339,20 @@ LBPhysics.CoordSystemState.prototype = {
      * @param {object} localPos The local coordinates of the point of interest.
      * @param {object} results  The object to receive the results. Results are stored
      * in keys, and are only computed if the key exists:
-     *      worldPos: The world coordinates of localPos.
-     *      worldVel:   The velocity of localPos in world coordinates.
-     *      localVel:   The velocity of localPos in local coordinates.
+     *      &lt;li>worldPos: The world coordinates of localPos.
+     *      &lt;li>worldVel:   The velocity of localPos in world coordinates.
+     *      &lt;li>localVel:   The velocity of localPos in local coordinates.
      * @param {object} [prevLocalPos] If defined, the previous local position, used for velocity calculation,
      * if not defined then the previous position is presumed to be localPos.
      * @returns {LBPhysics.CoordSystemState} this.
      */
     calcVectorLocalToWorld: function(localPos, results, prevLocalPos) {
-        var worldPos = Leeboard.isVar(results.worldPos) ? results.worldPos : this.workingPos;
+        var worldPos = results.worldPos || this.workingPos;
         worldPos.copy(localPos);
         worldPos.applyMatrix4(this.worldXfrm);
 
-        var isWorldVel = Leeboard.isVar(results.worldVel);
-        var isLocalVel = Leeboard.isVar(results.localVel);
+        var isWorldVel = results.worldVel;
+        var isLocalVel = results.localVel;
         if (isWorldVel || isLocalVel) {
             if (this.dt &lt;= 0) {
                 // No time change, no velocity.
@@ -358,6 +384,78 @@ LBPhysics.CoordSystemState.prototype = {
     constructor: LBPhysics.CoordSystemState
 };
 
+/**
+ * Loads a moment of inertia tensor from properties in a data object
+ * @param {object} data The data object to load from.
+ * @param {object} [store]  If defined the object to load the tensor into.
+ * @returns {object}    The moment of inertia tensor.
+ */
+LBPhysics.loadMomentInertia = function(data, store) {
+    store = store || LBGeometry.createMatrix3();
+    
+    var xx = data.xx || 0;
+    var xy = data.xy || 0;
+    var xz = data.xz || 0;
+    var yy = data.yy || 0;
+    var yz = data.yz || 0;
+    var zz = data.zz || 0;
+    store.set(xx, xy, xz, xy, yy, yz, xz, yz, zz);
+    return store;
+};
+
+/**
+ * Returns the Ixx term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Ixx term.
+ */
+LBPhysics.getInertiaXX = function(inertia) {
+    return inertia.elements[0];
+};
+
+/**
+ * Returns the Ixy term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Ixy term.
+ */
+LBPhysics.getInertiaXY = function(inertia) {
+    return inertia.elements[1];
+};
+
+/**
+ * Returns the Ixz term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Ixz term.
+ */
+LBPhysics.getInertiaXZ = function(inertia) {
+    return inertia.elements[1];
+};
+
+/**
+ * Returns the Iyy term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Iyy term.
+ */
+LBPhysics.getInertiaYY = function(inertia) {
+    return inertia.elements[4];
+};
+
+/**
+ * Returns the Iyz term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Iyz term.
+ */
+LBPhysics.getInertiaYZ = function(inertia) {
+    return inertia.elements[1];
+};
+
+/**
+ * Returns the Izz term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Izz term.
+ */
+LBPhysics.getInertiaZZ = function(inertia) {
+    return inertia.elements[8];
+};
 
 /**
  * A rigid body for purposes of force calculations. A rigid body has mass, a position
@@ -382,14 +480,22 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     this.centerOfMass = centerOfMass || LBGeometry.createVector3();
     
     this.obj3D = obj3D || LBGeometry.createObject3D();
-    this.coords = new LBPhysics.CoordSystemState();
+    this.coordSystem = new LBPhysics.CoordSystemState();
+    this.coordSystemResults = {
+        "worldVel": LBGeometry.createVector3(),
+        "localVel": LBGeometry.createVector3()
+    };
+    this.worldLinearVelocity = this.coordSystemResults.worldVel;
+    this.localLinearVelocity = this.coordSystemResults.localVel;
     
     this.resultant = new LBPhysics.Resultant3D();
 
     this.parts = [];
-    if (Leeboard.isVar(base)) {
+    if (base) {
         base.addPart(this);
     }
+    
+    this.isAddPartObj3DsAsChildren = true;
     
     this.isEnabled = true;
     
@@ -397,8 +503,9 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     this.totalMass = 0;
     this.totalMomentInertia = LBGeometry.createVector3();
     this.totalCenterOfMass = LBGeometry.createVector3();
+    this.totalResultant = new LBPhysics.Resultant3D();
     
-    if (Leeboard.isVar(obj3D)) {
+    if (obj3D) {
         this.updateCoords(0);
     }
 };
@@ -414,7 +521,7 @@ LBPhysics.RigidBody.prototype = {
     load: function(data) {
         this.loadBase(data);
         
-        if (Leeboard.isVar(data.obj3D)) {
+        if (data.obj3D) {
             this.obj3D = LBGeometry.createObject3DFromData(data.obj3D);
         }
         return this;
@@ -429,8 +536,11 @@ LBPhysics.RigidBody.prototype = {
     loadBase: function(data) {
         this.name = data.name || this.name;
         this.mass = data.mass || this.mass;
-        LBGeometry.loadVector3(data.centerOfMass, this.centerOfMass);
-        LBGeometry.loadMatrix3(data.momentInertia, this.momentInertia);
+        LBGeometry.loadVector3(data.centerOfMass, this.centerOfMass);        
+        if (data.momentInertia) {
+            LBPhysics.loadMomentInertia(data.momentInertia, this.momentInertia);
+        }
+        
         this.physicalPropertiesDirty = true;
         return this;
     },
@@ -442,13 +552,17 @@ LBPhysics.RigidBody.prototype = {
      * @returns {LBPhysics.RigidBody} this.
      */
     addPart: function(part) {
-        if (Leeboard.isVar(part.base)) {
+        if (part.base) {
             part.base.removePart(part);
         }
         
         this.parts.push(part);
         part.base = this;
         this.physicalPropertiesDirty = true;
+        
+        if (this.isAddPartObj3DsAsChildren) {
+            this.obj3D.add(part.obj3D);
+        }
         
         return this;
     },
@@ -463,6 +577,9 @@ LBPhysics.RigidBody.prototype = {
             var index = this.parts.indexOf(part);
             if (index >= 0) {
                 this.parts.splice(index, 1);
+                if (this.isAddPartObj3DsAsChildren) {
+                    this.obj3D.remove(part.obj3D);
+                }
             }
             part.base = undefined;
             this.physicalPropertiesDirty = true;
@@ -489,8 +606,18 @@ LBPhysics.RigidBody.prototype = {
      * @returns {LBPhysics.RigidBody}   this.
      */
     setZRotationRad: function(rad) {
-        this.obj3D.rotateZ(rad);
+        this.obj3D.setRotationFromEuler(LBGeometry.createEulerRad(0, 0, rad));
         return this;
+    },
+    
+    /**
+     * Sets the rotation of the rigid body about the z-axis, in degrees.
+     * @param {number} deg  The rotation about the z-axis, in degrees. The rotation
+     * is absolute with respect to the base's coordinate system.
+     * @returns {LBPhysics.RigidBody}   this.
+     */
+    setZRotationDeg: function(deg) {
+        return this.setZRotationRad(deg * LBMath.DEG_TO_RAD);
     },
 
     /**
@@ -500,6 +627,7 @@ LBPhysics.RigidBody.prototype = {
      */
     clearForces: function() {
         this.resultant.zero();
+        this.totalResultant.zero();
         for (var i = 0; i &lt; this.parts.length; ++i) {
             this.parts[i].clearForces();
         }
@@ -517,7 +645,8 @@ LBPhysics.RigidBody.prototype = {
     updateCoords: function(dt) {
         this.physicalPropertiesDirty = true;
 
-        this.coords.setXfrms(this.obj3D.matrixWorld, dt);
+        this.coordSystem.setXfrms(this.obj3D.matrixWorld, dt);
+        this.coordSystem.calcVectorLocalToWorld(this.centerOfMass, this.coordSystemResults);
         
         // Don't forget the parts...
         for (var i = 0; i &lt; this.parts.length; ++i) {
@@ -550,14 +679,22 @@ LBPhysics.RigidBody.prototype = {
     
     /**
      * Retrieves the resultant in world coordinates.
+     * @param {Boolean} convertToWrench If true the resultant is converted to a wrench,
+     * otherwise its application point is set to the total center of mass.
      * @returns {LBPhysics.Resultant3D} The resultant in world coordinates.
      */
-    getResultant: function() {
+    getResultant: function(convertToWrench) {
+        this.totalResultant.copy(this.resultant);
         for (var i = 0; i &lt; this.parts.length; ++i) {
-            this.resultant.addResultant(this.parts[i].getResultant());
+            this.totalResultant.addResultant(this.parts[i].getResultant());
         }
-        this.resultant.moveApplPoint(getTotalCenterOfMass());
-        return this.resultant;
+        if (convertToWrench) {
+            this.totalResultant.convertToWrench();
+        }
+        else {
+            this.totalResultant.moveApplPoint(this.getTotalCenterOfMass());
+        }
+        return this.totalResultant;
     },
     
     /**
@@ -571,7 +708,7 @@ LBPhysics.RigidBody.prototype = {
             this.totalMass = this.mass;
             
             this.totalCenterOfMass.copy(this.centerOfMass);
-            this.totalCenterOfMass.applyMatrix4(this.coords.worldXfrm);            
+            this.totalCenterOfMass.applyMatrix4(this.coordSystem.worldXfrm);            
             this.totalCenterOfMass.multiplyScalar(this.mass);
             
             this.totalMomentInertia.copy(this.momentInertia);
@@ -638,19 +775,19 @@ LBPhysics.RigidBody.prototype = {
  * @returns {object}    The foil object, undefined if both data and defCreatorFunc are not defined.
  */
 LBPhysics.RigidBody.createFromData = function(data, defCreatorFunc) {
-    if (!Leeboard.isVar(data)) {
-        if (Leeboard.isVar(defCreatorFunc)) {
+    if (!data) {
+        if (defCreatorFunc) {
             return defCreatorFunc();
         }
         return undefined;
     }
     
     var rigidBody;
-    if (Leeboard.isVar(data.construct)) {
+    if (data.construct) {
         rigidBody = eval(data.construct);
     }
     else {
-        if (Leeboard.isVar(defCreatorFunc)) {
+        if (defCreatorFunc) {
             rigidBody = defCreatorFunc(data);
         }
         else {
@@ -670,13 +807,13 @@ LBPhysics.RigidBody.createFromData = function(data, defCreatorFunc) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 11 2017 10:44:51 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:49 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

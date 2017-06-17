@@ -47,42 +47,6 @@
  */
 var Leeboard = Leeboard || {};
 
-/**
-* Convert p2 physics value (meters) to pixel scale, overloads Phaser.Physics.P2#mpx.
-* @param {number} v - The value to convert.
-* @return {number} The scaled value.
-*/
-Leeboard.mpx = function (v) {
-    return v *= 20;
-};
-
-/**
-* Convert pixel value to p2 physics scale (meters), overloads Phaser.Physics.P2#pxm
-* @param {number} v - The value to convert.
-* @return {number} The scaled value.
-*/
-Leeboard.pxm = function (v) {
-    return v * 0.05;
-};
-
-/**
-* Convert p2 physics value (meters) to pixel scale and inverses it, overloads Phaser.Physics.P2#mpxi
-* @param {number} v - The value to convert.
-* @return {number} The scaled value.
-*/
-Leeboard.mpxi = function (v) {
-    return v *= -20;
-};
-
-/**
-* Convert pixel value to p2 physics scale (meters) and inverses it, overloads Phaser.Physics.P2#pxmi.
-* @param {number} v - The value to convert.
-* @return {number} The scaled value.
-*/
-Leeboard.pxmi = function (v) {
-    return v * -0.05;
-};
-
 
 /**
  * Converts meters per second to knots.
@@ -154,7 +118,7 @@ Leeboard.copyCommonProperties = function(dst, src, filter) {
                 function(val, idx, array) {
                     if (src[val] !== undefined) {
                         if (filter(val, dst, src)) {
-                            dst[val] = src[val];
+                            dst[val] = Leeboard.copyObject(dst[val], src[val]);
                         }
                     }
                 }
@@ -164,12 +128,22 @@ Leeboard.copyCommonProperties = function(dst, src, filter) {
         Object.getOwnPropertyNames(dst).forEach(
                 function(val, idx, array) {
                     if (src[val] !== undefined) {
-                        dst[val] = src[val];
+                        dst[val] = Leeboard.copyObject(dst[val], src[val]);
                     }
                 }
         );
     }
     return dst;
+};
+
+Leeboard.copyObject = function(dst, src) {
+    if (typeof dst === "object") {
+        if (typeof dst.copy === "function") {
+            dst.copy(src);
+            return dst;
+        }
+    }
+    return src;
 };
 
 
@@ -183,6 +157,40 @@ Leeboard.isVar = function(v) {
 };
 
 
+/**
+ * Looks through the elements of an array for the first one with a property called 'name'
+ * whose value matches a given name.
+ * @param {object} array    The array to search.
+ * @param {object} name The name to look for.
+ * @param {object} [defValue=undefined]   The value to return if an element is not found.
+ * @returns {object}    The object, defValue if no element found.
+ */
+Leeboard.findArrayElementWithName = function(array, name, defValue) {
+    for (var i = 0; i &lt; array.length; ++i) {
+        if (array[i].name === name) {
+            return array[i];
+        }
+    }
+    return defValue;
+};
+
+/**
+ * Copies the contents of an array, followed by the same contents except in reverse order,
+ * into a new array.
+ * @param {Array} array    The array to be copied and mirrored.
+ * @returns {Array} The new array, undefined/null if array is undefined/null.
+ */
+Leeboard.copyAndMirrorArray = function(array) {
+    if (!array) {
+        return array;
+    }
+    
+    var newArray = array.slice();
+    for (var i = array.length - 1; i >= 0; --i) {
+        newArray.push(array[i]);
+    }
+    return newArray;
+};
 </code></pre>
         </article>
     </section>
@@ -193,13 +201,13 @@ Leeboard.isVar = function(v) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 11 2017 10:44:51 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:49 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -50,7 +50,13 @@ LBSailSim.P2Env.prototype._boatReturned = function(boat) {
     this.p2Link.removeLinkByRigidBody(boat);
 };
 
-LBSailSim.P2Env.prototype.update = function(dt) {
+/**
+ * The main simulation update method, call from the {@Phaser.State}'s update() method.
+ * @returns {undefined}
+ */
+LBSailSim.P2Env.prototype.update = function() {
+    var dt = Leeboard.P2Link.getP2TimeStep(this.game.physics.p2);
+    
     LBSailSim.Env.prototype.update.call(this, dt);
     this.p2Link.updateFromP2();
     this.p2Link.applyToP2(dt);

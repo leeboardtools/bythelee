@@ -235,21 +235,21 @@ PlayState._updateHUD = function() {
 //------------------------------ --------------------
 PlayState._handleInput = function() {
     if (this.cursorKeys.left.isDown) {
-        this.myBoat.moveRudder(-0.1, false);
+        this.myBoat.moveRudder(-0.1, true);
     }
     else if (this.cursorKeys.right.isDown) {
-        this.myBoat.moveRudder(0.1, false);
+        this.myBoat.moveRudder(0.1, true);
     }
     else if (this.cursorKeys.up.isDown) {
         //this.myBoat.moveMainsheet(-1);
-        this.myBoat.moveThrottle(0.1);
+        this.myBoat.moveThrottle(0.1, true);
     }
     else if (this.cursorKeys.down.isDown) {
         //this.myBoat.moveMainsheet(1);
-        this.myBoat.moveThrottle(-0.1);
+        this.myBoat.moveThrottle(-0.1, true);
     }
     else if (this.keys.space.isDown) {
-        this.myBoat.moveRudder(0, true);
+        this.myBoat.moveRudder(0, false);
     }
     else if (this.keys.t.isDown) {
         this.debounceT = true;

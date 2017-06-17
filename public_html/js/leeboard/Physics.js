@@ -29,6 +29,7 @@ var LBPhysics = LBPhysics || {};
  * force being applied at position.
  */
 LBPhysics.calcMoment = function(force, position) {
+    // Need to use Leeboard.isVar() because z is numeric.
     if (!Leeboard.isVar(force.z)) {
         return LBGeometry.crossVectors2(position, force);
     }
@@ -254,6 +255,7 @@ LBPhysics.CoordSystemState.prototype = {
      * @returns {LBPhysics.CoordSystemState} this.
      */
     setXfrms: function(worldXfrm, dt, localXfrm) {
+        // Need to use Leeboard.isVar() because dt is numeric.
         if (Leeboard.isVar(dt) && (dt > 0)) {
             // Save the current transforms...
             this.dt = dt;
@@ -264,8 +266,8 @@ LBPhysics.CoordSystemState.prototype = {
             this.dt = 0;
         }
         
-        if (!Leeboard.isVar(localXfrm)) {
-            if (!Leeboard.isVar(worldXfrm)) {
+        if (!localXfrm){
+            if (!worldXfrm) {
                 // Presume they're both going to be identity...
                 this.worldXfrm.identity();
                 this.localXfrm.identity();
@@ -275,7 +277,7 @@ LBPhysics.CoordSystemState.prototype = {
                 this.worldXfrm.copy(worldXfrm);
             }
         }
-        else if (!Leeboard.isVar(worldXfrm)) {
+        else if (!worldXfrm) {
             this.localXfrm.copy(localXfrm);
             this.worldXfrm.getInverse(localXfrm);
         }
@@ -317,12 +319,12 @@ LBPhysics.CoordSystemState.prototype = {
      * @returns {LBPhysics.CoordSystemState} this.
      */
     calcVectorLocalToWorld: function(localPos, results, prevLocalPos) {
-        var worldPos = Leeboard.isVar(results.worldPos) ? results.worldPos : this.workingPos;
+        var worldPos = results.worldPos || this.workingPos;
         worldPos.copy(localPos);
         worldPos.applyMatrix4(this.worldXfrm);
 
-        var isWorldVel = Leeboard.isVar(results.worldVel);
-        var isLocalVel = Leeboard.isVar(results.localVel);
+        var isWorldVel = results.worldVel;
+        var isLocalVel = results.localVel;
         if (isWorldVel || isLocalVel) {
             if (this.dt <= 0) {
                 // No time change, no velocity.
@@ -461,7 +463,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     this.resultant = new LBPhysics.Resultant3D();
 
     this.parts = [];
-    if (Leeboard.isVar(base)) {
+    if (base) {
         base.addPart(this);
     }
     
@@ -475,7 +477,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     this.totalCenterOfMass = LBGeometry.createVector3();
     this.totalResultant = new LBPhysics.Resultant3D();
     
-    if (Leeboard.isVar(obj3D)) {
+    if (obj3D) {
         this.updateCoords(0);
     }
 };
@@ -491,7 +493,7 @@ LBPhysics.RigidBody.prototype = {
     load: function(data) {
         this.loadBase(data);
         
-        if (Leeboard.isVar(data.obj3D)) {
+        if (data.obj3D) {
             this.obj3D = LBGeometry.createObject3DFromData(data.obj3D);
         }
         return this;
@@ -522,7 +524,7 @@ LBPhysics.RigidBody.prototype = {
      * @returns {LBPhysics.RigidBody} this.
      */
     addPart: function(part) {
-        if (Leeboard.isVar(part.base)) {
+        if (part.base) {
             part.base.removePart(part);
         }
         
@@ -745,19 +747,19 @@ LBPhysics.RigidBody.prototype = {
  * @returns {object}    The foil object, undefined if both data and defCreatorFunc are not defined.
  */
 LBPhysics.RigidBody.createFromData = function(data, defCreatorFunc) {
-    if (!Leeboard.isVar(data)) {
-        if (Leeboard.isVar(defCreatorFunc)) {
+    if (!data) {
+        if (defCreatorFunc) {
             return defCreatorFunc();
         }
         return undefined;
     }
     
     var rigidBody;
-    if (Leeboard.isVar(data.construct)) {
+    if (data.construct) {
         rigidBody = eval(data.construct);
     }
     else {
-        if (Leeboard.isVar(defCreatorFunc)) {
+        if (defCreatorFunc) {
             rigidBody = defCreatorFunc(data);
         }
         else {

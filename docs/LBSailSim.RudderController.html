@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: ClCd</title>
+    <title>JSDoc: Class: RudderController</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: ClCd</h1>
+    <h1 class="page-title">Class: RudderController</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="LBFoils.html">LBFoils</a>.</span>ClCd</h2>
+            <span class="ancestors"><a href="LBSailSim.html">LBSailSim</a>.</span>RudderController</h2>
         
     
 </header>
@@ -41,14 +41,15 @@
 
     
 
-    <h4 class="name" id="ClCd"><span class="type-signature"></span>new ClCd<span class="signature">(cl, cd, cm)</span><span class="type-signature"> &rarr; {<a href="LBFoils.ClCd.html">LBFoils.ClCd</a>}</span></h4>
+    <h4 class="name" id="RudderController"><span class="type-signature"></span>new RudderController<span class="signature">(vessel<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.RudderController.html">LBSailSim.RudderController</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Object holding lift, drag, and moment coefficients.
+    A controller for rudders. This supports controlling more than one rudder, though
+it only has a single rudder angle.
 </div>
 
 
@@ -72,6 +73,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -84,69 +87,33 @@
 
         <tr>
             
-                <td class="name"><code>cl</code></td>
+                <td class="name"><code>vessel</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type"><a href="LBSailSim.Vessel.html">LBSailSim.Vessel</a></span>
 
 
             
             </td>
 
             
-
-            
-
-            <td class="description last">The lift coefficient.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>cd</code></td>
-            
-
-            <td class="type">
-            
+                <td class="attributes">
                 
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The drag coefficient.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>cm</code></td>
-            
-
-            <td class="type">
-            
+                    &lt;optional><br>
                 
-<span class="param-type">number</span>
 
+                
 
-            
-            </td>
-
-            
-
+                
+                </td>
             
 
-            <td class="description last">The moment coefficient.</td>
+            
+
+            <td class="description last">The vessel this belongs to.</td>
         </tr>
 
     
@@ -171,6 +138,13 @@
     
 
     
+    <dt class="implements">Implements:</dt>
+    <dd class="implements"><ul>
+        
+            <li><a href="LBControls.SmoothController.html">LBControls.SmoothController</a></li>
+        
+    </ul></dd>
+    
 
     
 
@@ -187,7 +161,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line32">line 32</a>
+        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line171">line 171</a>
     </li></ul></dd>
     
 
@@ -221,7 +195,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBFoils.ClCd.html">LBFoils.ClCd</a></span>
+<span class="param-type"><a href="LBSailSim.RudderController.html">LBSailSim.RudderController</a></span>
 
 
     </dd>
@@ -249,26 +223,18 @@
 
         
             
-<h4 class="name" id="cd"><span class="type-signature"></span>cd<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="controllee"><span class="type-signature"></span>controllee<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    The drag coefficient, Cd
+    The function that is called whenever the value of the controller changes.
+It should have the signature:<p>
+controllee = function(currentValue, controller) {}
 </div>
 
 
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">number</span>
-
-
-        </li>
-    </ul>
 
 
 
@@ -287,6 +253,13 @@
     
 
     
+    <dt class="implements">Implements:</dt>
+    <dd class="implements"><ul>
+        
+            <li><a href="LBControls.SmoothController.html#controllee">LBControls.SmoothController#controllee</a></li>
+        
+    </ul></dd>
+    
 
     
 
@@ -303,7 +276,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line43">line 43</a>
+        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line66">line 66</a>
     </li></ul></dd>
     
 
@@ -321,13 +294,13 @@
 
         
             
-<h4 class="name" id="cl"><span class="type-signature"></span>cl<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="foilName"><span class="type-signature"></span>foilName<span class="type-signature"> :string</span></h4>
 
 
 
 
 <div class="description">
-    The lift coefficient, Cl
+    The name of the hydrofoils which this treats as rudders to be controlled.
 </div>
 
 
@@ -336,7 +309,7 @@
     <ul>
         <li>
             
-<span class="param-type">number</span>
+<span class="param-type">string</span>
 
 
         </li>
@@ -375,7 +348,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line37">line 37</a>
+        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line184">line 184</a>
     </li></ul></dd>
     
 
@@ -393,13 +366,13 @@
 
         
             
-<h4 class="name" id="cm"><span class="type-signature"></span>cm<span class="type-signature"> :number</span></h4>
+<h4 class="name" id="rudders"><span class="type-signature"></span>rudders<span class="type-signature"> :Array</span></h4>
 
 
 
 
 <div class="description">
-    The moment coefficient, Cm
+    The array of hydrofoils which this treats as rudders to be controlled.
 </div>
 
 
@@ -408,7 +381,7 @@
     <ul>
         <li>
             
-<span class="param-type">number</span>
+<span class="param-type">Array</span>
 
 
         </li>
@@ -447,7 +420,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line50">line 50</a>
+        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line190">line 190</a>
     </li></ul></dd>
     
 
@@ -465,13 +438,13 @@
 
         
             
-<h4 class="name" id="cmIsChordFraction"><span class="type-signature"></span>cmIsChordFraction<span class="type-signature"> :Boolean</span></h4>
+<h4 class="name" id="vessel"><span class="type-signature"></span>vessel<span class="type-signature"> :<a href="LBSailSim.Vessel.html">LBSailSim.Vessel</a></span></h4>
 
 
 
 
 <div class="description">
-    If true then cm represents the chord fraction rather than the true moment coefficient.
+    The vessel to which this belongs.
 </div>
 
 
@@ -480,7 +453,7 @@
     <ul>
         <li>
             
-<span class="param-type">Boolean</span>
+<span class="param-type"><a href="LBSailSim.Vessel.html">LBSailSim.Vessel</a></span>
 
 
         </li>
@@ -519,7 +492,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line56">line 56</a>
+        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line178">line 178</a>
     </li></ul></dd>
     
 
@@ -546,14 +519,14 @@
 
     
 
-    <h4 class="name" id="calcLiftDragMoment"><span class="type-signature"></span>calcLiftDragMoment<span class="signature">(rho, area, qInfSpeed, chordLength, aspectRatio, store)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="load"><span class="type-signature"></span>load<span class="signature">(data, vessel)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.RudderController.html">LBSailSim.RudderController</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Calculates the lift and drag forces and the moment from the coefficients.
+    Loads the controller's settings from properties in a data object.
 </div>
 
 
@@ -589,122 +562,7 @@
 
         <tr>
             
-                <td class="name"><code>rho</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The density.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>area</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The area.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>qInfSpeed</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The magnitude of the free stream velocity.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>chordLength</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The chord length, used for calculating the moment.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>aspectRatio</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Optional aspect ratio, used for calculating the induced drag.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>store</code></td>
+                <td class="name"><code>data</code></td>
             
 
             <td class="type">
@@ -720,7 +578,192 @@
 
             
 
-            <td class="description last">Optional object to store the lift, drag, and moment into.</td>
+            <td class="description last">The data object to load from.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vessel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBSailSim.Vessel.html">LBSailSim.Vessel</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The vessel to which this belongs.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="implements">Implements:</dt>
+    <dd class="implements"><ul>
+        
+            <li><a href="LBControls.SmoothController.html#load">LBControls.SmoothController#load</a></li>
+        
+    </ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line203">line 203</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this/
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBSailSim.RudderController.html">LBSailSim.RudderController</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setRudderAngleDeg"><span class="type-signature"></span>setRudderAngleDeg<span class="signature">(deg)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Sets the rudder angle for the controlled rudders. The actual <a href="LBSailSim.FoilInstance.html">LBSailSim.FoilInstance</a>
+objects are rotated about their local z-axis, the with foil instance's <a href="LBSailSim.FoilInstance.html#rotationOffsetDegs">LBSailSim.FoilInstance#rotationOffsetDegs</a>
+for the z-axis added to the angle.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>deg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The angle in degrees.</td>
         </tr>
 
     
@@ -761,7 +804,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line82">line 82</a>
+        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line232">line 232</a>
     </li></ul></dd>
     
 
@@ -784,128 +827,6 @@
 
 
 
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The object containing the calculated lift, drag, and moment.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="clean"><span class="type-signature"></span>clean<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Cleans up the coefficients, such as setting them to zero if they are near zero.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line66">line 66</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">undefined</span>
-
-
-    </dd>
-</dl>
-
-    
 
 
 
@@ -931,7 +852,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:49 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:50 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

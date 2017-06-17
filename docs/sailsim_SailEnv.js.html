@@ -64,6 +64,8 @@ LBSailSim.Env = function() {
     /**
      * The boat data objects, each property is named with the boat type name, with the
      * value of the property the data object for that boat type.
+     * @readonly
+     * @member {object}
      */
     this.boatDatas = {};
     
@@ -74,7 +76,8 @@ LBSailSim.Env = function() {
      * checked out boat, "" if the boat is not checked out. We use "" instead of
      * undefined so we can distinguish between availability (=== "") and non-existance 
      * (undefined).
-     * 
+     * @readonly
+     * @member {object}
      */
     this.boatsByType = {};
 };
@@ -130,7 +133,7 @@ LBSailSim.Env.prototype = {
         this.boatDatas[data.typeName] = data;
         
         var boatsForType = {};
-        if (Leeboard.isVar(data.instances)) {
+        if (data.instances) {
             // TODO: Someday support a range of numbered boats.
             for (var i = 0; i &lt; data.instances.length; ++i) {
                 boatsForType[data.instances[i]] = "";
@@ -158,19 +161,21 @@ LBSailSim.Env.prototype = {
      * @returns {Boolean}   True if the boat is available for checkout.
      */
     isBoatAvailable: function(typeName, boatName) {
-        var boatData = getBoatData(typeName);
-        if (!Leeboard.isVar(boatData)) {
+        var boatData = this.getBoatData(typeName);
+        if (!boatData) {
             return false;
         }
 
         var boatsOfType = this.boatsByType[typeName];
-        if (!Leeboard.isVar(boatsOfType)) {
+        if (!boatsOfType) {
             // The boat type is not supported.
             return false;
         }
 
         boatName = boatName || typeName;
         var boatInstance = boatsOfType[boatName];
+        // Need to use use Leeboard.isVar(), as boatInstance is a string and an empty
+        // string is treated as false.
         if (!Leeboard.isVar(boatInstance)) {
             // Boat name for boat type is not supported.
             return false;
@@ -191,20 +196,20 @@ LBSailSim.Env.prototype = {
             return undefined;
         }
 
-        var boatData = getBoatData(typeName);
-        if (!Leeboard.isVar(boatData)) {
+        var boatData = this.getBoatData(typeName);
+        if (!boatData) {
             return undefined;
         }
 
-        boat.boatName = boatName || "";
-        var boat = _createBoatInstance(typeName, boatName, boatData);
-        if (!Leeboard.isVar(boat)) {
+        boatName = boatName || "";
+        var boat = this._createBoatInstance(typeName, boatName, boatData);
+        if (!boat) {
             return undefined;
         }
 
         this.boatsByType[typeName][boatName] = boat;
         this._boatCheckedOut(boat);
-        return this;
+        return boat;
     },
     
     /**
@@ -237,10 +242,10 @@ LBSailSim.Env.prototype = {
      */
     returnBoat: function(boat) {
         var boatsOfType = this.boatsByType[boat.typeName];
-        if (Leeboard.isVar(boatsOfType)) {
+        if (boatsOfType) {
             if (boatsOfType[boat.boatName] === boat) {
                 boatsOfType[boat.boatName] = "";
-                _boatReturned(boat);
+                this._boatReturned(boat);
                 return true;
             }
         }
@@ -260,11 +265,12 @@ LBSailSim.Env.prototype = {
     /**
      * Call to update the sailing environment state for a new simulation time step.
      * @param {number} dt   The simulation time step.
-     * @returns {undefined}
+     * @returns {object}    this.
      */
     update: function(dt) {
         this.wind.update(dt);
         this.water.update(dt);
+        return this;
     }
 };
 
@@ -293,7 +299,7 @@ LBSailSim.Wind.prototype = {
         var vx = 4;
         var vy = 0;
 
-        if (!Leeboard.isVar(vel)) {
+        if (!vel) {
             return LBGeometry.createVector3(vx, vy);
         }
         vel.x = vx;
@@ -335,14 +341,18 @@ LBSailSim.Water.prototype = {
      */
     getFlowVelocity: function(x, y, z, vel) {
         var vx = 0;
-        var vy = 0.1;
+        var vy = 0;
+        //vy = 0.1;
+        //vx = 0.4;
+        vx = -0.5;
 
-        if (!Leeboard.isVar(vel)) {
+        if (!vel) {
             return new LBGeometry.createVector3(vx, vy, 0);
         }
         vel.x = vx;
         vel.y = vy;
         vel.z = 0;
+        return vel;
     },
     
     /**
@@ -377,13 +387,13 @@ LBSailSim.getFlowVelocity = function(flow, pos, vel) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 11 2017 10:44:51 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:49 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

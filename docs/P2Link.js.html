@@ -43,29 +43,37 @@
  */
 
 
-/* global Leeboard, Phaser */
+/* global Leeboard, Phaser, LBPhysics */
 
 /**
  * Manages linking a {@link Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody}, updating
  * the position/rotation of the rigid body from the P2 body and applying the forces
  * from the rigid body to the P2 body.
  * @constructor
+ * @param {object} game The Phaser game we're running under.
  * @returns {Leeboard.P2Link}
  */
-Leeboard.P2Link = function() {
+Leeboard.P2Link = function(game) {
+    this.game = game;
+    
+    /**
+     * Set this to -1 to make the y-axis going up, otherwise set it to +1 to make the y-axis
+     * go down.
+     */
+    this.ySign = 1;
     this.linkedObjects = [];
-    this.pixelsToMeters = 1;
+    this.workingResultant = new LBPhysics.Resultant3D();
 };
 
 Leeboard.P2Link.prototype = {
     /**
      * Adds a {@link Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody} pair to the manager.
      * @param {object} p2Body   The P2 body.
-     * @param {object} lb3Body The rigid body.
+     * @param {object} rigidBody The rigid body.
      * @returns {Leeboard.P2Link}   this.
      */
-    addLinkedObjects: function(p2Body, lb3Body) {
-        this.linkedObjects.push({ 'p2Body': p2Body, 'lb3Body': lb3Body });
+    addLinkedObjects: function(p2Body, rigidBody) {
+        this.linkedObjects.push({ 'p2Body': p2Body, 'rigidBody': rigidBody });
         return this;
     },
     
@@ -123,12 +131,12 @@ Leeboard.P2Link.prototype = {
     
     /**
      * Retrieves the index of a rigid body in the manager.
-     * @param {object} lb3Body  The rigid body.
-     * @returns {Number}    The index, -1 if lb3Body is not in the manager.
+     * @param {object} rigidBody  The rigid body.
+     * @returns {Number}    The index, -1 if rigidBody is not in the manager.
      */
-    indexOfRigidBody: function(lb3Body) {
+    indexOfRigidBody: function(rigidBody) {
         for (var i = 0; i &lt; this.linkedObjects.length; ++i) {
-            if (this.linkedObjects[i].lb3Body === lb3Body) {
+            if (this.linkedObjects[i].rigidBody === rigidBody) {
                 return i;
             }
         }
@@ -147,9 +155,12 @@ Leeboard.P2Link.prototype = {
     
     _updateLB3BodyFromP2: function(entry) {
         var p2Body = entry.p2Body;
-        var lb3Body = entry.lb3Body;
-        lb3Body.setXYZ(p2Body.x, p2Body.y, lb3Body.position.x);
-        lb3Body.setZRotationRad(p2Body.rotation);
+        var rigidBody = entry.rigidBody;
+        // Phaser negates the coordinate system between P2 and {@link PHaser.Physics.P2}.
+        rigidBody.setXYZ(-p2Body.world.pxmi(p2Body.x), -this.ySign * p2Body.world.pxmi(p2Body.y), 
+            rigidBody.obj3D.position.z);
+        rigidBody.setZRotationRad(this.ySign * p2Body.rotation);
+        rigidBody.obj3D.updateMatrixWorld();
     },
     
     /**
@@ -164,16 +175,20 @@ Leeboard.P2Link.prototype = {
     
     _updateP2BodyFromLB3: function(entry) {
         var p2Body = entry.p2Body;
-        var lb3Body = entry.lb3Body;
-        lb3Body.updateForces(this.dt);
+        var rigidBody = entry.rigidBody;
+        rigidBody.updateForces(this.dt);
         
-        var resultant = lb3Body.resultant;
-        resultant.convertToWrench();
-        var x = resultant.position.x / this.pixelsToMeters;
-        var y = resultant.position.y / this.pixelsToMeters;
-
-        p2Body.mass = lb3Body.getTotalMass();
-        p2Body.applyForce([resultant.force.x, resultant.force.y], x, y);        
+        var resultant = rigidBody.getResultant(true);
+        
+        p2Body.mass = rigidBody.getTotalMass();
+        p2Body.inertia = LBPhysics.getInertiaZZ(rigidBody.momentInertia);
+        
+        var x = resultant.applPoint.x - rigidBody.obj3D.position.x;
+        var y = resultant.applPoint.y - rigidBody.obj3D.position.y;
+        
+        // Phaser negates the coordinate system between P2 and {@link PHaser.Physics.P2}.
+        p2Body.applyForce([-resultant.force.x, -this.p2link.ySign * resultant.force.x], 
+            p2Body.world.mpxi(-x), p2Body.world.mpxi(-this.p2link.ySign * y));
     },
 
     constructor: Leeboard.P2Link
@@ -208,13 +223,28 @@ Leeboard.P2Link.createSpriteFromData = function(game, data) {
  */
 Leeboard.P2Link.createP2BodyFromData = function(game, data) {
     var sprite = Leeboard.P2Link.createSpriteFromData(game, data.sprite);
-    var p2Body = new Phaser.Physics.P2.Body(game, sprite.x, sprite.y, data.mass);
+    sprite.game.physics.enable(sprite, Phaser.Physics.P2JS);
+    sprite.body.collideWorldBounds = true;
+
+    var p2Body = sprite.body;
+    p2Body.mass = data.mass || p2Body.mass;
 
     Leeboard.copyCommonProperties(p2Body, data.p2Body, function(val) {
         return val !== 'sprite';
     });
     
     return p2Body;
+};
+
+/**
+ * Extension of {Phaser.Point}, adding a copy function.
+ * @param {object} src  The object to be copied.
+ * @returns {Phaser.Point}  this.   
+ */
+Phaser.Point.prototype.copy = function(src) {
+    this.x = src.x || this.x;
+    this.y = src.y || this.y;
+    return this;
 };</code></pre>
         </article>
     </section>
@@ -225,13 +255,13 @@ Leeboard.P2Link.createP2BodyFromData = function(game, data) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 11 2017 10:44:51 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:49 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

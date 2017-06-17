@@ -59,24 +59,43 @@ var LBFoils = LBFoils || {};
  */
 LBFoils.ClCd = function(cl, cd, cm) {
     /**
-     * @property {number} cl The lift coefficient, Cl
+     * The lift coefficient, Cl
+     * @member {number}
      */
     this.cl = cl || 0;
         
     /**
-     * @property {number} cd The drag coefficient, Cd
+     * The drag coefficient, Cd
+     * @member {number}
      */
     this.cd = cd || 0;
 
     
     /**
-     * @property {number} cm The moment coefficient, Cm
+     * The moment coefficient, Cm
+     * @member {number}
      */
     this.cm = cm || 0;
+    
+    /**
+     * If true then cm represents the chord fraction rather than the true moment coefficient.
+     * @member {Boolean}
+     */
+    this.cmIsChordFraction = false;
 };
 
 LBFoils.ClCd.prototype = {
     constructor: LBFoils.ClCd,
+
+    /**
+     * Cleans up the coefficients, such as setting them to zero if they are near zero.
+     * @returns {undefined}
+     */
+    clean: function() {
+        this.cd = LBMath.cleanNearZero(this.cd);
+        this.cl = LBMath.cleanNearZero(this.cl);
+        this.cm = LBMath.cleanNearZero(this.cm);
+    },
     
     /**
      * Calculates the lift and drag forces and the moment from the coefficients.
@@ -94,8 +113,14 @@ LBFoils.ClCd.prototype = {
         store.lift = this.cl * scale;
         store.drag = this.cd * scale;
         chordLength = chordLength || 1;
-        store.moment = this.cm * scale * chordLength;
-        if (Leeboard.isVar(aspectRatio)) {
+        
+        var cm = this.cm;
+        if (this.cmIsChordFraction) {
+            cm *= Math.sqrt(this.cl * this.cl + this.cd * this.cd);
+        }
+        store.moment = cm * scale * chordLength;
+
+        if (aspectRatio) {
             var ci = this.cl * this.cl / (Math.PI * aspectRatio);
             store.inducedDrag = scale * ci;
         }
@@ -136,7 +161,7 @@ LBFoils.calcCmForClCd = function(degrees, cl, cd, chordFraction) {
     var alphaRad = degrees * LBMath.DEG_TO_RAD;
     var cosAlpha = Math.cos(alphaRad);
     var sinAlpha = Math.sin(alphaRad);            
-    return chordFraction * (cosAlpha * cl + sinAlpha * cd);
+    return -chordFraction * (cosAlpha * cl + sinAlpha * cd);
 };
 
 
@@ -151,18 +176,20 @@ LBFoils.calcCmForClCd = function(degrees, cl, cd, chordFraction) {
  */
 LBFoils.ClCdStall = function(cl45Deg, cd45Deg, cd90Deg) {
     /**
-     * @property {number} cl45Deg The coefficient of lift at 45 degrees angle of attack.
+     * The coefficient of lift at 45 degrees angle of attack.
+     * @member {number}
      */
     this.cl45Deg = cl45Deg || 1.08;
     
     /**
-     * @@property {number} cd45Deg The coefficient of drag at 45 degrees angle of attack.
+     * The coefficient of drag at 45 degrees angle of attack.
+     * @member {number}
      */
     this.cd45Deg = cd45Deg || 1.11;
     
     /**
-     * @property {number} cd90Deg The coefficient of drag at 90 degrees angle of attack (the
-     * lift is 0 at 90 degrees).
+     * The coefficient of drag at 90 degrees angle of attack (the lift is 0 at 90 degrees).
+     * @member {number}
      */
     this.cd90Deg = cd90Deg || 1.80;
 };
@@ -173,11 +200,13 @@ LBFoils.ClCdStall.prototype = {
     /**
      * Loader method.
      * @param {object} data   The data, typically loaded from a JSON file.
+     * @returns {object} this.
      */
     load: function(data) {
         this.cl45Deg = data.cl45Deg || this.cl45Deg;
         this.cd45Deg = data.cd45Deg || this.cd45Deg;
         this.cd90Deg = data.cl90Deg || this.cd90Deg;
+        return this;
     },
     
     /**
@@ -209,11 +238,33 @@ LBFoils.ClCdStall.prototype = {
         store.cd = this.cd45Deg + 4 * (this.cd90Deg - this.cd45Deg) * x * (1 - x);   
         
         // 45 degrees is our 0 point...
-        store.cl = this.cl45Deg * Math.cos(2 * (degrees - 45) * LBMath.DEG_TO_RAD) * sign;    
-        store.cm = (0.46 + 0.04 * (degrees - 30) / 60) * sign;
+        store.cl = this.cl45Deg * Math.cos(2 * (deltaDeg - 45) * LBMath.DEG_TO_RAD) * sign;    
+        store.cm = -(0.46 + 0.04 * (deltaDeg - 30) / 60) * sign;
+        store.cmIsChordFraction = true;
         
         return store;
     }
+};
+
+/**
+ * Creates and load a {@link LBFoils.ClCdStall} object from properties in a data object.
+ * @param {object} data The data object.
+ * @returns {object}    The loaded object, undefined if data is undefined.
+ */
+LBFoils.ClCdStall.createFromData = function(data) {
+    if (!data) {
+        return undefined;
+    }
+    
+    var clCdStall;
+    if (data.construct) {
+        clCdStall = eval(data.construct);
+    }
+    else {
+        clCdStall = new LBFoils.ClCdStall();
+    }
+    
+    return clCdStall.load(data);
 };
 
 
@@ -230,6 +281,7 @@ LBFoils.ClCdInterp = function() {
     this.interpCls = new LBMath.CSpline();
     this.interpCds = new LBMath.CSpline();
     this.interpCms = null;
+    this.cmIsChordFraction = false;
 };
 
 LBFoils.ClCdInterp.prototype = {
@@ -237,24 +289,40 @@ LBFoils.ClCdInterp.prototype = {
     
     /**
      * Loads the interpolation data. Note that this stores the coefficient arrays
-     * by reference, not as copies.
+     * by reference, not as copies, unless there are symmetries involved.
      * @param {object} data   The data, typically loaded from a JSON file.
+     * @param {object} isForeAftSymmetric   If true the data is presumed to be symmetric
+     * about the 90 degrees point.
+     * @returns {object} this.
      */
-    load: function(data) {
+    load: function(data, isForeAftSymmetric) {
         this.alphas = data.alphas;
         this.cls = data.cls;
         this.cds = data.cds;
         this.cms = data.cms;
         
+        if (isForeAftSymmetric) {
+            var alphas = this.alphas.slice();
+            for (var i = this.alphas.length - 1; i >= 0; --i) {
+                alphas.push(180 - this.alphas[i]);
+            }
+            this.alphas = alphas;
+            this.cls = Leeboard.copyAndMirrorArray(this.cls);
+            this.cds = Leeboard.copyAndMirrorArray(this.cds);
+            this.cms = Leeboard.copyAndMirrorArray(this.cms);
+        }
+        
         this.interpCls.setup(this.alphas, this.cls);
         this.interpCds.setup(this.alphas, this.cds);
-        if (Leeboard.isVar(this.cms) &amp;&amp; (this.cms.length === this.alphas.length)) {
+        if (this.cms &amp;&amp; (this.cms.length === this.alphas.length)) {
             this.interpCms = new LBMath.CSpline();
             this.interpCms.setup(this.alphas, this.cms);
+            this.cmIsChordFraction = data.cmIsChordFraction || false;
         }
         else {
             this.interpCms = null;
         }
+        return this;
     },
     
     /**
@@ -268,13 +336,15 @@ LBFoils.ClCdInterp.prototype = {
         
         var lowIn = this.interpCls.findLowIndex(degrees);
         store.cl = this.interpCls.interpolate(degrees, lowIn);
-        store.cd = this.interpCds.interpolate(degrees, lowIn);
+        store.cd = this.interpCds.interpolate(degrees, lowIn);        
         
         if (this.interpCms !== null) {
             store.cm = this.interpCms.interpolate(degrees, lowIn);
+            store.cmIsChordFraction = this.cmIsChordFraction;
         }
         else {
             store.cm = LBFoils.calcCmForClCd(degrees, store.cl, store.cd, 0.25);
+            store.cmIsChordFraction = false;
         }
         
         return store;
@@ -293,10 +363,12 @@ LBFoils.ClCdCurve = function() {
     this.aspectRatio = Number.POSITIVE_INFINITY;
     this.re = Number.POSITIVE_INFINITY;
     this.clCdLifting = new LBFoils.ClCdInterp();
-    this.liftingEndDeg = 90;
     this.isSymmetric = true;
     
+    this.liftingEndDeg = 90;
     this.stallStartDeg = 90;
+    this.aftLiftingEndDeg = 90;
+    this.aftStallStartDeg = 90;
     this.clCdStall = null;
 };
 
@@ -309,7 +381,7 @@ LBFoils.ClCdCurve.prototype = {
      * @return {object} this.
      */
     load: function(data) {
-        if (!Leeboard.isVar(data)) {
+        if (!data) {
             return this;
         }
         
@@ -317,21 +389,22 @@ LBFoils.ClCdCurve.prototype = {
         this.aspectRatio = data.aspectRatio || Number.POSITIVE_INFINITY;
         this.re = data.re || Number.POSITIVE_INFINITY;
         
-        if (typeof data.clCdStall === "clCdStall") {
+        this.clCdStall = LBFoils.ClCdStall.createFromData(data.clCdStall);
+        if (this.clCdStall) {
             this.stallStartDeg = data.stallStartDeg || 90;
             this.liftEndDeg = data.liftEndDeg || this.stallStartDeg;
             
-            this.clCdStall.load(data.clCdStall);
-        }
-        else {
-            this.clCdStall = null;
+            if (data.isForeAftSymmetric) {
+                this.aftStallStartDeg = 180 - this.stallStartDeg;
+                this.aftLiftEndDeg = 180 - this.liftEndDeg;
+            }
         }
         
         this.isSymmetric = data.isSymmetric || true;
         
-        if (Leeboard.isVar(data.clCdInterp)) {
+        if (data.clCdInterp) {
             this.clCdLifting = new LBFoils.ClCdInterp();
-            this.clCdLifting.load(data.clCdInterp);
+            this.clCdLifting.load(data.clCdInterp, data.isForeAftSymmetric);
         }
         
         return this;
@@ -355,25 +428,40 @@ LBFoils.ClCdCurve.prototype = {
         }
         
         // TODO: To support a non-symmetric clCdStall, we need to add liftStartDeg and stallEndDeg.
-        if ((degrees &lt;= this.stallStartDeg) || (this.clCdStall === null)) {
+        // Also need to support reverse direction stall angles.
+        if (this.clCdStall === null) {
             store = this.clCdLifting.calcCoefsDeg(degrees, store);
         }
-        else if (degrees >= this.liftEndDeg) {
-            store = this.clCdStall.calcCoefsDeg(degrees, store);            
-        }
         else {
-            var store = this.clCdLifting.calcCoefsDeg(degrees, store);
-            var stalled = this.clCdStall.calcCoefsDeg(degrees);
-            var x = (degrees - this.stallStartDeg) / (this.liftEndDeg - this.stallStartDeg);
-            var s = LBMath.smoothstep3(x);
-            var sLift = 1 - s;
-            store.cl = store.cl * sLift + stalled.cl * s;
-            store.cd = store.cd * sLift + stalled.cd * s;
-            store.cm = store.cm * sLift + stalled.cm * s;
+            if ((degrees &lt;= this.stallStartDeg) || (degrees >= this.aftStallStartDeg)) {
+                store = this.clCdLifting.calcCoefsDeg(degrees, store);
+            }
+            else if ((degrees >= this.liftEndDeg) &amp;&amp; (degrees &lt;= this.aftLiftEndDeg)) {
+                store = this.clCdStall.calcCoefsDeg(degrees, store);            
+            }
+            else {
+                var store = this.clCdLifting.calcCoefsDeg(degrees, store);
+                var stalled = this.clCdStall.calcCoefsDeg(degrees);
+                var x;
+                if (degrees &lt; this.liftEndDeg) {
+                    x = (degrees - this.stallStartDeg) / (this.liftEndDeg - this.stallStartDeg);
+                }
+                else {
+                    x = (degrees - this.aftStallStartDeg) / (this.aftLiftEndDeg - this.aftStallStartDeg);
+                }
+                
+                var s = LBMath.smoothstep3(x);
+                var sLift = 1 - s;
+                store.cl = store.cl * sLift + stalled.cl * s;
+                store.cd = store.cd * sLift + stalled.cd * s;
+                store.cm = store.cm * sLift + stalled.cm * s;
+            }
         }
         
         store.cl *= sign;
         store.cm *= sign;
+        
+        store.clean();
         return store;
     },
 
@@ -402,33 +490,39 @@ LBFoils.ClCdCurve.prototype = {
  */
 LBFoils.Foil = function() {
     /**
-     * @property {object} chord A line describing the chord, with the chord.start treated as the
+     * A line describing the chord, with the chord.start treated as the
      * leading edge of the chord. This is used to resolve the angle of attack.
+     * @member {object}
      */
     this.chordLine = LBGeometry.createLine2();
     
     /**
-     * @property {number} sliceZ The z coordinate of the 2D slice.
+     * The z coordinate of the 2D slice.
+     * @member {number}
      */
     this.sliceZ = 0;
     
     /**
-     * @property {number} area The area to use in computing the forces from the coefficients.
+     * The area to use in computing the forces from the coefficients.
+     * @member {number}
      */
     this.area = 1;
     
     /**
-     * @property {number} aspectRatio The aspect ratio of the foil, this may be null.
+     * The aspect ratio of the foil, this may be null.
+     * @member {number}
      */
     this.aspectRatio = null;
     
     /**
-     * @property {LBFoils.ClCdCurve} clCdCurve The coefficient of lift/drag/moment curve.
+     * The coefficient of lift/drag/moment curve.
+     * @member {LBFoils.ClCdCurve}
      */
     this.clCdCurve = new LBFoils.ClCdCurve();
     
     this.workingVel = LBGeometry.createVector3();
     this.workingVelResults = {
+        'worldPos': LBGeometry.createVector3(), // For testing...
         'worldVel': LBGeometry.createVector3()
     };
 };
@@ -450,10 +544,10 @@ LBFoils.Foil.prototype = {
         this.aspectRatio = data.aspectRatio || this.aspectRatio;
         
         this.clCdCurve = undefined;
-        if (Leeboard.isVar(data.libClCdCurve)) {
+        if (data.libClCdCurve) {
             this.clCdCurve = curveLib.getClCdCurve(data.libClCdCurve);
         }
-        if (!Leeboard.isVar(this.clCdCurve)) {
+        if (!this.clCdCurve) {
             this.clCdCurve = new LBFoils.ClCdCurve();
             this.clCdCurve.load(data.clCdCurve);
         }
@@ -472,12 +566,12 @@ LBFoils.Foil.prototype = {
      */
     calcLocalLiftDragMoment: function(rho, qInfLocal, store, details) {
         var chord = this.chordLine.delta();
-        var angleDeg = chord.angleTo(qInfLocal) * LBMath.RAD_TO_DEG;
+        var angleDeg = chord.angleToSigned(qInfLocal) * LBMath.RAD_TO_DEG;
         var coefs = this.clCdCurve.calcCoefsDeg(angleDeg);
         var qInfSpeed = qInfLocal.length();
         var chordLength = chord.length();
         
-        if (Leeboard.isVar(details)) {
+        if (details) {
             details.angleDeg = angleDeg;
             details.qInfLocal = qInfLocal.clone();
             Object.assign(details, coefs);            
@@ -492,25 +586,34 @@ LBFoils.Foil.prototype = {
      * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
      * @param {object} [details]   If defined, an object that will receive details such
      * as lift, drag, induced drag, moment.
+     * @param {object} [resultant]  If defined, the object set to the resultant force.
      * @returns {LBPhysics.Resultant3D}  The resultant force in local coordinates.
      */
-    calcLocalForce: function(rho, qInfLocal, details) {
+    calcLocalForce: function(rho, qInfLocal, details, resultant) {
         details = this.calcLocalLiftDragMoment(rho, qInfLocal, details, details);
         
         var drag = details.drag;
-        if (Leeboard.isVar(details.inducedDrag)) {
+        if (details.inducedDrag) {
             drag += details.inducedDrag;
         }
         
         var qInfSpeed = qInfLocal.length();
-        var qInfNormal = LBGeometry.tangentToNormalXY(qInfLocal);
-        var fx = qInfNormal.x * details.lift + qInfLocal.x * drag / qInfSpeed;
-        var fy = qInfNormal.y * details.lift + qInfLocal.y * drag / qInfSpeed;
+        var fx;
+        var fy;
+        if (!LBMath.isLikeZero(qInfSpeed)) {
+            fx = (-qInfLocal.y * details.lift + qInfLocal.x * drag) / qInfSpeed;
+            fy = (qInfLocal.x * details.lift + qInfLocal.y * drag) / qInfSpeed;
+        }
+        else {
+            fx = 0;
+            fy = 0;
+        }
         
-        var force = LBGeometry.createVector3(fx, fy, 0);
-        var moment = LBGeometry.createVector3(0, 0, details.moment);
-        var applPoint = LBGeometry.createVector3(this.chordLine.start.x, this.chordLine.start.y, this.sliceZ);
-        return new LBPhysics.Resultant3D(force, moment, applPoint);
+        resultant = resultant || new LBPhysics.Resultant3D();
+        resultant.force.set(fx, fy, 0);
+        resultant.moment.set(0, 0, details.moment);
+        resultant.applPoint.set(this.chordLine.start.x, this.chordLine.start.y, this.sliceZ);
+        return resultant;
     },
     
     
@@ -524,9 +627,10 @@ LBFoils.Foil.prototype = {
      *  world-local transformations as well as the change in world position/orientation.
      * @param {object} [details]  If defined, an object that will receive details such
      * as lift, drag, induced drag, moment.
+     * @param {object} [resultant]  If defined, the object set to the resultant force.
      * @returns {LBPhysics.Resultant3D}  The resultant force in world coordinates.
      */
-    calcWorldForce: function(rho, qInfWorld, coordSystemState, details) {
+    calcWorldForce: function(rho, qInfWorld, coordSystemState, details, resultant) {
         coordSystemState.calcVectorLocalToWorld(this.chordLine.start, this.workingVelResults);
         
         this.workingVel.copy(this.workingVelResults.worldVel);
@@ -539,7 +643,7 @@ LBFoils.Foil.prototype = {
         
         this.workingVel.applyMatrix4Rotation(coordSystemState.localXfrm);
         
-        var resultant = this.calcLocalForce(rho, this.workingVel, details);
+        resultant = this.calcLocalForce(rho, this.workingVel, details, resultant);
         resultant.applyMatrix4(coordSystemState.worldXfrm);
         
         return resultant;
@@ -561,18 +665,18 @@ LBFoils.Foil.prototype = {
  * @returns {object}    The foil object, undefined if both data and defCreatorFunc are not defined.
  */
 LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
-    if (!Leeboard.isVar(data)) {
-        if (Leeboard.isVar(defCreatorFunc)) {
+    if (!data) {
+        if (defCreatorFunc) {
             return defCreatorFunc();
         }
         return undefined;
     }
     
     var foil;
-    if (Leeboard.isVar(data.construct)) {
+    if (data.construct) {
         foil = eval(data.construct);
     }
-    else if (Leeboard.isVar(defCreatorFunc)) {
+    else if (defCreatorFunc) {
         foil = defCreatorFunc(data);
     }
     else {
@@ -590,13 +694,13 @@ LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 11 2017 10:44:51 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:49 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

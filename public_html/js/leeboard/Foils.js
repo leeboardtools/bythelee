@@ -31,24 +31,27 @@ var LBFoils = LBFoils || {};
  */
 LBFoils.ClCd = function(cl, cd, cm) {
     /**
-     * @property {number} cl The lift coefficient, Cl
+     * The lift coefficient, Cl
+     * @member {number}
      */
     this.cl = cl || 0;
         
     /**
-     * @property {number} cd The drag coefficient, Cd
+     * The drag coefficient, Cd
+     * @member {number}
      */
     this.cd = cd || 0;
 
     
     /**
-     * @property {number} cm The moment coefficient, Cm
+     * The moment coefficient, Cm
+     * @member {number}
      */
     this.cm = cm || 0;
     
     /**
-     * @property {number} cmIsChordFraction If true then cm represents the chord fraction
-     * rather than the true moment coefficient.
+     * If true then cm represents the chord fraction rather than the true moment coefficient.
+     * @member {Boolean}
      */
     this.cmIsChordFraction = false;
 };
@@ -89,7 +92,7 @@ LBFoils.ClCd.prototype = {
         }
         store.moment = cm * scale * chordLength;
 
-        if (Leeboard.isVar(aspectRatio)) {
+        if (aspectRatio) {
             var ci = this.cl * this.cl / (Math.PI * aspectRatio);
             store.inducedDrag = scale * ci;
         }
@@ -145,18 +148,20 @@ LBFoils.calcCmForClCd = function(degrees, cl, cd, chordFraction) {
  */
 LBFoils.ClCdStall = function(cl45Deg, cd45Deg, cd90Deg) {
     /**
-     * @property {number} cl45Deg The coefficient of lift at 45 degrees angle of attack.
+     * The coefficient of lift at 45 degrees angle of attack.
+     * @member {number}
      */
     this.cl45Deg = cl45Deg || 1.08;
     
     /**
-     * @@property {number} cd45Deg The coefficient of drag at 45 degrees angle of attack.
+     * The coefficient of drag at 45 degrees angle of attack.
+     * @member {number}
      */
     this.cd45Deg = cd45Deg || 1.11;
     
     /**
-     * @property {number} cd90Deg The coefficient of drag at 90 degrees angle of attack (the
-     * lift is 0 at 90 degrees).
+     * The coefficient of drag at 90 degrees angle of attack (the lift is 0 at 90 degrees).
+     * @member {number}
      */
     this.cd90Deg = cd90Deg || 1.80;
 };
@@ -219,12 +224,12 @@ LBFoils.ClCdStall.prototype = {
  * @returns {object}    The loaded object, undefined if data is undefined.
  */
 LBFoils.ClCdStall.createFromData = function(data) {
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         return undefined;
     }
     
     var clCdStall;
-    if (Leeboard.isVar(data.construct)) {
+    if (data.construct) {
         clCdStall = eval(data.construct);
     }
     else {
@@ -281,7 +286,7 @@ LBFoils.ClCdInterp.prototype = {
         
         this.interpCls.setup(this.alphas, this.cls);
         this.interpCds.setup(this.alphas, this.cds);
-        if (Leeboard.isVar(this.cms) && (this.cms.length === this.alphas.length)) {
+        if (this.cms && (this.cms.length === this.alphas.length)) {
             this.interpCms = new LBMath.CSpline();
             this.interpCms.setup(this.alphas, this.cms);
             this.cmIsChordFraction = data.cmIsChordFraction || false;
@@ -348,7 +353,7 @@ LBFoils.ClCdCurve.prototype = {
      * @return {object} this.
      */
     load: function(data) {
-        if (!Leeboard.isVar(data)) {
+        if (!data) {
             return this;
         }
         
@@ -357,7 +362,7 @@ LBFoils.ClCdCurve.prototype = {
         this.re = data.re || Number.POSITIVE_INFINITY;
         
         this.clCdStall = LBFoils.ClCdStall.createFromData(data.clCdStall);
-        if (Leeboard.isVar(this.clCdStall)) {
+        if (this.clCdStall) {
             this.stallStartDeg = data.stallStartDeg || 90;
             this.liftEndDeg = data.liftEndDeg || this.stallStartDeg;
             
@@ -369,7 +374,7 @@ LBFoils.ClCdCurve.prototype = {
         
         this.isSymmetric = data.isSymmetric || true;
         
-        if (Leeboard.isVar(data.clCdInterp)) {
+        if (data.clCdInterp) {
             this.clCdLifting = new LBFoils.ClCdInterp();
             this.clCdLifting.load(data.clCdInterp, data.isForeAftSymmetric);
         }
@@ -457,28 +462,33 @@ LBFoils.ClCdCurve.prototype = {
  */
 LBFoils.Foil = function() {
     /**
-     * @property {object} chord A line describing the chord, with the chord.start treated as the
+     * A line describing the chord, with the chord.start treated as the
      * leading edge of the chord. This is used to resolve the angle of attack.
+     * @member {object}
      */
     this.chordLine = LBGeometry.createLine2();
     
     /**
-     * @property {number} sliceZ The z coordinate of the 2D slice.
+     * The z coordinate of the 2D slice.
+     * @member {number}
      */
     this.sliceZ = 0;
     
     /**
-     * @property {number} area The area to use in computing the forces from the coefficients.
+     * The area to use in computing the forces from the coefficients.
+     * @member {number}
      */
     this.area = 1;
     
     /**
-     * @property {number} aspectRatio The aspect ratio of the foil, this may be null.
+     * The aspect ratio of the foil, this may be null.
+     * @member {number}
      */
     this.aspectRatio = null;
     
     /**
-     * @property {LBFoils.ClCdCurve} clCdCurve The coefficient of lift/drag/moment curve.
+     * The coefficient of lift/drag/moment curve.
+     * @member {LBFoils.ClCdCurve}
      */
     this.clCdCurve = new LBFoils.ClCdCurve();
     
@@ -506,10 +516,10 @@ LBFoils.Foil.prototype = {
         this.aspectRatio = data.aspectRatio || this.aspectRatio;
         
         this.clCdCurve = undefined;
-        if (Leeboard.isVar(data.libClCdCurve)) {
+        if (data.libClCdCurve) {
             this.clCdCurve = curveLib.getClCdCurve(data.libClCdCurve);
         }
-        if (!Leeboard.isVar(this.clCdCurve)) {
+        if (!this.clCdCurve) {
             this.clCdCurve = new LBFoils.ClCdCurve();
             this.clCdCurve.load(data.clCdCurve);
         }
@@ -533,7 +543,7 @@ LBFoils.Foil.prototype = {
         var qInfSpeed = qInfLocal.length();
         var chordLength = chord.length();
         
-        if (Leeboard.isVar(details)) {
+        if (details) {
             details.angleDeg = angleDeg;
             details.qInfLocal = qInfLocal.clone();
             Object.assign(details, coefs);            
@@ -555,7 +565,7 @@ LBFoils.Foil.prototype = {
         details = this.calcLocalLiftDragMoment(rho, qInfLocal, details, details);
         
         var drag = details.drag;
-        if (Leeboard.isVar(details.inducedDrag)) {
+        if (details.inducedDrag) {
             drag += details.inducedDrag;
         }
         
@@ -627,18 +637,18 @@ LBFoils.Foil.prototype = {
  * @returns {object}    The foil object, undefined if both data and defCreatorFunc are not defined.
  */
 LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
-    if (!Leeboard.isVar(data)) {
-        if (Leeboard.isVar(defCreatorFunc)) {
+    if (!data) {
+        if (defCreatorFunc) {
             return defCreatorFunc();
         }
         return undefined;
     }
     
     var foil;
-    if (Leeboard.isVar(data.construct)) {
+    if (data.construct) {
         foil = eval(data.construct);
     }
-    else if (Leeboard.isVar(defCreatorFunc)) {
+    else if (defCreatorFunc) {
         foil = defCreatorFunc(data);
     }
     else {

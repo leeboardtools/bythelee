@@ -11,9 +11,7 @@ To Generate Docs:
 In root directory:
 Delete the docs directory.
 Run:
-    jsdoc public_html/js -r -d docs
+    jsdoc public_html/js/leeboard -r -d docs
 
 
 TODO:
-Question: Is the chord velocity used for apparent wind correct with the obj3D as child?
-

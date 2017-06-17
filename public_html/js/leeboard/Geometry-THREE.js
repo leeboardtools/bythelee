@@ -55,7 +55,7 @@ LBGeometry.normalToTangentXY = function(normal, store) {
     var tx = normal.y;
     var ty = -normal.x;
     if (!store) {
-        store = new THREE.Vector(tx, ty);
+        store = new THREE.Vector2(tx, ty);
     }
     else {
         store.set(tx, ty);
@@ -224,7 +224,7 @@ THREE.Vector3.prototype.isZero = function() {
  */
 LBGeometry.loadVector2 = function(data, vec) {
     vec = vec || new THREE.Vector2();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         vec.zero();
     }
     else {
@@ -244,7 +244,7 @@ LBGeometry.loadVector2 = function(data, vec) {
  */
 LBGeometry.loadVector3 = function(data, vec) {
     vec = vec || new THREE.Vector3();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         vec.zero();
     }
     else {
@@ -375,7 +375,7 @@ LBGeometry.createQuaternion = function(x, y, z, w) {
  */
 LBGeometry.loadQuaternion = function(data, quat) {
     quat = quat || new THREE.Quaternion();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         quat.set(0, 0, 0, 1);
     }
     else {
@@ -433,10 +433,11 @@ LBGeometry.createEulerDeg = function(xDeg, yDeg, zDeg, order) {
  */
 LBGeometry.loadEuler = function(data, euler) {
     euler = euler || new THREE.Euler();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         euler.set(0, 0, 0, THREE.Euler.DefaultOrder);
     }
     else {
+        // Need to use Leeboard.isVar(), data.exd might be 0.
         if (Leeboard.isVar(data.exd)) {
             euler.x = (data.exd || 0) * LBMath.DEG_TO_RAD;
             euler.y = (data.eyd || 0) * LBMath.DEG_TO_RAD;
@@ -509,7 +510,7 @@ LBGeometry.Line2.prototype = {
  */
 LBGeometry.loadLine2 = function(data, line) {
     line = line || LBGeometry.createLine2();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         line.start.zero();
         line.end.zero();
     }
@@ -539,7 +540,7 @@ LBGeometry.createLine3 = function(start, end) {
  */
 LBGeometry.loadLine3 = function(data, line) {
     line = line || LBGeometry.createLine3();
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         line.start.zero();
         line.end.zero();
     }
@@ -625,18 +626,18 @@ LBGeometry.createMatrix3 = function() {
  * @returns {object}    The loaded matrix.
  */
 LBGeometry.loadMatrix3 = function(data, mat) {
-    if (Leeboard.isVar(mat)) {
+    if (mat) {
         mat.identity();
     }
     else {
         mat = new THREE.Matrix3();
     }
     
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         return mat;
     }
     
-    if (Leeboard.isVar(data.elements)) {
+    if (data.elements) {
         var count = Math.min(data.elements.length, mat.elements.length);
         for (var i = 0; i < count; ++i) {
             mat.elements[i] = data.elements[i];
@@ -664,18 +665,18 @@ LBGeometry.createMatrix4 = function() {
  * @returns {object}    The matrix.
  */
 LBGeometry.loadMatrix4 = function(data, mat) {
-    if (Leeboard.isVar(mat)) {
+    if (mat) {
         mat.identity();
     }
     else {
         mat = new THREE.Matrix4();
     }
     
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         return mat;
     }
     
-    if (Leeboard.isVar(data.elements)) {
+    if (data.elements) {
         var count = Math.min(data.elements.length, mat.elements.length);
         for (var i = 0; i < count; ++i) {
             mat.elements[i] = data.elements[i];
@@ -685,7 +686,8 @@ LBGeometry.loadMatrix4 = function(data, mat) {
         }
     }
     else {
-        if (Leeboard.isVar(data.rotation)) {
+        if (data.rotation) {
+            // Need to use Leeboard.isVar() here because the values may be 0..
             if (Leeboard.isVar(data.rotation.ex) || Leeboard.isVar(data.rotation.exd)) {
                 // Euler angles...
                 var euler = LBGeometry.loadEuler(data.rotation);
@@ -698,7 +700,7 @@ LBGeometry.loadMatrix4 = function(data, mat) {
             }
         }
         
-        if (Leeboard.isVar(data.origin)) {
+        if (data.origin) {
             var origin = LBGeometry.loadVector3(data.origin);
             mat.setPosition(origin);
         }
@@ -781,14 +783,14 @@ LBGeometry.createObject3D = function() {
  * @returns {object}    this.
  */
 LBGeometry.loadObject3DBasic = function(data, obj3D) {
-    if (!Leeboard.isVar(obj3D)) {
+    if (!obj3D) {
         obj3D = LBGeometry.createObject3D();
     }
     
     obj3D.name = data.name || "";
     
     LBGeometry.loadVector3(data.position, obj3D.position);
-    if (Leeboard.isVar(data.rotation)) {
+    if (data.rotation) {
         LBGeometry.loadEuler(data.rotation, obj3D.rotation);
     }
     else {
@@ -807,19 +809,19 @@ LBGeometry.loadObject3DBasic = function(data, obj3D) {
  * @returns {object}    The 3D object.
  */
 LBGeometry.createObject3DFromData = function(data) {
-    if (!Leeboard.isVar(data)) {
+    if (!data) {
         return LBGeometry.createObject3D();
     }
     
     var obj3D;
-    if (Leeboard.isVar(data.construct)) {
+    if (data.construct) {
         obj3D = eval(data.construct);
     }
     else {
         obj3D = LBGeometry.createObject3D();
     }
     
-    if (Leeboard.isVar(obj3D.load)) {
+    if (obj3D.load) {
         obj3D.load(data);
     }
     else {

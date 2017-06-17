@@ -242,7 +242,7 @@ we can simply replace this file.</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line225">line 225</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line264">line 264</a>
     </li></ul></dd>
     
 
@@ -418,7 +418,7 @@ we can simply replace this file.</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line237">line 237</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line276">line 276</a>
     </li></ul></dd>
     
 
@@ -471,7 +471,183 @@ we can simply replace this file.</div>
 
     
 
-    <h4 class="name" id=".createEuler"><span class="type-signature">(static) </span>createEuler<span class="signature">(xDeg, yDeg, zDeg, order)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id=".clampVectorMag"><span class="type-signature">(static) </span>clampVectorMag<span class="signature">(vec, mag)</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Limits the magnitude of a vector.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>vec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The 2D or 3D vector.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mag</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The maximum magnitude.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line352">line 352</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    vec.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".createEulerDeg"><span class="type-signature">(static) </span>createEulerDeg<span class="signature">(xDeg, yDeg, zDeg, order)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
@@ -640,7 +816,7 @@ we can simply replace this file.</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line373">line 373</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line424">line 424</a>
     </li></ul></dd>
     
 
@@ -667,7 +843,7 @@ we can simply replace this file.</div>
 
         
 <div class="param-desc">
-    The THREE.Euler compatible quaternion.
+    The THREE.Euler compatible object.
 </div>
 
 
@@ -693,7 +869,7 @@ we can simply replace this file.</div>
 
     
 
-    <h4 class="name" id=".createEuler"><span class="type-signature">(static) </span>createEuler<span class="signature">(xRad, yRad, zRad, order)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id=".createEulerRad"><span class="type-signature">(static) </span>createEulerRad<span class="signature">(xRad, yRad, zRad, order)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
@@ -862,7 +1038,7 @@ we can simply replace this file.</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line361">line 361</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line412">line 412</a>
     </li></ul></dd>
     
 
@@ -889,7 +1065,7 @@ we can simply replace this file.</div>
 
         
 <div class="param-desc">
-    The THREE.Euler compatible quaternion.
+    The THREE.Euler compatible object.
 </div>
 
 
@@ -1038,7 +1214,7 @@ we can simply replace this file.</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line410">line 410</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line462">line 462</a>
     </li></ul></dd>
     
 
@@ -1192,7 +1368,7 @@ we can simply replace this file.</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line479">line 479</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line531">line 531</a>
     </li></ul></dd>
     
 
@@ -1296,7 +1472,7 @@ we can simply replace this file.</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line566">line 566</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line618">line 618</a>
     </li></ul></dd>
     
 
@@ -1378,7 +1554,7 @@ we can simply replace this file.</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line605">line 605</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line657">line 657</a>
     </li></ul></dd>
     
 
@@ -1460,7 +1636,7 @@ we can simply replace this file.</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line722">line 722</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line775">line 775</a>
     </li></ul></dd>
     
 
@@ -1611,7 +1787,7 @@ the 3D object object, otherwise LBGeometry.createObject3D() is used.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line758">line 758</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line811">line 811</a>
     </li></ul></dd>
     
 
@@ -1788,7 +1964,7 @@ the normal vector.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line510">line 510</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line562">line 562</a>
     </li></ul></dd>
     
 
@@ -2006,7 +2182,7 @@ the normal vector.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line315">line 315</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line366">line 366</a>
     </li></ul></dd>
     
 
@@ -2183,7 +2359,7 @@ the normal vector.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line346">line 346</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line397">line 397</a>
     </li></ul></dd>
     
 
@@ -2359,7 +2535,7 @@ the normal vector.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line53">line 53</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line71">line 71</a>
     </li></ul></dd>
     
 
@@ -2513,7 +2689,7 @@ the normal vector.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line62">line 62</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line80">line 80</a>
     </li></ul></dd>
     
 
@@ -2690,7 +2866,7 @@ the normal vector.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line127">line 127</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line166">line 166</a>
     </li></ul></dd>
     
 
@@ -2844,7 +3020,7 @@ the normal vector.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line273">line 273</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line312">line 312</a>
     </li></ul></dd>
     
 
@@ -3020,7 +3196,7 @@ the normal vector.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line283">line 283</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line322">line 322</a>
     </li></ul></dd>
     
 
@@ -3198,7 +3374,7 @@ plane then it returns undefined. This function treats the line as a true line.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line549">line 549</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line601">line 601</a>
     </li></ul></dd>
     
 
@@ -3380,7 +3556,7 @@ unit vector in the direction of the line.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line523">line 523</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line575">line 575</a>
     </li></ul></dd>
     
 
@@ -3423,6 +3599,159 @@ to the plane or a point.
 |
 
 <span class="param-type">number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".isVector2LikeZero"><span class="type-signature">(static) </span>isVector2LikeZero<span class="signature">(vec)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Determines if all the components of a vector are near zero.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>vec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The vector of interest.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line333">line 333</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    True if all three components can be treated as 0.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
 
 
     </dd>
@@ -3537,160 +3866,7 @@ to the plane or a point.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line303">line 303</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    True if all three components can be treated as 0.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Boolean</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".isVectors2LikeZero"><span class="type-signature">(static) </span>isVectors2LikeZero<span class="signature">(vec)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Determines if all the components of a vector are near zero.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>vec</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The vector of interest.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line294">line 294</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line342">line 342</a>
     </li></ul></dd>
     
 
@@ -3886,7 +4062,7 @@ to the plane or a point.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line383">line 383</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line434">line 434</a>
     </li></ul></dd>
     
 
@@ -4082,7 +4258,7 @@ to the plane or a point.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line459">line 459</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line511">line 511</a>
     </li></ul></dd>
     
 
@@ -4278,7 +4454,7 @@ to the plane or a point.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line489">line 489</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line541">line 541</a>
     </li></ul></dd>
     
 
@@ -4474,7 +4650,7 @@ to the plane or a point.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line576">line 576</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line628">line 628</a>
     </li></ul></dd>
     
 
@@ -4670,7 +4846,7 @@ to the plane or a point.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line615">line 615</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line667">line 667</a>
     </li></ul></dd>
     
 
@@ -4866,7 +5042,7 @@ to the plane or a point.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line732">line 732</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line785">line 785</a>
     </li></ul></dd>
     
 
@@ -5062,7 +5238,7 @@ to the plane or a point.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line325">line 325</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line376">line 376</a>
     </li></ul></dd>
     
 
@@ -5259,7 +5435,7 @@ for a field that field is set to 0.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line186">line 186</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line225">line 225</a>
     </li></ul></dd>
     
 
@@ -5456,7 +5632,7 @@ for a field that field is set to 0.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line206">line 206</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line245">line 245</a>
     </li></ul></dd>
     
 
@@ -5632,7 +5808,7 @@ for a field that field is set to 0.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line699">line 699</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line752">line 752</a>
     </li></ul></dd>
     
 
@@ -5786,7 +5962,7 @@ for a field that field is set to 0.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line104">line 104</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line143">line 143</a>
     </li></ul></dd>
     
 
@@ -5940,7 +6116,7 @@ for a field that field is set to 0.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line115">line 115</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line154">line 154</a>
     </li></ul></dd>
     
 
@@ -5971,7 +6147,7 @@ for a field that field is set to 0.
 
     
 
-    <h4 class="name" id=".normalToTangentXY"><span class="type-signature">(static) </span>normalToTangentXY<span class="signature">(normal)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id=".normalToTangentXY"><span class="type-signature">(static) </span>normalToTangentXY<span class="signature">(normal, store<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
@@ -6002,6 +6178,8 @@ for a field that field is set to 0.
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -6027,10 +6205,51 @@ for a field that field is set to 0.
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last">The normal of interest.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>store</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Optional object to store the tangent into.</td>
         </tr>
 
     
@@ -6071,7 +6290,7 @@ for a field that field is set to 0.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line44">line 44</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line54">line 54</a>
     </li></ul></dd>
     
 
@@ -6247,7 +6466,7 @@ for a field that field is set to 0.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line249">line 249</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line288">line 288</a>
     </li></ul></dd>
     
 
@@ -6423,7 +6642,7 @@ for a field that field is set to 0.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line261">line 261</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line300">line 300</a>
     </li></ul></dd>
     
 
@@ -6476,7 +6695,7 @@ for a field that field is set to 0.
 
     
 
-    <h4 class="name" id=".tangentToNormalXY"><span class="type-signature">(static) </span>tangentToNormalXY<span class="signature">(tangent)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id=".tangentToNormalXY"><span class="type-signature">(static) </span>tangentToNormalXY<span class="signature">(tangent, store<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
@@ -6507,6 +6726,8 @@ for a field that field is set to 0.
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -6532,10 +6753,51 @@ for a field that field is set to 0.
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last">The tangent of interest.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>store</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Optional object to store the normal into.</td>
         </tr>
 
     
@@ -6576,7 +6838,7 @@ for a field that field is set to 0.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line35">line 35</a>
+        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line36">line 36</a>
     </li></ul></dd>
     
 
@@ -6640,13 +6902,13 @@ for a field that field is set to 0.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 11 2017 10:44:51 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:49 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

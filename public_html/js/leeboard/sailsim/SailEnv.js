@@ -36,6 +36,8 @@ LBSailSim.Env = function() {
     /**
      * The boat data objects, each property is named with the boat type name, with the
      * value of the property the data object for that boat type.
+     * @readonly
+     * @member {object}
      */
     this.boatDatas = {};
     
@@ -46,7 +48,8 @@ LBSailSim.Env = function() {
      * checked out boat, "" if the boat is not checked out. We use "" instead of
      * undefined so we can distinguish between availability (=== "") and non-existance 
      * (undefined).
-     * 
+     * @readonly
+     * @member {object}
      */
     this.boatsByType = {};
 };
@@ -102,7 +105,7 @@ LBSailSim.Env.prototype = {
         this.boatDatas[data.typeName] = data;
         
         var boatsForType = {};
-        if (Leeboard.isVar(data.instances)) {
+        if (data.instances) {
             // TODO: Someday support a range of numbered boats.
             for (var i = 0; i < data.instances.length; ++i) {
                 boatsForType[data.instances[i]] = "";
@@ -131,18 +134,20 @@ LBSailSim.Env.prototype = {
      */
     isBoatAvailable: function(typeName, boatName) {
         var boatData = this.getBoatData(typeName);
-        if (!Leeboard.isVar(boatData)) {
+        if (!boatData) {
             return false;
         }
 
         var boatsOfType = this.boatsByType[typeName];
-        if (!Leeboard.isVar(boatsOfType)) {
+        if (!boatsOfType) {
             // The boat type is not supported.
             return false;
         }
 
         boatName = boatName || typeName;
         var boatInstance = boatsOfType[boatName];
+        // Need to use use Leeboard.isVar(), as boatInstance is a string and an empty
+        // string is treated as false.
         if (!Leeboard.isVar(boatInstance)) {
             // Boat name for boat type is not supported.
             return false;
@@ -164,13 +169,13 @@ LBSailSim.Env.prototype = {
         }
 
         var boatData = this.getBoatData(typeName);
-        if (!Leeboard.isVar(boatData)) {
+        if (!boatData) {
             return undefined;
         }
 
         boatName = boatName || "";
         var boat = this._createBoatInstance(typeName, boatName, boatData);
-        if (!Leeboard.isVar(boat)) {
+        if (!boat) {
             return undefined;
         }
 
@@ -209,7 +214,7 @@ LBSailSim.Env.prototype = {
      */
     returnBoat: function(boat) {
         var boatsOfType = this.boatsByType[boat.typeName];
-        if (Leeboard.isVar(boatsOfType)) {
+        if (boatsOfType) {
             if (boatsOfType[boat.boatName] === boat) {
                 boatsOfType[boat.boatName] = "";
                 this._boatReturned(boat);
@@ -266,7 +271,7 @@ LBSailSim.Wind.prototype = {
         var vx = 4;
         var vy = 0;
 
-        if (!Leeboard.isVar(vel)) {
+        if (!vel) {
             return LBGeometry.createVector3(vx, vy);
         }
         vel.x = vx;
@@ -313,7 +318,7 @@ LBSailSim.Water.prototype = {
         //vx = 0.4;
         vx = -0.5;
 
-        if (!Leeboard.isVar(vel)) {
+        if (!vel) {
             return new LBGeometry.createVector3(vx, vy, 0);
         }
         vel.x = vx;
