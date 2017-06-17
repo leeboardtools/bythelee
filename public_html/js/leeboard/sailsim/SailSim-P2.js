@@ -38,6 +38,7 @@ LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, dat
     
     // Tack on a P2 body...
     boat.p2Body = Leeboard.P2Link.createP2BodyFromData(this.game, data.p2Body, this.game);
+    boat.p2Body.damping = 0;
     boat.p2Body.mass = boat.getTotalMass();
     return boat;
 };

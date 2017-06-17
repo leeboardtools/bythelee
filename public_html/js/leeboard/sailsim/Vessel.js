@@ -387,6 +387,12 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
      * @member {LBGeometry.createVector3}
      */
     this.apparentWind = LBGeometry.createVector3();
+    
+    /**
+     * Stores the current apparent velocity through the water.
+     * @member {LBGeometry.createVector3}
+     */
+    this.apparentCurrent = LBGeometry.createVector3();
 
 };
 
@@ -640,6 +646,8 @@ LBSailSim.Vessel.prototype.load = function(data) {
     this._loadBallasts(data.ballasts);
     this._loadControllers(data.controllers);
     
+    this.hull = LBSailSim.Hull.createFromData(data.hull, this);
+    
     return this;
 };
 
@@ -673,6 +681,9 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
     this.sailEnv.wind.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, 0, this.apparentWind);
     this.apparentWind.sub(this.worldLinearVelocity);
     
+    this.sailEnv.water.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, 0, this.apparentCurrent);
+    this.apparentCurrent.sub(this.worldLinearVelocity);
+    
     this._updateFoilForces(dt, this.sailEnv.wind, this.aeroFoils);
     this._updateFoilForces(dt, this.sailEnv.water, this.hydroFoils);
     
@@ -680,9 +691,10 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
         this.propulsors[i].updateForce(dt);
     }
     
-    // Need the hull resistance...
-    
-    // Need to add gravity.
+    if (this.hull) {
+        this.workingResultant = this.hull.updateForces(dt);
+        this.addWorldResultant(this.workingResultant);
+    }
     
     return this;
 };

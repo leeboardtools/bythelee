@@ -52,10 +52,46 @@ LBSailSim.Env = function() {
      * @member {object}
      */
     this.boatsByType = {};
+    
+    /**
+     * The acceleration due to gravity.
+     * @member {number}
+     */
+    this.gravity = 9.81;
 };
 
 LBSailSim.Env.prototype = {
     constructor: LBSailSim.Env,
+    
+    /**
+     * Calculates the Froude number for a given speed and length.
+     * @param {number} vel  The speed.
+     * @param {number} len  The length.
+     * @returns {number}    The Froude number.
+     */
+    calcFroudeNumber: function(vel, len) {
+        return vel / Math.sqrt(len * this.gravity);
+    },
+    
+    /**
+     * Calculates the Reynolds number for a given speed and length in the air.
+     * @param {number} vel  The speed.
+     * @param {number} len  The length.
+     * @returns {number}    The Reynolds number.
+     */
+    calcAirRe: function(vel, len) {
+        return this.wind.calcRe(vel, len);
+    },
+    
+    /**
+     * Calculates the Reynolds number for a given speed and length in the water.
+     * @param {number} vel  The speed.
+     * @param {number} len  The length.
+     * @returns {number}    The Reynolds number.
+     */
+    calcWaterRe: function(vel, len) {
+        return this.water.calcRe(vel, len);
+    },
     
     /**
      * Loads {@link LBFoils.ClCdCurve} from a data object.
@@ -253,7 +289,17 @@ LBSailSim.Env.prototype = {
  * @returns {LBSailSim.Wind}
  */
 LBSailSim.Wind = function() {
+    /**
+     * The density.
+     * @member {number}
+     */
     this.density = 1.204;
+    
+    /**
+     * The kinematic viscosity.
+     * @member {number}
+     */
+    this.kViscosity = 1.48e-5;
 };
 
 LBSailSim.Wind.prototype = {
@@ -281,6 +327,16 @@ LBSailSim.Wind.prototype = {
     },
     
     /**
+     * Calculates a Reynolds number.
+     * @param {number} vel  The speed.
+     * @param {number} len  The length.
+     * @returns {Number}    The Reynolds number.
+     */
+    calcRe: function(vel, len) {
+        return vel * len / this.kViscosity; 
+    },
+    
+    /**
      * Called to update the state of the wind.
      * @param {number} dt   The simulation time step.
      * @returns {LBSailSim.Wind}    this.
@@ -297,7 +353,15 @@ LBSailSim.Wind.prototype = {
  * @returns {LBSailSim.Water}
  */
 LBSailSim.Water = function() {
-    this.density = 1000;
+    /**
+     * Density of the water, fresh water is ~1000, salt water is ~1025 kg/m^3
+     */
+    this.density = 1025;
+    
+    /**
+     * Kinematic viscosity of the water, salt water is ~1e-6 m^2/s
+     */
+    this.kViscosity = 1e-6;
 };
 
 LBSailSim.Water.prototype = {
@@ -325,6 +389,16 @@ LBSailSim.Water.prototype = {
         vel.y = vy;
         vel.z = 0;
         return vel;
+    },
+    
+    /**
+     * Calculates a Reynolds number.
+     * @param {number} vel  The speed.
+     * @param {number} len  The length.
+     * @returns {Number}    The Reynolds number.
+     */
+    calcRe: function(vel, len) {
+        return vel * len / this.kViscosity; 
     },
     
     /**

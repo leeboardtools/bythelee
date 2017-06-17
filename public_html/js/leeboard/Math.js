@@ -130,6 +130,21 @@ LBMath.round = function(val, decimalPlaces) {
 };
 
 /**
+ * Rounds a value down to a certain number of decimal places.
+ * @param {number} val  The value to be rounded downward.
+ * @param {number} [decimalPlaces]  The number of decimal places, less than zero rounds
+ * above the decimal place.
+ * @returns {Number}    The rounded value.
+ */
+LBMath.roundDown = function(val, decimalPlaces) {
+    if (decimalPlaces) {
+        var scale = Math.pow(10, decimalPlaces);
+        return Math.floor(val * scale) / scale;
+    }
+    return Math.floor(val);
+};
+
+/**
  * Third order smoothstep function per https://en.wikipedia.org/wiki/Smoothstep
  * s(x) = -2*x^3 + 3*x^2
  * @param {Number} x The x value.
@@ -195,9 +210,14 @@ LBMath.transition = function(x, ya, yb, smoothFunc) {
 /**
  * Cubic spline interpolator.
  * @constructor
+     * @param {Array} [xs]    Optional array of x values, this must be sorted such that xs[i] &lt; xs[i+1].
+     * @param {Array} [ys]    Optional array of y values corresponding to the xs.
  * @returns {LBMath.CSpline}
  */
-LBMath.CSpline = function() {
+LBMath.CSpline = function(xs, ys) {    
+    if (xs && ys) {
+        this.setup(xs, ys);
+    }
 };
 
 LBMath.CSpline.prototype = {
@@ -250,7 +270,7 @@ LBMath.CSpline.prototype = {
     /**
      * Interpolates a y value given an x value.
      * @param {Number} x  The x value to interpolate.
-     * @param {Number} lowIn If not undefined, the smallest index in this.xs such that this.xs[lowIn] &le; x,
+     * @param {Number} [lowIn] If not undefined, the smallest index in this.xs such that this.xs[lowIn] &le; x,
      * used to avoid the binary search for multiple dimensions.
      * @returns {Number}    The interpolated value.
      */

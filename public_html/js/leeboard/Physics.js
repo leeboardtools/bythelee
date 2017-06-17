@@ -675,7 +675,7 @@ LBPhysics.RigidBody.prototype = {
      * @private
      * @returns {LBPhysics.RigidBody}    this.
      */
-    updatePhysicalProperties: function() {
+    _updatePhysicalProperties: function() {
         if (this.physicalPropertiesDirty) {
             this.totalMass = this.mass;
             
@@ -711,7 +711,7 @@ LBPhysics.RigidBody.prototype = {
      * @returns {Number}    The total mass.
      */
     getTotalMass: function() {
-        this.updatePhysicalProperties();
+        this._updatePhysicalProperties();
         return this.totalMass;
     },
     
@@ -721,7 +721,7 @@ LBPhysics.RigidBody.prototype = {
      * @returns {object}    The center of mass in world coordinates.
      */
     getTotalCenterOfMass: function() {
-        this.updatePhysicalProperties();
+        this._updatePhysicalProperties();
         return this.totalCenterOfMass;
     },
 /*    
