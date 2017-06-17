@@ -27,7 +27,7 @@ LBSailSim.P2Env = function(game) {
     LBSailSim.Env.call(this);
     this.game = game;
     
-    this.p2Link = new Leeboard.P2Link();
+    this.p2Link = new Leeboard.P2Link(game);
 };
 
 LBSailSim.P2Env.prototype = Object.create(LBSailSim.Env.prototype);

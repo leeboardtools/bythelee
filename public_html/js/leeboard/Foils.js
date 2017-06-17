@@ -55,6 +55,16 @@ LBFoils.ClCd = function(cl, cd, cm) {
 
 LBFoils.ClCd.prototype = {
     constructor: LBFoils.ClCd,
+
+    /**
+     * Cleans up the coefficients, such as setting them to zero if they are near zero.
+     * @returns {undefined}
+     */
+    clean: function() {
+        this.cd = LBMath.cleanNearZero(this.cd);
+        this.cl = LBMath.cleanNearZero(this.cl);
+        this.cm = LBMath.cleanNearZero(this.cm);
+    },
     
     /**
      * Calculates the lift and drag forces and the moment from the coefficients.
@@ -195,8 +205,8 @@ LBFoils.ClCdStall.prototype = {
         store.cd = this.cd45Deg + 4 * (this.cd90Deg - this.cd45Deg) * x * (1 - x);   
         
         // 45 degrees is our 0 point...
-        store.cl = this.cl45Deg * Math.cos(2 * (degrees - 45) * LBMath.DEG_TO_RAD) * sign;    
-        store.cm = -(0.46 + 0.04 * (degrees - 30) / 60) * sign;
+        store.cl = this.cl45Deg * Math.cos(2 * (deltaDeg - 45) * LBMath.DEG_TO_RAD) * sign;    
+        store.cm = -(0.46 + 0.04 * (deltaDeg - 30) / 60) * sign;
         store.cmIsChordFraction = true;
         
         return store;
@@ -246,15 +256,28 @@ LBFoils.ClCdInterp.prototype = {
     
     /**
      * Loads the interpolation data. Note that this stores the coefficient arrays
-     * by reference, not as copies.
+     * by reference, not as copies, unless there are symmetries involved.
      * @param {object} data   The data, typically loaded from a JSON file.
+     * @param {object} isForeAftSymmetric   If true the data is presumed to be symmetric
+     * about the 90 degrees point.
      * @returns {object} this.
      */
-    load: function(data) {
+    load: function(data, isForeAftSymmetric) {
         this.alphas = data.alphas;
         this.cls = data.cls;
         this.cds = data.cds;
         this.cms = data.cms;
+        
+        if (isForeAftSymmetric) {
+            var alphas = this.alphas.slice();
+            for (var i = this.alphas.length - 1; i >= 0; --i) {
+                alphas.push(180 - this.alphas[i]);
+            }
+            this.alphas = alphas;
+            this.cls = Leeboard.copyAndMirrorArray(this.cls);
+            this.cds = Leeboard.copyAndMirrorArray(this.cds);
+            this.cms = Leeboard.copyAndMirrorArray(this.cms);
+        }
         
         this.interpCls.setup(this.alphas, this.cls);
         this.interpCds.setup(this.alphas, this.cds);
@@ -307,10 +330,12 @@ LBFoils.ClCdCurve = function() {
     this.aspectRatio = Number.POSITIVE_INFINITY;
     this.re = Number.POSITIVE_INFINITY;
     this.clCdLifting = new LBFoils.ClCdInterp();
-    this.liftingEndDeg = 90;
     this.isSymmetric = true;
     
+    this.liftingEndDeg = 90;
     this.stallStartDeg = 90;
+    this.aftLiftingEndDeg = 90;
+    this.aftStallStartDeg = 90;
     this.clCdStall = null;
 };
 
@@ -335,13 +360,18 @@ LBFoils.ClCdCurve.prototype = {
         if (Leeboard.isVar(this.clCdStall)) {
             this.stallStartDeg = data.stallStartDeg || 90;
             this.liftEndDeg = data.liftEndDeg || this.stallStartDeg;
+            
+            if (data.isForeAftSymmetric) {
+                this.aftStallStartDeg = 180 - this.stallStartDeg;
+                this.aftLiftEndDeg = 180 - this.liftEndDeg;
+            }
         }
         
         this.isSymmetric = data.isSymmetric || true;
         
         if (Leeboard.isVar(data.clCdInterp)) {
             this.clCdLifting = new LBFoils.ClCdInterp();
-            this.clCdLifting.load(data.clCdInterp);
+            this.clCdLifting.load(data.clCdInterp, data.isForeAftSymmetric);
         }
         
         return this;
@@ -365,25 +395,40 @@ LBFoils.ClCdCurve.prototype = {
         }
         
         // TODO: To support a non-symmetric clCdStall, we need to add liftStartDeg and stallEndDeg.
-        if ((degrees <= this.stallStartDeg) || (this.clCdStall === null)) {
+        // Also need to support reverse direction stall angles.
+        if (this.clCdStall === null) {
             store = this.clCdLifting.calcCoefsDeg(degrees, store);
         }
-        else if (degrees >= this.liftEndDeg) {
-            store = this.clCdStall.calcCoefsDeg(degrees, store);            
-        }
         else {
-            var store = this.clCdLifting.calcCoefsDeg(degrees, store);
-            var stalled = this.clCdStall.calcCoefsDeg(degrees);
-            var x = (degrees - this.stallStartDeg) / (this.liftEndDeg - this.stallStartDeg);
-            var s = LBMath.smoothstep3(x);
-            var sLift = 1 - s;
-            store.cl = store.cl * sLift + stalled.cl * s;
-            store.cd = store.cd * sLift + stalled.cd * s;
-            store.cm = store.cm * sLift + stalled.cm * s;
+            if ((degrees <= this.stallStartDeg) || (degrees >= this.aftStallStartDeg)) {
+                store = this.clCdLifting.calcCoefsDeg(degrees, store);
+            }
+            else if ((degrees >= this.liftEndDeg) && (degrees <= this.aftLiftEndDeg)) {
+                store = this.clCdStall.calcCoefsDeg(degrees, store);            
+            }
+            else {
+                var store = this.clCdLifting.calcCoefsDeg(degrees, store);
+                var stalled = this.clCdStall.calcCoefsDeg(degrees);
+                var x;
+                if (degrees < this.liftEndDeg) {
+                    x = (degrees - this.stallStartDeg) / (this.liftEndDeg - this.stallStartDeg);
+                }
+                else {
+                    x = (degrees - this.aftStallStartDeg) / (this.aftLiftEndDeg - this.aftStallStartDeg);
+                }
+                
+                var s = LBMath.smoothstep3(x);
+                var sLift = 1 - s;
+                store.cl = store.cl * sLift + stalled.cl * s;
+                store.cd = store.cd * sLift + stalled.cd * s;
+                store.cm = store.cm * sLift + stalled.cm * s;
+            }
         }
         
         store.cl *= sign;
         store.cm *= sign;
+        
+        store.clean();
         return store;
     },
 
@@ -439,6 +484,7 @@ LBFoils.Foil = function() {
     
     this.workingVel = LBGeometry.createVector3();
     this.workingVelResults = {
+        'worldPos': LBGeometry.createVector3(), // For testing...
         'worldVel': LBGeometry.createVector3()
     };
 };
@@ -482,7 +528,7 @@ LBFoils.Foil.prototype = {
      */
     calcLocalLiftDragMoment: function(rho, qInfLocal, store, details) {
         var chord = this.chordLine.delta();
-        var angleDeg = chord.angleTo(qInfLocal) * LBMath.RAD_TO_DEG;
+        var angleDeg = chord.angleToSigned(qInfLocal) * LBMath.RAD_TO_DEG;
         var coefs = this.clCdCurve.calcCoefsDeg(angleDeg);
         var qInfSpeed = qInfLocal.length();
         var chordLength = chord.length();
@@ -502,9 +548,10 @@ LBFoils.Foil.prototype = {
      * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
      * @param {object} [details]   If defined, an object that will receive details such
      * as lift, drag, induced drag, moment.
+     * @param {object} [resultant]  If defined, the object set to the resultant force.
      * @returns {LBPhysics.Resultant3D}  The resultant force in local coordinates.
      */
-    calcLocalForce: function(rho, qInfLocal, details) {
+    calcLocalForce: function(rho, qInfLocal, details, resultant) {
         details = this.calcLocalLiftDragMoment(rho, qInfLocal, details, details);
         
         var drag = details.drag;
@@ -513,14 +560,22 @@ LBFoils.Foil.prototype = {
         }
         
         var qInfSpeed = qInfLocal.length();
-        var qInfNormal = LBGeometry.tangentToNormalXY(qInfLocal);
-        var fx = qInfNormal.x * details.lift + qInfLocal.x * drag / qInfSpeed;
-        var fy = qInfNormal.y * details.lift + qInfLocal.y * drag / qInfSpeed;
+        var fx;
+        var fy;
+        if (!LBMath.isLikeZero(qInfSpeed)) {
+            fx = (-qInfLocal.y * details.lift + qInfLocal.x * drag) / qInfSpeed;
+            fy = (qInfLocal.x * details.lift + qInfLocal.y * drag) / qInfSpeed;
+        }
+        else {
+            fx = 0;
+            fy = 0;
+        }
         
-        var force = LBGeometry.createVector3(fx, fy, 0);
-        var moment = LBGeometry.createVector3(0, 0, details.moment);
-        var applPoint = LBGeometry.createVector3(this.chordLine.start.x, this.chordLine.start.y, this.sliceZ);
-        return new LBPhysics.Resultant3D(force, moment, applPoint);
+        resultant = resultant || new LBPhysics.Resultant3D();
+        resultant.force.set(fx, fy, 0);
+        resultant.moment.set(0, 0, details.moment);
+        resultant.applPoint.set(this.chordLine.start.x, this.chordLine.start.y, this.sliceZ);
+        return resultant;
     },
     
     
@@ -534,9 +589,10 @@ LBFoils.Foil.prototype = {
      *  world-local transformations as well as the change in world position/orientation.
      * @param {object} [details]  If defined, an object that will receive details such
      * as lift, drag, induced drag, moment.
+     * @param {object} [resultant]  If defined, the object set to the resultant force.
      * @returns {LBPhysics.Resultant3D}  The resultant force in world coordinates.
      */
-    calcWorldForce: function(rho, qInfWorld, coordSystemState, details) {
+    calcWorldForce: function(rho, qInfWorld, coordSystemState, details, resultant) {
         coordSystemState.calcVectorLocalToWorld(this.chordLine.start, this.workingVelResults);
         
         this.workingVel.copy(this.workingVelResults.worldVel);
@@ -549,7 +605,7 @@ LBFoils.Foil.prototype = {
         
         this.workingVel.applyMatrix4Rotation(coordSystemState.localXfrm);
         
-        var resultant = this.calcLocalForce(rho, this.workingVel, details);
+        resultant = this.calcLocalForce(rho, this.workingVel, details, resultant);
         resultant.applyMatrix4(coordSystemState.worldXfrm);
         
         return resultant;

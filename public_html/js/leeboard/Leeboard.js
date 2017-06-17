@@ -19,42 +19,6 @@
  */
 var Leeboard = Leeboard || {};
 
-/**
-* Convert p2 physics value (meters) to pixel scale, replaces Phaser.Physics.P2#mpx.
-* @param {number} v - The value to convert.
-* @return {number} The scaled value.
-*/
-Leeboard.mpx = function (v) {
-    return v *= 20;
-};
-
-/**
-* Convert pixel value to p2 physics scale (meters), replaces Phaser.Physics.P2#pxm
-* @param {number} v - The value to convert.
-* @return {number} The scaled value.
-*/
-Leeboard.pxm = function (v) {
-    return v * 0.05;
-};
-
-/**
-* Convert p2 physics value (meters) to pixel scale and inverses it, replaces Phaser.Physics.P2#mpxi
-* @param {number} v - The value to convert.
-* @return {number} The scaled value.
-*/
-Leeboard.mpxi = function (v) {
-    return v *= -20;
-};
-
-/**
-* Convert pixel value to p2 physics scale (meters) and inverses it, replaces Phaser.Physics.P2#pxmi.
-* @param {number} v - The value to convert.
-* @return {number} The scaled value.
-*/
-Leeboard.pxmi = function (v) {
-    return v * -0.05;
-};
-
 
 /**
  * Converts meters per second to knots.
@@ -165,3 +129,37 @@ Leeboard.isVar = function(v) {
 };
 
 
+/**
+ * Looks through the elements of an array for the first one with a property called 'name'
+ * whose value matches a given name.
+ * @param {object} array    The array to search.
+ * @param {object} name The name to look for.
+ * @param {object} [defValue=undefined]   The value to return if an element is not found.
+ * @returns {object}    The object, defValue if no element found.
+ */
+Leeboard.findArrayElementWithName = function(array, name, defValue) {
+    for (var i = 0; i < array.length; ++i) {
+        if (array[i].name === name) {
+            return array[i];
+        }
+    }
+    return defValue;
+};
+
+/**
+ * Copies the contents of an array, followed by the same contents except in reverse order,
+ * into a new array.
+ * @param {Array} array    The array to be copied and mirrored.
+ * @returns {Array} The new array, undefined/null if array is undefined/null.
+ */
+Leeboard.copyAndMirrorArray = function(array) {
+    if (!array) {
+        return array;
+    }
+    
+    var newArray = array.slice();
+    for (var i = array.length - 1; i >= 0; --i) {
+        newArray.push(array[i]);
+    }
+    return newArray;
+};

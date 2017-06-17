@@ -17,6 +17,7 @@
 
 /* global LBMath, Leeboard, LBGeometry */
 
+
 var LBControls = LBControls || {};
 
 LBControls.SmoothController = function(name, minValue, maxValue, initialValue, controllee) {
@@ -36,6 +37,10 @@ LBControls.SmoothController = function(name, minValue, maxValue, initialValue, c
 LBControls.SmoothController.prototype = {
     constructor: LBControls.SmoothController,
     
+    getValue: function() {
+        return this.currentValue;
+    },
+    
     setValue: function(value) {
         value = LBMath.clamp(value, this.minValue, this.maxValue);
         if (value !== this.currentValue) {
@@ -48,7 +53,7 @@ LBControls.SmoothController.prototype = {
         return this;
     },
     
-    load: function(data) {
+    load: function(data, owner) {
         if (!Leeboard.isVar(data)) {
             return this;
         }
@@ -62,7 +67,15 @@ LBControls.SmoothController.prototype = {
             this.maxValue=  tmp;
         }
         
-        this.currentValue = data.currentValue || this.minValue;
+        if (data.currentValue) {
+            this.currentValue = data.currentValue;
+        }
+        else if ((this.minValue >= 0) || (this.maxValue < 0)) {
+            this.currentValue = this.minValue;
+        }
+        else {
+            this.currentValue = 0;
+        }
         this.currentValue = LBMath.clamp(this.currentValue, this.minValue, this.maxValue);
         
         return this;
@@ -92,7 +105,7 @@ LBControls.SteppedController.prototype = {
         return this;
     },
     
-    load: function(data) {
+    load: function(data, owner) {
         if (!Leeboard.isVar(data)) {
             return this;
         }
@@ -108,6 +121,22 @@ LBControls.SteppedController.prototype = {
         
         return this;
     }
+};
+
+LBControls.createControllerFromData = function(data, owner) {
+    if (!Leeboard.isVar(data)) {
+        return undefined;
+    }
+    
+    var controller;
+    if (Leeboard.isVar(data.construct)) {
+        controller = eval(data.construct);
+    }
+    else {
+        controller = new LBControls.SmoothController();
+    }
+    
+    return controller.load(data, owner);
 };
 
 

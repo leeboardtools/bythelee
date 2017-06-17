@@ -215,6 +215,13 @@ QUnit.test( "CoordSystemState.calcVectorLocalToWorld()", function( assert ) {
     
 });
 
+QUnit.test( "loadMomentInertia()", function( assert ) {
+    var moment = LBPhysics.loadMomentInertia({ 'xx': 1, 'xy': 2, 'xz': 3, 'yy': 4, 'yz': 5, 'zz': 6});
+    var refMoment = LBGeometry.createMatrix3();
+    refMoment.set(1, 2, 3, 2, 4, 5, 3, 5, 6);
+    checkMatrix(assert, moment, refMoment);
+});
+
 QUnit.test( "RigidBody()", function( assert ) {
     var obj3DA = LBGeometry.createObject3D();
     var bodyA = new LBPhysics.RigidBody(obj3DA, 10);

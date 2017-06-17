@@ -12,32 +12,81 @@
                     }
                 }
             },
-            "mass": 100,
+            "mass": 200,
             "centerOfMass": { "x": 0, "y": 0, "z": 0 },
-            "momentInertia": {},
+            "momentInertia": { "zz": 1000 },
             "aeroFoils": [],
-            "hydroFoils": [ {
+            "hydroFoils": [ 
+                {
                     "construct": "new LBSailSim.FoilInstance()",
                     "name": "keel",
-                    "mass": 20,
-                    "centerOfMass": { "x": 0, "y": 0, "z": 0 },
+                    "mass": 100,
+                    "centerOfMass": { "x": -0.5, "y": 0, "z": -1 },
                     "obj3D": {
                         "position" : { "x": 0, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                         },
                     "foil": {
                         "chordLine": {
-                            "start": { "x": 0, "y": 0 },
-                            "end": { "x": -1, "y": 0 }
+                            "start": { "x": 0.5, "y": 0 },
+                            "end": { "x": -0.5, "y": 0 }
                         },
                         "sliceZ": 0.2,
-                        "area": 1,
+                        "area": 0.3,
                         "aspectRatio": 3,
                         "libClCdCurve": "FlatPlate"
                     }
-            }],
-            "propulsors": [],
-            "ballasts": []
+                },
+                {
+                    "name": "rudder",
+                    "mass": 4,
+                    "centerOfMass": { "x": -0.15, "y": 0, "z": -0.5 },
+                    "obj3D": {
+                        "position" : { "x": -2, "y": 0, "z": 0 },
+                        "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                        },
+                    "foil": {
+                        "chordLine": {
+                            "start": { "x": 0, "y": 0 },
+                            "end": { "x": -0.3, "y": 0 }
+                        },
+                        "sliceZ": 0.2,
+                        "area": 0.1,
+                        "aspectRatio": 5,
+                        "libClCdCurve": "FlatPlate"
+                    }
+                }
+            ],
+            "propulsors": [
+                {
+                    "name": "engine",
+                    "mass": 0,
+                    "obj3D": {
+                        "position" : { "x": -1.8, "y": 0, "z": 0 },
+                        "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                    },
+                    "minForce": -25,
+                    "maxForce": 100
+                }
+            ],
+            "ballasts": [],
+            "controllers": [
+                {
+                    "construct": "new LBSailSim.RudderController()",
+                    "name": "Rudder",
+                    "minValue": -45,
+                    "maxValue": 45,
+                    "currentValue": 0                    
+                },
+                {
+                    "construct": "new LBSailSim.ThrottleController()",
+                    "name": "Throttle",
+                    "propulsorName": "engine",
+                    "minValue": -5,
+                    "maxValue": 10,
+                    "currentValue": 0
+                }
+            ]
         }
     ]
 }

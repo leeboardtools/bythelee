@@ -74,11 +74,12 @@ function checkLine2(assert, line, startX, startY, endX, endY, msg, tolerance) {
     checkVector2(assert, line.end, endX, endY, msg + "End", tolerance);
 }
 
-function checkMatrix4(assert, mat, refMat, msg, tolerance) {
+function checkMatrix(assert, mat, refMat, msg, tolerance) {
     if (!Leeboard.isVar(msg)) {
         msg = "";
     }
 
+    assert.equal(mat.elements.length, refMat.elements.length, msg + " Elements Match");
     for (var i = 0; i < refMat.elements.length; ++i) {
         assert.nearEqual(mat.elements[i], refMat.elements[i], msg + " E" + i + "OK", tolerance);
     }
@@ -171,20 +172,20 @@ QUnit.test( "Matrix4 Load", function( assert ) {
     for (var i = 0; i < elements.length; ++i) {
         refMat.elements[i] = elements[i];
     }
-    checkMatrix4(assert, mat, refMat, "Elements");
+    checkMatrix(assert, mat, refMat, "Elements");
     
     mat = LBGeometry.loadMatrix4({ "origin": { 'x': 10, 'y': 11, 'z': 12 } }, mat);
     refMat.identity();
     refMat.setPosition(LBGeometry.createVector3(10, 11, 12));
-    checkMatrix4(assert, mat, refMat, "Origin");
+    checkMatrix(assert, mat, refMat, "Origin");
     
     
     LBGeometry.loadMatrix4({ 'rotation': { 'ex': .1, 'ey': .2, 'ez': .3 }}, mat);
     refMat.makeFromEulerAndXYZ(.1, .2, .3, 0, 0, 0);
-    checkMatrix4(assert, mat, refMat, "Euler");
+    checkMatrix(assert, mat, refMat, "Euler");
     
     LBGeometry.loadMatrix4({ 'origin': { 'x':10, 'y':11, 'z':15}, 'rotation': { 'qx': 1, 'qy':2, 'qz':3, 'qw':4}}, mat);
     refMat.makeRotationFromQuaternion(LBGeometry.createQuaternion(1, 2, 3, 4));
     refMat.setPosition(LBGeometry.createVector3(10, 11, 15));
-    checkMatrix4(assert, mat, refMat, "Quaternion-Origin");
+    checkMatrix(assert, mat, refMat, "Quaternion-Origin");
 });

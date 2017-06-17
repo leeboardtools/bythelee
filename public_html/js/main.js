@@ -74,6 +74,9 @@ PlayState.init = function() {
 PlayState.create = function() {
     this.camera.flash('#000000');
     this.world.setBounds(-this.game.width / 2, -this.game.height / 2, this.game.width, this.game.height);
+    this.game.world.bounds.setTo(-10000, -10000, 20000, 20000);
+    this.game.physics.setBoundsToWorld();
+    
     this.camera.focusOnXY(0, 0);
         
     var clCdCurvesJSON = this.game.cache.getJSON('clCdCurves');
@@ -124,6 +127,7 @@ PlayState._spawnCharacters = function (data) {
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA");
     this.myBoat.p2Body.x = centerX;
     this.myBoat.p2Body.y = centerY;
+    this.myBoat.p2Body.rotation = -10 * LBMath.DEG_TO_RAD;
     this.worldGroup.add(this.myBoat.p2Body.sprite);    
 };
 
@@ -161,6 +165,14 @@ PlayState._setupHUD = function() {
     this.appWindBearingText = this.game.add.text(left, top, "App Wind Bearing: 0", style);
     this.hud.add(this.appWindBearingText);
     top += this.appWindBearingText.height + vSpacing;
+    
+    this.rudderText = this.game.add.text(left, top, "Rudder Angle: 0", style);
+    this.hud.add(this.rudderText);
+    top += this.rudderText.height + vSpacing;
+    
+    this.throttleText = this.game.add.text(left, top, "Throttle: 0", style);
+    this.hud.add(this.throttleText);
+    top += this.throttleText.height + vSpacing;
 };
 
 
@@ -209,25 +221,35 @@ PlayState._updateHUD = function() {
     
     var bearing = this.myBoat.getApparentWindBearingDeg(true);
     this.appWindBearingText.text = "App Wind Bearing: " + bearing.toFixed();
+    
+    var rudder = this.myBoat.getRudderDeg();
+    this.rudderText.text = "Rudder Angle: " + LBMath.round(rudder);
+    
+    var throttle = this.myBoat.getThrottlePos();
+    if (throttle !== undefined) {
+        this.throttleText.text = "Throttle:" + LBMath.round(throttle, 1);
+    }
 };
 
 
 //------------------------------ --------------------
 PlayState._handleInput = function() {
     if (this.cursorKeys.left.isDown) {
-        this.myBoat.moveTiller(-1);
+        this.myBoat.moveRudder(-0.1, false);
     }
     else if (this.cursorKeys.right.isDown) {
-        this.myBoat.moveTiller(1);
+        this.myBoat.moveRudder(0.1, false);
     }
     else if (this.cursorKeys.up.isDown) {
-        this.myBoat.moveMainsheet(-1);
+        //this.myBoat.moveMainsheet(-1);
+        this.myBoat.moveThrottle(0.1);
     }
     else if (this.cursorKeys.down.isDown) {
-        this.myBoat.moveMainsheet(1);
+        //this.myBoat.moveMainsheet(1);
+        this.myBoat.moveThrottle(-0.1);
     }
     else if (this.keys.space.isDown) {
-        this.myBoat.moveTiller(0);
+        this.myBoat.moveRudder(0, true);
     }
     else if (this.keys.t.isDown) {
         this.debounceT = true;
@@ -269,6 +291,21 @@ PlayState._updateCamera = function() {
 
 // PlayState.shutdown
 
+PlayState.mpx = function (v) {
+    return v *= 20;
+};
+
+PlayState.pxm = function (v) {
+    return v * 0.05;
+};
+
+PlayState.mpxi = function (v) {
+    return v *= -20;
+};
+
+PlayState.pxmi = function (v) {
+    return v * -0.05;
+};
 
 //--------------------------------------------------
 window.onload = function() {
@@ -277,7 +314,7 @@ window.onload = function() {
         height: "100",
         renderer: Phaser.AUTO,
         parent: "game",
-        physicsConfig: Leeboard
+        physicsConfig: PlayState
     };
     
     game = new Phaser.Game(config);

@@ -22,12 +22,18 @@
  * the position/rotation of the rigid body from the P2 body and applying the forces
  * from the rigid body to the P2 body.
  * @constructor
+ * @param {object} game The Phaser game we're running under.
  * @returns {Leeboard.P2Link}
  */
-Leeboard.P2Link = function() {
+Leeboard.P2Link = function(game) {
+    this.game = game;
+    
+    /**
+     * Set this to -1 to make the y-axis going up, otherwise set it to +1 to make the y-axis
+     * go down.
+     */
+    this.ySign = 1;
     this.linkedObjects = [];
-    this.metersToPixels = 20;
-    this.pixelsToMeters = 1/this.metersToPixels;
     this.workingResultant = new LBPhysics.Resultant3D();
 };
 
@@ -122,9 +128,10 @@ Leeboard.P2Link.prototype = {
     _updateLB3BodyFromP2: function(entry) {
         var p2Body = entry.p2Body;
         var rigidBody = entry.rigidBody;
-        rigidBody.setXYZ(-p2Body.x * this.pixelsToMeters, -p2Body.y * this.pixelsToMeters, 
+        // Phaser negates the coordinate system between P2 and {@link PHaser.Physics.P2}.
+        rigidBody.setXYZ(-p2Body.world.pxmi(p2Body.x), -this.ySign * p2Body.world.pxmi(p2Body.y), 
             rigidBody.obj3D.position.z);
-        rigidBody.setZRotationRad(p2Body.rotation);
+        rigidBody.setZRotationRad(this.ySign * p2Body.rotation);
         rigidBody.obj3D.updateMatrixWorld();
     },
     
@@ -143,14 +150,17 @@ Leeboard.P2Link.prototype = {
         var rigidBody = entry.rigidBody;
         rigidBody.updateForces(this.dt);
         
-        var resultant = this.p2link.workingResultant;
-        resultant.copy(rigidBody.getResultant(true));
-        resultant.applyDistanceScale(this.p2link.metersToPixels);
+        var resultant = rigidBody.getResultant(true);
         
         p2Body.mass = rigidBody.getTotalMass();
+        p2Body.inertia = LBPhysics.getInertiaZZ(rigidBody.momentInertia);
         
-        p2Body.applyForce([resultant.force.x, resultant.force.y], 
-            resultant.applPoint.x, resultant.applPoint.y);        
+        var x = resultant.applPoint.x - rigidBody.obj3D.position.x;
+        var y = resultant.applPoint.y - rigidBody.obj3D.position.y;
+        
+        // Phaser negates the coordinate system between P2 and {@link PHaser.Physics.P2}.
+        p2Body.applyForce([-resultant.force.x, -this.p2link.ySign * resultant.force.x], 
+            p2Body.world.mpxi(-x), p2Body.world.mpxi(-this.p2link.ySign * y));
     },
 
     constructor: Leeboard.P2Link

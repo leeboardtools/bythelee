@@ -30,19 +30,37 @@ var LBGeometry = LBGeometry || {};
 /**
  * Calculates a 2D normal from a tangent.
  * @param {object} tangent  The tangent of interest.
+ * @param {object} [store] Optional object to store the normal into.
  * @returns {object}    The normal.
  */
-LBGeometry.tangentToNormalXY = function(tangent) {
-    return new THREE.Vector2(-tangent.y, tangent.x).normalize();
+LBGeometry.tangentToNormalXY = function(tangent, store) {
+    var nx = -tangent.y;
+    var ny = tangent.x;
+    if (!store) {
+        store = new THREE.Vector2(nx, ny);
+    }
+    else {
+        store.set(nx, ny);
+    }
+    return store.normalize();
 };
 
 /**
  * Calculates a 2D tangent from a normal.
  * @param {object} normal  The normal of interest.
+ * @param {object} [store]  Optional object to store the tangent into.
  * @returns {object}    The tangent.
  */
-LBGeometry.normalToTangentXY = function(normal) {
-    return new THREE.Vector2(normal.y, -normal.x).normalize();
+LBGeometry.normalToTangentXY = function(normal, store) {
+    var tx = normal.y;
+    var ty = -normal.x;
+    if (!store) {
+        store = new THREE.Vector(tx, ty);
+    }
+    else {
+        store.set(tx, ty);
+    }
+    return store.normalize();
 };
 
 /**
@@ -67,14 +85,35 @@ LBGeometry.createVector2MagDeg = function(mag, deg) {
 };
 
 /**
- * Returns the angle, in radians, between this vector and another vector.
+ * Returns the angle, in radians, between this vector and another vector with the sign
+ * appropriate for the direction towards the other vector.
  * @param {object} v    The other vector.
  * @returns {Number}    The angle.
  */
-THREE.Vector2.prototype.angleTo = function(v) {
-    // Straight from THREE.js' Vector3.js
-    var theta = this.dot( v ) / ( Math.sqrt( this.lengthSq() * v.lengthSq() ) );
-    return Math.acos( LBMath.clamp( theta, - 1, 1 ) );
+THREE.Vector2.prototype.angleToSigned = function(v) {
+    var lengthSquards = this.lengthSq() * v.lengthSq();
+    if (LBMath.isLikeZero(lengthSquards)) {
+        return 0;
+    }
+    var cosTheta = this.dot( v ) / ( Math.sqrt(lengthSquards) );
+    cosTheta = LBMath.clamp( cosTheta, -1, 1);
+    
+    var theta;
+    if (LBMath.isNearEqual(cosTheta, -1)) {
+        theta = -Math.PI;
+    }
+    else if (LBMath.isNearEqual(cosTheta, 1)) {
+        theta = Math.PI;
+    }
+    else {
+        theta = Math.acos(cosTheta);
+    }
+    
+    // Now handle the sign...
+    if ((this.x * v.y - this.y * v.x) < 0) {
+        theta = -theta;
+    }
+    return theta;
 };
 
 /**
@@ -291,7 +330,7 @@ LBGeometry.crossVectors3 = function(vecA, vecB) {
  * @param {object} vec  The vector of interest.
  * @returns {Boolean}   True if all three components can be treated as 0.
  */
-LBGeometry.isVectors2LikeZero = function(vec) {
+LBGeometry.isVector2LikeZero = function(vec) {
     return LBMath.isLikeZero(vec.x) && LBMath.isLikeZero(vec.y);
 };
 
@@ -304,6 +343,18 @@ LBGeometry.isVector3LikeZero = function(vec) {
     return LBMath.isLikeZero(vec.x) && LBMath.isLikeZero(vec.y) && LBMath.isLikeZero(vec.z);
 };
 
+/**
+ * Limits the magnitude of a vector.
+ * @param {object} vec  The 2D or 3D vector.
+ * @param {number} mag  The maximum magnitude.
+ * @returns {object}    vec.
+ */
+LBGeometry.clampVectorMag = function(vec, mag) {
+    if (vec.lengthSq() > mag * mag) {
+        vec.setLength(mag);
+    }
+    return vec;
+};
 
 /**
  * Creates a quaternion.

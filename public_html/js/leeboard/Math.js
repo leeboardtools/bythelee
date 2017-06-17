@@ -46,7 +46,7 @@ LBMath.defZeroTolerance = 1e-10;
 /**
  * Determines if a number should be treated as zero (usually for avoiding divide by zero)
  * @param {number} x  The number.
- * @param {number} tolerance    The optional tolerance.
+ * @param {number} [tolerance=LBMath.defZeroTolerance]  The optional tolerance.
  * @returns {Boolean}   True if x can be considered zero.
  */
 LBMath.isLikeZero = function(x, tolerance) {
@@ -58,7 +58,7 @@ LBMath.isLikeZero = function(x, tolerance) {
  * Determines if two numbers are approximately equal.
  * @param {number} a    The first number.
  * @param {number} b    The second number.
- * @param {number} tolerance    The optional tolerance.
+ * @param {number} [tolerance=LBMath.defZeroTolerance]  The optional tolerance.
  * @returns {Boolean}   True if the numbers can be considered equal.
  */
 LBMath.isNearEqual = function(a, b, tolerance) {
@@ -75,6 +75,16 @@ LBMath.isNearEqual = function(a, b, tolerance) {
     var scaledA = a * scale;
     var scaledB = b * scale;
     return (Math.abs(scaledA - scaledB) <= tolerance);
+};
+
+/**
+ * Converts a value to zero if it is considered like zero by {@link LBMath.isLikeZero}.
+ * @param {number} x    The value.
+ * @param {number} [tolerance=LBMath.defZeroTolerance]  The optional tolerance.
+ * @returns {Number}    x or 0.
+ */
+LBMath.cleanNearZero = function(x, tolerance) {
+    return LBMath.isLikeZero(x, tolerance) ? 0 : x;
 };
 
 /**

@@ -233,6 +233,7 @@ LBPhysics.CoordSystemState = function() {
     this.prevWorldXfrm = LBGeometry.createMatrix4();
     this.prevLocalXfrm = LBGeometry.createMatrix4();
     this.dt = 0;
+    this.isXfrmsValid = false;
     
     this.workingPos = LBGeometry.createVector3();
     this.workingPrevPos = LBGeometry.createVector3();
@@ -283,13 +284,22 @@ LBPhysics.CoordSystemState.prototype = {
             this.worldXfrm.copy(worldXfrm);
         }
         
-        if (this.dt === 0) {
+        if ((this.dt === 0) || !this.isXfrmsValid) {
             // No time change, make the previous transforms match the current transforms.
             this.prevWorldXfrm.copy(this.worldXfrm);
             this.prevLocalXfrm.copy(this.localXfrm);
         }
+        this.isXfrmsValid = true;
         
         return this;
+    },
+    
+    /**
+     * Marks the coordinate transforms as invalid so the initial transforms are not
+     * saved for velocity calculations.
+     */
+    reset: function() {
+        this.isXfrmsValid = false;
     },
     
     
@@ -344,6 +354,78 @@ LBPhysics.CoordSystemState.prototype = {
     constructor: LBPhysics.CoordSystemState
 };
 
+/**
+ * Loads a moment of inertia tensor from properties in a data object
+ * @param {object} data The data object to load from.
+ * @param {object} [store]  If defined the object to load the tensor into.
+ * @returns {object}    The moment of inertia tensor.
+ */
+LBPhysics.loadMomentInertia = function(data, store) {
+    store = store || LBGeometry.createMatrix3();
+    
+    var xx = data.xx || 0;
+    var xy = data.xy || 0;
+    var xz = data.xz || 0;
+    var yy = data.yy || 0;
+    var yz = data.yz || 0;
+    var zz = data.zz || 0;
+    store.set(xx, xy, xz, xy, yy, yz, xz, yz, zz);
+    return store;
+};
+
+/**
+ * Returns the Ixx term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Ixx term.
+ */
+LBPhysics.getInertiaXX = function(inertia) {
+    return inertia.elements[0];
+};
+
+/**
+ * Returns the Ixy term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Ixy term.
+ */
+LBPhysics.getInertiaXY = function(inertia) {
+    return inertia.elements[1];
+};
+
+/**
+ * Returns the Ixz term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Ixz term.
+ */
+LBPhysics.getInertiaXZ = function(inertia) {
+    return inertia.elements[1];
+};
+
+/**
+ * Returns the Iyy term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Iyy term.
+ */
+LBPhysics.getInertiaYY = function(inertia) {
+    return inertia.elements[4];
+};
+
+/**
+ * Returns the Iyz term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Iyz term.
+ */
+LBPhysics.getInertiaYZ = function(inertia) {
+    return inertia.elements[1];
+};
+
+/**
+ * Returns the Izz term of an inertia tensor.
+ * @param {object} inertia The inertia tensor.
+ * @returns {number}    The Izz term.
+ */
+LBPhysics.getInertiaZZ = function(inertia) {
+    return inertia.elements[8];
+};
 
 /**
  * A rigid body for purposes of force calculations. A rigid body has mass, a position
@@ -424,8 +506,11 @@ LBPhysics.RigidBody.prototype = {
     loadBase: function(data) {
         this.name = data.name || this.name;
         this.mass = data.mass || this.mass;
-        LBGeometry.loadVector3(data.centerOfMass, this.centerOfMass);
-        LBGeometry.loadMatrix3(data.momentInertia, this.momentInertia);
+        LBGeometry.loadVector3(data.centerOfMass, this.centerOfMass);        
+        if (data.momentInertia) {
+            LBPhysics.loadMomentInertia(data.momentInertia, this.momentInertia);
+        }
+        
         this.physicalPropertiesDirty = true;
         return this;
     },
@@ -493,6 +578,16 @@ LBPhysics.RigidBody.prototype = {
     setZRotationRad: function(rad) {
         this.obj3D.setRotationFromEuler(LBGeometry.createEulerRad(0, 0, rad));
         return this;
+    },
+    
+    /**
+     * Sets the rotation of the rigid body about the z-axis, in degrees.
+     * @param {number} deg  The rotation about the z-axis, in degrees. The rotation
+     * is absolute with respect to the base's coordinate system.
+     * @returns {LBPhysics.RigidBody}   this.
+     */
+    setZRotationDeg: function(deg) {
+        return this.setZRotationRad(deg * LBMath.DEG_TO_RAD);
     },
 
     /**

@@ -308,7 +308,10 @@ LBSailSim.Water.prototype = {
      */
     getFlowVelocity: function(x, y, z, vel) {
         var vx = 0;
-        var vy = 0.1;
+        var vy = 0;
+        //vy = 0.1;
+        //vx = 0.4;
+        vx = -0.5;
 
         if (!Leeboard.isVar(vel)) {
             return new LBGeometry.createVector3(vx, vy, 0);

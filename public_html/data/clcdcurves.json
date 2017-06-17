@@ -3,6 +3,7 @@
         { 
             "name": "FlatPlate", 
             "isSymmetric": true,
+            "isForeAftSymmetric": true,
             "stallStartDeg": 25,
             "liftEndDeg": 35,
             "clCdStall": {},
@@ -21,6 +22,7 @@
         {
             "name": "FlatPlateAR5",
             "isSymmetric": true,
+            "isForeAftSymmetric": true,
             "aspectRatio": 5,
             "clCdInterp": {
                 "alphas": [
