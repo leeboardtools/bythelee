@@ -44,6 +44,10 @@ LBSailSim.FoilInstance = function(foil, obj3D, mass, centerOfMass) {
     this.rotationOffsetDegs = [0, 0, 0];
     
     this.workingPos = LBGeometry.createVector3();
+    
+    /**
+     * Object holding the details from the foil, see {@link Foil#calcWorldForce}.
+     */
     this.foilDetails = {
         
     };
@@ -393,6 +397,13 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
      * @member {LBGeometry.createVector3}
      */
     this.apparentCurrent = LBGeometry.createVector3();
+    
+    /**
+     * The maximum force magnitude we'll generate algorithmically, used
+     * to help prevent weird oscillations.
+     * @member {number}
+     */
+    this.maxForceMag = 10000;
 
 };
 
@@ -478,7 +489,7 @@ LBSailSim.Vessel.prototype._removeParts = function(foils) {
  * @param {object} data The data object.
  * @returns {LBSailSim.FoilInstance}    The foil instance.
  */
-LBSailSim.Vessel.prototype._createAndLoadFoilInstance = function(data) {
+LBSailSim.Vessel.prototype._createAndLoadFoilInstance = function(data, isSail) {
     // We're not using {@link LBPhysics.RigidBody#createFromData() because we need to pass
     // sailEnv to {@link LBFoils.Foil#load()}.
     var foilInstance;
@@ -486,7 +497,13 @@ LBSailSim.Vessel.prototype._createAndLoadFoilInstance = function(data) {
         foilInstance = eval(data.construct);
     }
     else {
-        foilInstance = new LBSailSim.FoilInstance();
+        if (isSail) {
+            foilInstance = new LBSailSim.SailInstance();
+//            foilInstance = new LBSailSim.FoilInstance();
+        }
+        else {
+            foilInstance = new LBSailSim.FoilInstance();
+        }
     }
     
     return foilInstance.load(data, this.sailEnv);
@@ -498,17 +515,23 @@ LBSailSim.Vessel.prototype._createAndLoadFoilInstance = function(data) {
  * @protected
  * @param {Array} data  The array of data objects to load each foil from.
  * @param {Array} foils The array for the loaded foils.
+ * @param {object} [loadCallback]   If defined, a callback object with functions that
+ * get called back after each component is loaded.
  * @returns {LBSailSim.Vessel}  this.
  */
-LBSailSim.Vessel.prototype._loadFoils = function(data, foils) {
+LBSailSim.Vessel.prototype._loadFoils = function(data, foils, loadCallback) {
     if (!data) {
         return this;
     }
     
+    var isSail = foils === this.aeroFoils;
     for (var i = 0; i < data.length; ++i) {
         var foilData = data[i];
-        var foilInstance = this._createAndLoadFoilInstance(foilData);
+        var foilInstance = this._createAndLoadFoilInstance(foilData, isSail);
         if (foilInstance) {
+            if (loadCallback && loadCallback.foilInstanceLoaded) {
+                loadCallback.foilInstanceLoaded(this, foilInstance, foilData, isSail);
+            }
             foils.push(foilInstance);
             this.addPart(foilInstance);
         }
@@ -538,9 +561,11 @@ LBSailSim.Vessel.prototype._createAndLoadPropulsor = function(data) {
  * Loads the vessel's propulsors from properties of data objects in an array.
  * @protected
  * @param {Array} data  The array of data objects.
+ * @param {object} [loadCallback]   If defined, a callback object with functions that
+ * get called back after each component is loaded.
  * @returns {LBSailSim.Vessel}  this.
  */
-LBSailSim.Vessel.prototype._loadPropulsors = function(data) {
+LBSailSim.Vessel.prototype._loadPropulsors = function(data, loadCallback) {
     if (!data) {
         return this;
     }
@@ -548,6 +573,9 @@ LBSailSim.Vessel.prototype._loadPropulsors = function(data) {
     for (var i = 0; i < data.length; ++i) {
         var propulsor = this._createAndLoadPropulsor(data[i]);
         if (propulsor) {
+            if (loadCallback && loadCallback.propulsorLoaded) {
+                loadCallback.propulsorLoaded(this, propulsor, data[i]);
+            }
             this.addPropulsor(propulsor);
         }
     }
@@ -570,9 +598,11 @@ LBSailSim.Vessel.prototype._createAndLoadBallast = function(data) {
  * array of data objects.
  * @protected
  * @param {Array} data  The array of data objects.
+ * @param {object} [loadCallback]   If defined, a callback object with functions that
+ * get called back after each component is loaded.
  * @returns {LBSailSim.Vessel}  this.
  */
-LBSailSim.Vessel.prototype._loadBallasts = function(data) {
+LBSailSim.Vessel.prototype._loadBallasts = function(data, loadCallback) {
     if (!data) {
         return this;
     }
@@ -580,6 +610,9 @@ LBSailSim.Vessel.prototype._loadBallasts = function(data) {
     for (var i = 0; i < data.length; ++i) {
         var ballast = this._createAndLoadBallast(data[i]);
         if (ballast) {
+            if (loadCallback && loadCallback.ballastLoaded) {
+                loadCallback.ballastLoaded(this, ballast, data[i]);
+            }
             this.addBallast(ballast);
         }
     }
@@ -602,9 +635,11 @@ LBSailSim.Vessel.prototype._createAndLoadController = function(data) {
  * of data objects.
  * @protected
  * @param {Array} data  The array of data objects.
+ * @param {object} [loadCallback]   If defined, a callback object with functions that
+ * get called back after each component is loaded.
  * @returns {LBSailSim.Vessel}  this.
  */
-LBSailSim.Vessel.prototype._loadControllers = function(data) {
+LBSailSim.Vessel.prototype._loadControllers = function(data, loadCallback) {
     if (!data) {
         return this;
     }
@@ -612,6 +647,9 @@ LBSailSim.Vessel.prototype._loadControllers = function(data) {
     for (var i = 0; i < data.length; ++i) {
         var controller = this._createAndLoadController(data[i]);
         if (controller) {
+            if (loadCallback && loadCallback.controllerLoaded) {
+                loadCallback.controllerLoaded(this, controller, data[i]);
+            }
             this.controllers.push(controller);
         }
     }
@@ -621,9 +659,11 @@ LBSailSim.Vessel.prototype._loadControllers = function(data) {
 /**
  * Loads the vessel's properties from properties in a data object.
  * @param {object} data The data object.
+ * @param {object} [loadCallback]   If defined, a callback object with functions that
+ * get called back after each component is loaded.
  * @returns {LBSailSim.Vessel}  this.
  */
-LBSailSim.Vessel.prototype.load = function(data) {
+LBSailSim.Vessel.prototype.load = function(data, loadCallback) {
     // Clear out the existing settings...
     this._removeParts(this.aeroFoils);
     this._removeParts(this.hydroFoils);
@@ -640,13 +680,22 @@ LBSailSim.Vessel.prototype.load = function(data) {
     this.typeName = data.typeName;
     this.instances = data.instances;
     
-    this._loadFoils(data.aeroFoils, this.aeroFoils);
-    this._loadFoils(data.hydroFoils, this.hydroFoils);
-    this._loadPropulsors(data.propulsors);
-    this._loadBallasts(data.ballasts);
-    this._loadControllers(data.controllers);
+    this._loadFoils(data.hydroFoils, this.hydroFoils, loadCallback);
+    this._loadPropulsors(data.propulsors, loadCallback);
+    this._loadBallasts(data.ballasts, loadCallback);
+    this._loadControllers(data.controllers, loadCallback);
+    
+    // Load aerofoils last so they appear above everyone else...
+    this._loadFoils(data.aeroFoils, this.aeroFoils, loadCallback);
     
     this.hull = LBSailSim.Hull.createFromData(data.hull, this);
+    if (this.hull && loadCallback && loadCallback.hullLoaded) {
+        loadCallback.hullLoaded(this, this.hull, data.hull);
+    }
+    
+    if (loadCallback && loadCallback.vesselLoaded) {
+        loadCallback.vesselLoaded(this, data);
+    }
     
     return this;
 };
@@ -704,7 +753,7 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
  */
 LBSailSim.Vessel.prototype.getResultant = function(convertToWrench) {
     var resultant = LBPhysics.RigidBody.prototype.getResultant.call(this, convertToWrench);
-    LBGeometry.clampVectorMag(resultant.force, 100);
+    LBGeometry.clampVectorMag(resultant.force, this.maxForceMag);
     return resultant;
 };
 
@@ -889,9 +938,11 @@ LBSailSim.Vessel.prototype.getApparentWindBearingDeg = function(isRound) {
  * Creates a vessel object based upon properties in a data object.
  * @param {object} data
  * @param {object} sailEnv
+ * @param {object} [loadCallback]   If defined, a callback object with the following functions
+ * that get called back after loading of each component:
  * @returns {object}    The created vessel, {undefined} if data is not defined.
  */
-LBSailSim.Vessel.createFromData = function(data, sailEnv) {
+LBSailSim.Vessel.createFromData = function(data, sailEnv, loadCallback) {
     if (!data) {
         return undefined;
     }
@@ -905,5 +956,5 @@ LBSailSim.Vessel.createFromData = function(data, sailEnv) {
         vessel = new LBSailSim.Vessel(sailEnv);
     }
     
-    return vessel.load(data);
+    return vessel.load(data, loadCallback);
 };

@@ -227,10 +227,12 @@ LBSailSim.Env.prototype = {
      * @param {object} typeName The boat's type name passed to checkoutBoat().
      * @param {object} boatName The instance name for the boat.
      * @param {object} data The boat data object.
+     * @param {object} [loadCallback]   If defined, a callback object with functions that
+     * get called back after each component is loaded.
      * @returns {object}    The boat instance.
      */
-    _createBoatInstance: function(typeName, boatName, data) {
-        return LBSailSim.Vessel.createFromData(data, this);
+    _createBoatInstance: function(typeName, boatName, data, loadCallback) {
+        return LBSailSim.Vessel.createFromData(data, this, loadCallback);
     },
     
     /**

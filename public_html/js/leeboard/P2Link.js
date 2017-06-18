@@ -15,7 +15,7 @@
  */
 
 
-/* global Leeboard, Phaser, LBPhysics */
+/* global Leeboard, Phaser, LBPhysics, LBGeometry */
 
 /**
  * Manages linking a {@link Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody}, updating
@@ -29,92 +29,49 @@ Leeboard.P2Link = function(game) {
     this.game = game;
     this.game.physics.p2.world.applyGravity = false;
     
+    // We're overriding the stage's updateTransform() method so we can update the
+    // sprites from the current obj3D positions of the rigid bodies. The postUpdate()
+    // methods all seem to be internal, so I'm hooking into updateTransform() because
+    // that's currently called right after the P2 bodies update the positions of their
+    // sprites (which is done in {Phaser.Physics.P2.Body.postUpdate()}.
+    this.savedUpdateTransform = this.game.stage.updateTransform;
+    this.game.stage.LB_P2Link = this;
+    this.game.stage.updateTransform = this._stageUpdateTransform;
+    
     /**
      * Set this to -1 to make the y-axis going up, otherwise set it to +1 to make the y-axis
      * go down.
      */
     this.ySign = 1;
-    this.linkedObjects = [];
+    this.rigidBodies = [];
     this.workingResultant = new LBPhysics.Resultant3D();
+    this.working3DPos = LBGeometry.createVector3();
 };
 
 Leeboard.P2Link.prototype = {
     /**
-     * Adds a {@link Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody} pair to the manager.
-     * @param {object} p2Body   The P2 body.
+     * Adds a {@link LBPhysics.RigidBody} pair to the manager.
      * @param {object} rigidBody The rigid body.
      * @returns {Leeboard.P2Link}   this.
      */
-    addLinkedObjects: function(p2Body, rigidBody) {
-        this.linkedObjects.push({ 'p2Body': p2Body, 'rigidBody': rigidBody });
+    addRigidBody: function(rigidBody) {
+        this.rigidBodies.push(rigidBody);
         return this;
     },
     
     /**
-     * Removes a P2 body/rigid body link via index.
-     * @param {number} index  The index of the entry to remove.
+     * Removes a rigid body link via index.
+     * @param {object} rigidBody The rigid body.
      * @returns {Leeboard.P2Link}   this.
      */
-    removeLinkedObject: function(index) {
-        this.linkedObjects.splice(index, 1);
+    removeRigidBody: function(rigidBody) {
+        var index = this.rigidBodies.indexOf(rigidBody);
+        if (index >= 0) {
+            this.rigidBodies.splice(index, 1);
+        }
         return this;
     },
     
-    /**
-     * Removes a P2 body/rigid body link via the P2 body.
-     * @param {object} p2Body   The P2 body of the link.
-     * @returns {Boolean}   true if a link with the P2 body was removed.
-     */
-    removeLinkByP2Body: function(p2Body) {
-        var index = indexOfP2Body(p2Body);
-        if (index >= 0) {
-            removeLinkedObject(index);
-            return true;
-        }
-        return false;
-    },
-    
-    /**
-     * Removes a P2 body/rigid body link via the rigid body.
-     * @param {object} rigidBody    The rigid body of the link.
-     * @returns {Boolean}   true if a link with the rigid body was removed.
-     */
-    removeLinkByRigidBody: function(rigidBody) {
-        var index = indexOfRigidBody(rigidBody);
-        if (index >= 0) {
-            removeLinkedObject(index);
-            return true;
-        }
-        return false;
-    },
-    
-    /**
-     * Retrieves the index of a P2 body in the manager.
-     * @param {object} p2Body   The P2 body of interest.
-     * @returns {Number}    The index, -1 if p2Body is not in the manager.
-     */
-    indexOfP2Body: function(p2Body) {
-        for (var i = 0; i < this.linkedObjects.length; ++i) {
-            if (this.linkedObjects[i].p2Body === p2Body) {
-                return i;
-            }
-        }
-        return -1;
-    },
-    
-    /**
-     * Retrieves the index of a rigid body in the manager.
-     * @param {object} rigidBody  The rigid body.
-     * @returns {Number}    The index, -1 if rigidBody is not in the manager.
-     */
-    indexOfRigidBody: function(rigidBody) {
-        for (var i = 0; i < this.linkedObjects.length; ++i) {
-            if (this.linkedObjects[i].rigidBody === rigidBody) {
-                return i;
-            }
-        }
-        return -1;
-    },
     
     /**
      * Call to update the rigid bodies from the P2 bodies. This updates the position and
@@ -122,18 +79,19 @@ Leeboard.P2Link.prototype = {
      * @returns {Leeboard.P2Link}   this.
      */
     updateFromP2: function() {
-        this.linkedObjects.forEach(this._updateLB3BodyFromP2, this);
+        this.rigidBodies.forEach(this._updateRigidBodyFromPhaser, this);
         return this;
     },
     
-    _updateLB3BodyFromP2: function(entry) {
-        var p2Body = entry.p2Body;
-        var rigidBody = entry.rigidBody;
-        // Phaser negates the coordinate system between P2 and {@link PHaser.Physics.P2}.
-        rigidBody.setXYZ(-p2Body.world.pxmi(p2Body.x), -this.ySign * p2Body.world.pxmi(p2Body.y), 
-            rigidBody.obj3D.position.z);
-        rigidBody.setZRotationRad(this.ySign * p2Body.rotation);
-        rigidBody.obj3D.updateMatrixWorld();
+    _updateRigidBodyFromPhaser: function(rigidBody) {
+        var p2Body = rigidBody[Leeboard.P2Link.p2BodyProperty];
+        if (p2Body) {
+            // Phaser negates the coordinate system between P2 and {@link PHaser.Physics.P2}.
+            rigidBody.setXYZ(-p2Body.world.pxmi(p2Body.x), -this.ySign * p2Body.world.pxmi(p2Body.y), 
+                rigidBody.obj3D.position.z);
+            rigidBody.setZRotationRad(this.ySign * p2Body.rotation);
+            rigidBody.obj3D.updateMatrixWorld();
+        }
     },
     
     /**
@@ -142,13 +100,16 @@ Leeboard.P2Link.prototype = {
      * @returns {Leeboard.P2Link}   this.
      */
     applyToP2: function(dt) {
-        this.linkedObjects.forEach(this._updateP2BodyFromLB3, { 'p2link': this, 'dt': dt });
+        this.rigidBodies.forEach(this._updateP2BodyFromLB3, { 'p2link': this, 'dt': dt });
         return this;
     },
     
-    _updateP2BodyFromLB3: function(entry) {
-        var p2Body = entry.p2Body;
-        var rigidBody = entry.rigidBody;
+    _updateP2BodyFromLB3: function(rigidBody) {
+        var p2Body = rigidBody[Leeboard.P2Link.p2BodyProperty];
+        if (!p2Body) {
+            return;
+        }
+        
         rigidBody.updateForces(this.dt);
         
         var resultant = rigidBody.getResultant(true);
@@ -163,9 +124,77 @@ Leeboard.P2Link.prototype = {
         p2Body.applyForce([-resultant.force.x, -this.p2link.ySign * resultant.force.y], 
             p2Body.world.mpxi(-x), p2Body.world.mpxi(-this.p2link.ySign * y));
     },
+    
+    /**
+     * Our hook into {@link Phaser.Stage#updateTransform}.
+     * @returns {undefined}
+     */
+    _stageUpdateTransform: function() {
+        var p2Link = this.LB_P2Link;
+        p2Link.savedUpdateTransform.call(this);
+        
+        p2Link.updateSprites();
+    },
+    
+    /**
+     * Updates any sprites that have been attached to any of the rigid bodies or their
+     * parts via a property named {@link Leeboard.P2Link.spriteProperty}.
+     * @returns {undefined}
+     */
+    updateSprites: function() {
+        this.rigidBodies.forEach(this._updateSprites, this);
+    },
+    
+    _updateSprites: function(rigidBody) {
+        var sprite = rigidBody[Leeboard.P2Link.spriteProperty];
+        if (sprite) {
+            this.updateSpriteFromRigidBody(rigidBody, sprite);
+        }
+        
+        rigidBody.parts.forEach(this._updateSprites, this);
+    },
+    
+    /**
+     * Updates a sprite from a rigid body.
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @param {Phaser.Sprite|Phaser.Image} sprite   The sprite to be updated.
+     * @returns {undefined}
+     */
+    updateSpriteFromRigidBody: function(rigidBody, sprite) {
+        var obj3D = rigidBody.obj3D;
+        if (!obj3D) {
+            return;
+        }        
+
+        if (sprite.lbLocalOffset) {
+            this.working3DPos.copy(sprite.lbLocalOffset);
+        }
+        else {
+            this.working3DPos.zero();
+        }
+        obj3D.localToWorld(this.working3DPos);
+        this.workingEuler = obj3D.getWorldRotation(this.workingEuler);
+        
+        var p2 = this.game.physics.p2;
+        sprite.x = p2.mpx(this.working3DPos.x);
+        sprite.y = this.ySign * p2.mpx(this.working3DPos.y);
+        sprite.rotation = this.workingEuler.z;
+    },
 
     constructor: Leeboard.P2Link
 };
+
+/**
+ * The name of the property in {LBPhysics.RigidBody} objects where we store the {Phaser.Physics.P2.Body}.
+ * P2 bodies control the position of the rigid body.
+ */
+Leeboard.P2Link.p2BodyProperty = "_p2Body";
+
+/**
+ * The name of the property in {LBPhysics.RigidBody} objects where we store {Phaser.Sprite} or {Phaser.Image}
+ * objects. Sprite/image objects are controlled by the rigid body's world position and rotation.
+ */
+Leeboard.P2Link.spriteProperty = "_sprite";
 
 /**
  * Retrieves the appropriate tie step to use based on the settings of {@link Phaser.Physics.P2}.
@@ -184,6 +213,20 @@ Leeboard.P2Link.getP2TimeStep = function(p2) {
  */
 Leeboard.P2Link.createSpriteFromData = function(game, data) {
     var sprite = new Phaser.Sprite(game, data.x, data.y, data.key, data.frame);
+    sprite.lbLocalOffset = LBGeometry.createVector3();    
+    Leeboard.copyCommonProperties(sprite, data);
+    return sprite;
+};
+
+/**
+ * Creates and loads a {Phaser.Image} object based on properties in a data object.
+ * @param {Phaser.Game} game    The game to which the sprite will belong.
+ * @param {object} data The data object.
+ * @returns {Phaser.Image} Th created/loaded image.
+ */
+Leeboard.P2Link.createImageFromData = function(game, data) {
+    var sprite = new Phaser.Image(game, data.x, data.y, data.key, data.frame);
+    sprite.lbLocalOffset = LBGeometry.createVector3();    
     Leeboard.copyCommonProperties(sprite, data);
     return sprite;
 };

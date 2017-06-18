@@ -15,7 +15,7 @@
  */
 
 
-/* global LBSailSim, Leeboard */
+/* global LBSailSim, Leeboard, LBMath */
 
 /**
  * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2}.
@@ -33,22 +33,71 @@ LBSailSim.P2Env = function(game) {
 LBSailSim.P2Env.prototype = Object.create(LBSailSim.Env.prototype);
 LBSailSim.P2Env.prototype.constructor = LBSailSim.P2Env;
 
-LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, data) {
-    var boat = LBSailSim.Env.prototype._createBoatInstance.call(this, typeName, boatName, data);
+LBSailSim.P2Env.prototype.checkoutBoat = function(worldGroup, typeName, boatName, centerX, centerY, rotation) {
+    this.worldGroup = worldGroup;
     
-    // Tack on a P2 body...
-    boat.p2Body = Leeboard.P2Link.createP2BodyFromData(this.game, data.p2Body, this.game);
-    boat.p2Body.damping = 0;
-    boat.p2Body.mass = boat.getTotalMass();
+    var childIndex = this.worldGroup.children.length;
+    
+    var boat = LBSailSim.Env.prototype.checkoutBoat.call(this, typeName, boatName);
+    var p2Body = boat[Leeboard.P2Link.p2BodyProperty];
+    p2Body.x = centerX;
+    p2Body.y = centerY;
+    p2Body.rotation = -10 * LBMath.DEG_TO_RAD;
+    
+    worldGroup.addAt(p2Body.sprite, childIndex);
+    
+    this.worldGroup = undefined;
     return boat;
 };
 
+LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, data) {
+    var boat = LBSailSim.Env.prototype._createBoatInstance.call(this, typeName, boatName, data, this);
+    
+    // Tack on a P2 body...
+    var p2Body = Leeboard.P2Link.createP2BodyFromData(this.game, data.p2Body);
+    boat[Leeboard.P2Link.p2BodyProperty] = p2Body;
+    p2Body.damping = 0;
+    p2Body.mass = boat.getTotalMass();
+    
+    return boat;
+};
+
+LBSailSim.P2Env.prototype.foilInstanceLoaded = function(vessel, foilInstance, data, isSail) {
+    this._loadObj3DSprite(vessel, foilInstance, data);
+};
+
+LBSailSim.P2Env.prototype._loadObj3DSprite = function(vessel, object, data) {
+    if (!object || !object.obj3D || !data) {
+        return undefined;
+    }
+    
+    var sprite;
+    var spriteData;
+    if (data.phaser_sprite) {
+        sprite = Leeboard.P2Link.createSpriteFromData(this.game, data.phaser_sprite);
+        spriteData = data.phaser_sprite;
+    }
+    else if (data.phaser_image) {
+        sprite = Leeboard.P2Link.createImageFromData(this.game, data.phaser_image);
+        spriteData = data.phaser_image;
+    }
+    if (!sprite) {
+        return undefined;
+    }
+    
+    object[Leeboard.P2Link.spriteProperty] = sprite;
+    if (this.worldGroup) {
+        this.worldGroup.add(sprite);
+    }
+    return sprite;
+};
+
 LBSailSim.P2Env.prototype._boatCheckedOut = function(boat) {
-    this.p2Link.addLinkedObjects(boat.p2Body, boat);
+    this.p2Link.addRigidBody(boat);
 };
 
 LBSailSim.P2Env.prototype._boatReturned = function(boat) {
-    this.p2Link.removeLinkByRigidBody(boat);
+    this.p2Link.removeRigidBody(boat);
 };
 
 /**
@@ -62,4 +111,3 @@ LBSailSim.P2Env.prototype.update = function() {
     this.p2Link.updateFromP2();
     this.p2Link.applyToP2(dt);
 };
-

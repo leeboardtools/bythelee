@@ -7,16 +7,17 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="48"
-   height="128"
-   viewBox="0 0 48 128"
+   width="128"
+   height="48"
+   viewBox="0 0 128 48"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
    sodipodi:docname="dinghy.svg"
-   inkscape:export-filename="/media/albert/DataDrive/Albert/Projects/Phaser/ByTheLee/working_files/images/dinghy.png"
+   inkscape:export-filename="/Users/albert/Projects/Javascript/ByTheLee/public_html/images/tubby.png"
    inkscape:export-xdpi="89.462593"
    inkscape:export-ydpi="89.462593">
   <defs
@@ -28,18 +29,18 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="8.1640625"
-     inkscape:cx="43.238278"
-     inkscape:cy="64"
+     inkscape:zoom="8.4675614"
+     inkscape:cx="45.390514"
+     inkscape:cy="23.923738"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      units="px"
      showguides="true"
-     inkscape:window-width="1871"
-     inkscape:window-height="1182"
-     inkscape:window-x="1969"
-     inkscape:window-y="18"
+     inkscape:window-width="1680"
+     inkscape:window-height="953"
+     inkscape:window-x="0"
+     inkscape:window-y="1"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata7">
@@ -54,23 +55,70 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
+     inkscape:label="Hull"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-924.36216)">
+     transform="translate(0,-1004.3622)"
+     style="display:inline">
+    <g
+       id="g3343"
+       transform="matrix(0,1,-1,0,1052.3964,1004.48)"
+       inkscape:label="Hull">
+      <g
+         id="g3340">
+        <path
+           sodipodi:nodetypes="ccsc"
+           inkscape:connector-curvature="0"
+           id="tubby_hull"
+           d="m 23.8822,1051.924 c -9.189273,-0.132 -13.607225,-0.9013 -19.9323653,-2.0077 C 1.6257803,1036.7183 0.23797931,1015.9556 0.28880424,999.6067 0.38988936,967.09057 4.5622524,944.49442 23.8822,924.73273"
+           style="fill:#f8e286;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           inkscape:label="#path3336" />
+        <path
+           sodipodi:nodetypes="cczcc"
+           inkscape:connector-curvature="0"
+           id="path3338"
+           d="m 23.908355,1044.8381 c -6.810304,-0.1968 -10.246641,-0.2676 -15.4708056,-1.299 -2.9000973,-12.9967 -3.9160152,-24.9091 -4.0153237,-36.4922 -0.099309,-11.58309 0.6319203,-22.39274 3.0705417,-32.71312 5.3563716,0.0354 16.0612946,0 16.0612946,0"
+           style="fill:#f2c365;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      </g>
+    </g>
+    <use
+       x="0"
+       y="0"
+       xlink:href="#g3343"
+       id="use3345"
+       transform="matrix(1,0,0,-1,0,2056.6297)"
+       width="100%"
+       height="100%" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Mainsail"
+     style="display:inline">
     <path
-       style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
-       d="m 22.537799,924.85211 c 0,0 22.406647,42.12796 24.98756,65.28612 2.307509,20.70497 -8.941627,61.85647 -8.941627,61.85647 l -30.0095693,0 c 0,0 -10.333649,-39.9474 -8.20669858,-61.73397 C 2.4944145,968.47416 22.537799,924.85211 22.537799,924.85211 Z"
-       id="path4140"
+       style="fill:#6dbaff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 90,24 12,24 C 12,24 36.521734,16.997024 56.923119,17.176486 77.324504,17.355948 90,24 90,24 Z"
+       id="tubby_mainsail"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cscczc"
+       sodipodi:nodetypes="cczc"
+       inkscape:export-filename="/Users/albert/Projects/Javascript/ByTheLee/public_html/images/tubby_mainsail.png"
+       inkscape:export-xdpi="89.462593"
+       inkscape:export-ydpi="89.462593"
+       inkscape:label="#path3348" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="Rudder">
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#876610;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m -8,24 36,0"
+       id="tubby_rudder"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:label="#path4151"
+       inkscape:export-filename="/Users/albert/Projects/Javascript/ByTheLee/public_html/images/tubby_rudder.png"
        inkscape:export-xdpi="89.462593"
        inkscape:export-ydpi="89.462593" />
-    <path
-       style="fill:#a0a0a0;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
-       d="m 14.086124,1041.9507 c 0,0 -5.9428238,-27.8167 -5.3894732,-42.01343 0.216765,-5.56131 2.8172242,-16.78085 2.8172242,-16.78085 l 24.620097,-0.12249 c 0,0 2.926341,11.26113 3.0622,17.02587 0.331828,14.0801 -5.511961,41.8909 -5.511961,41.8909 z"
-       id="path4142"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="csccscc" />
   </g>
 </svg>

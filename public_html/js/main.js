@@ -38,6 +38,9 @@ LoadingState.preload = function() {
     
     this.game.load.image('bkgd_water', 'images/bkgd_water.png');
     this.game.load.image('dinghy', 'images/dinghy.png');
+    this.game.load.image('tubby', 'images/tubby.png');
+    this.game.load.image('tubby_mainsail', 'images/tubby_mainsail.png');
+    this.game.load.image('tubby_rudder', 'images/tubby_rudder.png');
     this.game.load.image('can', 'images/can.png');
 };
 
@@ -59,15 +62,33 @@ PlayState.init = function() {
     this.cursorKeys = this.game.input.keyboard.createCursorKeys();
     this.keys = this.game.input.keyboard.addKeys({
         space: Phaser.KeyCode.SPACEBAR,
-        t : Phaser.KeyCode.T
+        t : Phaser.KeyCode.T,
+        p : Phaser.KeyCode.P,
+        n : Phaser.KeyCode.N
     });
-    this.debounceT = false;
+    
+    this.keys.p.onDown.add(this.togglePause);
+    this.keys.t.onDown.add(this.doTest);
     
     this.game.physics.startSystem(Phaser.Physics.P2JS);
 
     this.sailEnv = new LBSailSim.P2Env(this.game);
 };
 
+//
+//--------------------------------------------------
+PlayState.togglePause = function() {
+    this.game.paused = !this.game.paused;
+};
+
+//
+//--------------------------------------------------
+PlayState.doTest = function() {
+    //var cspline = new LBMath.CSpline();
+    //cspline.test();
+    var clCdCurve = this.sailEnv.clCdCurves["FlatPlateAR5"];
+    clCdCurve.test(0, 180, 2);
+};
 
 //
 //--------------------------------------------------
@@ -123,12 +144,9 @@ PlayState._spawnBuoys = function(data) {
 PlayState._spawnCharacters = function (data) {
     var centerX = 0;
     var centerY = 0;
+    var rotation = -10 * LBMath.DEG_TO_RAD;
     //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
-    this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA");
-    this.myBoat.p2Body.x = centerX;
-    this.myBoat.p2Body.y = centerY;
-    this.myBoat.p2Body.rotation = -10 * LBMath.DEG_TO_RAD;
-    this.worldGroup.add(this.myBoat.p2Body.sprite);    
+    this.myBoat = this.sailEnv.checkoutBoat(this.worldGroup, "Tubby", "TubbyA", centerX, centerY, rotation);
 };
 
 //--------------------------------------------------
@@ -184,8 +202,7 @@ PlayState.update = function() {
     this._updateCamera();
     this._handleInput();
     
-    var dt = Leeboard.P2Link.getP2TimeStep(this.game.physics.p2);
-    this.sailEnv.update(dt);
+    this.sailEnv.update();
     this._updateHUD();
 };
 
@@ -251,23 +268,16 @@ PlayState._handleInput = function() {
     else if (this.keys.space.isDown) {
         this.myBoat.moveRudder(0, false);
     }
-    else if (this.keys.t.isDown) {
-        this.debounceT = true;
-    }
-    else if (this.debounceT && this.keys.t.isUp) {
-        this.debounceT = false;
-        
-        //var cspline = new LBMath.CSpline();
-        //cspline.test();
-        var clCdCurve = this.sailEnv.clCdCurves["FlatPlateAR5"];
-        clCdCurve.test(0, 180, 2);
+    else if (this.keys.n.isDown) {
+        this.myBoat.moveThrottle(0, false);
     }
 };
 
 //--------------------------------------------------
 PlayState._updateCamera = function() {
-    var x = this.myBoat.p2Body.x;
-    var y = this.myBoat.p2Body.y;
+    var p2Body = this.myBoat[Leeboard.P2Link.p2BodyProperty];
+    var x = p2Body.x;
+    var y = p2Body.y;
     
     this.water.tilePosition.x = -x;
     this.water.tilePosition.y = -y;

@@ -5,14 +5,14 @@
             "instances": [ "TubbyA", "TubbyB", "TubbyC" ],
             "p2Body": {
                 "sprite": {
-                    "key": "dinghy",
+                    "key": "tubby",
                     "anchor": {
                         "x": 0.5,
                         "y": 0.5
                     }
                 }
             },
-            "mass": 200,
+            "mass": 7820,
             "centerOfMass": { "x": 0, "y": 0, "z": 0 },
             "momentInertia": { "zz": 1000 },
             "hull": {
@@ -23,7 +23,172 @@
                 "k": 200e-6,
                 "centerOfBuoyancy": { "x": -0.3 }
             },
-            "aeroFoils": [],
+            "aeroFoils": [
+                {
+                    "name": "mainsail",
+                    "mass": 20,
+                    "centerOfMass": { "x": 0, "y": 0, "z": 4 },
+                    "obj3D": {
+                        "position" : { "x": 1.7, "y": 0, "z": 0 },
+                        "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                        },
+                    "phaser_sprite": {
+                        "key": "tubby_mainsail",
+                        "lbLocalOffset": {
+                            "x": -0.4,
+                            "y": 0
+                        },
+                        "anchor": {
+                            "x": 1,
+                            "y": 1
+                        }
+                        },
+                    "foil": {
+                        "chordLine": {
+                            "start": { "x": 0, "y": 0 },
+                            "end": { "x": -1, "y": 0 }
+                        },
+                        "sliceZ": 0.2,
+                        "area": 0.3,
+                        "aspectRatio": 3,
+                        "libClCdCurve": "FlatPlate"
+                    }
+                }
+            ],
+            "hydroFoils": [ 
+                {
+                    "construct": "new LBSailSim.FoilInstance()",
+                    "name": "keel",
+                    "mass": 100,
+                    "centerOfMass": { "x": -0.5, "y": 0, "z": -1 },
+                    "obj3D": {
+                        "position" : { "x": 0, "y": 0, "z": 0 },
+                        "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                        },
+                    "foil": {
+                        "chordLine": {
+                            "start": { "x": 0, "y": 0 },
+                            "end": { "x": -1, "y": 0 }
+                        },
+                        "sliceZ": 0.2,
+                        "area": 0.3,
+                        "aspectRatio": 3,
+                        "libClCdCurve": "FlatPlate"
+                    }
+                },
+                {
+                    "name": "rudder",
+                    "mass": 4,
+                    "centerOfMass": { "x": -0.15, "y": 0, "z": -0.5 },
+                    "obj3D": {
+                        "position" : { "x": -3.2, "y": 0, "z": 0 },
+                        "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                        },
+                    "phaser_sprite": {
+                        "key": "tubby_rudder",
+                        "lbLocalOffset": {
+                            "x": -0.4,
+                            "y": 0
+                        },
+                        "anchor": {
+                            "x": 0,
+                            "y": 0
+                        }
+                        },
+                    "foil": {
+                        "chordLine": {
+                            "start": { "x": 0, "y": 0 },
+                            "end": { "x": -0.3, "y": 0 }
+                        },
+                        "sliceZ": 0.2,
+                        "area": 0.1,
+                        "aspectRatio": 5,
+                        "libClCdCurve": "FlatPlate"
+                    }
+                }
+            ],
+            "propulsors": [
+                {
+                    "name": "engine",
+                    "mass": 0,
+                    "obj3D": {
+                        "position" : { "x": -1.8, "y": 0, "z": 0 },
+                        "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                    },
+                    "minForce": -2500,
+                    "maxForce": 10000
+                }
+            ],
+            "ballasts": [],
+            "controllers": [
+                {
+                    "construct": "new LBSailSim.RudderController()",
+                    "name": "Rudder",
+                    "minValue": -45,
+                    "maxValue": 45,
+                    "currentValue": 0                    
+                },
+                {
+                    "construct": "new LBSailSim.ThrottleController()",
+                    "name": "Throttle",
+                    "propulsorName": "engine",
+                    "minValue": -5,
+                    "maxValue": 10,
+                    "currentValue": 0
+                }
+            ]
+        },
+        {
+            "typeName": "YD-40",
+            "description": "YD-40 from Principles of Yacht Design, 3rd edition, Larsson & Eliasson",
+            "p2Body": {
+                "sprite": {
+                    "key": "yd40",
+                    "anchor": {
+                        "x": 0.5,
+                        "y": 0.5
+                    }
+                }
+            },
+            "mass": 7820,
+            "centerOfMass": { "x": 0, "y": 0, "z": 0 },
+            "momentInertia": { "zz": 1000 },
+            "hull": {
+                "lwl": 10.02,
+                "bwl": 3.17,
+                "tc": 0.57,
+                "delC": 7.63,
+                "k": 200e-6,
+                "centerOfBuoyancy": { "x": -0.3 }
+            },
+            "aeroFoils": [
+                {
+                    "name": "mainsail",
+                    "mass": 20,
+                    "centerOfMass": { "x": 0, "y": 0, "z": 4 },
+                    "obj3D": {
+                        "position" : { "x": 0, "y": 0, "z": 0 },
+                        "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                        },
+                    "phaser_sprite": {
+                        "key": "tubby_mainsail",
+                        "anchor": {
+                            "x": 0,
+                            "y": 0
+                        }
+                        },
+                    "foil": {
+                        "chordLine": {
+                            "start": { "x": 0, "y": 0 },
+                            "end": { "x": -1, "y": 0 }
+                        },
+                        "sliceZ": 0.2,
+                        "area": 0.3,
+                        "aspectRatio": 3,
+                        "libClCdCurve": "FlatPlate"
+                    }
+                }
+            ],
             "hydroFoils": [ 
                 {
                     "construct": "new LBSailSim.FoilInstance()",
@@ -52,6 +217,13 @@
                     "obj3D": {
                         "position" : { "x": -2, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                        },
+                    "phaser_sprite": {
+                        "key": "tubby_mainsail",
+                        "anchor": {
+                            "x": 0,
+                            "y": 0
+                        }
                         },
                     "foil": {
                         "chordLine": {

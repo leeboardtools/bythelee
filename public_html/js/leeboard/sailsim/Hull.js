@@ -147,7 +147,7 @@ LBSailSim.Hull.prototype = {
                     cFriction = LBSailSim.CFVsRoughnessRatio.interpolate(roughnessRatio);
                 }
             }
-            this.frictionalDrag = this.halfRhoVSq * cFriction * this.wettedArea;
+            this.frictionalDrag = this.halfRhoVSq * cFriction * this.swc;
         }
         
         return this.frictionalDrag;
@@ -275,4 +275,27 @@ LBSailSim.Hull.estimateSW = function(hull) {
     var sw = (1.97 + 0.171 * hull.bwl / hull.tc) * Math.sqrt(hull.delC * hull.lwl);
     sw *= Math.pow(0.65 / cm, 1./3.);
     return sw;
+};
+
+/**
+ * Calculates the prismatic coefficient CP.
+ * @param {number} delC The canoe body volumetric displacement.
+ * @param {number} lwl  The waterline length.
+ * @param {number} ax   The maximum transverse cross-sectional area.
+ * @return {number} The prismatic coefficient.
+ */
+LBSailSim.Hull.calcCP = function(delC, lwl, ax) {
+    return delC / (lwl * ax);
+};
+
+/**
+ * Calculates the block coefficient CB.
+ * @param {number} delC The canoe body volumetric displacement.
+ * @param {number} lwl  The waterline length.
+ * @param {number} bwl  The maximum beam at the designated waterline.
+ * @param {number} tc   The canoe body draft.
+ * @return {number} The block coefficient.
+ */
+LBSailSim.Hull.calcCB = function(delC, lwl, bwl, tc) {
+    return delC / (lwl * bwl * tc);
 };
