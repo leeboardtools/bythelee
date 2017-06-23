@@ -55,6 +55,17 @@
  */
 var LBGeometry = LBGeometry || {};
 
+
+LBGeometry.ORIGIN = new THREE.Vector3();
+LBGeometry.X_AXIS = new THREE.Vector3(1, 0, 0);
+LBGeometry.Y_AXIS = new THREE.Vector3(0, 1, 0);
+LBGeometry.Z_AXIS = new THREE.Vector3(0, 0, 1);
+
+LBGeometry.XY_PLANE = new THREE.Plane(LBGeometry.Z_AXIS, 0);
+LBGeometry.ZX_PLANE = new THREE.Plane(LBGeometry.Y_AXIS, 0);
+LBGeometry.YZ_PLANE = new THREE.Plane(LBGeometry.X_AXIS, 0);
+
+
 /**
  * Calculates a 2D normal from a tangent.
  * @param {object} tangent  The tangent of interest.
@@ -119,11 +130,11 @@ LBGeometry.createVector2MagDeg = function(mag, deg) {
  * @returns {Number}    The angle.
  */
 THREE.Vector2.prototype.angleToSigned = function(v) {
-    var lengthSquards = this.lengthSq() * v.lengthSq();
-    if (LBMath.isLikeZero(lengthSquards)) {
+    var lengthSquareds = this.lengthSq() * v.lengthSq();
+    if (LBMath.isLikeZero(lengthSquareds)) {
         return 0;
     }
-    var cosTheta = this.dot( v ) / ( Math.sqrt(lengthSquards) );
+    var cosTheta = this.dot( v ) / ( Math.sqrt(lengthSquareds) );
     cosTheta = LBMath.clamp( cosTheta, -1, 1);
     
     var theta;
@@ -151,6 +162,22 @@ THREE.Vector2.prototype.angleToSigned = function(v) {
 THREE.Vector2.prototype.zero = function() {
     this.x = 0;
     this.y = 0;
+    return this;
+};
+
+/**
+ * Normalizes the vector, this version handles the zero length case.
+ * @implements {THREE.Vector2#normalize}
+ * @returns {object} this.
+ */
+THREE.Vector2.prototype.normalize = function() {
+    var len = this.length();
+    if (LBMath.isLikeZero(len)) {
+        return this.zero();
+    }
+    
+    this.x /= len;
+    this.y /= len;
     return this;
 };
 
@@ -211,8 +238,26 @@ THREE.Vector3.prototype.applyMatrix4Rotation = function(m) {
 };
 
 /**
+ * Normalizes the vector, this version handles the zero length case.
+ * @implements {THREE.Vector3#normalize}
+ * @returns {object} this.
+ */
+THREE.Vector3.prototype.normalize = function() {
+    var len = this.length();
+    if (LBMath.isLikeZero(len)) {
+        return this.zero();
+    }
+    
+    this.x /= len;
+    this.y /= len;
+    this.z /= len;
+    return this;
+};
+
+/**
  * Override of THREE.Vector3.copy(), supports copying a Vector2 by setting the
  * z coordinate to 0 if the object being copied does not have a z.
+ * @implements {THREE.Vector3#copy}
  * @param {object} vec  The vector to copy.
  * @returns {object}    this.
  */
@@ -224,7 +269,21 @@ THREE.Vector3.prototype.copy = function(vec) {
 };
 
 /**
- * Extension to THREE.Vector3, sets the vector's components to all zero.
+ * Override of {@link THREE.Vector3#add}, supports copying a Vector2 by setting the
+ * z coordinate to 0 if the object being copied does not have a z.
+ * @implements {THREE.Vector3#copy}
+ * @param {object} vec  The vector to copy.
+ * @returns {object}    this.
+ */
+THREE.Vector3.prototype.add = function(vec) {
+    this.x += vec.x;
+    this.y += vec.y;
+    this.z += vec.z || 0;
+    return this;
+};
+
+/**
+ * Extension to {THREE.Vector3}, sets the vector's components to all zero.
  * @returns {object} this.
  */
 THREE.Vector3.prototype.zero = function() {
@@ -382,6 +441,27 @@ LBGeometry.clampVectorMag = function(vec, mag) {
         vec.setLength(mag);
     }
     return vec;
+};
+
+/**
+ * Sets a vector such that it is orthogonal to another vector.
+ * @param {object} refVec The 3D axis to make the vec orthogonal to.
+ * @param {object} [store]  If defined, the vector to be made orthogonal
+ * @returns {object}    vec.
+ */
+LBGeometry.makeOrthogonal = function(refVec, store) {
+    store = store || new THREE.Vector3();
+    // Orthogonality is defined by vec dot axis === 0, or vec.x * axis.x + vec.y * axis.y + vec.z * axis.z === 0.
+    // We'll just rotate the x and y coordinates and then solve for the z coordinate.
+    store.x = refVec.y;
+    store.y = refVec.z;
+    if (!LBMath.isLikeZero(refVec.z)) {
+        store.z = -(store.x * refVec.x + store.y * refVec.y) / refVec.z;
+    }
+    else {
+        store.z = refVec.x;
+    }
+    return store;
 };
 
 /**
@@ -613,7 +693,7 @@ LBGeometry.intersectLineWithPlane = function(plane, line) {
     }
     
     var nDotP = plane.normal.dot(line.start);
-    var s = (plane.constant - nDotP) / nDotU;
+    var s = -(plane.constant + nDotP) / nDotU;
     return s;
 };
 
@@ -623,20 +703,22 @@ LBGeometry.intersectLineWithPlane = function(plane, line) {
  * plane then it returns undefined. This function treats the line as a true line.
  * @param {type} plane  The plane of interest.
  * @param {type} line   The line of interest.
+ * @param {LBGeometry.createVector3} [store]    If defined the 3D vector to receive the intersection point.
  * @returns {undefined|object}  The intersection point, undefined if the line does not
  * intersect the plane.
  */
-LBGeometry.getLinePlaneIntersection = function(plane, line) {
-    var s = LBGeometry.intersectLineWithPlane(plane, line);
-    if (s === Math.NaN) {
+LBGeometry.getLinePlaneIntersection = function(plane, line, store) {
+    store = store || LBGeometry.createVector3();
+    store.copy(line.end).sub(line.start);
+    var nDotDir = plane.normal.dot(store);
+    if (LBMath.isLikeZero(nDotDir)) {
         return undefined;
     }
     
-    var delta = line.delta();
-    var length = delta.length();
-    delta.multiplyScalar(s / length);
-    delta.add(line.start);
-    return delta;
+    var nDotP = plane.normal.dot(line.start);
+    var s = -(plane.constant + nDotP) / nDotDir;
+    store.multiplyScalar(s).add(line.start);
+    return store;
 };
 
 
@@ -646,6 +728,17 @@ LBGeometry.getLinePlaneIntersection = function(plane, line) {
 LBGeometry.createMatrix3 = function() {
     return new THREE.Matrix3();
 };
+
+/**
+ * Extension to {THREE.Matrix3}, sets all the elements of the matrix to 0.
+ * @returns {undefined}
+ */
+THREE.Matrix3.prototype.zero = function() {
+    var e = this.elements;
+    e[0] = e[1] = e[2] = e[3] = e[4] = e[5] = e[6] = e[7] = e[8] = 0;
+    return this;
+};
+
 
 /**
  * Loads a 3x3 matrix from a data object.
@@ -875,7 +968,7 @@ LBGeometry.createObject3DFromData = function(data) {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:49 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 18:13:06 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

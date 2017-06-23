@@ -382,7 +382,7 @@ LBSailSim.Water.prototype = {
         var vy = 0;
         //vy = 0.1;
         //vx = 0.4;
-        vx = -0.5;
+        //vx = -0.5;
 
         if (!vel) {
             return new LBGeometry.createVector3(vx, vy, 0);

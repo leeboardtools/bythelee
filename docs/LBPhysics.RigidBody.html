@@ -292,7 +292,7 @@ local coordinates of the base.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line448">line 448</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line543">line 543</a>
     </li></ul></dd>
     
 
@@ -489,7 +489,7 @@ passed to this function is the data argument.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line749">line 749</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line928">line 928</a>
     </li></ul></dd>
     
 
@@ -643,7 +643,7 @@ body it is removed from that other rigid body.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line526">line 526</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line634">line 634</a>
     </li></ul></dd>
     
 
@@ -820,7 +820,7 @@ applied.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line637">line 637</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line745">line 745</a>
     </li></ul></dd>
     
 
@@ -973,7 +973,7 @@ applied.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line647">line 647</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line755">line 755</a>
     </li></ul></dd>
     
 
@@ -1078,7 +1078,7 @@ part of it.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line600">line 600</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line708">line 708</a>
     </li></ul></dd>
     
 
@@ -1131,7 +1131,7 @@ part of it.
 
     
 
-    <h4 class="name" id="getResultant"><span class="type-signature"></span>getResultant<span class="signature">(convertToWrench)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
+    <h4 class="name" id="getResultant"><span class="type-signature"></span>getResultant<span class="signature">(convertToWrench, wrenchPlane<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
 
     
 
@@ -1162,6 +1162,8 @@ part of it.
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -1187,11 +1189,53 @@ part of it.
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last">If true the resultant is converted to a wrench,
 otherwise its application point is set to the total center of mass.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>wrenchPlane</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBGeometry.html#.createPlane">LBGeometry.createPlane</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If convertToWrench is true, this is the
+optional plane passed to LBPhysics.Resultant3D.convertToWrench.</td>
         </tr>
 
     
@@ -1232,7 +1276,7 @@ otherwise its application point is set to the total center of mass.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line658">line 658</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line768">line 768</a>
     </li></ul></dd>
     
 
@@ -1292,7 +1336,7 @@ otherwise its application point is set to the total center of mass.</td>
 
 
 <div class="description">
-    Retrieves the composit center of mass of the rigid body and all its parts,
+    Retrieves the composite center of mass of the rigid body and all its parts,
 in world coordinates.
 </div>
 
@@ -1337,7 +1381,7 @@ in world coordinates.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line723">line 723</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line845">line 845</a>
     </li></ul></dd>
     
 
@@ -1376,6 +1420,110 @@ in world coordinates.
     <dd>
         
 <span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getTotalInvMomentInertia"><span class="type-signature"></span>getTotalInvMomentInertia<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBGeometry.html#.createMatrix3">LBGeometry.createMatrix3</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Retrieves the composite inverse moment of inertia tensor.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line863">line 863</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The inverse matrix tensor.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBGeometry.html#.createMatrix3">LBGeometry.createMatrix3</a></span>
 
 
     </dd>
@@ -1441,7 +1589,7 @@ in world coordinates.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line713">line 713</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line835">line 835</a>
     </li></ul></dd>
     
 
@@ -1480,6 +1628,338 @@ in world coordinates.
     <dd>
         
 <span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getTotalMomentInertia"><span class="type-signature"></span>getTotalMomentInertia<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBGeometry.html#.createMatrix3">LBGeometry.createMatrix3</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Retrieves the composite moment of inertia tensor.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line854">line 854</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The matrix tensor.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBGeometry.html#.createMatrix3">LBGeometry.createMatrix3</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="integrateForceForRotation"><span class="type-signature"></span>integrateForceForRotation<span class="signature">(axis, currentDeg, constrainer<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    This integrates the current resultant against the local rotation of the rigid
+body around a given axis, rotating the body and reducing the resultant appropriately.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>axis</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">LBGeometry.Vector3</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The axis of rotation in local coordinates, this must be normalized.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>currentDeg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The current angular rotation about the axis in degrees.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>constrainer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Optional function called to enforce any constraints
+on the rotation angle. The function signature is:
+ constrainer = function(deltaDeg) {
+     return constrainedDeg;
+ }</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line881">line 881</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
 
 
     </dd>
@@ -1596,7 +2076,7 @@ the future.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line493">line 493</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line598">line 598</a>
     </li></ul></dd>
     
 
@@ -1750,7 +2230,7 @@ object and the parts are not loaded.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line508">line 508</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line613">line 613</a>
     </li></ul></dd>
     
 
@@ -1903,7 +2383,7 @@ object and the parts are not loaded.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line547">line 547</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line655">line 655</a>
     </li></ul></dd>
     
 
@@ -2102,7 +2582,7 @@ object and the parts are not loaded.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line569">line 569</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line677">line 677</a>
     </li></ul></dd>
     
 
@@ -2256,7 +2736,7 @@ is absolute with respect to the base's coordinate system.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line591">line 591</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line699">line 699</a>
     </li></ul></dd>
     
 
@@ -2410,7 +2890,7 @@ is absolute with respect to the base's coordinate system.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line580">line 580</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line688">line 688</a>
     </li></ul></dd>
     
 
@@ -2566,7 +3046,7 @@ was updated, passed to the coordinate system state.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line617">line 617</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line725">line 725</a>
     </li></ul></dd>
     
 
@@ -2636,7 +3116,7 @@ was updated, passed to the coordinate system state.</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:50 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 18:13:06 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

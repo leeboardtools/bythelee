@@ -121,7 +121,10 @@ PlayState._loadLevel = function (data) {
  
     // Need wind ripples...
     
+    // The worldGroup effectively lets us scroll the world...
     this.worldGroup = this.game.add.group();
+    this.sailEnv.setWorldGroup(this.worldGroup);
+    
     this.buoys = this.game.add.group(this.worldGroup);
     
     data.buoys.forEach(this._spawnBuoys, this);
@@ -146,7 +149,7 @@ PlayState._spawnCharacters = function (data) {
     var centerY = 0;
     var rotation = -10 * LBMath.DEG_TO_RAD;
     //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
-    this.myBoat = this.sailEnv.checkoutBoat(this.worldGroup, "Tubby", "TubbyA", centerX, centerY, rotation);
+    this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation);
 };
 
 //--------------------------------------------------
@@ -187,6 +190,10 @@ PlayState._setupHUD = function() {
     this.rudderText = this.game.add.text(left, top, "Rudder Angle: 0", style);
     this.hud.add(this.rudderText);
     top += this.rudderText.height + vSpacing;
+    
+    this.mainsheetText = this.game.add.text(left, top, "Mainsheet: 0", style);
+    this.hud.add(this.mainsheetText);
+    top += this.mainsheetText.height + vSpacing;
     
     this.throttleText = this.game.add.text(left, top, "Throttle: 0", style);
     this.hud.add(this.throttleText);
@@ -242,28 +249,63 @@ PlayState._updateHUD = function() {
     var rudder = this.myBoat.getRudderDeg();
     this.rudderText.text = "Rudder Angle: " + LBMath.round(rudder);
     
+    var mainsheet = this.myBoat.getMainsheetPos();
+    this.mainsheetText.text = "Mainsheet: " + LBMath.round(mainsheet, 2);
+    
     var throttle = this.myBoat.getThrottlePos();
     if (throttle !== undefined) {
         this.throttleText.text = "Throttle:" + LBMath.round(throttle, 1);
     }
 };
 
+PlayState.getControlIncrement = function(controller) {
+    var range = controller.maxValue - controller.minValue;
+    return range / 50;
+};
+
+//------------------------------ --------------------
+PlayState.moveRudder = function(key, isDecrease) {
+    var delta = PlayState.getControlIncrement(this.myBoat.getRudderController());
+    if (key.shiftKey) {
+        delta *= 0.25;
+    }
+    else if (key.altKey) {
+        delta *= 4.0;
+    }
+    if (isDecrease) {
+        delta = -delta;
+    }
+    this.myBoat.moveRudder(delta, true);
+};
+
+//------------------------------ --------------------
+PlayState.moveMainsheet = function(key, isDecrease) {
+    var delta = PlayState.getControlIncrement(this.myBoat.getMainsheetController());
+    if (key.shiftKey) {
+        delta *= 0.25;
+    }
+    else if (key.altKey) {
+        delta *= 4.0;
+    }
+    if (isDecrease) {
+        delta = -delta;
+    }
+    this.myBoat.moveMainsheet(delta, true);
+};
 
 //------------------------------ --------------------
 PlayState._handleInput = function() {
     if (this.cursorKeys.left.isDown) {
-        this.myBoat.moveRudder(0.5, true);
+        this.moveRudder(this.cursorKeys.left, false);
     }
     else if (this.cursorKeys.right.isDown) {
-        this.myBoat.moveRudder(-0.5, true);
+        this.moveRudder(this.cursorKeys.right, true);
     }
     else if (this.cursorKeys.up.isDown) {
-        //this.myBoat.moveMainsheet(-1);
-        this.myBoat.moveThrottle(0.1, true);
+        this.moveMainsheet(this.cursorKeys.up, false);
     }
     else if (this.cursorKeys.down.isDown) {
-        //this.myBoat.moveMainsheet(1);
-        this.myBoat.moveThrottle(-0.1, true);
+        this.moveMainsheet(this.cursorKeys.up, true);
     }
     else if (this.keys.space.isDown) {
         this.myBoat.moveRudder(0, false);

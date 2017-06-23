@@ -85,6 +85,14 @@ function checkMatrix(assert, mat, refMat, msg, tolerance) {
     }
 }
 
+function checkOrthogonal(assert, vec, ref, msg) {
+    if (!Leeboard.isVar(msg)) {
+        msg = "";
+    }
+    var dot = vec.dot(ref);
+    assert.nearEqual(dot, 0, msg + " OK");
+}
+
 QUnit.test( "applyMatrix4Rotation", function( assert ) {
     var m = LBGeometry.createMatrix4();
     var a = 30 * LBMath.DEG_TO_RAD;
@@ -188,4 +196,22 @@ QUnit.test( "Matrix4 Load", function( assert ) {
     refMat.makeRotationFromQuaternion(LBGeometry.createQuaternion(1, 2, 3, 4));
     refMat.setPosition(LBGeometry.createVector3(10, 11, 15));
     checkMatrix(assert, mat, refMat, "Quaternion-Origin");
+});
+
+QUnit.test( "makeOrthogonal", function( assert ) {
+    var vecA = LBGeometry.createVector3(2, 3, 4);
+    var result = LBGeometry.makeOrthogonal(vecA);
+    checkOrthogonal(assert, result, vecA, "2, 3, 4");
+    
+    vecA.set(1, 0, 0);
+    LBGeometry.makeOrthogonal(vecA, result);
+    checkOrthogonal(assert, result, vecA, "1, 0, 0");
+
+    vecA.set(0, -1, 0);
+    LBGeometry.makeOrthogonal(vecA, result);
+    checkOrthogonal(assert, result, vecA, "0, -1, 0");
+
+    vecA.set(0, 0, 1);
+    LBGeometry.makeOrthogonal(vecA, result);
+    checkOrthogonal(assert, result, vecA, "0, 0, 1");
 });

@@ -37,6 +37,10 @@ LBMath.RAD_TO_DEG = 180 / Math.PI;
  */
 LBMath.TWO_PI = Math.PI * 2;
 
+/**
+ * @property {number} PI_2    PI / 2
+ */
+LBMath.PI_2 = Math.PI / 2;
 
 /**
  * @property {number} The default zero tolerance used by {@link LBMath.isLikeZero} and {@link LBMath.isNearEqual}.
@@ -143,6 +147,26 @@ LBMath.roundDown = function(val, decimalPlaces) {
     }
     return Math.floor(val);
 };
+
+
+/**
+ * Returns the angle in radians between sides a and b of a triangle, given the lengths
+ * of the sides of the triangle.
+ * @param {number} a    The length of one side of the vertex of interest.
+ * @param {number} b    The length of the other side of the vertex of interest.
+ * @param {number} c    The length of the side opposite the vertex of interest.
+ * @returns {Number}    The angle between sides a and b in radians.
+ */
+LBMath.radFromThreeSides = function(a, b, c) {
+    var den = 2 * a * b;
+    if (LBMath.isLikeZero(den)) {
+        return 0;
+    }
+    
+    var cosC = (a * a + b * b - c * c) / den;
+    return Math.acos(cosC);
+};
+
 
 /**
  * Third order smoothstep function per https://en.wikipedia.org/wiki/Smoothstep

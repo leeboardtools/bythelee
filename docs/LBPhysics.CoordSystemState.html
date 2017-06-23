@@ -95,7 +95,7 @@ system.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line231">line 231</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line246">line 246</a>
     </li></ul></dd>
     
 
@@ -153,9 +153,527 @@ system.
     
 
     
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="dt"><span class="type-signature"></span>dt<span class="type-signature"> :number</span></h4>
+
+
+
+
+<div class="description">
+    The last time step.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line275">line 275</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="localXfrm"><span class="type-signature"></span>localXfrm<span class="type-signature"> :<a href="LBGeometry.html#.createMatrix4">LBGeometry.createMatrix4</a></span></h4>
+
+
+
+
+<div class="description">
+    The matrix transforming from world to local coordinates.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="LBGeometry.html#.createMatrix4">LBGeometry.createMatrix4</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line257">line 257</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="prevLocalXfrm"><span class="type-signature"></span>prevLocalXfrm<span class="type-signature"> :<a href="LBGeometry.html#.createMatrix4">LBGeometry.createMatrix4</a></span></h4>
+
+
+
+
+<div class="description">
+    The matrix transforming from world to local coordinates from the previous time step.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="LBGeometry.html#.createMatrix4">LBGeometry.createMatrix4</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line269">line 269</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="prevWorldXfrm"><span class="type-signature"></span>prevWorldXfrm<span class="type-signature"> :<a href="LBGeometry.html#.createMatrix4">LBGeometry.createMatrix4</a></span></h4>
+
+
+
+
+<div class="description">
+    The matrix transforming from local to world coordinates from the previous time step.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="LBGeometry.html#.createMatrix4">LBGeometry.createMatrix4</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line263">line 263</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="worldXfrm"><span class="type-signature"></span>worldXfrm<span class="type-signature"> :<a href="LBGeometry.html#.createMatrix4">LBGeometry.createMatrix4</a></span></h4>
+
+
+
+
+<div class="description">
+    The matrix transforming from local to world coordinates.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="LBGeometry.html#.createMatrix4">LBGeometry.createMatrix4</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line251">line 251</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
 
     
         <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="calcAngularVelocityAboutLocalAxis"><span class="type-signature"></span>calcAngularVelocityAboutLocalAxis<span class="signature">(rotAxis)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Calculates the angular velocity about an axis in the local coordinate system
+based upon the current and past transforms.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rotAxis</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBGeometry.html#.createVector3">LBGeometry.createVector3</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The axis, this must be normalized.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line409">line 409</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The angular velocity in radians/sec.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
 
         
             
@@ -342,7 +860,7 @@ if not defined then the previous position is presumed to be localPos.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line321">line 321</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line368">line 368</a>
     </li></ul></dd>
     
 
@@ -447,7 +965,7 @@ saved for velocity calculations.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line303">line 303</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line350">line 350</a>
     </li></ul></dd>
     
 
@@ -660,7 +1178,7 @@ to compute velocity.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line257">line 257</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line304">line 304</a>
     </li></ul></dd>
     
 
@@ -730,7 +1248,7 @@ to compute velocity.</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:50 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 18:13:06 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

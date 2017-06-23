@@ -89,7 +89,7 @@ var boatsJSON_Test = {
             "mass": 100,
             "centerOfMass": { "x": 1, "y": 5, "z": 10 },
             "momentInertia": {},
-            "aeroFoils": [],
+            "airfoils": [],
             "hydroFoils": [ {
                     "construct": "new LBSailSim.FoilInstance()",
                     "name": "keel",

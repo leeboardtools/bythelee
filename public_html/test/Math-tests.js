@@ -54,3 +54,8 @@ QUnit.test( "round", function( assert ) {
     assert.equal(LBMath.round(-123.456), -123, "-123.456 => -123");
     assert.equal(LBMath.round(-123.456, -1), -120, "-123.456 => -120");
 });
+
+QUnit.test( "radFromThreeSides", function( assert ) {
+    assert.nearEqual(LBMath.radFromThreeSides(10, 10, 10), 60 * LBMath.DEG_TO_RAD);
+    assert.nearEqual(LBMath.radFromThreeSides(3, 4, 5), 90 * LBMath.DEG_TO_RAD);
+});

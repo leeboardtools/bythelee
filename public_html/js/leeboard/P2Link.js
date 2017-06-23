@@ -15,12 +15,13 @@
  */
 
 
-/* global Leeboard, Phaser, LBPhysics, LBGeometry */
+/* global Leeboard, Phaser, LBPhysics, LBGeometry, LBMath */
 
 /**
  * Manages linking a {@link Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody}, updating
  * the position/rotation of the rigid body from the P2 body and applying the forces
- * from the rigid body to the P2 body.
+ * from the rigid body to the P2 body. This also supports displaying an arrow representing
+ * the resultant force on rigid bodies.
  * @constructor
  * @param {object} game The Phaser game we're running under.
  * @returns {Leeboard.P2Link}
@@ -44,9 +45,12 @@ Leeboard.P2Link = function(game) {
      */
     this.ySign = 1;
     this.rigidBodies = [];
-    this.workingResultant = new LBPhysics.Resultant3D();
-    this.working3DPos = LBGeometry.createVector3();
 };
+
+Leeboard.P2Link._working3DPos = LBGeometry.createVector3();
+Leeboard.P2Link._workingEuler;
+Leeboard.P2Link._workingPlane = LBGeometry.createPlane();
+Leeboard.P2Link._working3DNormal = LBGeometry.createVector3();
 
 Leeboard.P2Link.prototype = {
     /**
@@ -72,6 +76,41 @@ Leeboard.P2Link.prototype = {
         return this;
     },
     
+    /**
+     * Scales an x value in rigid body coordinates to pixel coordinates.
+     * @param {number} x    The x coordinate.
+     * @returns {Number}    The pixel equivalent.
+     */
+    rbToPixelsX: function(x) {
+        return -this.game.physics.p2.mpxi(x);
+    },
+     
+    /**
+     * Scales an y value in rigid body coordinates to pixel coordinates.
+     * @param {number} y    The y coordinate.
+     * @returns {Number}    The pixel equivalent.
+     */
+    rbToPixelsY: function(y) {
+        return -this.ySign * this.game.physics.p2.mpxi(y);
+    },
+       
+    /**
+     * Scales an x value in pixel coordinates to rigid body coordinates.
+     * @param {number} px    The pixels x coordinate.
+     * @returns {Number}    The rigid body equivalent.
+     */
+    pixelsToRBX: function(px) {
+        return -this.game.physics.p2.pxmi(px);
+    },
+           
+    /**
+     * Scales a y value in pixel coordinates to rigid body coordinates.
+     * @param {number} py    The pixels y coordinate.
+     * @returns {Number}    The rigid body equivalent.
+     */
+    pixelsToRBY: function(py) {
+        return -this.ySign * this.game.physics.p2.pxmi(py);
+    },
     
     /**
      * Call to update the rigid bodies from the P2 bodies. This updates the position and
@@ -120,8 +159,10 @@ Leeboard.P2Link.prototype = {
         var x = resultant.applPoint.x - rigidBody.obj3D.position.x;
         var y = resultant.applPoint.y - rigidBody.obj3D.position.y;
         
+        resultant.force.y *= this.p2link.ySign;
+        
         // Phaser negates the coordinate system between P2 and {@link PHaser.Physics.P2}.
-        p2Body.applyForce([-resultant.force.x, -this.p2link.ySign * resultant.force.y], 
+        p2Body.applyForce([-resultant.force.x, -resultant.force.y], 
             p2Body.world.mpxi(-x), p2Body.world.mpxi(-this.p2link.ySign * y));
     },
     
@@ -133,7 +174,7 @@ Leeboard.P2Link.prototype = {
         var p2Link = this.LB_P2Link;
         p2Link.savedUpdateTransform.call(this);
         
-        p2Link.updateSprites();
+        p2Link.updateDisplayObjects();
     },
     
     /**
@@ -141,17 +182,36 @@ Leeboard.P2Link.prototype = {
      * parts via a property named {@link Leeboard.P2Link.spriteProperty}.
      * @returns {undefined}
      */
-    updateSprites: function() {
-        this.rigidBodies.forEach(this._updateSprites, this);
+    updateDisplayObjects: function() {
+        this.rigidBodies.forEach(this._topUpdateDisplayObjects, this);
+    },
+
+    _topUpdateDisplayObjects: function(rigidBody) {
+        this.activeRigidBody = rigidBody;
+        this.activeP2Body = rigidBody[Leeboard.P2Link.p2BodyProperty];
+        
+        // TEST
+        var x, y;
+        if (this.activeP2Body) {
+            x = this.activeP2Body.x;
+            y = this.activeP2Body.y;
+        }
+        
+        this._updateDisplayObjects(rigidBody);
     },
     
-    _updateSprites: function(rigidBody) {
+    _updateDisplayObjects: function(rigidBody) {
         var sprite = rigidBody[Leeboard.P2Link.spriteProperty];
         if (sprite) {
             this.updateSpriteFromRigidBody(rigidBody, sprite);
         }
         
-        rigidBody.parts.forEach(this._updateSprites, this);
+        var forceArrow = rigidBody[Leeboard.P2Link.forceArrowProperty];
+        if (forceArrow) {
+            this.updateForceArrowFromRigidBody(rigidBody, forceArrow);
+        }
+        
+        rigidBody.parts.forEach(this._updateDisplayObjects, this);
     },
     
     /**
@@ -166,21 +226,44 @@ Leeboard.P2Link.prototype = {
             return;
         }        
 
+        var pos = Leeboard.P2Link._working3DPos;
         if (sprite.lbLocalOffset) {
-            this.working3DPos.copy(sprite.lbLocalOffset);
+            pos.copy(sprite.lbLocalOffset);
         }
         else {
-            this.working3DPos.zero();
+            pos.zero();
         }
-        obj3D.localToWorld(this.working3DPos);
-        this.workingEuler = obj3D.getWorldRotation(this.workingEuler);
+        obj3D.localToWorld(pos);
+        var euler = Leeboard._workingEuler = obj3D.getWorldRotation(Leeboard._workingEuler);
         
-        var p2 = this.game.physics.p2;
-        sprite.x = p2.mpx(this.working3DPos.x);
-        sprite.y = this.ySign * p2.mpx(this.working3DPos.y);
-        sprite.rotation = this.workingEuler.z;
+        sprite.x = this.rbToPixelsX(pos.x);
+        sprite.y = this.rbToPixelsY(pos.y);
+        sprite.rotation = euler.z;
     },
 
+    updateForceArrowFromRigidBody: function(rigidBody, forceArrow) {
+        // We want the resultant passing through the vertical (world) plane that is
+        // lined up with the local X-axis and passes through the local origin.
+        var plane = Leeboard.P2Link._workingPlane;
+        var normal = Leeboard.P2Link._working3DNormal;
+        var point = rigidBody.obj3D.getWorldPosition(Leeboard.P2Link._working3DPos);
+        var rotation = rigidBody.obj3D.getWorldRotation(Leeboard.P2Link._workingEuler);
+        var angle = LBMath.PI_2 + rotation.z;
+        normal.set(Math.cos(angle), Math.sin(angle), 0);
+        plane.setFromNormalAndCoplanarPoint(normal, point);
+        
+        var resultant = rigidBody.getResultant(true, plane);
+        forceArrow.updateForce(resultant.force, resultant.applPoint);
+    },
+
+    scaleForceArrow: function(forceMag) {
+        return forceMag * 0.1;
+    },
+
+    getForceArrowAlpha: function() {
+        return 1;
+    },
+    
     constructor: Leeboard.P2Link
 };
 
@@ -195,6 +278,11 @@ Leeboard.P2Link.p2BodyProperty = "_p2Body";
  * objects. Sprite/image objects are controlled by the rigid body's world position and rotation.
  */
 Leeboard.P2Link.spriteProperty = "_sprite";
+
+/**
+ * The name of the property in {LBPhysics.RigidBody} objects where we store {@link Leeboard.P2ForceArrow} objects.
+ */
+Leeboard.P2Link.forceArrowProperty = "_forceArrow";
 
 /**
  * Retrieves the appropriate tie step to use based on the settings of {@link Phaser.Physics.P2}.
@@ -261,4 +349,64 @@ Phaser.Point.prototype.copy = function(src) {
     this.x = src.x || this.x;
     this.y = src.y || this.y;
     return this;
+};
+
+
+Leeboard.P2ForceArrow = function(p2Link, color, width, arrowSize) {
+    this.p2Link = p2Link;
+    this.graphics = p2Link.game.add.graphics(0, 0, p2Link.worldGroup);
+    this.color = color;
+    this.width = width || 2;
+    this.arrowSize = arrowSize || 20;
+};
+
+Leeboard.P2ForceArrow.prototype = {
+    updateForce: function(force, applPoint) {
+        var g = this.graphics;
+        g.clear();
+        
+        var length = force.length();
+        if (LBMath.isLikeZero(length)) {
+            return;
+        }
+        var dx = force.x / length;
+        var dy = force.y / length;
+        length = this.p2Link.scaleForceArrow(length);
+        
+        var alpha = this.p2Link.getForceArrowAlpha();
+        
+        g.lineStyle(this.width, this.color, alpha);
+        
+        var baseX = this.p2Link.rbToPixelsX(applPoint.x);
+        var baseY = this.p2Link.rbToPixelsY(applPoint.y); 
+        g.moveTo(baseX, baseY);
+        
+        dx = this.p2Link.rbToPixelsX(dx * length);
+        dy = this.p2Link.rbToPixelsY(dy * length);
+        length = Math.sqrt(dx * dx + dy * dy);
+        
+        var tipX = baseX + dx;
+        var tipY = baseY + dy;
+        g.lineTo(tipX, tipY);
+        
+        var arrowSize = Math.min(this.arrowSize, length * 0.707);
+        
+        var endX = -dy - dx;
+        var endY = dx - dy;
+        var endLen = Math.sqrt(endX * endX + endY * endY);
+        endX = arrowSize * endX / endLen;
+        endY = arrowSize * endY / endLen;
+        g.lineTo(tipX + endX, tipY + endY);
+        
+        endX = dy - dx;
+        endY = -dx - dy;
+        endLen = Math.sqrt(endX * endX + endY * endY);
+        endX = arrowSize * endX / endLen;
+        endY = arrowSize * endY / endLen;
+
+        g.moveTo(tipX, tipY);
+        g.lineTo(tipX + endX, tipY + endY);
+    },
+    
+    constructor: Leeboard.P2ForceArrow
 };

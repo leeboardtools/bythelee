@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: sailsim/Hull.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: sailsim/Hull.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* 
+ * Copyright 2017 Albert Santos.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/* global LBSailSim, LBPhysics, LBGeometry, LBMath */
+
+/**
+ * Spline used for calculating the friction coefficient Cf given the roughness
+ * ratio, eyeballed from Fossati pg. 16.
+ * @type {LBMath.CSpline}
+ */
+LBSailSim.CFVsRoughnessRatio = new LBMath.CSpline();
+LBSailSim.CFVsRoughnessRatio.setup(
+        [ 3e3,      1e4,    3e4,    1e5,    3e5 ],
+        [ 6.5e-3,   5e-3,   4e-3,   3e-3,   2.6e-3]);
+
+LBSailSim.Hull = function(vessel) {
+    this.vessel = vessel;
+    
+    this.centerOfBuoyancy = LBGeometry.createVector3();
+    this.worldCenterOfBuoyancy = LBGeometry.createVector3();
+    
+    /**
+     * The waterline length LWL.
+     * @member {number}
+     */
+    this.lwl = 10.02;
+    
+    /**
+     * The waterline beam, BWL.
+     * @member {number}
+     */
+    this.bwl = 3.17;
+    
+    /**
+     * The canoe body draft Tc.
+     * @member {number}
+     */
+    this.tc = 0.57;
+    
+    /**
+     * The canoe body volumne displacement delC.
+     */
+    this.delC = 7.63;
+    
+    /**
+     * The prismatic coefficient CP.
+     */
+    this.cp = 0.56;
+    
+    /**
+     * The longitudinal center of buoyancy from the forward perpendicular, LBCfpp
+     */
+    // In the book it's given as a percentage, which I'm presuming is percent of LWO
+    // from the mid-point, so we have:
+    // lwl / 2 + % LWL / 2
+    this.lcb = 0.5 * this.lwl + 0.035 * this.lwl;
+    
+    /**
+     * The longitudinal center of floatation from the forward perpendicular, LFCfpp.
+     */
+    this.lcf = 0.5 * this.lwl + 0.065 * this.lwl;
+    
+    /**
+     * The area of water plane, AW
+     */
+    this.aw = 22.7;
+    
+    /**
+     * The wetted surface area of canoe body, Swc, also Sc
+     */
+    this.swc = 25.2;
+    
+    /**
+     * The unheeled wetted surface area of canoe body, Swc, also Sc
+     */
+    this.swcnh = 25.2;
+     
+    /**
+     * The midship section coefficient, CM
+     */
+    this.cm = 0.752;
+   
+    /**
+     * The equivalent uniform roughness, K.
+     * @member {number}
+     */
+    this.k = 5e-6;
+    
+    this.heelAngleDeg = 0;
+    this.halfRhoVSq = 0;
+    
+    this.workingForce = LBGeometry.createVector3();
+    this.workingVelResults = { 'worldPos' : LBGeometry.createVector3() };
+};
+
+LBSailSim.Hull.prototype = {
+    
+    /**
+     * Updates the hull properties that are dependent upon the hull's orientation.
+     * @protected
+     */
+    _updatePropertiesFromVessel: function() {
+        var vessel = this.vessel;
+        this.waterSpeed = vessel.apparentCurrent.length();
+        this.halfRhoVSq = 0.5 * vessel.sailEnv.water.density * this.waterSpeed;
+
+        this.heelAngleDeg = vessel.obj3D.rotation.x * LBMath.RAD_TO_DEG;
+        
+        vessel.coordSystem.calcVectorLocalToWorld(this.centerOfBuoyancy, this.workingVelResults);
+        this.worldCenterOfBuoyancy.copy(this.workingVelResults.worldPos);
+        
+        this.swc = this.swcnh * LBSailSim.Delft.calcWettedSurfaceHeelCorrection(this);
+    },
+    
+    /**
+     * Calculates the drag due to friction.
+     * @return {number} The drag due to friction.
+     */
+    calcFrictionalDrag: function() {
+        // Based on Larsson, pg. 66 - 70.
+        if (LBMath.isLikeZero(this.waterSpeed)) {
+            this.frictionalDrag = 0;
+        }
+        else {
+            var frictionalRe = this.vessel.sailEnv.water.calcRe(this.waterSpeed, this.lwl * 0.7);
+            var den = Math.log10(frictionalRe) - 2;
+            var cFriction = 0.075 / (den * den);
+
+            if (!LBMath.isLikeZero(this.waterSpeed)) {
+                var permissibleRoughness = 100e-6 / this.waterSpeed;
+                if (this.k > permissibleRoughness) {
+                    var roughnessRatio = this.lwl / this.k;
+                    cFriction = LBSailSim.CFVsRoughnessRatio.interpolate(roughnessRatio);
+                }
+            }
+            this.frictionalDrag = this.halfRhoVSq * cFriction * this.swc;
+        }
+        
+        return this.frictionalDrag;
+    },
+    
+    calcResiduaryResistance: function() {
+        this.residuaryResistance = LBSailSim.Delft.calcResiduaryResistance(this);
+        return this.residuaryResistance;
+    },
+    
+    calcFormDrag: function() {
+        return 0;
+    },
+    
+    calcWaveDrag: function() {
+        return 0;
+    },
+    
+    /**
+     * Calculates the forces due to the hull, returning it as a resultant.
+     * @param {number} dt   The simulation time step.
+     * @param {LBPhysics.Resultant} [resultant] If defined the resultant to store the results into.
+     * @return {LBPhysics.Resultant3D}  The resultant.
+     */
+    updateForces: function(dt, resultant) {
+        resultant = resultant || new LBPhysics.Resultant3D();
+        
+        this._updatePropertiesFromVessel();
+        
+        resultant.applPoint.copy(this.centerOfBuoyancy);
+
+        var frictionDrag = this.calcFrictionalDrag();
+        var residuaryResistance = this.calcResiduaryResistance();
+        var formDrag = this.calcFormDrag();
+        var waveDrag = this.calcWaveDrag();
+        
+        var drag = frictionDrag + residuaryResistance + formDrag + waveDrag;
+        this.workingForce.copy(this.vessel.apparentCurrent).normalize();
+        this.workingForce.multiplyScalar(drag);
+        
+        resultant.addForce(this.workingForce, this.worldCenterOfBuoyancy);
+        
+        // Add gravity...
+        var fGravity = this.vessel.getTotalMass() * this.vessel.sailEnv.gravity;
+        this.workingForce.set(0, 0, fGravity);
+        resultant.addForce(this.workingForce, this.vessel.getTotalCenterOfMass());
+        
+        // And buoyancy...
+        this.workingForce.set(0, 0, -fGravity);
+        resultant.addForce(this.workingForce, this.worldCenterOfBuoyancy);
+        
+        return resultant;
+    },
+
+    /**
+     * Loads the hull parameters from properties in a data object.
+     * @param {object} data The data object.
+     * @param {LBSailSim.Vessel} vessel The vessel this hull represents.
+     * @return {LBSailSim.Hull} this.
+     */
+    load: function(data, vessel) {
+        this.vessel = vessel;
+        
+        this.lwl = data.lwl || this.lwl;
+        this.bwl = data.bwl || this.bwl;
+        this.tc = data.tc || this.tc;
+        this.delC = data.delC || this.delC;
+        this.cm = data.cm || this.cm;
+        this.cp = data.cp || this.cp;
+         
+        this.k = data.k || this.k;
+        
+        this.swc = data.swc || LBSailSim.Hull.estimateSW(this);
+        this.swcnh = this.swc;
+        
+        LBGeometry.loadVector3(data.centerOfBuoyancy, this.centerOfBuoyancy);
+        return this;
+    },
+
+    constructor: LBSailSim.Hull
+};
+
+/**
+ * Creates and loads a hull from properties in a data object.
+ * @param {object} data The data object.
+ * @param {LBSailSim.Vessel} vessel The vessel to which the hull belongs.
+ * @return {LBSailSim.Hull} The hull, undefined if data is undefined.
+ */
+LBSailSim.Hull.createFromData = function(data, vessel) {
+    if (!data) {
+        return undefined;
+    }
+    
+    var hull;
+    if (data.construct) {
+        hull = eval(data.construct);
+    }
+    else {
+        hull = new LBSailSim.Hull();
+    }
+    
+    return hull.load(data, vessel);
+};
+
+
+/**
+ * Calculates the midship coefficient for a set of hull parameters.
+ * Larsson pg. 33
+ * @param {LBSailSim.Hull} hull The hull parameters.
+ * @return {number} The midship coefficient CM.
+ */
+LBSailSim.Hull.calcCM = function(hull) {
+    var den = hull.lwl * hull.bwl * hull.tc * hull.cp;
+    return hull.delC / den;
+};
+
+/**
+ * Estimates the wetted surface area.
+ * Larsson pg. 33
+ * @param {LBSailSim.Hull} hull The hull parameters.
+ * @return {number} The estimated wetted surface area SW.
+ */
+LBSailSim.Hull.estimateSW = function(hull) {
+    var cm = (hull.cm) ? hull.cm : LBSailSim.Hull.calcCM(hull);
+    var sw = (1.97 + 0.171 * hull.bwl / hull.tc) * Math.sqrt(hull.delC * hull.lwl);
+    sw *= Math.pow(0.65 / cm, 1./3.);
+    return sw;
+};
+
+/**
+ * Calculates the prismatic coefficient CP.
+ * @param {number} delC The canoe body volumetric displacement.
+ * @param {number} lwl  The waterline length.
+ * @param {number} ax   The maximum transverse cross-sectional area.
+ * @return {number} The prismatic coefficient.
+ */
+LBSailSim.Hull.calcCP = function(delC, lwl, ax) {
+    return delC / (lwl * ax);
+};
+
+/**
+ * Calculates the block coefficient CB.
+ * @param {number} delC The canoe body volumetric displacement.
+ * @param {number} lwl  The waterline length.
+ * @param {number} bwl  The maximum beam at the designated waterline.
+ * @param {number} tc   The canoe body draft.
+ * @return {number} The block coefficient.
+ */
+LBSailSim.Hull.calcCB = function(delC, lwl, bwl, tc) {
+    return delC / (lwl * bwl * tc);
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 18:13:06 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

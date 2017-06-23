@@ -215,6 +215,40 @@ QUnit.test( "CoordSystemState.calcVectorLocalToWorld()", function( assert ) {
     
 });
 
+
+QUnit.test( "CoordSystemState.calcAngularVelocityAboutLocalAxis()", function( assert ) {
+    var xfrmA = LBGeometry.createMatrix4();
+    xfrmA.makeFromEulerAndXYZ(0, 0, 0, 0, 0, 0);
+    
+    var xfrmB = LBGeometry.createMatrix4();
+    xfrmB.makeFromEulerAndXYZ(90 * LBMath.DEG_TO_RAD, 0, 0, 0, 0, 0);
+    
+    var coordSystemState = new LBPhysics.CoordSystemState();
+    coordSystemState.setXfrms(xfrmA, 0);
+    coordSystemState.setXfrms(xfrmB, 1);
+    
+    var axis = LBGeometry.createVector3(0, 1, 0);
+    var omega = coordSystemState.calcAngularVelocityAboutLocalAxis(axis) * LBMath.RAD_TO_DEG;
+    assert.nearEqual(omega, 0, "90 deg about X-axis, Y-Axis ref");
+    
+    axis.set(1, 0, 0);
+    omega = coordSystemState.calcAngularVelocityAboutLocalAxis(axis) * LBMath.RAD_TO_DEG;
+    assert.nearEqual(omega, 90, "90 deg about X-axis, X-axis ref");
+
+    xfrmB.makeFromEulerAndXYZ(-90 * LBMath.DEG_TO_RAD, 0, 0, 0, 0, 0);
+    coordSystemState.setXfrms(xfrmA, 0);
+    coordSystemState.setXfrms(xfrmB, 1);
+
+    axis.set(1, 0, 0);
+    omega = coordSystemState.calcAngularVelocityAboutLocalAxis(axis) * LBMath.RAD_TO_DEG;
+    assert.nearEqual(omega, -90, "Sign check: -90 deg about X-axis, X-axis ref");
+    
+    axis.set(1, 1, 0).normalize();
+    omega = coordSystemState.calcAngularVelocityAboutLocalAxis(axis) * LBMath.RAD_TO_DEG;
+    assert.nearEqual(omega, -90, "Sign check: -90 deg about X-axis, X-Y-axis ref");
+});
+
+
 QUnit.test( "loadMomentInertia()", function( assert ) {
     var moment = LBPhysics.loadMomentInertia({ 'xx': 1, 'xy': 2, 'xz': 3, 'yy': 4, 'yz': 5, 'zz': 6});
     var refMoment = LBGeometry.createMatrix3();

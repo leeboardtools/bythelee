@@ -14,7 +14,7 @@
             },
             "mass": 7820,
             "centerOfMass": { "x": 0, "y": 0, "z": 0 },
-            "momentInertia": { "zz": 1000 },
+            "momentInertia": { "xx": 1, "yy": 1, "zz": 1000 },
             "hull": {
                 "lwl": 10.02,
                 "bwl": 3.17,
@@ -23,7 +23,7 @@
                 "k": 200e-6,
                 "centerOfBuoyancy": { "x": -0.3 }
             },
-            "aeroFoils": [
+            "airfoils": [
                 {
                     "name": "mainsail",
                     "mass": 20,
@@ -43,13 +43,15 @@
                             "y": 1
                         }
                         },
+                    "minSheetLength": 0,
+                    "maxSheetLength": 2,
                     "foil": {
                         "chordLine": {
                             "start": { "x": 0, "y": 0 },
-                            "end": { "x": -1, "y": 0 }
+                            "end": { "x": -3, "y": 0 }
                         },
                         "sliceZ": 0.2,
-                        "area": 0.3,
+                        "area": 35.5,
                         "aspectRatio": 3,
                         "libClCdCurve": "FlatPlate"
                     }
@@ -92,7 +94,7 @@
                         },
                         "anchor": {
                             "x": 0,
-                            "y": 0
+                            "y": 0.5
                         }
                         },
                     "foil": {
@@ -101,7 +103,7 @@
                             "end": { "x": -0.3, "y": 0 }
                         },
                         "sliceZ": 0.2,
-                        "area": 0.1,
+                        "area": 0.2,
                         "aspectRatio": 5,
                         "libClCdCurve": "FlatPlate"
                     }
@@ -115,8 +117,8 @@
                         "position" : { "x": -1.8, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                     },
-                    "minForce": -2500,
-                    "maxForce": 10000
+                    "minForce": -250,
+                    "maxForce": 1000
                 }
             ],
             "ballasts": [],
@@ -124,8 +126,8 @@
                 {
                     "construct": "new LBSailSim.RudderController()",
                     "name": "Rudder",
-                    "minValue": -45,
-                    "maxValue": 45,
+                    "minValue": -90,
+                    "maxValue": 90,
                     "currentValue": 0                    
                 },
                 {
@@ -135,6 +137,14 @@
                     "minValue": -5,
                     "maxValue": 10,
                     "currentValue": 0
+                },
+                {
+                    "construct": "new LBSailSim.SailController()",
+                    "name": "Mainsheet",
+                    "sailName": "mainsail",
+                    "minValue": 0,
+                    "maxValue": 1,
+                    "currentValue": 0.5                    
                 }
             ]
         },
@@ -152,7 +162,7 @@
             },
             "mass": 7820,
             "centerOfMass": { "x": 0, "y": 0, "z": 0 },
-            "momentInertia": { "zz": 1000 },
+            "momentInertia": { "xx": 1, "yy": 1, "zz": 1000 },
             "hull": {
                 "lwl": 10.02,
                 "bwl": 3.17,
@@ -161,7 +171,7 @@
                 "k": 200e-6,
                 "centerOfBuoyancy": { "x": -0.3 }
             },
-            "aeroFoils": [
+            "airfoils": [
                 {
                     "name": "mainsail",
                     "mass": 20,

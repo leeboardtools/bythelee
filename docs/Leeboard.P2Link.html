@@ -50,7 +50,8 @@
 <div class="description">
     Manages linking a Phaser.Physics.P2.Body and a <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a>, updating
 the position/rotation of the rigid body from the P2 body and applying the forces
-from the rigid body to the P2 body.
+from the rigid body to the P2 body. This also supports displaying an arrow representing
+the resultant force on rigid bodies.
 </div>
 
 
@@ -143,7 +144,7 @@ from the rigid body to the P2 body.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line28">line 28</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line29">line 29</a>
     </li></ul></dd>
     
 
@@ -205,6 +206,194 @@ from the rigid body to the P2 body.
 
         
             
+<h4 class="name" id=".forceArrowProperty"><span class="type-signature">(static) </span>forceArrowProperty<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    The name of the property in {LBPhysics.RigidBody} objects where we store Leeboard.P2ForceArrow objects.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line285">line 285</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".p2BodyProperty"><span class="type-signature">(static) </span>p2BodyProperty<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    The name of the property in {LBPhysics.RigidBody} objects where we store the {Phaser.Physics.P2.Body}.
+P2 bodies control the position of the rigid body.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line274">line 274</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".spriteProperty"><span class="type-signature">(static) </span>spriteProperty<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    The name of the property in {LBPhysics.RigidBody} objects where we store {Phaser.Sprite} or {Phaser.Image}
+objects. Sprite/image objects are controlled by the rigid body's world position and rotation.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line280">line 280</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="ySign"><span class="type-signature"></span>ySign<span class="type-signature"></span></h4>
 
 
@@ -250,7 +439,7 @@ go down.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line35">line 35</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line46">line 46</a>
     </li></ul></dd>
     
 
@@ -271,6 +460,182 @@ go down.
 
     
         <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".createImageFromData"><span class="type-signature">(static) </span>createImageFromData<span class="signature">(game, data)</span><span class="type-signature"> &rarr; {Phaser.Image}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Creates and loads a {Phaser.Image} object based on properties in a data object.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>game</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Phaser.Game</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The game to which the sprite will belong.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The data object.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line315">line 315</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Th created/loaded image.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Phaser.Image</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
 
         
             
@@ -400,7 +765,7 @@ go down.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line196">line 196</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line328">line 328</a>
     </li></ul></dd>
     
 
@@ -576,7 +941,7 @@ go down.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line184">line 184</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line302">line 302</a>
     </li></ul></dd>
     
 
@@ -729,7 +1094,7 @@ go down.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line174">line 174</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line292">line 292</a>
     </li></ul></dd>
     
 
@@ -782,14 +1147,114 @@ go down.
 
     
 
-    <h4 class="name" id="addLinkedObjects"><span class="type-signature"></span>addLinkedObjects<span class="signature">(p2Body, rigidBody)</span><span class="type-signature"> &rarr; {<a href="Leeboard.P2Link.html">Leeboard.P2Link</a>}</span></h4>
+    <h4 class="name" id="_stageUpdateTransform"><span class="type-signature"></span>_stageUpdateTransform<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
 
     
 
 
 
 <div class="description">
-    Adds a Phaser.Physics.P2.Body and a <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a> pair to the manager.
+    Our hook into Phaser.Stage#updateTransform.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line173">line 173</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="addRigidBody"><span class="type-signature"></span>addRigidBody<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {<a href="Leeboard.P2Link.html">Leeboard.P2Link</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Adds a <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a> pair to the manager.
 </div>
 
 
@@ -821,29 +1286,6 @@ go down.
     </thead>
 
     <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>p2Body</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The P2 body.</td>
-        </tr>
-
     
 
         <tr>
@@ -905,7 +1347,7 @@ go down.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line47">line 47</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -1058,7 +1500,7 @@ go down.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line143">line 143</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line141">line 141</a>
     </li></ul></dd>
     
 
@@ -1111,14 +1553,14 @@ go down.
 
     
 
-    <h4 class="name" id="indexOfP2Body"><span class="type-signature"></span>indexOfP2Body<span class="signature">(p2Body)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    <h4 class="name" id="pixelsToRBX"><span class="type-signature"></span>pixelsToRBX<span class="signature">(px)</span><span class="type-signature"> &rarr; {Number}</span></h4>
 
     
 
 
 
 <div class="description">
-    Retrieves the index of a P2 body in the manager.
+    Scales an x value in pixel coordinates to rigid body coordinates.
 </div>
 
 
@@ -1154,13 +1596,13 @@ go down.
 
         <tr>
             
-                <td class="name"><code>p2Body</code></td>
+                <td class="name"><code>px</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">number</span>
 
 
             
@@ -1170,7 +1612,7 @@ go down.
 
             
 
-            <td class="description last">The P2 body of interest.</td>
+            <td class="description last">The pixels x coordinate.</td>
         </tr>
 
     
@@ -1211,7 +1653,7 @@ go down.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line95">line 95</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line102">line 102</a>
     </li></ul></dd>
     
 
@@ -1238,7 +1680,7 @@ go down.
 
         
 <div class="param-desc">
-    The index, -1 if p2Body is not in the manager.
+    The rigid body equivalent.
 </div>
 
 
@@ -1264,14 +1706,473 @@ go down.
 
     
 
-    <h4 class="name" id="indexOfRigidBody"><span class="type-signature"></span>indexOfRigidBody<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    <h4 class="name" id="pixelsToRBY"><span class="type-signature"></span>pixelsToRBY<span class="signature">(py)</span><span class="type-signature"> &rarr; {Number}</span></h4>
 
     
 
 
 
 <div class="description">
-    Retrieves the index of a rigid body in the manager.
+    Scales a y value in pixel coordinates to rigid body coordinates.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>py</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The pixels y coordinate.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line111">line 111</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The rigid body equivalent.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="rbToPixelsX"><span class="type-signature"></span>rbToPixelsX<span class="signature">(x)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Scales an x value in rigid body coordinates to pixel coordinates.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The x coordinate.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line84">line 84</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The pixel equivalent.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="rbToPixelsY"><span class="type-signature"></span>rbToPixelsY<span class="signature">(y)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Scales an y value in rigid body coordinates to pixel coordinates.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The y coordinate.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line93">line 93</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The pixel equivalent.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="removeRigidBody"><span class="type-signature"></span>removeRigidBody<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {<a href="Leeboard.P2Link.html">Leeboard.P2Link</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Removes a rigid body link via index.
 </div>
 
 
@@ -1364,466 +2265,7 @@ go down.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line109">line 109</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The index, -1 if rigidBody is not in the manager.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="removeLinkByP2Body"><span class="type-signature"></span>removeLinkByP2Body<span class="signature">(p2Body)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Removes a P2 body/rigid body link via the P2 body.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>p2Body</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The P2 body of the link.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line67">line 67</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true if a link with the P2 body was removed.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Boolean</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="removeLinkByRigidBody"><span class="type-signature"></span>removeLinkByRigidBody<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Removes a P2 body/rigid body link via the rigid body.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>rigidBody</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The rigid body of the link.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line81">line 81</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    true if a link with the rigid body was removed.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Boolean</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="removeLinkedObject"><span class="type-signature"></span>removeLinkedObject<span class="signature">(index)</span><span class="type-signature"> &rarr; {<a href="Leeboard.P2Link.html">Leeboard.P2Link</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Removes a P2 body/rigid body link via index.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>index</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The index of the entry to remove.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line57">line 57</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line71">line 71</a>
     </li></ul></dd>
     
 
@@ -1862,6 +2304,107 @@ go down.
     <dd>
         
 <span class="param-type"><a href="Leeboard.P2Link.html">Leeboard.P2Link</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="updateDisplayObjects"><span class="type-signature"></span>updateDisplayObjects<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Updates any sprites that have been attached to any of the rigid bodies or their
+parts via a property named <a href="Leeboard.P2Link.html#.spriteProperty">Leeboard.P2Link.spriteProperty</a>.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line185">line 185</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
 
 
     </dd>
@@ -1928,7 +2471,7 @@ orientation of the rigid body from that of the linked P2 body.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line123">line 123</a>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line120">line 120</a>
     </li></ul></dd>
     
 
@@ -1977,6 +2520,181 @@ orientation of the rigid body from that of the linked P2 body.
 
 
         
+            
+
+    
+
+    <h4 class="name" id="updateSpriteFromRigidBody"><span class="type-signature"></span>updateSpriteFromRigidBody<span class="signature">(rigidBody, sprite)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Updates a sprite from a rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sprite</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Phaser.Sprite</span>
+|
+
+<span class="param-type">Phaser.Image</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The sprite to be updated.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="P2Link.js.html">P2Link.js</a>, <a href="P2Link.js.html#line223">line 223</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
     
 
     
@@ -1998,7 +2716,7 @@ orientation of the rigid body from that of the linked P2 body.
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jun 17 2017 09:44:50 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 18:13:06 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

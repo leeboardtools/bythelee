@@ -85,6 +85,7 @@ LBSailSim.FoilInstance.prototype.load = function(data, sailEnv) {
     if (data.foil) {
         this.foil = LBFoils.Foil.createFromData(data.foil, sailEnv);
     }
+    
     if (data.rotationOffset) {
         this.rotationOffsetDegs = data.rotationOffset;
     }
@@ -336,7 +337,7 @@ LBSailSim.ThrottleController.prototype.setThrottlePosition = function(value) {
 
 /**
  * Container representing a vessel that floats. Vessels support:
- * <li>Aerofoils, which are {@link LBSailSim.FoilInstance} based objects that are driven by the atmosphere.
+ * <li>airfoils, which are {@link LBSailSim.FoilInstance} based objects that are driven by the atmosphere.
  * <li>Hydrofoils,which are {@link LBSailSim.FoilInstance} based objects that are driven by the water.
  * <li>Propulsors, which are {@link LBSailSim.Propulsor} based objects.
  * <li>Ballasts, which are {@link LBPhysics.RigidBody} based objects.
@@ -362,10 +363,10 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
     this.hydroFoils = [];
     
     /**
-     * The array of aerofoils {@link LBSailSim.FoilInstance}.
+     * The array of airfoils {@link LBSailSim.FoilInstance}.
      * @member {Array}
      */
-    this.aeroFoils = [];
+    this.airfoils = [];
     
     /**
      * The array of propulsors {@link LBSaimSim.Propulsor}.
@@ -411,12 +412,12 @@ LBSailSim.Vessel.prototype = Object.create(LBPhysics.RigidBody.prototype);
 LBSailSim.Vessel.prototype.constructor = LBSailSim.Vessel;
 
 /**
- * Adds an aerofoil to the vessel.
- * @param {LBSailSim.FoilInstance} foilInstance The foil instance representing the aerofoil.
+ * Adds an airfoil to the vessel.
+ * @param {LBSailSim.FoilInstance} foilInstance The foil instance representing the airfoil.
  * @returns {LBSailSim.Vessel}  this.
  */
-LBSailSim.Vessel.prototype.addAeroFoil = function(foilInstance) {
-    this.aeroFoils.push(foilInstance);
+LBSailSim.Vessel.prototype.addairfoil = function(foilInstance) {
+    this.airfoils.push(foilInstance);
     this.addPart(foilInstance);
     return this;
 };
@@ -487,6 +488,7 @@ LBSailSim.Vessel.prototype._removeParts = function(foils) {
  * object from properties in a data object.
  * @protected
  * @param {object} data The data object.
+ * @param {boolean} isSail  If true the foil is being created for a sail/airfoil.
  * @returns {LBSailSim.FoilInstance}    The foil instance.
  */
 LBSailSim.Vessel.prototype._createAndLoadFoilInstance = function(data, isSail) {
@@ -499,7 +501,6 @@ LBSailSim.Vessel.prototype._createAndLoadFoilInstance = function(data, isSail) {
     else {
         if (isSail) {
             foilInstance = new LBSailSim.SailInstance();
-//            foilInstance = new LBSailSim.FoilInstance();
         }
         else {
             foilInstance = new LBSailSim.FoilInstance();
@@ -524,7 +525,7 @@ LBSailSim.Vessel.prototype._loadFoils = function(data, foils, loadCallback) {
         return this;
     }
     
-    var isSail = foils === this.aeroFoils;
+    var isSail = foils === this.airfoils;
     for (var i = 0; i < data.length; ++i) {
         var foilData = data[i];
         var foilInstance = this._createAndLoadFoilInstance(foilData, isSail);
@@ -665,7 +666,7 @@ LBSailSim.Vessel.prototype._loadControllers = function(data, loadCallback) {
  */
 LBSailSim.Vessel.prototype.load = function(data, loadCallback) {
     // Clear out the existing settings...
-    this._removeParts(this.aeroFoils);
+    this._removeParts(this.airfoils);
     this._removeParts(this.hydroFoils);
     this._removeParts(this.propulsors);
     this._removeParts(this.ballasts);
@@ -683,10 +684,11 @@ LBSailSim.Vessel.prototype.load = function(data, loadCallback) {
     this._loadFoils(data.hydroFoils, this.hydroFoils, loadCallback);
     this._loadPropulsors(data.propulsors, loadCallback);
     this._loadBallasts(data.ballasts, loadCallback);
-    this._loadControllers(data.controllers, loadCallback);
     
-    // Load aerofoils last so they appear above everyone else...
-    this._loadFoils(data.aeroFoils, this.aeroFoils, loadCallback);
+    // Load airfoils last so they appear above everyone else...
+    this._loadFoils(data.airfoils, this.airfoils, loadCallback);
+
+    this._loadControllers(data.controllers, loadCallback);
     
     this.hull = LBSailSim.Hull.createFromData(data.hull, this);
     if (this.hull && loadCallback && loadCallback.hullLoaded) {
@@ -733,7 +735,7 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
     this.sailEnv.water.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, 0, this.apparentCurrent);
     this.apparentCurrent.sub(this.worldLinearVelocity);
     
-    this._updateFoilForces(dt, this.sailEnv.wind, this.aeroFoils);
+    this._updateFoilForces(dt, this.sailEnv.wind, this.airfoils);
     this._updateFoilForces(dt, this.sailEnv.water, this.hydroFoils);
     
     for (var i = 0; i < this.propulsors.length; ++i) {

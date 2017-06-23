@@ -33,9 +33,12 @@ LBSailSim.P2Env = function(game) {
 LBSailSim.P2Env.prototype = Object.create(LBSailSim.Env.prototype);
 LBSailSim.P2Env.prototype.constructor = LBSailSim.P2Env;
 
-LBSailSim.P2Env.prototype.checkoutBoat = function(worldGroup, typeName, boatName, centerX, centerY, rotation) {
+LBSailSim.P2Env.prototype.setWorldGroup = function(worldGroup) {
     this.worldGroup = worldGroup;
-    
+    this.p2Link.worldGroup = worldGroup;
+};
+
+LBSailSim.P2Env.prototype.checkoutBoat = function(typeName, boatName, centerX, centerY, rotation) {
     var childIndex = this.worldGroup.children.length;
     
     var boat = LBSailSim.Env.prototype.checkoutBoat.call(this, typeName, boatName);
@@ -44,9 +47,7 @@ LBSailSim.P2Env.prototype.checkoutBoat = function(worldGroup, typeName, boatName
     p2Body.y = centerY;
     p2Body.rotation = -10 * LBMath.DEG_TO_RAD;
     
-    worldGroup.addAt(p2Body.sprite, childIndex);
-    
-    this.worldGroup = undefined;
+    this.worldGroup.addAt(p2Body.sprite, childIndex);
     return boat;
 };
 
@@ -64,6 +65,10 @@ LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, dat
 
 LBSailSim.P2Env.prototype.foilInstanceLoaded = function(vessel, foilInstance, data, isSail) {
     this._loadObj3DSprite(vessel, foilInstance, data);
+    
+    var arrowColor = (isSail) ? 0x00FF00 : 0xFF0000;
+    var arrow = new Leeboard.P2ForceArrow(this.p2Link, arrowColor);
+    foilInstance[Leeboard.P2Link.forceArrowProperty] = arrow;
 };
 
 LBSailSim.P2Env.prototype._loadObj3DSprite = function(vessel, object, data) {
@@ -111,3 +116,4 @@ LBSailSim.P2Env.prototype.update = function() {
     this.p2Link.updateFromP2();
     this.p2Link.applyToP2(dt);
 };
+
