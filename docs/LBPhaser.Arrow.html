@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: LBControls</title>
+    <title>JSDoc: Class: Arrow</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: LBControls</h1>
+    <h1 class="page-title">Class: Arrow</h1>
 
     
 
@@ -28,7 +28,8 @@
 
 <header>
     
-        <h2>LBControls</h2>
+        <h2>
+            <span class="ancestors"><a href="LBPhaser.html">LBPhaser</a>.</span>Arrow</h2>
         
     
 </header>
@@ -38,92 +39,16 @@
     
         
 
-        
-
-
-<dl class="details">
-
     
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line20">line 20</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="LBControls.SmoothController.html">SmoothController</a></dt>
-            <dd></dd>
-        
-            <dt><a href="LBControls.SteppedController.html">SteppedController</a></dt>
-            <dd></dd>
-        </dl>
-    
-
-     
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id=".createControllerFromData"><span class="type-signature">(static) </span>createControllerFromData<span class="signature">(data, owner)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="Arrow"><span class="type-signature"></span>new Arrow<span class="signature">(env, group<span class="signature-attributes">opt</span>, style<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Creates and loads a controller based upon properties in a data object.
+    A Phaser.Graphics based arrow.
 </div>
 
 
@@ -147,7 +72,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -159,47 +88,112 @@
 
         <tr>
             
-                <td class="name"><code>data</code></td>
+                <td class="name"><code>env</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type"><a href="LBPhaser.Env.html">LBPhaser.Env</a></span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">The data object.</td>
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The Phaser environment.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>owner</code></td>
+                <td class="name"><code>group</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">Phaser.Group</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">An object passed as the owner argument to the load functions
-of the individual controllers.</td>
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">If defined the group the arrow is added to.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhaser.ArrowStyle.html">LBPhaser.ArrowStyle</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    LBPhaser.ArrowStyle.DEFAULT
+                
+                </td>
+            
+
+            <td class="description last">If defined the style for the arrow,
+if not defined <a href="LBPhaser.ArrowStyle.html#.DEFAULT">LBPhaser.ArrowStyle.DEFAULT</a> will be used.</td>
         </tr>
 
     
@@ -240,7 +234,7 @@ of the individual controllers.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line245">line 245</a>
+        <a href="phaser_PhaserUtil.js.html">phaser/PhaserUtil.js</a>, <a href="phaser_PhaserUtil.js.html#line131">line 131</a>
     </li></ul></dd>
     
 
@@ -266,10 +260,6 @@ of the individual controllers.</td>
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    The controller.
-</div>
-
 
 
 <dl>
@@ -278,7 +268,199 @@ of the individual controllers.</td>
     </dt>
     <dd>
         
+<span class="param-type"><a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="setFromBaseAndVector"><span class="type-signature"></span>setFromBaseAndVector<span class="signature">(base, vector)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Sets the arrow from a point defining the base and a vector defining the
+length and direction of the arrow from the base.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>base</code></td>
+            
+
+            <td class="type">
+            
+                
 <span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The base of the arrow, a 2D or 3D vector.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The vector describing the length and direction of the
+arrow from base. A 2D or 3D vector.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhaserUtil.js.html">phaser/PhaserUtil.js</a>, <a href="phaser_PhaserUtil.js.html#line146">line 146</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
 
 
     </dd>

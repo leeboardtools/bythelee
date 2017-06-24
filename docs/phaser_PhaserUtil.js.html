@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: phaser/PhaserUtil.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: phaser/PhaserUtil.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* 
+ * Copyright 2017 Albert Santos.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* global Leeboard, LBMath, Phaser */
+
+/**
+ * @namespace LBPhaser
+ */
+var LBPhaser = LBPhaser || {};
+
+/**
+ * This is used as the central environment for the Leeboard-Phaser interface.
+ * @constructor
+ * @param {Phaser.Game} game    The Phaser game object.
+ * @returns {LBPhaser.Env}
+ */
+LBPhaser.Env = function(game) {
+    this.game = game;
+
+    /**
+     * Set this to -1 to make the y-axis going up, otherwise set it to +1 to make the y-axis
+     * go down.
+     */
+    this.ySign = 1;
+};
+
+LBPhaser.Env.prototype = {
+    /**
+     * Converts a x coordinate in our units (normally meters) to pixels.
+     * @param {Number} x    The x coordinate to convert.
+     * @returns {Number}    The pixels.
+     */
+    toPixelsX: function(x) {
+        return -this.game.physics.p2.mpxi(x);
+    },
+    
+    /**
+     * Converts a y coordinate in our units (normally meters) to pixels.
+     * @param {Number} y    The y coordinate to convert.
+     * @returns {Number}    The pixels.
+     */
+    toPixelsY: function(y) {
+        return -this.ySign * this.game.physics.p2.mpxi(y);
+    },
+    
+    /**
+     * Converts x pixels to our units (normally meters).
+     * @param {Number} x    The x pixels.
+     * @returns {Number}    Our units.
+     */
+    fromPixelsX: function(x) {
+        return -this.game.physics.p2.pxmi(x);
+    },
+    
+    /**
+     * Converts y pixels to our units (normally meters).
+     * @param {Number} y    The y pixels.
+     * @returns {Number}    Our units.
+     */
+    fromPixelsY: function(y) {
+        return -this.ySign * this.game.physics.p2.pxmi(y);
+    },
+    
+    constructor: LBPhaser.Env
+};
+
+/**
+ * Extension of {Phaser.Point}, adding a copy function.
+ * @param {object} src  The object to be copied.
+ * @returns {Phaser.Point}  this.   
+ */
+Phaser.Point.prototype.copy = function(src) {
+    this.x = src.x || this.x;
+    this.y = src.y || this.y;
+    return this;
+};
+
+
+/**
+ * Object representing the style information used for an {@link LBPhaser.Arrow}.
+ * @constructor
+ * @param {number} color    The RGB color.
+ * @param {number} [width=2]    The pixel width of the arrow line.
+ * @param {number} [arrowSize=20]    The nominal pixel size of the arrow head.
+ * @returns {LBPhaser.ArrowStyle}
+ */
+LBPhaser.ArrowStyle = function(color, width, arrowSize) {
+    this.color = color;
+    this.width = width || 2;
+    this.arrowSize = arrowSize || 20;
+    this.alpha = 1;
+    this.scaleArrowLength = function(length) {
+        return length * 0.1;
+    };
+};
+
+LBPhaser.ArrowStyle.prototype = {
+    
+    constructor: LBPhaser.ArrowStyle
+};
+
+/**
+ * The default {@link LBPhaser.Arrow} style.
+ * @type LBPhaser.ArrowStyle
+ */
+LBPhaser.ArrowStyle.DEFAULT = new LBPhaser.ArrowStyle();
+
+
+/**
+ * A {@link Phaser.Graphics} based arrow.
+ * @constructor
+ * @param {LBPhaser.Env} env    The Phaser environment.
+ * @param {Phaser.Group} [group]    If defined the group the arrow is added to.
+ * @param {LBPhaser.ArrowStyle} [style=LBPhaser.ArrowStyle.DEFAULT] If defined the style for the arrow,
+ * if not defined {@link LBPhaser.ArrowStyle.DEFAULT} will be used.
+ * @returns {LBPhaser.Arrow}
+ */
+LBPhaser.Arrow = function(env, group, style) {
+    this.env = env;
+    this.graphics = env.game.add.graphics(0, 0, group);
+    this.style = style || LBPhaser.ArrowStyle.DEFAULT;
+};
+
+LBPhaser.Arrow.prototype = {
+    /**
+     * Sets the arrow from a point defining the base and a vector defining the
+     * length and direction of the arrow from the base.
+     * @param {object} base The base of the arrow, a 2D or 3D vector.
+     * @param {object} vector   The vector describing the length and direction of the
+     * arrow from base. A 2D or 3D vector.
+     * @returns {undefined}
+     */
+    setFromBaseAndVector: function(base, vector) {
+        var g = this.graphics;
+        g.clear();
+        
+        var length = vector.length();
+        if (LBMath.isLikeZero(length)) {
+            return;
+        }
+        var dx = vector.x / length;
+        var dy = vector.y / length;
+        length = this.style.scaleArrowLength(length);
+        
+        g.lineStyle(this.style.width, this.style.color, this.style.alpha);
+        
+        var baseX = this.env.toPixelsX(base.x);
+        var baseY = this.env.toPixelsY(base.y); 
+        g.moveTo(baseX, baseY);
+        
+        dx = this.env.toPixelsX(dx * length);
+        dy = this.env.toPixelsY(dy * length);
+        length = Math.sqrt(dx * dx + dy * dy);
+        
+        var tipX = baseX + dx;
+        var tipY = baseY + dy;
+        g.lineTo(tipX, tipY);
+        
+        var arrowSize = Math.min(this.style.arrowSize, length * 0.707);
+        
+        var endX = -dy - dx;
+        var endY = dx - dy;
+        var endLen = Math.sqrt(endX * endX + endY * endY);
+        endX = arrowSize * endX / endLen;
+        endY = arrowSize * endY / endLen;
+        g.lineTo(tipX + endX, tipY + endY);
+        
+        endX = dy - dx;
+        endY = -dx - dy;
+        endLen = Math.sqrt(endX * endX + endY * endY);
+        endX = arrowSize * endX / endLen;
+        endY = arrowSize * endY / endLen;
+
+        g.moveTo(tipX, tipY);
+        g.lineTo(tipX + endX, tipY + endY);
+    },
+  
+    constructor: LBPhaser.Arrow
+};
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 20:39:58 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

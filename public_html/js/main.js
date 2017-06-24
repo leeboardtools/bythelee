@@ -317,7 +317,7 @@ PlayState._handleInput = function() {
 
 //--------------------------------------------------
 PlayState._updateCamera = function() {
-    var p2Body = this.myBoat[Leeboard.P2Link.p2BodyProperty];
+    var p2Body = this.myBoat[LBPhaser.P2Link.p2BodyProperty];
     var x = p2Body.x;
     var y = p2Body.y;
     

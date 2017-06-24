@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: LBControls</title>
+    <title>JSDoc: Class: ArrowStyle</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: LBControls</h1>
+    <h1 class="page-title">Class: ArrowStyle</h1>
 
     
 
@@ -28,7 +28,8 @@
 
 <header>
     
-        <h2>LBControls</h2>
+        <h2>
+            <span class="ancestors"><a href="LBPhaser.html">LBPhaser</a>.</span>ArrowStyle</h2>
         
     
 </header>
@@ -38,92 +39,16 @@
     
         
 
-        
-
-
-<dl class="details">
-
     
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line20">line 20</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="LBControls.SmoothController.html">SmoothController</a></dt>
-            <dd></dd>
-        
-            <dt><a href="LBControls.SteppedController.html">SteppedController</a></dt>
-            <dd></dd>
-        </dl>
-    
-
-     
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id=".createControllerFromData"><span class="type-signature">(static) </span>createControllerFromData<span class="signature">(data, owner)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="ArrowStyle"><span class="type-signature"></span>new ArrowStyle<span class="signature">(color, width<span class="signature-attributes">opt</span>, arrowSize<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.ArrowStyle.html">LBPhaser.ArrowStyle</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Creates and loads a controller based upon properties in a data object.
+    Object representing the style information used for an <a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a>.
 </div>
 
 
@@ -147,7 +72,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -159,47 +88,113 @@
 
         <tr>
             
-                <td class="name"><code>data</code></td>
+                <td class="name"><code>color</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">The data object.</td>
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The RGB color.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>owner</code></td>
+                <td class="name"><code>width</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">An object passed as the owner argument to the load functions
-of the individual controllers.</td>
+            
+                <td class="default">
+                
+                    2
+                
+                </td>
+            
+
+            <td class="description last">The pixel width of the arrow line.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>arrowSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    20
+                
+                </td>
+            
+
+            <td class="description last">The nominal pixel size of the arrow head.</td>
         </tr>
 
     
@@ -240,7 +235,7 @@ of the individual controllers.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line245">line 245</a>
+        <a href="phaser_PhaserUtil.js.html">phaser/PhaserUtil.js</a>, <a href="phaser_PhaserUtil.js.html#line100">line 100</a>
     </li></ul></dd>
     
 
@@ -266,10 +261,6 @@ of the individual controllers.</td>
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    The controller.
-</div>
-
 
 
 <dl>
@@ -278,7 +269,7 @@ of the individual controllers.</td>
     </dt>
     <dd>
         
-<span class="param-type">object</span>
+<span class="param-type"><a href="LBPhaser.ArrowStyle.html">LBPhaser.ArrowStyle</a></span>
 
 
     </dd>
@@ -288,7 +279,97 @@ of the individual controllers.</td>
 
 
 
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
         
+            
+<h4 class="name" id=".DEFAULT"><span class="type-signature">(static) </span>DEFAULT<span class="type-signature"> :<a href="LBPhaser.ArrowStyle.html">LBPhaser.ArrowStyle</a></span></h4>
+
+
+
+
+<div class="description">
+    The default <a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a> style.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="LBPhaser.ArrowStyle.html">LBPhaser.ArrowStyle</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhaserUtil.js.html">phaser/PhaserUtil.js</a>, <a href="phaser_PhaserUtil.js.html#line119">line 119</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
     
 
     
@@ -310,7 +391,7 @@ of the individual controllers.</td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 20:39:58 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 20:39:59 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -15,7 +15,8 @@
  */
 
 
-/* global LBSailSim, Leeboard, LBMath */
+/* global LBSailSim, Leeboard, LBMath, LBPhaser */
+
 
 /**
  * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2}.
@@ -26,8 +27,13 @@
 LBSailSim.P2Env = function(game) {
     LBSailSim.Env.call(this);
     this.game = game;
+    this.phaserEnv = new LBPhaser.Env(game);
     
-    this.p2Link = new Leeboard.P2Link(game);
+    this.p2Link = new LBPhaser.P2Link(this.phaserEnv);
+    
+    this.sailArrowStyle = new LBPhaser.ArrowStyle(0x00FF00);
+    this.foilArrowStyle = new LBPhaser.ArrowStyle(0x00FFFF);
+    this.hullArrowStyle = new LBPhaser.ArrowStyle(0xFF0000);
 };
 
 LBSailSim.P2Env.prototype = Object.create(LBSailSim.Env.prototype);
@@ -42,7 +48,7 @@ LBSailSim.P2Env.prototype.checkoutBoat = function(typeName, boatName, centerX, c
     var childIndex = this.worldGroup.children.length;
     
     var boat = LBSailSim.Env.prototype.checkoutBoat.call(this, typeName, boatName);
-    var p2Body = boat[Leeboard.P2Link.p2BodyProperty];
+    var p2Body = boat[LBPhaser.P2Link.p2BodyProperty];
     p2Body.x = centerX;
     p2Body.y = centerY;
     p2Body.rotation = -10 * LBMath.DEG_TO_RAD;
@@ -55,10 +61,17 @@ LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, dat
     var boat = LBSailSim.Env.prototype._createBoatInstance.call(this, typeName, boatName, data, this);
     
     // Tack on a P2 body...
-    var p2Body = Leeboard.P2Link.createP2BodyFromData(this.game, data.p2Body);
-    boat[Leeboard.P2Link.p2BodyProperty] = p2Body;
+    var p2Body = LBPhaser.P2Link.createP2BodyFromData(this.game, data.p2Body);
+    boat[LBPhaser.P2Link.p2BodyProperty] = p2Body;
     p2Body.damping = 0;
     p2Body.mass = boat.getTotalMass();
+    
+    boat.getForceArrowResultant = function(plane) {
+        return boat.hullResultant.convertToWrench(plane);
+    };
+    
+    var hullArrow = new LBPhaser.Arrow(this.phaserEnv, this.worldGroup, this.hullArrowStyle);
+    boat[LBPhaser.P2Link.forceArrowProperty] = hullArrow;
     
     return boat;
 };
@@ -66,9 +79,9 @@ LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, dat
 LBSailSim.P2Env.prototype.foilInstanceLoaded = function(vessel, foilInstance, data, isSail) {
     this._loadObj3DSprite(vessel, foilInstance, data);
     
-    var arrowColor = (isSail) ? 0x00FF00 : 0xFF0000;
-    var arrow = new Leeboard.P2ForceArrow(this.p2Link, arrowColor);
-    foilInstance[Leeboard.P2Link.forceArrowProperty] = arrow;
+    var arrowStyle = (isSail) ? this.sailArrowStyle : this.foilArrowStyle;
+    var arrow = new LBPhaser.Arrow(this.phaserEnv, this.worldGroup, arrowStyle);    
+    foilInstance[LBPhaser.P2Link.forceArrowProperty] = arrow;
 };
 
 LBSailSim.P2Env.prototype._loadObj3DSprite = function(vessel, object, data) {
@@ -79,18 +92,18 @@ LBSailSim.P2Env.prototype._loadObj3DSprite = function(vessel, object, data) {
     var sprite;
     var spriteData;
     if (data.phaser_sprite) {
-        sprite = Leeboard.P2Link.createSpriteFromData(this.game, data.phaser_sprite);
+        sprite = LBPhaser.P2Link.createSpriteFromData(this.game, data.phaser_sprite);
         spriteData = data.phaser_sprite;
     }
     else if (data.phaser_image) {
-        sprite = Leeboard.P2Link.createImageFromData(this.game, data.phaser_image);
+        sprite = LBPhaser.P2Link.createImageFromData(this.game, data.phaser_image);
         spriteData = data.phaser_image;
     }
     if (!sprite) {
         return undefined;
     }
     
-    object[Leeboard.P2Link.spriteProperty] = sprite;
+    object[LBPhaser.P2Link.spriteProperty] = sprite;
     if (this.worldGroup) {
         this.worldGroup.add(sprite);
     }
@@ -110,7 +123,7 @@ LBSailSim.P2Env.prototype._boatReturned = function(boat) {
  * @returns {undefined}
  */
 LBSailSim.P2Env.prototype.update = function() {
-    var dt = Leeboard.P2Link.getP2TimeStep(this.game.physics.p2);
+    var dt = LBPhaser.P2Link.getP2TimeStep(this.game.physics.p2);
     
     LBSailSim.Env.prototype.update.call(this, dt);
     this.p2Link.updateFromP2();

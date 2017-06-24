@@ -43,7 +43,8 @@
  */
 
 
-/* global LBSailSim, Leeboard, LBMath */
+/* global LBSailSim, Leeboard, LBMath, LBPhaser */
+
 
 /**
  * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2}.
@@ -54,8 +55,13 @@
 LBSailSim.P2Env = function(game) {
     LBSailSim.Env.call(this);
     this.game = game;
+    this.phaserEnv = new LBPhaser.Env(game);
     
-    this.p2Link = new Leeboard.P2Link(game);
+    this.p2Link = new LBPhaser.P2Link(this.phaserEnv);
+    
+    this.sailArrowStyle = new LBPhaser.ArrowStyle(0x00FF00);
+    this.foilArrowStyle = new LBPhaser.ArrowStyle(0x0000FF);
+    this.hullArrowStyle = new LBPhaser.ArrowStyle(0xFF0000);
 };
 
 LBSailSim.P2Env.prototype = Object.create(LBSailSim.Env.prototype);
@@ -70,7 +76,7 @@ LBSailSim.P2Env.prototype.checkoutBoat = function(typeName, boatName, centerX, c
     var childIndex = this.worldGroup.children.length;
     
     var boat = LBSailSim.Env.prototype.checkoutBoat.call(this, typeName, boatName);
-    var p2Body = boat[Leeboard.P2Link.p2BodyProperty];
+    var p2Body = boat[LBPhaser.P2Link.p2BodyProperty];
     p2Body.x = centerX;
     p2Body.y = centerY;
     p2Body.rotation = -10 * LBMath.DEG_TO_RAD;
@@ -83,10 +89,17 @@ LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, dat
     var boat = LBSailSim.Env.prototype._createBoatInstance.call(this, typeName, boatName, data, this);
     
     // Tack on a P2 body...
-    var p2Body = Leeboard.P2Link.createP2BodyFromData(this.game, data.p2Body);
-    boat[Leeboard.P2Link.p2BodyProperty] = p2Body;
+    var p2Body = LBPhaser.P2Link.createP2BodyFromData(this.game, data.p2Body);
+    boat[LBPhaser.P2Link.p2BodyProperty] = p2Body;
     p2Body.damping = 0;
     p2Body.mass = boat.getTotalMass();
+    
+    boat.getForceArrowResultant = function(plane) {
+        return boat.hullResultant.convertToWrench(plane);
+    };
+    
+    var hullArrow = new LBPhaser.Arrow(this.phaserEnv, this.worldGroup, this.hullArrowStyle);
+    boat[LBPhaser.P2Link.forceArrowProperty] = hullArrow;
     
     return boat;
 };
@@ -94,9 +107,9 @@ LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, dat
 LBSailSim.P2Env.prototype.foilInstanceLoaded = function(vessel, foilInstance, data, isSail) {
     this._loadObj3DSprite(vessel, foilInstance, data);
     
-    var arrowColor = (isSail) ? 0x00FF00 : 0xFF0000;
-    var arrow = new Leeboard.P2ForceArrow(this.p2Link, arrowColor);
-    foilInstance[Leeboard.P2Link.forceArrowProperty] = arrow;
+    var arrowStyle = (isSail) ? this.sailArrowStyle : this.foilArrowStyle;
+    var arrow = new LBPhaser.Arrow(this.phaserEnv, this.worldGroup, arrowStyle);    
+    foilInstance[LBPhaser.P2Link.forceArrowProperty] = arrow;
 };
 
 LBSailSim.P2Env.prototype._loadObj3DSprite = function(vessel, object, data) {
@@ -107,18 +120,18 @@ LBSailSim.P2Env.prototype._loadObj3DSprite = function(vessel, object, data) {
     var sprite;
     var spriteData;
     if (data.phaser_sprite) {
-        sprite = Leeboard.P2Link.createSpriteFromData(this.game, data.phaser_sprite);
+        sprite = LBPhaser.P2Link.createSpriteFromData(this.game, data.phaser_sprite);
         spriteData = data.phaser_sprite;
     }
     else if (data.phaser_image) {
-        sprite = Leeboard.P2Link.createImageFromData(this.game, data.phaser_image);
+        sprite = LBPhaser.P2Link.createImageFromData(this.game, data.phaser_image);
         spriteData = data.phaser_image;
     }
     if (!sprite) {
         return undefined;
     }
     
-    object[Leeboard.P2Link.spriteProperty] = sprite;
+    object[LBPhaser.P2Link.spriteProperty] = sprite;
     if (this.worldGroup) {
         this.worldGroup.add(sprite);
     }
@@ -138,7 +151,7 @@ LBSailSim.P2Env.prototype._boatReturned = function(boat) {
  * @returns {undefined}
  */
 LBSailSim.P2Env.prototype.update = function() {
-    var dt = Leeboard.P2Link.getP2TimeStep(this.game.physics.p2);
+    var dt = LBPhaser.P2Link.getP2TimeStep(this.game.physics.p2);
     
     LBSailSim.Env.prototype.update.call(this, dt);
     this.p2Link.updateFromP2();
@@ -155,13 +168,13 @@ LBSailSim.P2Env.prototype.update = function() {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="Leeboard.P2Link.html">P2Link</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 18:13:06 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 20:39:58 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
