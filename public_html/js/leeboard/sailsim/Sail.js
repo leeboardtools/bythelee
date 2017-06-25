@@ -197,7 +197,7 @@ LBSailSim.SailInstance.prototype.setSheetLength = function(length) {
  * Sets the sheet length based on a ratio between the minimum and maximum sheet lengths.
  * @param {number} ratio    The sheet length ratio, 0 is the minimun sheet length,
  * 1 is the maximum sheet length.
- * @returns {LBSailSim.SailInstance.prototype}  this.
+ * @returns {LBSailSim.SailInstance}  this.
  */
 LBSailSim.SailInstance.prototype.setSheetLengthRatio = function(ratio) {
     var length = this.minSheetLength + ratio * (this.maxSheetLength - this.minSheetLength);

@@ -32,3 +32,16 @@ LBSailSim.compassDegrees = function(degrees) {
     return (degrees === 360) ? 0 : degrees;
 };
 
+/**
+ * Converts an angle from a right-hand x-y coordinate system to compass degrees.
+ * <p>The right-hand x-y coordinate system has 0 degrees along the +x direction and
+ * 90 degrees along the +y direction.
+ * <p>The compass degrees has 0 degrees along the +y direction and 90 degrees along the +x
+ * direction. The compass degrees returned is such that 0 &le; angle &lt; 360.
+ * @param {number} degrees  The degrees to convert.
+ * @returns {Number}    The degrees in compass format.
+ */
+LBSailSim.compassDegreesXY = function(degrees) {
+    return LBSailSim.compassDegrees(-degrees);
+};
+

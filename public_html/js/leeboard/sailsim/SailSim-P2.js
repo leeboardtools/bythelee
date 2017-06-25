@@ -35,7 +35,7 @@ LBSailSim.P2Env = function(game) {
     this.p2Link = new LBPhaser.P2Link(this.phaserEnv);
     
     var forceArrowScaler = function(length) {
-        return 0.01 * length;
+        return 0.025 * length;
     };
     this.sailArrowStyle = new LBPhaser.ArrowStyle(0x00FF00, forceArrowScaler);
     this.foilArrowStyle = new LBPhaser.ArrowStyle(0x00FFFF, forceArrowScaler);
@@ -45,11 +45,26 @@ LBSailSim.P2Env = function(game) {
 LBSailSim.P2Env.prototype = Object.create(LBSailSim.Env.prototype);
 LBSailSim.P2Env.prototype.constructor = LBSailSim.P2Env;
 
+/**
+ * Sets the world group to which all the sailing environment graphic objects will
+ * belong.
+ * @param {Phaser.Group} worldGroup The world group.
+ * @returns {undefined}
+ */
 LBSailSim.P2Env.prototype.setWorldGroup = function(worldGroup) {
     this.worldGroup = worldGroup;
     this.p2Link.worldGroup = worldGroup;
 };
 
+/**
+ * @inheritdoc
+ * @param {type} typeName
+ * @param {type} boatName
+ * @param {type} centerX
+ * @param {type} centerY
+ * @param {type} rotDeg
+ * @returns {Object@call;create.checkoutBoat.boat}
+ */
 LBSailSim.P2Env.prototype.checkoutBoat = function(typeName, boatName, centerX, centerY, rotDeg) {
     var childIndex = this.worldGroup.children.length;
     
@@ -82,6 +97,15 @@ LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, dat
     return boat;
 };
 
+/**
+ * Called after a foil instance has been loaded by {@link LBSailSim.Vessel#_loadFoils}, this
+ * is where we attach the force arrows and graphic objects. 
+ * @param {LBSailSim.Vessel} vessel The vessel calling this.
+ * @param {LBSailSim.FoilInstance} foilInstance The foil instance that was just loaded.
+ * @param {object} data The data object the foil instance was loaded from.
+ * @param {Boolean} isSail  True if the foil instance is an airfoil, false if hydrofoil.
+ * @returns {undefined}
+ */
 LBSailSim.P2Env.prototype.foilInstanceLoaded = function(vessel, foilInstance, data, isSail) {
     this._loadObj3DSprite(vessel, foilInstance, data);
     

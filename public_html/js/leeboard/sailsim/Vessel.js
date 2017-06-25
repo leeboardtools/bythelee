@@ -879,11 +879,11 @@ LBSailSim.Vessel.prototype.getPosition = function() {
  * @returns {Number}    The heading in compass degrees.
  */
 LBSailSim.Vessel.prototype.getHeadingDeg = function(isRound) {
-    var degrees = this.obj3D.rotation.z * LBMath.RAD_TO_DEG + 90;
+    var degrees = this.obj3D.rotation.z * LBMath.RAD_TO_DEG - 90;
     if (isRound) {
         degrees = Math.round(degrees);
     }
-    return LBSailSim.compassDegrees(degrees);
+    return LBSailSim.compassDegreesXY(degrees);
 };
 
 /**

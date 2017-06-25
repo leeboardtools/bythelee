@@ -12,7 +12,7 @@
                     }
                 }
             },
-            "mass": 7820,
+            "mass": 1782,
             "centerOfMass": { "x": 0, "y": 0, "z": 0 },
             "momentInertia": { "xx": 1, "yy": 1, "zz": 1000 },
             "hull": {
@@ -21,7 +21,7 @@
                 "tc": 0.57,
                 "delC": 7.63,
                 "k": 200e-6,
-                "centerOfBuoyancy": { "x": -0.3 }
+                "centerOfBuoyancy": { "x": -0.5 }
             },
             "airfoils": [
                 {
@@ -29,7 +29,7 @@
                     "mass": 20,
                     "centerOfMass": { "x": 0, "y": 0, "z": 4 },
                     "obj3D": {
-                        "position" : { "x": 1.7, "y": 0, "z": 0 },
+                        "position" : { "x": 1.3, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                         },
                     "phaser_sprite": {
@@ -62,9 +62,9 @@
                     "construct": "new LBSailSim.FoilInstance()",
                     "name": "keel",
                     "mass": 100,
-                    "centerOfMass": { "x": -0.5, "y": 0, "z": -1 },
+                    "centerOfMass": { "x": -0.0, "y": 0, "z": -1 },
                     "obj3D": {
-                        "position" : { "x": 0, "y": 0, "z": 0 },
+                        "position" : { "x": 0.3, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                         },
                     "foil": {
