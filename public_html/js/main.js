@@ -62,13 +62,17 @@ PlayState.init = function() {
     this.cursorKeys = this.game.input.keyboard.createCursorKeys();
     this.keys = this.game.input.keyboard.addKeys({
         space: Phaser.KeyCode.SPACEBAR,
-        t : Phaser.KeyCode.T,
+        f : Phaser.KeyCode.F,
+        n : Phaser.KeyCode.N,
         p : Phaser.KeyCode.P,
-        n : Phaser.KeyCode.N
+        t : Phaser.KeyCode.T,
+        v : Phaser.KeyCode.V    // Velocity arrows?
     });
     
+    this.keys.f.onDown.add(this.toggleForceArrows, this);
     this.keys.p.onDown.add(this.togglePause, this);
     this.keys.t.onDown.add(this.doTest, this);
+    this.keys.v.onDown.add(this.toggleVelocityArrows, this);
     
     this.game.physics.startSystem(Phaser.Physics.P2JS);
 
@@ -79,6 +83,18 @@ PlayState.init = function() {
 //--------------------------------------------------
 PlayState.togglePause = function() {
     this.game.paused = !this.game.paused;
+};
+
+//
+//--------------------------------------------------
+PlayState.toggleForceArrows = function() {
+    this.sailEnv.setForceArrowsVisible(!this.sailEnv.areForceArrowsVisible());
+};
+
+//
+//--------------------------------------------------
+PlayState.toggleVelocityArrows = function() {
+    this.sailEnv.setVelocityArrowsVisible(!this.sailEnv.areVelocityArrowsVisible());
 };
 
 //

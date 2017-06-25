@@ -29,7 +29,7 @@ LBSailSim.P2Env = function(game) {
     this.game = game;
     this.phaserEnv = new LBPhaser.Env(game);
     
-    // TEST!!!!
+    // Less confusing for the math if the y axis is pointing up.
     this.phaserEnv.ySign = -1;
     
     this.p2Link = new LBPhaser.P2Link(this.phaserEnv);
@@ -38,8 +38,14 @@ LBSailSim.P2Env = function(game) {
         return 0.025 * length;
     };
     this.sailArrowStyle = new LBPhaser.ArrowStyle(0x00FF00, forceArrowScaler);
-    this.foilArrowStyle = new LBPhaser.ArrowStyle(0x00FFFF, forceArrowScaler);
+    this.foilArrowStyle = new LBPhaser.ArrowStyle(0x0088FF, forceArrowScaler);
     this.hullArrowStyle = new LBPhaser.ArrowStyle(0xFF0000, forceArrowScaler);
+    
+    var velocityArrowScaler = function(length) {
+        return length;
+    };
+    this.boatVelocityArrowStyle = new LBPhaser.ArrowStyle(0x008888, velocityArrowScaler, 0.5);
+    this.appWindVelocityArrowStyle = new LBPhaser.ArrowStyle(0x008800, velocityArrowScaler, 0.5);
 };
 
 LBSailSim.P2Env.prototype = Object.create(LBSailSim.Env.prototype);
@@ -57,13 +63,52 @@ LBSailSim.P2Env.prototype.setWorldGroup = function(worldGroup) {
 };
 
 /**
+ * Changes whether or not the force arrows are displayed.
+ * @param {boolean} isVisible   If true the force arrows are displayed, otherwise they are hidden.
+ * @returns {boolean}   True if the force arrows were visible prior to this call.
+ */
+LBSailSim.P2Env.prototype.setForceArrowsVisible = function(isVisible) {
+    var wasVisible = this.areForceArrowsVisible();
+    this.sailArrowStyle.isVisible = isVisible;
+    this.foilArrowStyle.isVisible = isVisible;
+    this.hullArrowStyle.isVisible = isVisible;
+    return wasVisible;
+};
+
+/**
+ * @returns {Boolean}   True if the force arrows are currently displayed.
+ */
+LBSailSim.P2Env.prototype.areForceArrowsVisible = function() {
+    return this.sailArrowStyle.isVisible;
+};
+
+/**
+ * Changes whether or not the velocity arrows are displayed.
+ * @param {boolean} isVisible   If true the velocity arrows are displayed, otherwise they are hidden.
+ * @returns {boolean}   True if the velocity arrows were visible prior to this call.
+ */
+LBSailSim.P2Env.prototype.setVelocityArrowsVisible = function(isVisible) {
+    var wasVisible = this.areVelocityArrowsVisible();
+    this.boatVelocityArrowStyle.isVisible = isVisible;
+    this.appWindVelocityArrowStyle.isVisible = isVisible;
+    return wasVisible;
+};
+
+/**
+ * @returns {Boolean}   True if the velocity arrows are currently displayed.
+ */
+LBSailSim.P2Env.prototype.areVelocityArrowsVisible = function() {
+    return this.boatVelocityArrowStyle.isVisible;
+};
+
+/**
  * @inheritdoc
  * @param {type} typeName
  * @param {type} boatName
  * @param {type} centerX
  * @param {type} centerY
  * @param {type} rotDeg
- * @returns {Object@call;create.checkoutBoat.boat}
+ * @returns {LBSailSim.Vessel}
  */
 LBSailSim.P2Env.prototype.checkoutBoat = function(typeName, boatName, centerX, centerY, rotDeg) {
     var childIndex = this.worldGroup.children.length;
@@ -107,11 +152,25 @@ LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, dat
  * @returns {undefined}
  */
 LBSailSim.P2Env.prototype.foilInstanceLoaded = function(vessel, foilInstance, data, isSail) {
-    this._loadObj3DSprite(vessel, foilInstance, data);
+    var sprite = this._loadObj3DSprite(vessel, foilInstance, data);
     
     var arrowStyle = (isSail) ? this.sailArrowStyle : this.foilArrowStyle;
     var arrow = new LBPhaser.Arrow(this.phaserEnv, this.worldGroup, arrowStyle);    
     foilInstance[LBPhaser.P2Link.forceArrowProperty] = arrow;
+    
+    if (isSail && sprite) {
+        // Need a sail flipper...
+        foilInstance[LBPhaser.P2Link.callbackProperty] = this;
+    }
+};
+
+LBSailSim.P2Env.prototype.displayObjectsUpdated = function(topRigidBody, rigidBody) {
+    var sprite = rigidBody[LBPhaser.P2Link.spriteProperty];
+    if (sprite) {
+        if (rigidBody.foilDetails) {
+            sprite.scale.y = (rigidBody.foilDetails.angleDeg * this.phaserEnv.ySign < 0) ? -1 : 1;
+        }
+    }
 };
 
 LBSailSim.P2Env.prototype._loadObj3DSprite = function(vessel, object, data) {

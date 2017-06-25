@@ -46,7 +46,7 @@ LBSailSim.FoilInstance = function(foil, obj3D, mass, centerOfMass) {
     this.workingPos = LBGeometry.createVector3();
     
     /**
-     * Object holding the details from the foil, see {@link Foil#calcWorldForce}.
+     * Object holding the details from the foil, see {@link LBFoils.Foil#calcWorldForce}.
      */
     this.foilDetails = {
         
@@ -943,7 +943,15 @@ LBSailSim.Vessel.prototype.getApparentWindBearingDeg = function(isRound) {
  * @param {object} data
  * @param {object} sailEnv
  * @param {object} [loadCallback]   If defined, a callback object with the following functions
- * that get called back after loading of each component:
+ * that get called back after the loading of each component:
+ * <li>foilInstanceLoaded = function(vessel, foilInstance, foilData, isSail);
+ * <li>propulsorLoaded = function(this, propulsor, propulsorData);
+ * <li>ballastLoaded = function(this, ballast, ballastData);
+ * <li>controllerLoaded = function(this, controller, controllerData);
+ * <li>hullLoaded = function(this, this.hull, hullData);
+ * <li>vesselLoaded = function(this, vesselData);
+ * <p>
+ * Each function is optional.
  * @returns {object}    The created vessel, {undefined} if data is not defined.
  */
 LBSailSim.Vessel.createFromData = function(data, sailEnv, loadCallback) {

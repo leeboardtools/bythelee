@@ -96,16 +96,18 @@ Phaser.Point.prototype.copy = function(src) {
  * @param {function} [arrowLengthScaler=LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER]
  * The function to use for scaling the vector length passed to the arrow to units
  * prior to conversion to pixels.
+ * @param {number} [alpha=1]    The alpha value for the arrow, 1 = opaque, 0 = transparent.
  * @param {number} [width=2]    The pixel width of the arrow line.
  * @param {number} [arrowSize=20]    The nominal pixel size of the arrow head.
  * @returns {LBPhaser.ArrowStyle}
  */
-LBPhaser.ArrowStyle = function(color, arrowLengthScaler, width, arrowSize) {
+LBPhaser.ArrowStyle = function(color, arrowLengthScaler, alpha, width, arrowSize) {
     this.color = color;
     this.width = width || 2;
     this.arrowSize = arrowSize || 20;
-    this.alpha = 1;
+    this.alpha = alpha || 1;
     this.arrowLengthScaler = arrowLengthScaler || LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER;
+    this.isVisible = true;
 };
 
 LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER = function(length) {
@@ -150,6 +152,11 @@ LBPhaser.Arrow.prototype = {
      */
     setFromBaseAndVector: function(base, vector) {
         var g = this.graphics;
+        g.visible = this.style.isVisible;
+        if (!this.style.isVisible) {
+            return;
+        }
+        
         g.clear();
         
         var length = vector.length();

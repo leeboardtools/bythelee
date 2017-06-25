@@ -156,13 +156,6 @@ LBPhaser.P2Link.prototype = {
         this.activeRigidBody = rigidBody;
         this.activeP2Body = rigidBody[LBPhaser.P2Link.p2BodyProperty];
         
-        // TEST
-        var x, y;
-        if (this.activeP2Body) {
-            x = this.activeP2Body.x;
-            y = this.activeP2Body.y;
-        }
-        
         this._updateDisplayObjects(rigidBody);
     },
     
@@ -178,6 +171,11 @@ LBPhaser.P2Link.prototype = {
         }
         
         rigidBody.parts.forEach(this._updateDisplayObjects, this);
+        
+        var callback = rigidBody[LBPhaser.P2Link.callbackProperty];
+        if (callback) {
+            callback.displayObjectsUpdated(this.activeRigidBody, rigidBody);
+        }
     },
     
     /**
@@ -261,6 +259,14 @@ LBPhaser.P2Link.spriteProperty = "_sprite";
  * The name of the property in {LBPhysics.RigidBody} objects where we store {@link LBPhaser.P2ForceArrow} objects.
  */
 LBPhaser.P2Link.forceArrowProperty = "_forceArrow";
+
+/**
+ * The name of the property in {LBPhysics.RigidBody} objects where we store the callback object.
+ * <p>
+ * The callback has the following optional functions:
+ * <li>displayObjectsUpdated = function(topRigidBody, rigidBody);
+ */
+LBPhaser.P2Link.callbackProperty = "_p2Callback";
 
 /**
  * Retrieves the appropriate tie step to use based on the settings of {@link Phaser.Physics.P2}.
