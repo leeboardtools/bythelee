@@ -67,8 +67,8 @@ PlayState.init = function() {
         n : Phaser.KeyCode.N
     });
     
-    this.keys.p.onDown.add(this.togglePause);
-    this.keys.t.onDown.add(this.doTest);
+    this.keys.p.onDown.add(this.togglePause, this);
+    this.keys.t.onDown.add(this.doTest, this);
     
     this.game.physics.startSystem(Phaser.Physics.P2JS);
 
@@ -86,8 +86,8 @@ PlayState.togglePause = function() {
 PlayState.doTest = function() {
     //var cspline = new LBMath.CSpline();
     //cspline.test();
-    var clCdCurve = this.sailEnv.clCdCurves["FlatPlateAR5"];
-    clCdCurve.test(0, 180, 2);
+    var clCdCurve = this.sailEnv.clCdCurves["FlatPlate"];
+    clCdCurve.test(-180, 180, 2);
 };
 
 //
@@ -147,7 +147,7 @@ PlayState._spawnBuoys = function(data) {
 PlayState._spawnCharacters = function (data) {
     var centerX = 0;
     var centerY = 0;
-    var rotation = -10 * LBMath.DEG_TO_RAD;
+    var rotation = -51;
     //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation);
 };
@@ -198,6 +198,10 @@ PlayState._setupHUD = function() {
     this.throttleText = this.game.add.text(left, top, "Throttle: 0", style);
     this.hud.add(this.throttleText);
     top += this.throttleText.height + vSpacing;
+    
+    this.ticksText = this.game.add.text(left, top, "SimTicks: 0", style);
+    this.hud.add(this.ticksText);
+    top += this.ticksText.height + vSpacing;
 };
 
 
@@ -256,6 +260,10 @@ PlayState._updateHUD = function() {
     if (throttle !== undefined) {
         this.throttleText.text = "Throttle:" + LBMath.round(throttle, 1);
     }
+    
+    if (this.ticksText) {
+        this.ticksText.text = "SimTicks:" + this.sailEnv.p2Link.updateCount;
+    }
 };
 
 PlayState.getControlIncrement = function(controller) {
@@ -275,6 +283,7 @@ PlayState.moveRudder = function(key, isDecrease) {
     if (isDecrease) {
         delta = -delta;
     }
+    delta *= this.sailEnv.phaserEnv.ySign;
     this.myBoat.moveRudder(delta, true);
 };
 

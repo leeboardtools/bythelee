@@ -212,6 +212,7 @@ LBSailSim.RudderController.prototype.load = function(data, vessel) {
     this.vessel = vessel;
     LBControls.SmoothController.prototype.load.call(this, data, vessel);
     this._loadRudders();
+    this.setRudderAngleDeg(this.currentValue);
     return this;
 };
 
@@ -287,6 +288,7 @@ LBSailSim.ThrottleController.prototype.load = function(data, vessel) {
     LBControls.SmoothController.prototype.load.call(this, data, vessel);
     this.propulsorName = data.propulsorName || 'engine';
     this._loadEngines();
+    this.setThrottlePosition(this.currentValue);
     return this;
 };
 

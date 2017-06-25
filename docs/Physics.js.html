@@ -614,6 +614,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
 
 LBPhysics.RigidBody._workingResultant = new LBPhysics.Resultant3D();
 LBPhysics.RigidBody._workingMoment = LBGeometry.createVector3();
+LBPhysics.RigidBody._workingPos = LBGeometry.createVector3();
 
 LBPhysics.RigidBody.prototype = {
     /**
@@ -897,6 +898,8 @@ LBPhysics.RigidBody.prototype = {
     /**
      * This integrates the current resultant against the local rotation of the rigid
      * body around a given axis, rotating the body and reducing the resultant appropriately.
+     * @param {LBGeometry.Vector3} axisOrigin A point defining the location of the axis, in
+     * local coordinates.
      * @param {LBGeometry.Vector3} axis The axis of rotation in local coordinates, this must be normalized.
      * @param {number} currentDeg    The current angular rotation about the axis in degrees.
      * @param {function} [constrainer]  Optional function called to enforce any constraints
@@ -906,23 +909,23 @@ LBPhysics.RigidBody.prototype = {
      *  }
      * @returns {undefined}
      */
-    integrateForceForRotation: function(axis, currentDeg, constrainer) {
+    integrateForceForRotation: function(axisOrigin, axis, currentDeg, constrainer) {
         if ((this.coordSystem.dt === 0) || LBMath.isLikeZero(this.mass)) {
             return;
         }
         
-        // Move the resultant to the origin, then convert it to local coordinates.
+        // Move the resultant to the axis origin, then convert it to local coordinates.
         var resultant = LBPhysics.RigidBody._workingResultant.copy(this.resultant);
 
-        resultant.moveApplPoint(LBGeometry.ORIGIN);
         resultant.applyMatrix4(this.coordSystem.localXfrm);
+        resultant.moveApplPoint(axisOrigin);
         
         // We only want the moment that is along the axis of rotation.
         var momentMag = resultant.moment.dot(axis);
         
         var moment = LBPhysics.RigidBody._workingMoment.copy(axis).multiplyScalar(momentMag);
         var invInertia = this.getTotalInvMomentInertia();
-        var angularAccel = -moment.applyMatrix3(invInertia).dot(axis);
+        var angularAccel = moment.applyMatrix3(invInertia).dot(axis);
         
         // Integrate the new rotation - first we'll need the local angular velocity.
         var angularVelocity = this.coordSystem.calcAngularVelocityAboutLocalAxis(axis);
@@ -934,7 +937,7 @@ LBPhysics.RigidBody.prototype = {
         }
         
         if (deg !== currentDeg) {
-            this.obj3D.rotateOnAxis(axis, deg * LBMath.RAD_TO_DEG);
+            this.obj3D.rotateOnAxis(axis, (deg - currentDeg) * LBMath.DEG_TO_RAD);
         }
     },
     
@@ -986,13 +989,13 @@ LBPhysics.RigidBody.createFromData = function(data, defCreatorFunc) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 20:39:58 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 25 2017 15:17:11 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

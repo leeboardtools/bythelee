@@ -586,6 +586,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
 
 LBPhysics.RigidBody._workingResultant = new LBPhysics.Resultant3D();
 LBPhysics.RigidBody._workingMoment = LBGeometry.createVector3();
+LBPhysics.RigidBody._workingPos = LBGeometry.createVector3();
 
 LBPhysics.RigidBody.prototype = {
     /**
@@ -869,6 +870,8 @@ LBPhysics.RigidBody.prototype = {
     /**
      * This integrates the current resultant against the local rotation of the rigid
      * body around a given axis, rotating the body and reducing the resultant appropriately.
+     * @param {LBGeometry.Vector3} axisOrigin A point defining the location of the axis, in
+     * local coordinates.
      * @param {LBGeometry.Vector3} axis The axis of rotation in local coordinates, this must be normalized.
      * @param {number} currentDeg    The current angular rotation about the axis in degrees.
      * @param {function} [constrainer]  Optional function called to enforce any constraints
@@ -878,23 +881,23 @@ LBPhysics.RigidBody.prototype = {
      *  }
      * @returns {undefined}
      */
-    integrateForceForRotation: function(axis, currentDeg, constrainer) {
+    integrateForceForRotation: function(axisOrigin, axis, currentDeg, constrainer) {
         if ((this.coordSystem.dt === 0) || LBMath.isLikeZero(this.mass)) {
             return;
         }
         
-        // Move the resultant to the origin, then convert it to local coordinates.
+        // Move the resultant to the axis origin, then convert it to local coordinates.
         var resultant = LBPhysics.RigidBody._workingResultant.copy(this.resultant);
 
-        resultant.moveApplPoint(LBGeometry.ORIGIN);
         resultant.applyMatrix4(this.coordSystem.localXfrm);
+        resultant.moveApplPoint(axisOrigin);
         
         // We only want the moment that is along the axis of rotation.
         var momentMag = resultant.moment.dot(axis);
         
         var moment = LBPhysics.RigidBody._workingMoment.copy(axis).multiplyScalar(momentMag);
         var invInertia = this.getTotalInvMomentInertia();
-        var angularAccel = -moment.applyMatrix3(invInertia).dot(axis);
+        var angularAccel = moment.applyMatrix3(invInertia).dot(axis);
         
         // Integrate the new rotation - first we'll need the local angular velocity.
         var angularVelocity = this.coordSystem.calcAngularVelocityAboutLocalAxis(axis);
@@ -906,7 +909,7 @@ LBPhysics.RigidBody.prototype = {
         }
         
         if (deg !== currentDeg) {
-            this.obj3D.rotateOnAxis(axis, deg * LBMath.RAD_TO_DEG);
+            this.obj3D.rotateOnAxis(axis, (deg - currentDeg) * LBMath.DEG_TO_RAD);
         }
     },
     

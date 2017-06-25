@@ -183,35 +183,37 @@ LBFoils.ClCdStall.prototype = {
     
     /**
      * Calculates the coefficients of lift, drag and moment for a given angle of attack in degrees.
-     * @param {number} degrees    The angle of attack in degrees.
+     * @param {number} deg    The angle of attack in degrees.
      * @param {object} store  If not undefined, the object to store the coefficients in.
      * @returns {object}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
      */
-    calcCoefsDeg: function(degrees, store) {        
+    calcCoefsDeg: function(deg, store) {        
         store = store || new LBFoils.ClCd();
         
-        var sign;
-        if (degrees < 0) {
-            degrees = -degrees;
-            sign = -1;
+        var clSign;
+        if (deg < 0) {
+            deg = -deg;
+            clSign = -1;
         }
         else {
-            sign = 1;
+            clSign = 1;
         }
         
         var deltaDeg;
-        if (degrees > 90) {
-            deltaDeg = 180 - degrees;
+        var cmSign = clSign;
+        if (deg > 90) {
+            deltaDeg = 180 - deg;
+            clSign = -clSign;
         }
         else {
-            deltaDeg = degrees;
+            deltaDeg = deg;
         }
         var x = (deltaDeg - 45) / 90;
         store.cd = this.cd45Deg + 4 * (this.cd90Deg - this.cd45Deg) * x * (1 - x);   
         
         // 45 degrees is our 0 point...
-        store.cl = this.cl45Deg * Math.cos(2 * (deltaDeg - 45) * LBMath.DEG_TO_RAD) * sign;    
-        store.cm = -(0.46 + 0.04 * (deltaDeg - 30) / 60) * sign;
+        store.cl = this.cl45Deg * Math.cos(2 * (deltaDeg - 45) * LBMath.DEG_TO_RAD) * clSign;    
+        store.cm = (0.46 + 0.04 * (deg - 30) / 60) * cmSign;
         store.cmIsChordFraction = true;
         
         return store;
@@ -299,24 +301,28 @@ LBFoils.ClCdInterp.prototype = {
     
     /**
      * Calculates the coefficients of lift, drag and moment for a given angle of attack in degrees.
-     * @param {number} degrees    The angle of attack in degrees.
+     * @param {number} deg    The angle of attack in degrees.
      * @param {object} store  If not undefined, the object to store the coefficients in.
      * @returns {object}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
      */
-    calcCoefsDeg: function(degrees, store) {
+    calcCoefsDeg: function(deg, store) {
         store = store || new LBFoils.ClCd();
+        deg = LBMath.wrapDegrees(deg);
         
-        var lowIn = this.interpCls.findLowIndex(degrees);
-        store.cl = this.interpCls.interpolate(degrees, lowIn);
-        store.cd = this.interpCds.interpolate(degrees, lowIn);        
+        var lowIn = this.interpCls.findLowIndex(deg);
+        store.cl = this.interpCls.interpolate(deg, lowIn);
+        store.cd = this.interpCds.interpolate(deg, lowIn);        
         
         if (this.interpCms !== null) {
-            store.cm = this.interpCms.interpolate(degrees, lowIn);
+            store.cm = this.interpCms.interpolate(deg, lowIn);
             store.cmIsChordFraction = this.cmIsChordFraction;
         }
         else {
-            store.cm = LBFoils.calcCmForClCd(degrees, store.cl, store.cd, 0.25);
-            store.cmIsChordFraction = false;
+            var absDeg = Math.abs(deg);
+            // If the angle is greater than 90 then the leading and trailing edges
+            // are swapped.
+            store.cm = (absDeg <= 90) ? 0.25 : 0.75;
+            store.cmIsChordFraction = true;
         }
         
         return store;
@@ -343,6 +349,8 @@ LBFoils.ClCdCurve = function() {
     this.aftStallStartDeg = 90;
     this.clCdStall = null;
 };
+
+LBFoils.ClCdCurve._workingCoefs = new LBFoils.ClCd();
 
 LBFoils.ClCdCurve.prototype = {
     constructor: LBFoils.ClCdCurve,
@@ -399,21 +407,52 @@ LBFoils.ClCdCurve.prototype = {
             sign = 1;
         }
         
+        // TEST!!!
+        store = store || new LBFoils.ClCd();
+        store.clLift = undefined;
+        store.cdLift = undefined;
+        store.cmLift = undefined;
+        store.clStalled = undefined;
+        store.cdStalled = undefined;
+        store.cmStalled = undefined;
+        
         // TODO: To support a non-symmetric clCdStall, we need to add liftStartDeg and stallEndDeg.
         // Also need to support reverse direction stall angles.
         if (this.clCdStall === null) {
             store = this.clCdLifting.calcCoefsDeg(degrees, store);
+            store.stallFraction = 0;
         }
         else {
             if ((degrees <= this.stallStartDeg) || (degrees >= this.aftStallStartDeg)) {
                 store = this.clCdLifting.calcCoefsDeg(degrees, store);
+                store.stallFraction = 0;
+                if (degrees >= this.aftStallStartDeg) {
+                    store.cl = -store.cl;
+                    //store.cm = -store.cm;
+                }
+
+                // TEST!!!
+                store.clLift = store.cl;
+                store.cdLift = store.cd;
+                store.cmLift = store.cm;
             }
             else if ((degrees >= this.liftEndDeg) && (degrees <= this.aftLiftEndDeg)) {
                 store = this.clCdStall.calcCoefsDeg(degrees, store);            
+                store.stallFraction = 1;
+
+                // TEST!!!
+                store.clStalled = store.cl;
+                store.cdStalled = store.cd;
+                store.cmStalled = store.cm;
             }
             else {
-                var store = this.clCdLifting.calcCoefsDeg(degrees, store);
-                var stalled = this.clCdStall.calcCoefsDeg(degrees);
+                store = this.clCdLifting.calcCoefsDeg(degrees, store);
+                if (degrees >= this.aftLiftEndDeg) {
+                    store.cl = -store.cl;
+                    //store.cm = -store.cm;
+                }
+
+                var stalled = this.clCdStall.calcCoefsDeg(degrees, LBFoils.ClCdCurve._workingCoefs);
                 var x;
                 if (degrees < this.liftEndDeg) {
                     x = (degrees - this.stallStartDeg) / (this.liftEndDeg - this.stallStartDeg);
@@ -422,11 +461,20 @@ LBFoils.ClCdCurve.prototype = {
                     x = (degrees - this.aftStallStartDeg) / (this.aftLiftEndDeg - this.aftStallStartDeg);
                 }
                 
+                // TEST!!!
+                store.clLift = store.cl;
+                store.cdLift = store.cd;
+                store.cmLift = store.cm;
+                store.clStalled = stalled.cl;
+                store.cdStalled = stalled.cd;
+                store.cmStalled = stalled.cm;
+                
                 var s = LBMath.smoothstep3(x);
                 var sLift = 1 - s;
                 store.cl = store.cl * sLift + stalled.cl * s;
                 store.cd = store.cd * sLift + stalled.cd * s;
                 store.cm = store.cm * sLift + stalled.cm * s;
+                store.stallFraction = s;
             }
         }
         
@@ -442,7 +490,9 @@ LBFoils.ClCdCurve.prototype = {
         var clCd;
         for (var i = start; i < end; i += delta) {
             clCd = this.calcCoefsDeg(i, clCd);
-            console.log(i + "\t" + clCd.cl + "\t" + clCd.cd + "\t" + clCd.cm);
+            console.log(i + "\t" + clCd.cl + "\t" + clCd.cd + "\t" + clCd.cm + "\t" + clCd.stallFraction + "\t"
+                    + "\t" + clCd.clLift + "\t" + clCd.cdLift + "\t" + clCd.cmLift + "\t"
+                    + "\t" + clCd.clStalled + "\t" + clCd.cdStalled + "\t" + clCd.cmStalled + "\t");
         }
     }
     
@@ -532,21 +582,31 @@ LBFoils.Foil.prototype = {
      * The moment is about the leading edge, or this.chordLine.start.
      * @param {number} rho  The fluid density.
      * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
-     * @param {object} [store]  If defined, the object to receive the forces and moment.
      * @param {object} [details]  If defined, an object to receive details about the calculation.
+     * @param {object} [store]  If defined, the object to receive the forces and moment.
      * @returns {object}    The object containing the forces and moment.
      */
-    calcLocalLiftDragMoment: function(rho, qInfLocal, store, details) {
-        var chord = this.chordLine.delta();
+    calcLocalLiftDragMoment: function(rho, qInfLocal, details, store) {
+        var chord;
+        var coefs;
+        if (details) {
+            details.chord = this.chordLine.delta(details.chord);
+            chord = details.chord;
+            coefs = details.coefs || (details.coefs = new LBFoils.ClCd());
+        }
+        else {
+            chord = this.chordLine.delta();
+            coefs = new LBFoils.ClCd();
+        }
+        
         var angleDeg = chord.angleToSigned(qInfLocal) * LBMath.RAD_TO_DEG;
-        var coefs = this.clCdCurve.calcCoefsDeg(angleDeg);
+        this.clCdCurve.calcCoefsDeg(angleDeg, coefs);
         var qInfSpeed = qInfLocal.length();
         var chordLength = chord.length();
         
         if (details) {
             details.angleDeg = angleDeg;
             details.qInfLocal = qInfLocal.clone();
-            Object.assign(details, coefs);            
         }
         return coefs.calcLiftDragMoment(rho, this.area, qInfSpeed, chordLength, this.aspectRatio, store);
     },
@@ -619,6 +679,26 @@ LBFoils.Foil.prototype = {
         resultant.applyMatrix4(coordSystemState.worldXfrm);
         
         return resultant;
+    },
+    
+    
+    localForceTest: function(rho, qInfSpeed, start, end, delta) {
+        console.log("LBFoils.Foil.localForceTest:");
+        console.log("Deg\t\tApplPoint.x\tApplPoint.y\t\tForce.x\tForce.y\t\tMoment.z");
+        var resultant = new LBPhysics.Resultant3D();
+        var details = {};
+        var qInfLocal = LBGeometry.createVector2();
+        for (var deg = start; deg < end; deg += delta) {
+            var rad = deg * LBMath.DEG_TO_RAD;
+            qInfLocal.set(Math.cos(rad) * qInfSpeed, Math.sin(rad) * qInfSpeed);
+            this.calcLocalForce(rho, qInfLocal, details, resultant);
+            var string = deg + "\t" 
+                    //+ "\t" + resultant.applPoint.x + "\t" + resultant.applPoint.y + "\t" 
+                    + "\t" + resultant.force.x + "\t" + resultant.force.y + "\t"
+                    + "\t" + resultant.moment.z
+                    + "\t" + details.coefs.stallFraction;
+            console.log(string);
+        }
     }
 };
 

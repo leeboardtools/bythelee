@@ -489,7 +489,7 @@ passed to this function is the data argument.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line928">line 928</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line931">line 931</a>
     </li></ul></dd>
     
 
@@ -643,7 +643,7 @@ body it is removed from that other rigid body.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line634">line 634</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line635">line 635</a>
     </li></ul></dd>
     
 
@@ -820,7 +820,7 @@ applied.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line745">line 745</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line746">line 746</a>
     </li></ul></dd>
     
 
@@ -973,7 +973,7 @@ applied.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line755">line 755</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line756">line 756</a>
     </li></ul></dd>
     
 
@@ -1078,7 +1078,7 @@ part of it.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line708">line 708</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line709">line 709</a>
     </li></ul></dd>
     
 
@@ -1276,7 +1276,7 @@ optional plane passed to LBPhysics.Resultant3D.convertToWrench.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line768">line 768</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line769">line 769</a>
     </li></ul></dd>
     
 
@@ -1381,7 +1381,7 @@ in world coordinates.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line845">line 845</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line846">line 846</a>
     </li></ul></dd>
     
 
@@ -1485,7 +1485,7 @@ in world coordinates.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line863">line 863</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line864">line 864</a>
     </li></ul></dd>
     
 
@@ -1589,7 +1589,7 @@ in world coordinates.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line835">line 835</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line836">line 836</a>
     </li></ul></dd>
     
 
@@ -1693,7 +1693,7 @@ in world coordinates.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line854">line 854</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line855">line 855</a>
     </li></ul></dd>
     
 
@@ -1746,7 +1746,7 @@ in world coordinates.
 
     
 
-    <h4 class="name" id="integrateForceForRotation"><span class="type-signature"></span>integrateForceForRotation<span class="signature">(axis, currentDeg, constrainer<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <h4 class="name" id="integrateForceForRotation"><span class="type-signature"></span>integrateForceForRotation<span class="signature">(axisOrigin, axis, currentDeg, constrainer<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
 
     
 
@@ -1788,6 +1788,38 @@ body around a given axis, rotating the body and reducing the resultant appropria
     </thead>
 
     <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>axisOrigin</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">LBGeometry.Vector3</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">A point defining the location of the axis, in
+local coordinates.</td>
+        </tr>
+
     
 
         <tr>
@@ -1925,7 +1957,7 @@ on the rotation angle. The function signature is:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line881">line 881</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line884">line 884</a>
     </li></ul></dd>
     
 
@@ -2076,7 +2108,7 @@ the future.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line598">line 598</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line599">line 599</a>
     </li></ul></dd>
     
 
@@ -2230,7 +2262,7 @@ object and the parts are not loaded.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line613">line 613</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line614">line 614</a>
     </li></ul></dd>
     
 
@@ -2383,7 +2415,7 @@ object and the parts are not loaded.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line655">line 655</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line656">line 656</a>
     </li></ul></dd>
     
 
@@ -2582,7 +2614,7 @@ object and the parts are not loaded.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line677">line 677</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line678">line 678</a>
     </li></ul></dd>
     
 
@@ -2736,7 +2768,7 @@ is absolute with respect to the base's coordinate system.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line699">line 699</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line700">line 700</a>
     </li></ul></dd>
     
 
@@ -2890,7 +2922,7 @@ is absolute with respect to the base's coordinate system.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line688">line 688</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line689">line 689</a>
     </li></ul></dd>
     
 
@@ -3046,7 +3078,7 @@ was updated, passed to the coordinate system state.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line725">line 725</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line726">line 726</a>
     </li></ul></dd>
     
 
@@ -3110,13 +3142,13 @@ was updated, passed to the coordinate system state.</td>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 23 2017 20:39:59 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 25 2017 15:17:12 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

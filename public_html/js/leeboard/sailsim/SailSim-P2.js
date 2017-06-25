@@ -29,11 +29,17 @@ LBSailSim.P2Env = function(game) {
     this.game = game;
     this.phaserEnv = new LBPhaser.Env(game);
     
+    // TEST!!!!
+    this.phaserEnv.ySign = -1;
+    
     this.p2Link = new LBPhaser.P2Link(this.phaserEnv);
     
-    this.sailArrowStyle = new LBPhaser.ArrowStyle(0x00FF00);
-    this.foilArrowStyle = new LBPhaser.ArrowStyle(0x00FFFF);
-    this.hullArrowStyle = new LBPhaser.ArrowStyle(0xFF0000);
+    var forceArrowScaler = function(length) {
+        return 0.01 * length;
+    };
+    this.sailArrowStyle = new LBPhaser.ArrowStyle(0x00FF00, forceArrowScaler);
+    this.foilArrowStyle = new LBPhaser.ArrowStyle(0x00FFFF, forceArrowScaler);
+    this.hullArrowStyle = new LBPhaser.ArrowStyle(0xFF0000, forceArrowScaler);
 };
 
 LBSailSim.P2Env.prototype = Object.create(LBSailSim.Env.prototype);
@@ -44,14 +50,14 @@ LBSailSim.P2Env.prototype.setWorldGroup = function(worldGroup) {
     this.p2Link.worldGroup = worldGroup;
 };
 
-LBSailSim.P2Env.prototype.checkoutBoat = function(typeName, boatName, centerX, centerY, rotation) {
+LBSailSim.P2Env.prototype.checkoutBoat = function(typeName, boatName, centerX, centerY, rotDeg) {
     var childIndex = this.worldGroup.children.length;
     
     var boat = LBSailSim.Env.prototype.checkoutBoat.call(this, typeName, boatName);
     var p2Body = boat[LBPhaser.P2Link.p2BodyProperty];
     p2Body.x = centerX;
     p2Body.y = centerY;
-    p2Body.rotation = -10 * LBMath.DEG_TO_RAD;
+    p2Body.rotation = rotDeg * LBMath.DEG_TO_RAD;
     
     this.worldGroup.addAt(p2Body.sprite, childIndex);
     return boat;

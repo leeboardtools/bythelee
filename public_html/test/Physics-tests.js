@@ -245,7 +245,7 @@ QUnit.test( "CoordSystemState.calcAngularVelocityAboutLocalAxis()", function( as
     
     axis.set(1, 1, 0).normalize();
     omega = coordSystemState.calcAngularVelocityAboutLocalAxis(axis) * LBMath.RAD_TO_DEG;
-    assert.nearEqual(omega, -90, "Sign check: -90 deg about X-axis, X-Y-axis ref");
+    assert.nearEqual(omega, -54.7356, "Sign check: -90 deg about X-axis, X-Y-axis ref", 1e-4);
 });
 
 

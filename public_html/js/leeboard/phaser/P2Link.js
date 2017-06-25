@@ -41,6 +41,9 @@ LBPhaser.P2Link = function(phaserEnv) {
     this.game.stage.updateTransform = this._stageUpdateTransform;
     
     this.rigidBodies = [];
+    
+    this.updateCount = 0;
+    this.stageUpdateCount = 0;
 };
 
 LBPhaser.P2Link._working3DPos = LBGeometry.createVector3();
@@ -100,6 +103,7 @@ LBPhaser.P2Link.prototype = {
      */
     applyToP2: function(dt) {
         this.rigidBodies.forEach(this._updateP2BodyFromLB3, { 'p2link': this, 'dt': dt });
+        ++this.updateCount;
         return this;
     },
     
@@ -136,6 +140,7 @@ LBPhaser.P2Link.prototype = {
         p2Link.savedUpdateTransform.call(this);
         
         p2Link.updateDisplayObjects();
+        ++this.stageUpdateCount;
     },
     
     /**
@@ -199,7 +204,7 @@ LBPhaser.P2Link.prototype = {
         
         sprite.x = this.phaserEnv.toPixelsX(pos.x);
         sprite.y = this.phaserEnv.toPixelsY(pos.y);
-        sprite.rotation = euler.z;
+        sprite.rotation = this.phaserEnv.ySign * euler.z;
     },
 
     /**

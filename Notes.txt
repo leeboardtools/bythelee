@@ -1,9 +1,11 @@
 Dev Requirements:
 
-Install node.js
+Install node.js:
+Ubuntu: https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions
+
 
 Install jsdocs globally:
-npm -install -g jsdoc
+sudo npm install -g jsdoc
 
 
 

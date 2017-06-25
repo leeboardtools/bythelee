@@ -35,7 +35,7 @@
                     "phaser_sprite": {
                         "key": "tubby_mainsail",
                         "lbLocalOffset": {
-                            "x": -0.4,
+                            "x": 0,
                             "y": 0
                         },
                         "anchor": {
@@ -48,10 +48,10 @@
                     "foil": {
                         "chordLine": {
                             "start": { "x": 0, "y": 0 },
-                            "end": { "x": -3, "y": 0 }
+                            "end": { "x": -4, "y": 0 }
                         },
                         "sliceZ": 0.2,
-                        "area": 35.5,
+                        "area": 25.5,
                         "aspectRatio": 3,
                         "libClCdCurve": "FlatPlate"
                     }

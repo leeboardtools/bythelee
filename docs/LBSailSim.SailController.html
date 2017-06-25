@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: ThrottleController</title>
+    <title>JSDoc: Class: SailController</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: ThrottleController</h1>
+    <h1 class="page-title">Class: SailController</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="LBSailSim.html">LBSailSim</a>.</span>ThrottleController</h2>
+            <span class="ancestors"><a href="LBSailSim.html">LBSailSim</a>.</span>SailController</h2>
         
     
 </header>
@@ -41,14 +41,14 @@
 
     
 
-    <h4 class="name" id="ThrottleController"><span class="type-signature"></span>new ThrottleController<span class="signature">(vessel)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.ThrottleController.html">LBSailSim.ThrottleController</a>}</span></h4>
+    <h4 class="name" id="SailController"><span class="type-signature"></span>new SailController<span class="signature">(vessel)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.SailController.html">LBSailSim.SailController</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    A controller for propulsors.
+    Basic sail controller, sets the sheet length.
 </div>
 
 
@@ -100,7 +100,7 @@
 
             
 
-            <td class="description last">The vessel to which this belongs.</td>
+            <td class="description last">The vessel which this helps control.</td>
         </tr>
 
     
@@ -125,13 +125,6 @@
     
 
     
-    <dt class="implements">Implements:</dt>
-    <dd class="implements"><ul>
-        
-            <li><a href="LBControls.SmoothController.html">LBControls.SmoothController</a></li>
-        
-    </ul></dd>
-    
 
     
 
@@ -148,7 +141,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line253">line 253</a>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line214">line 214</a>
     </li></ul></dd>
     
 
@@ -182,7 +175,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBSailSim.ThrottleController.html">LBSailSim.ThrottleController</a></span>
+<span class="param-type"><a href="LBSailSim.SailController.html">LBSailSim.SailController</a></span>
 
 
     </dd>
@@ -210,156 +203,13 @@
 
         
             
-<h4 class="name" id="controllee"><span class="type-signature"></span>controllee<span class="type-signature"></span></h4>
+<h4 class="name" id="sailName"><span class="type-signature"></span>sailName<span class="type-signature"> :string</span></h4>
 
 
 
 
 <div class="description">
-    The function that is called whenever the value of the controller changes.
-It should have the signature:<p>
-controllee = function(currentValue, controller) {}
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="implements">Implements:</dt>
-    <dd class="implements"><ul>
-        
-            <li><a href="LBControls.SmoothController.html#controllee">LBControls.SmoothController#controllee</a></li>
-        
-    </ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line66">line 66</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="engines"><span class="type-signature"></span>engines<span class="type-signature"> :Array</span></h4>
-
-
-
-
-<div class="description">
-    The array of propulsors controlled by this.
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Array</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line271">line 271</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="propulsorName"><span class="type-signature"></span>propulsorName<span class="type-signature"> :string</span></h4>
-
-
-
-
-<div class="description">
-    The name of the propulsors which are controlled by this.
+    The name of the sails which are controlled by this.
 </div>
 
 
@@ -407,7 +257,79 @@ controllee = function(currentValue, controller) {}
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line265">line 265</a>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line227">line 227</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="sails"><span class="type-signature"></span>sails<span class="type-signature"> :Array</span></h4>
+
+
+
+
+<div class="description">
+    The array of sails controlled by this.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line233">line 233</a>
     </li></ul></dd>
     
 
@@ -479,7 +401,7 @@ controllee = function(currentValue, controller) {}
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line259">line 259</a>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line221">line 221</a>
     </li></ul></dd>
     
 
@@ -506,7 +428,107 @@ controllee = function(currentValue, controller) {}
 
     
 
-    <h4 class="name" id="load"><span class="type-signature"></span>load<span class="signature">(data, vessel)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.ThrottleController.html">LBSailSim.ThrottleController</a>}</span></h4>
+    <h4 class="name" id="_loadSails"><span class="type-signature"></span>_loadSails<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Gathers up the sails controlled by this controller.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line264">line 264</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="load"><span class="type-signature"></span>load<span class="signature">(data, vessel)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.SailController.html">LBSailSim.SailController</a>}</span></h4>
 
     
 
@@ -613,13 +635,6 @@ controllee = function(currentValue, controller) {}
     
 
     
-    <dt class="implements">Implements:</dt>
-    <dd class="implements"><ul>
-        
-            <li><a href="LBControls.SmoothController.html#load">LBControls.SmoothController#load</a></li>
-        
-    </ul></dd>
-    
 
     
 
@@ -636,7 +651,7 @@ controllee = function(currentValue, controller) {}
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line283">line 283</a>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line247">line 247</a>
     </li></ul></dd>
     
 
@@ -674,7 +689,7 @@ controllee = function(currentValue, controller) {}
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBSailSim.ThrottleController.html">LBSailSim.ThrottleController</a></span>
+<span class="param-type"><a href="LBSailSim.SailController.html">LBSailSim.SailController</a></span>
 
 
     </dd>
@@ -689,19 +704,14 @@ controllee = function(currentValue, controller) {}
 
     
 
-    <h4 class="name" id="setThrottlePosition"><span class="type-signature"></span>setThrottlePosition<span class="signature">(value)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.ThrottleController.html">LBSailSim.ThrottleController</a>}</span></h4>
+    <h4 class="name" id="setSheetLength"><span class="type-signature"></span>setSheetLength<span class="signature">(value)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
 
     
 
 
 
 <div class="description">
-    Sets the throttle position. The throttle position is such that when it is set to
-its maximum value the force for the engines is set to their maximum magnitude.
-If the throttle's minimum value is less than zero, which corresponds to reverse,
-then the mapping is done in two stages. For positive control values it is mapped
-between 0 and the engine's maximum force, while for negative control values it is
-mapped between 0 and the engine's minimum force (which should be negative).
+    Changes the sheet length for all the sails.
 </div>
 
 
@@ -753,7 +763,7 @@ mapped between 0 and the engine's minimum force (which should be negative).
 
             
 
-            <td class="description last">The throttle position value.</td>
+            <td class="description last">The sheet length.</td>
         </tr>
 
     
@@ -794,7 +804,7 @@ mapped between 0 and the engine's minimum force (which should be negative).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line318">line 318</a>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line282">line 282</a>
     </li></ul></dd>
     
 
@@ -820,10 +830,6 @@ mapped between 0 and the engine's minimum force (which should be negative).
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    this.
-</div>
-
 
 
 <dl>
@@ -832,7 +838,7 @@ mapped between 0 and the engine's minimum force (which should be negative).
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBSailSim.ThrottleController.html">LBSailSim.ThrottleController</a></span>
+<span class="param-type">undefined</span>
 
 
     </dd>

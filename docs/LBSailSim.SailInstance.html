@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: ClCdCurve</title>
+    <title>JSDoc: Class: SailInstance</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: ClCdCurve</h1>
+    <h1 class="page-title">Class: SailInstance</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="LBFoils.html">LBFoils</a>.</span>ClCdCurve</h2>
+            <span class="ancestors"><a href="LBSailSim.html">LBSailSim</a>.</span>SailInstance</h2>
         
     
 </header>
@@ -41,15 +41,14 @@
 
     
 
-    <h4 class="name" id="ClCdCurve"><span class="type-signature"></span>new ClCdCurve<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBFoils.ClCdCurve.html">LBFoils.ClCdCurve</a>}</span></h4>
+    <h4 class="name" id="SailInstance"><span class="type-signature"></span>new SailInstance<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBSailSim.SailInstance.html">LBSailSim.SailInstance</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    A Cl/Cd curve calculates lift (Cl), drag (Cd), and moment (Cm) coeffiecients given an angle
-of attack.
+    The <a href="LBSailSim.FoilInstance.html">LBSailSim.FoilInstance</a> implementation for sails.
 </div>
 
 
@@ -93,7 +92,7 @@ of attack.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line339">line 339</a>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line55">line 55</a>
     </li></ul></dd>
     
 
@@ -127,7 +126,7 @@ of attack.
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBFoils.ClCdCurve.html">LBFoils.ClCdCurve</a></span>
+<span class="param-type"><a href="LBSailSim.SailInstance.html">LBSailSim.SailInstance</a></span>
 
 
     </dd>
@@ -160,14 +159,15 @@ of attack.
 
     
 
-    <h4 class="name" id="calcCoefsDeg"><span class="type-signature"></span>calcCoefsDeg<span class="signature">(degrees, store)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="_updateRotationLimits"><span class="type-signature">(protected) </span>_updateRotationLimits<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
 
     
 
 
 
 <div class="description">
-    Calculates the coefficients of lift, drag and moment for a given angle of attack in degrees.
+    This handles calculating the rotation limits LBSailSim.SailInstance#minRotationDeg
+and LBSailSim.SailInstance#maxRotationDeg based on the current sheet length.
 </div>
 
 
@@ -176,78 +176,6 @@ of attack.
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>degrees</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The angle of attack in degrees.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>store</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">If not undefined, the object to store the coefficients in.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -283,7 +211,7 @@ of attack.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line400">line 400</a>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line130">line 130</a>
     </li></ul></dd>
     
 
@@ -309,10 +237,6 @@ of attack.
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    The object with the lift, drag, and moment coefficients (cl, cd, cm).
-</div>
-
 
 
 <dl>
@@ -321,7 +245,7 @@ of attack.
     </dt>
     <dd>
         
-<span class="param-type">object</span>
+<span class="param-type">undefined</span>
 
 
     </dd>
@@ -336,14 +260,92 @@ of attack.
 
     
 
-    <h4 class="name" id="load"><span class="type-signature"></span>load<span class="signature">(data)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    <h4 class="name" id="load"><span class="type-signature"></span>load<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line156">line 156</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setSheetLength"><span class="type-signature"></span>setSheetLength<span class="signature">(length)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.SailInstance.html">LBSailSim.SailInstance</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    The main loading method.
+    Sets the sheet length.
 </div>
 
 
@@ -379,13 +381,13 @@ of attack.
 
         <tr>
             
-                <td class="name"><code>data</code></td>
+                <td class="name"><code>length</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">number</span>
 
 
             
@@ -395,7 +397,7 @@ of attack.
 
             
 
-            <td class="description last">The data, typically loaded from a JSON file.</td>
+            <td class="description last">The sheet length.</td>
         </tr>
 
     
@@ -436,7 +438,7 @@ of attack.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line363">line 363</a>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line190">line 190</a>
     </li></ul></dd>
     
 
@@ -474,13 +476,245 @@ of attack.
     </dt>
     <dd>
         
-<span class="param-type">object</span>
+<span class="param-type"><a href="LBSailSim.SailInstance.html">LBSailSim.SailInstance</a></span>
 
 
     </dd>
 </dl>
 
     
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setSheetLengthRatio"><span class="type-signature"></span>setSheetLengthRatio<span class="signature">(ratio)</span><span class="type-signature"> &rarr; {LBSailSim.SailInstance.prototype}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Sets the sheet length based on a ratio between the minimum and maximum sheet lengths.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ratio</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The sheet length ratio, 0 is the minimun sheet length,
+1 is the maximum sheet length.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line202">line 202</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">LBSailSim.SailInstance.prototype</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="updateFoilForce"><span class="type-signature"></span>updateFoilForce<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_Sail.js.html">sailsim/Sail.js</a>, <a href="sailsim_Sail.js.html#line85">line 85</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -506,7 +740,7 @@ of attack.
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 25 2017 15:17:11 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 25 2017 15:17:12 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

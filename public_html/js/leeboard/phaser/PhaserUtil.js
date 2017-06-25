@@ -93,18 +93,23 @@ Phaser.Point.prototype.copy = function(src) {
  * Object representing the style information used for an {@link LBPhaser.Arrow}.
  * @constructor
  * @param {number} color    The RGB color.
+ * @param {function} [arrowLengthScaler=LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER]
+ * The function to use for scaling the vector length passed to the arrow to units
+ * prior to conversion to pixels.
  * @param {number} [width=2]    The pixel width of the arrow line.
  * @param {number} [arrowSize=20]    The nominal pixel size of the arrow head.
  * @returns {LBPhaser.ArrowStyle}
  */
-LBPhaser.ArrowStyle = function(color, width, arrowSize) {
+LBPhaser.ArrowStyle = function(color, arrowLengthScaler, width, arrowSize) {
     this.color = color;
     this.width = width || 2;
     this.arrowSize = arrowSize || 20;
     this.alpha = 1;
-    this.scaleArrowLength = function(length) {
-        return length * 0.1;
-    };
+    this.arrowLengthScaler = arrowLengthScaler || LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER;
+};
+
+LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER = function(length) {
+    return length;
 };
 
 LBPhaser.ArrowStyle.prototype = {
@@ -153,7 +158,7 @@ LBPhaser.Arrow.prototype = {
         }
         var dx = vector.x / length;
         var dy = vector.y / length;
-        length = this.style.scaleArrowLength(length);
+        length = this.style.arrowLengthScaler(length);
         
         g.lineStyle(this.style.width, this.style.color, this.style.alpha);
         
