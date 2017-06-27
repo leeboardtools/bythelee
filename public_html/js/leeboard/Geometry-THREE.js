@@ -27,14 +27,53 @@
  */
 var LBGeometry = LBGeometry || {};
 
-
+/**
+ * The 3D point (0, 0, 0)
+ * @constant
+ * @type LBGeometry.createVector3
+ */
 LBGeometry.ORIGIN = new THREE.Vector3();
+
+/**
+ * A vector representing the x-axis.
+ * @constant
+ * @type LBGeometry.createVector3
+ */
 LBGeometry.X_AXIS = new THREE.Vector3(1, 0, 0);
+
+/**
+ * A vector representing the y-axis.
+ * @constant
+ * @type LBGeometry.createVector3
+ */
 LBGeometry.Y_AXIS = new THREE.Vector3(0, 1, 0);
+
+/**
+ * A vector representing the z-axis.
+ * @constant
+ * @type LBGeometry.createVector3
+ */
 LBGeometry.Z_AXIS = new THREE.Vector3(0, 0, 1);
 
+/**
+ * A plane representing the x-y plane passing through the origin.
+ * @constant
+ * @type LBGeometry.createPlane
+ */
 LBGeometry.XY_PLANE = new THREE.Plane(LBGeometry.Z_AXIS, 0);
+
+/**
+ * A plane representing the z-x plane passing through the origin.
+ * @constant
+ * @type LBGeometry.createPlane
+ */
 LBGeometry.ZX_PLANE = new THREE.Plane(LBGeometry.Y_AXIS, 0);
+
+/**
+ * A plane representing the y-z plane passing through the origin.
+ * @constant
+ * @type LBGeometry.createPlane
+ */
 LBGeometry.YZ_PLANE = new THREE.Plane(LBGeometry.X_AXIS, 0);
 
 
@@ -691,6 +730,16 @@ LBGeometry.getLinePlaneIntersection = function(plane, line, store) {
     var s = -(plane.constant + nDotP) / nDotDir;
     store.multiplyScalar(s).add(line.start);
     return store;
+};
+
+/**
+ * Creates a sphere
+ * @param {LBGeometry.createVector3} center The center of the sphere.
+ * @param {number} radius   The radius of the sphere.
+ * @returns {THREE.Sphere}
+ */
+LBGeometry.createSphere = function(center, radius) {
+    return new THREE.Sphere(center, radius);
 };
 
 

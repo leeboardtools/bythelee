@@ -56,6 +56,40 @@ LBFoils.ClCd = function(cl, cd, cm) {
     this.cmIsChordFraction = false;
 };
 
+/**
+ * Calculates the lift and drag forces and the moment from the coefficients.
+ * @param {object} coefs    The lift/drag coefficients.
+ * @param {number} rho    The density.
+ * @param {number} area   The area.
+ * @param {number} qInfSpeed   The magnitude of the free stream velocity.
+ * @param {number} chordLength The chord length, used for calculating the moment.
+ * @param {number} aspectRatio  Optional aspect ratio, used for calculating the induced drag.
+ * @param {object} store  Optional object to store the lift, drag, and moment into.
+ * @returns {object}    The object containing the calculated lift, drag, and moment.
+ */
+LBFoils.ClCd.calcLiftDragMoment = function(coefs, rho, area, qInfSpeed, chordLength, aspectRatio, store) {
+    var scale = 0.5 * rho * area * qInfSpeed * qInfSpeed;
+    store = store || {};
+    store.lift = coefs.cl * scale;
+    store.drag = coefs.cd * scale;
+    chordLength = chordLength || 1;
+
+    var cm = coefs.cm;
+    if (coefs.cmIsChordFraction) {
+        cm *= Math.sqrt(coefs.cl * coefs.cl + coefs.cd * coefs.cd);
+    }
+    store.moment = cm * scale * chordLength;
+
+    if (aspectRatio) {
+        var ci = coefs.cl * coefs.cl / (Math.PI * aspectRatio);
+        store.inducedDrag = scale * ci;
+    }
+    else {
+        store.inducedDrag = undefined;
+    }
+    return store;
+};
+
 LBFoils.ClCd.prototype = {
     constructor: LBFoils.ClCd,
 
@@ -67,40 +101,8 @@ LBFoils.ClCd.prototype = {
         this.cd = LBMath.cleanNearZero(this.cd);
         this.cl = LBMath.cleanNearZero(this.cl);
         this.cm = LBMath.cleanNearZero(this.cm);
-    },
-    
-    /**
-     * Calculates the lift and drag forces and the moment from the coefficients.
-     * @param {number} rho    The density.
-     * @param {number} area   The area.
-     * @param {number} qInfSpeed   The magnitude of the free stream velocity.
-     * @param {number} chordLength The chord length, used for calculating the moment.
-     * @param {number} aspectRatio  Optional aspect ratio, used for calculating the induced drag.
-     * @param {object} store  Optional object to store the lift, drag, and moment into.
-     * @returns {object}    The object containing the calculated lift, drag, and moment.
-     */
-    calcLiftDragMoment : function(rho, area, qInfSpeed, chordLength, aspectRatio, store) {
-        var scale = 0.5 * rho * area * qInfSpeed * qInfSpeed;
-        store = store || {};
-        store.lift = this.cl * scale;
-        store.drag = this.cd * scale;
-        chordLength = chordLength || 1;
-        
-        var cm = this.cm;
-        if (this.cmIsChordFraction) {
-            cm *= Math.sqrt(this.cl * this.cl + this.cd * this.cd);
-        }
-        store.moment = cm * scale * chordLength;
-
-        if (aspectRatio) {
-            var ci = this.cl * this.cl / (Math.PI * aspectRatio);
-            store.inducedDrag = scale * ci;
-        }
-        else {
-            store.inducedDrag = undefined;
-        }
-        return store;
     }
+   
 };
 
 /**
@@ -608,7 +610,7 @@ LBFoils.Foil.prototype = {
             details.angleDeg = angleDeg;
             details.qInfLocal = qInfLocal.clone();
         }
-        return coefs.calcLiftDragMoment(rho, this.area, qInfSpeed, chordLength, this.aspectRatio, store);
+        return LBFoils.ClCd.calcLiftDragMoment(coefs, rho, this.area, qInfSpeed, chordLength, this.aspectRatio, store);
     },
     
     /**

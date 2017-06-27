@@ -132,7 +132,7 @@ LBSailSim.P2Env.prototype._createBoatInstance = function(typeName, boatName, dat
     p2Body.damping = 0;
     p2Body.mass = boat.getTotalMass();
     
-    boat.getForceArrowResultant = function(plane) {
+    boat.getForceArrowResultant = function(plane, bounds) {
         return boat.hullResultant.convertToWrench(plane);
     };
     

@@ -45,8 +45,22 @@ LBPhysics.calcMoment = function(force, position) {
  * @returns {LBPhysics.Resultant3D}  The resultant.
  */
 LBPhysics.Resultant3D = function(force, moment, position) {
+    /**
+     * The force vector.
+     * @member {LBGeometry.createVector3}
+     */
     this.force = Leeboard.copyCommonProperties(LBGeometry.createVector3(), force);
+
+    /**
+     * The moment vector.
+     * @member {LBGeometry.createVector3}
+     */
     this.moment = Leeboard.copyCommonProperties(LBGeometry.createVector3(), moment);
+
+    /**
+     * The force application point.
+     * @member {LBGeometry.createVector3}
+     */
     this.applPoint = Leeboard.copyCommonProperties(LBGeometry.createVector3(), position);
 };
 
@@ -132,9 +146,13 @@ LBPhysics.Resultant3D.prototype = {
      * force vector. The application point and moment may be modified, the force vector is not.
      * @param {LBGeometry.createPlane} [plane] If defined the plane where the application point
      * should be in, if possible.
+     * @param {LBGeometry.createSphere} [planeBoundsSphere] If both this and plane are defined, this
+     * is a sphere within which the plane application point must be for the application point
+     * to be moved to the plane. This prevents the application point from shooting far away
+     * when the force direction is near the same direction as the plane.
      * @returns {LBPhysics.Resultant3D}  this.
      */
-    convertToWrench: function(plane) {
+    convertToWrench: function(plane, planeBoundsSphere) {
         var forceMagSq = this.force.lengthSq();
         if (LBMath.isLikeZero(forceMagSq)) {
             return this;
@@ -164,7 +182,9 @@ LBPhysics.Resultant3D.prototype = {
             line.end.copy(this.applPoint).add(this.force);
             var pos = LBGeometry.getLinePlaneIntersection(plane, line, LBPhysics.Resultant3D._workingPos);
             if (pos) {
-                this.applPoint.copy(pos);
+                if (!planeBoundsSphere || planeBoundsSphere.containsPoint(pos)) {
+                    this.applPoint.copy(pos);
+                }
             }
         }
         
@@ -541,8 +561,22 @@ LBPhysics.getInertiaZZ = function(inertia) {
  * local coordinates of the base.
  */
 LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
+    /**
+     * A name for the rigid body.
+     * @type String
+     */
     this.name = "";
+    
+    /**
+     * The mass.
+     * @type number
+     */
     this.mass = mass;
+    
+    /**
+     * The moment of inertia tensor.
+     * @type LBGeometry.createMatrix3
+     */
     this.momentInertia = LBGeometry.createMatrix3();
     if (momentInertia) {
         this.momentInertia.copy(momentInertia);
@@ -550,19 +584,60 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     else {
         this.momentInertia.identity().multiplyScalar(this.mass);
     }
+    
+    /**
+     * The center of mass in local coordinates relative to the origin.
+     * @type LBGeometry.createVector3
+     */
     this.centerOfMass = centerOfMass || LBGeometry.createVector3();
     
+    /**
+     * A radius associated with the mass, used as essentially a region of interest
+     * around the center of mass.
+     * @type number
+     */
+    this.massRadius = 0;
+    
+    /**
+     * The Object3D used to define the 3D properties of the body.
+     * @type LBGeometry.Object3D
+     */
     this.obj3D = obj3D || LBGeometry.createObject3D();
+    
+    /**
+     * The coordinate system state used to track changes in the location of the
+     * local coordinate system in the world space. Primarily used to track velocity.
+     * @type LBPhysics.CoordSystemState
+     */
     this.coordSystem = new LBPhysics.CoordSystemState();
     this.coordSystemResults = {
         "worldVel": LBGeometry.createVector3(),
         "localVel": LBGeometry.createVector3()
     };
+    
+    /**
+     * The current linear velocity of the body in the world coordinate system.
+     * @type LBGeometry.createVector3
+     */
     this.worldLinearVelocity = this.coordSystemResults.worldVel;
+
+    /**
+     * The current linear velocity of the body in the local coordinate system.
+     * @type LBGeometry.createVector3
+     */
     this.localLinearVelocity = this.coordSystemResults.localVel;
     
     this.resultant = new LBPhysics.Resultant3D();
 
+    /**
+     * An array contianing the rigid bodies that are part of this rigid body. The
+     * parts have their local coordinate systems specified relative to this rigid
+     * body's local coordinate system.
+     * <p>
+     * Parts should be added and removed using {@link LBPhysics.RigidBody#addPart} and
+     * {@link LBPhysics.RigidBody#removePart}.
+     * @type LBPhysics.RigidBody[]
+     */
     this.parts = [];
     if (base) {
         base.addPart(this);
@@ -614,7 +689,9 @@ LBPhysics.RigidBody.prototype = {
     loadBase: function(data) {
         this.name = data.name || this.name;
         this.mass = data.mass || this.mass;
-        LBGeometry.loadVector3(data.centerOfMass, this.centerOfMass);        
+        LBGeometry.loadVector3(data.centerOfMass, this.centerOfMass);
+        this.massRadius = data.massRadius || this.massRadius;
+        
         if (data.momentInertia) {
             LBPhysics.loadMomentInertia(data.momentInertia, this.momentInertia);
         }
@@ -764,15 +841,18 @@ LBPhysics.RigidBody.prototype = {
      * otherwise its application point is set to the total center of mass.
      * @param {LBGeometry.createPlane} [wrenchPlane]    If convertToWrench is true, this is the
      * optional plane passed to {@link LBPhysics.Resultant3D.convertToWrench}.
+     * @param {LBGeometry.createSphere} [wrenchBounds]  If convertToWrench is true and
+     * wrenchPlane is specified, this is a bounding sphere within which the application
+     * point transfered to the wrenchPlane must lie for it to actually be transferred.
      * @returns {LBPhysics.Resultant3D} The resultant in world coordinates.
      */
-    getResultant: function(convertToWrench, wrenchPlane) {
+    getResultant: function(convertToWrench, wrenchPlane, wrenchBounds) {
         this.totalResultant.copy(this.resultant);
         for (var i = 0; i < this.parts.length; ++i) {
             this.totalResultant.addResultant(this.parts[i].getResultant());
         }
         if (convertToWrench) {
-            this.totalResultant.convertToWrench(wrenchPlane);
+            this.totalResultant.convertToWrench(wrenchPlane, wrenchBounds);
         }
         else {
             this.totalResultant.moveApplPoint(this.getTotalCenterOfMass());

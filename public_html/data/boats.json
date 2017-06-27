@@ -14,7 +14,8 @@
             },
             "mass": 1782,
             "centerOfMass": { "x": 0, "y": 0, "z": 0 },
-            "momentInertia": { "xx": 1, "yy": 1, "zz": 1000 },
+            "massRadius": 4,
+            "momentInertia": { "xx": 1, "yy": 1, "zz": 500 },
             "hull": {
                 "lwl": 10.02,
                 "bwl": 3.17,
@@ -28,8 +29,9 @@
                     "name": "mainsail",
                     "mass": 20,
                     "centerOfMass": { "x": 0, "y": 0, "z": 4 },
+                    "massRadius": 4,
                     "obj3D": {
-                        "position" : { "x": 1.3, "y": 0, "z": 0 },
+                        "position" : { "x": 1.0, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                         },
                     "phaser_sprite": {
@@ -53,7 +55,7 @@
                         "sliceZ": 0.2,
                         "area": 25.5,
                         "aspectRatio": 3,
-                        "libClCdCurve": "FlatPlate"
+                        "libClCdCurve": "Sail"
                     }
                 }
             ],
@@ -63,6 +65,7 @@
                     "name": "keel",
                     "mass": 100,
                     "centerOfMass": { "x": -0.0, "y": 0, "z": -1 },
+                    "massRadius": 4,
                     "obj3D": {
                         "position" : { "x": 0.3, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
@@ -73,7 +76,7 @@
                             "end": { "x": -1, "y": 0 }
                         },
                         "sliceZ": 0.2,
-                        "area": 0.3,
+                        "area": 0.75,
                         "aspectRatio": 3,
                         "libClCdCurve": "FlatPlate"
                     }
@@ -82,6 +85,7 @@
                     "name": "rudder",
                     "mass": 4,
                     "centerOfMass": { "x": -0.15, "y": 0, "z": -0.5 },
+                    "massRadius": 4,
                     "obj3D": {
                         "position" : { "x": -3.2, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
@@ -103,7 +107,7 @@
                             "end": { "x": -0.3, "y": 0 }
                         },
                         "sliceZ": 0.2,
-                        "area": 0.2,
+                        "area": 0.3,
                         "aspectRatio": 5,
                         "libClCdCurve": "FlatPlate"
                     }

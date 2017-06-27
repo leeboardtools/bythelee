@@ -84,39 +84,13 @@ LBSailSim.SailInstance.prototype.constructor = LBSailSim.SailInstance;
  */
 LBSailSim.SailInstance.prototype.updateFoilForce = function(dt, flow) {
     LBSailSim.FoilInstance.prototype.updateFoilForce.call(this, dt, flow);
-    
-    // Handle rotating the sail if needed.
-    // The force on the sail is our current force resultant, first let's move it to
-    // the center of rotation.
-    this.workingPos.zero();
-    this.coordSystem.calcVectorLocalToWorld(this.workingPos, this.workingCoordResults);
-    
-    this.resultant.moveApplPoint(this.workingCoordResults.worldPos);
-    
-    this.workingMoment.copy(this.resultant.moment);
-    this.workingMoment.applyMatrix4Rotation(this.coordSystem.localXfrm);
-    // If the moment's z-axis is positive, the rotation is positive...
-    if (!LBMath.isLikeZero(this.workingMoment.z)) {
-        // Get the current rotation and check it against the appropriate angle limit.
-        var rotationDeg = this.obj3D.rotation.z * LBMath.RAD_TO_DEG + this.rotationOffsetDegs[2];
-        if (this.workingMoment.z > 0) {
-            if (rotationDeg >= this.maxRotationDeg) {
-                return this;
-            }
-        }
-        else {
-            if (rotationDeg <= this.minRotationDeg) {
-                return this;
-            }
-        }
-        
-        var currentDeg = this.obj3D.rotation.z * LBMath.RAD_TO_DEG;
-        this.integrateForceForRotation(LBGeometry.ORIGIN, LBGeometry.Z_AXIS, currentDeg, function(deg) {
-            deg += this.rotationOffsetDegs[2];
-            var deg2 = LBMath.clamp(deg, this.minRotationDeg, this.maxRotationDeg);
-            return deg2 - this.rotationOffsetDegs[2];
-        });
-    }
+
+    var currentDeg = this.obj3D.rotation.z * LBMath.RAD_TO_DEG;
+    this.integrateForceForRotation(LBGeometry.ORIGIN, LBGeometry.Z_AXIS, currentDeg, function(deg) {
+        deg += this.rotationOffsetDegs[2];
+        var deg2 = LBMath.clamp(deg, this.minRotationDeg, this.maxRotationDeg);
+        return deg2 - this.rotationOffsetDegs[2];
+    });
     
     return this;
 };

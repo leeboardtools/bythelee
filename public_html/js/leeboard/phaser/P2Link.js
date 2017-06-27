@@ -50,6 +50,7 @@ LBPhaser.P2Link._working3DPos = LBGeometry.createVector3();
 LBPhaser.P2Link._workingEuler;
 LBPhaser.P2Link._workingPlane = LBGeometry.createPlane();
 LBPhaser.P2Link._working3DNormal = LBGeometry.createVector3();
+LBPhaser.P2Link._workingSphere = LBGeometry.createSphere();
 
 LBPhaser.P2Link.prototype = {
     /**
@@ -212,7 +213,8 @@ LBPhaser.P2Link.prototype = {
      * be called.
      * <p>
      * The getForceArrowResultant function has the same function signature as 
-     * {@link LBPhysics.RigidBody#getResultant}.
+     * {@link LBPhysics.RigidBody#getResultant} excluding the convertToWrench argument
+     * (the first argument).
      * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
      * @param {LBPhaser.Arrow} forceArrow   The arrow object.
      * @returns {undefined}
@@ -228,12 +230,20 @@ LBPhaser.P2Link.prototype = {
         normal.set(Math.cos(angle), Math.sin(angle), 0);
         plane.setFromNormalAndCoplanarPoint(normal, point);
         
+        var bounds;
+        if (rigidBody.massRadius) {
+            bounds = LBPhaser.P2Link._workingSphere;
+            bounds.set(rigidBody.centerOfMass, rigidBody.massRadius);
+            bounds.center.z = 0;
+            bounds.applyMatrix4(rigidBody.obj3D.matrixWorld);
+        }
+        
         var resultant;
         if (rigidBody.getForceArrowResultant) {
-            resultant = rigidBody.getForceArrowResultant(plane);
+            resultant = rigidBody.getForceArrowResultant(plane, bounds);
         }
         else {
-            resultant = rigidBody.getResultant(true, plane);
+            resultant = rigidBody.getResultant(true, plane, bounds);
         }
         if (resultant) {
             forceArrow.setFromBaseAndVector(resultant.applPoint, resultant.force);

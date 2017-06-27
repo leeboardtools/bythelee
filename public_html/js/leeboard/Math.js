@@ -103,18 +103,19 @@ LBMath.clamp = function(val, low, high) {
 };
 
 /**
- * Adjusts an angle in degrees so it satisfies -180 &le; degrees &gt; 180.
+ * Adjusts an angle in degrees so it satisfies -180 &lt; degrees &ge; 180.
  * @param {number} degrees  The anngle in degrees to wrap.
- * @returns {number}    degrees wrapped to -180 &le; degrees &gt; 180.
+ * @returns {number}    degrees wrapped to -180 &lt; degrees &ge; 180.
  */
 LBMath.wrapDegrees = function(degrees) {
     degrees %= 360;
-    if (degrees >= 180) {
-        degrees -= 360;
-    }
-    else if (degrees < -180) {
+    if (degrees <= -180) {
         degrees += 360;
     }
+    else if (degrees > 180) {
+        degrees -= 360;
+    }
+
     return degrees;
 };
 
