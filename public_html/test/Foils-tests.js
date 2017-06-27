@@ -109,7 +109,8 @@ QUnit.test( "Foil.calcLocalForce", function( assert ) {
     
     // The force is applied at the 25% chord point...
     refForce.sub(refInducedDrag);
-    var refR = new LBGeometry.Vector2(2.5, 0);
+    var refForceMag = refForce.length();
+    var refR = new LBGeometry.Vector2(2.5 * refForce.y / refForceMag, 2.5 * -refForce.x / refForceMag);
     var refMoment = LBPhysics.calcMoment(refForce, refR);
     
     checkVector3(assert, localForceResultant.moment, refMoment.x, refMoment.y, refMoment.z, "moment: ");
