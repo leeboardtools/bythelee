@@ -61,19 +61,19 @@ LBSailSim.SailInstance = function() {
     this.reef = 1;
     this.vreef = 1;
     
-    this.sheetAnchorSail = LBGeometry.createVector3();
-    this.sheetAnchorBoat = LBGeometry.createVector3();
+    this.sheetAnchorSail = new LBGeometry.Vector3();
+    this.sheetAnchorBoat = new LBGeometry.Vector3();
     
     this.sheetLength = 0;
     this.minSheetLength = 0;
     this.maxSheetLength = 1;
     
-    this.workingPos = LBGeometry.createVector3();
+    this.workingPos = new LBGeometry.Vector3();
     this.workingCoordResults = {
-        'worldPos' : LBGeometry.createVector3(),
-        'worldVel' : LBGeometry.createVector3()
+        'worldPos' : new LBGeometry.Vector3(),
+        'worldVel' : new LBGeometry.Vector3()
     };
-    this.workingMoment = LBGeometry.createVector3();
+    this.workingMoment = new LBGeometry.Vector3();
 };
 
 LBSailSim.SailInstance.prototype = Object.create(LBSailSim.FoilInstance.prototype);

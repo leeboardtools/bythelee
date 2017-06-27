@@ -47,25 +47,25 @@ LBPhysics.calcMoment = function(force, position) {
 LBPhysics.Resultant3D = function(force, moment, position) {
     /**
      * The force vector.
-     * @member {LBGeometry.createVector3}
+     * @member {LBGeometry.Vector3}
      */
-    this.force = Leeboard.copyCommonProperties(LBGeometry.createVector3(), force);
+    this.force = Leeboard.copyCommonProperties(new LBGeometry.Vector3(), force);
 
     /**
      * The moment vector.
-     * @member {LBGeometry.createVector3}
+     * @member {LBGeometry.Vector3}
      */
-    this.moment = Leeboard.copyCommonProperties(LBGeometry.createVector3(), moment);
+    this.moment = Leeboard.copyCommonProperties(new LBGeometry.Vector3(), moment);
 
     /**
      * The force application point.
-     * @member {LBGeometry.createVector3}
+     * @member {LBGeometry.Vector3}
      */
-    this.applPoint = Leeboard.copyCommonProperties(LBGeometry.createVector3(), position);
+    this.applPoint = Leeboard.copyCommonProperties(new LBGeometry.Vector3(), position);
 };
 
-LBPhysics.Resultant3D._workingLine3 = LBGeometry.createLine3();
-LBPhysics.Resultant3D._workingPos = LBGeometry.createVector3();
+LBPhysics.Resultant3D._workingLine3 = new LBGeometry.Line3();
+LBPhysics.Resultant3D._workingPos = new LBGeometry.Vector3();
 
 LBPhysics.Resultant3D.prototype = {
     /**
@@ -144,9 +144,9 @@ LBPhysics.Resultant3D.prototype = {
     /**
      * Moves the application point such that the moment vector is parallel to the
      * force vector. The application point and moment may be modified, the force vector is not.
-     * @param {LBGeometry.createPlane} [plane] If defined the plane where the application point
+     * @param {LBGeometry.Plane} [plane] If defined the plane where the application point
      * should be in, if possible.
-     * @param {LBGeometry.createSphere} [planeBoundsSphere] If both this and plane are defined, this
+     * @param {LBGeometry.Sphere} [planeBoundsSphere] If both this and plane are defined, this
      * is a sphere within which the plane application point must be for the application point
      * to be moved to the plane. This prevents the application point from shooting far away
      * when the force direction is near the same direction as the plane.
@@ -160,12 +160,12 @@ LBPhysics.Resultant3D.prototype = {
         
         // Find the parallel moment.
         var normScale = 1./Math.sqrt(forceMagSq);
-        var forceDir = LBGeometry.createVector3(this.force.x * normScale, this.force.y * normScale, this.force.z * normScale);        
+        var forceDir = new LBGeometry.Vector3(this.force.x * normScale, this.force.y * normScale, this.force.z * normScale);        
         var pMoment = forceDir.multiplyScalar(this.moment.dot(forceDir));
 
         // And then the perpendicular moment, which is moment - parallel moment.
         var moment = LBGeometry.subVectors3(this.moment, pMoment);
-        if (LBGeometry.isVector3LikeZero(moment)) {
+        if (LBGeometry.isVectorLikeZero(moment)) {
             // Already a wrench...
             return this;
         }
@@ -266,27 +266,27 @@ LBPhysics.Resultant3D.prototype = {
 LBPhysics.CoordSystemState = function() {
     /**
      * The matrix transforming from local to world coordinates.
-     * @member {LBGeometry.createMatrix4}
+     * @member {LBGeometry.Matrix4}
      */
-    this.worldXfrm = LBGeometry.createMatrix4();
+    this.worldXfrm = new LBGeometry.Matrix4();
 
     /**
      * The matrix transforming from world to local coordinates.
-     * @member {LBGeometry.createMatrix4}
+     * @member {LBGeometry.Matrix4}
      */
-    this.localXfrm = LBGeometry.createMatrix4();
+    this.localXfrm = new LBGeometry.Matrix4();
     
     /**
      * The matrix transforming from local to world coordinates from the previous time step.
-     * @member {LBGeometry.createMatrix4}
+     * @member {LBGeometry.Matrix4}
      */    
-    this.prevWorldXfrm = LBGeometry.createMatrix4();
+    this.prevWorldXfrm = new LBGeometry.Matrix4();
     
     /**
      * The matrix transforming from world to local coordinates from the previous time step.
-     * @member {LBGeometry.createMatrix4}
+     * @member {LBGeometry.Matrix4}
      */    
-    this.prevLocalXfrm = LBGeometry.createMatrix4();
+    this.prevLocalXfrm = new LBGeometry.Matrix4();
     
     /**
      * The last time step.
@@ -297,17 +297,17 @@ LBPhysics.CoordSystemState = function() {
     
     this.isXfrmsValid = false;
     
-    this.workingPos = LBGeometry.createVector3();
-    this.workingPrevPos = LBGeometry.createVector3();
-    this.workingWorldVel = LBGeometry.createVector3();
-    this.workingLocalVel = LBGeometry.createVector3();
+    this.workingPos = new LBGeometry.Vector3();
+    this.workingPrevPos = new LBGeometry.Vector3();
+    this.workingWorldVel = new LBGeometry.Vector3();
+    this.workingLocalVel = new LBGeometry.Vector3();
 };
 
-LBPhysics.CoordSystemState._workingPosA = LBGeometry.createVector3();
-LBPhysics.CoordSystemState._workingPosB = LBGeometry.createVector3();
-LBPhysics.CoordSystemState._workingPosC = LBGeometry.createVector3();
-LBPhysics.CoordSystemState._workingPosD = LBGeometry.createVector3();
-LBPhysics.CoordSystemState._workingPlane = LBGeometry.createPlane();
+LBPhysics.CoordSystemState._workingPosA = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPosB = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPosC = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPosD = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPlane = new LBGeometry.Plane();
 
 LBPhysics.CoordSystemState.prototype = {
     /**
@@ -423,7 +423,7 @@ LBPhysics.CoordSystemState.prototype = {
     /**
      * Calculates the angular velocity about an axis in the local coordinate system
      * based upon the current and past transforms.
-     * @param {LBGeometry.createVector3} rotAxis   The axis, this must be normalized.
+     * @param {LBGeometry.Vector3} rotAxis   The axis, this must be normalized.
      * @returns {number}    The angular velocity in radians/sec.
      */
     calcAngularVelocityAboutLocalAxis: function(rotAxis) {
@@ -478,7 +478,7 @@ LBPhysics.CoordSystemState.prototype = {
  * @returns {object}    The moment of inertia tensor.
  */
 LBPhysics.loadMomentInertia = function(data, store) {
-    store = store || LBGeometry.createMatrix3();
+    store = store || new LBGeometry.Matrix3();
     
     var xx = data.xx || 0;
     var xy = data.xy || 0;
@@ -575,9 +575,9 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     
     /**
      * The moment of inertia tensor.
-     * @type LBGeometry.createMatrix3
+     * @type LBGeometry.Matrix3
      */
-    this.momentInertia = LBGeometry.createMatrix3();
+    this.momentInertia = new LBGeometry.Matrix3();
     if (momentInertia) {
         this.momentInertia.copy(momentInertia);
     }
@@ -587,9 +587,9 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     
     /**
      * The center of mass in local coordinates relative to the origin.
-     * @type LBGeometry.createVector3
+     * @type LBGeometry.Vector3
      */
-    this.centerOfMass = centerOfMass || LBGeometry.createVector3();
+    this.centerOfMass = centerOfMass || new LBGeometry.Vector3();
     
     /**
      * A radius associated with the mass, used as essentially a region of interest
@@ -602,7 +602,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
      * The Object3D used to define the 3D properties of the body.
      * @type LBGeometry.Object3D
      */
-    this.obj3D = obj3D || LBGeometry.createObject3D();
+    this.obj3D = obj3D || new LBGeometry.Object3D();
     
     /**
      * The coordinate system state used to track changes in the location of the
@@ -611,19 +611,19 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
      */
     this.coordSystem = new LBPhysics.CoordSystemState();
     this.coordSystemResults = {
-        "worldVel": LBGeometry.createVector3(),
-        "localVel": LBGeometry.createVector3()
+        "worldVel": new LBGeometry.Vector3(),
+        "localVel": new LBGeometry.Vector3()
     };
     
     /**
      * The current linear velocity of the body in the world coordinate system.
-     * @type LBGeometry.createVector3
+     * @type LBGeometry.Vector3
      */
     this.worldLinearVelocity = this.coordSystemResults.worldVel;
 
     /**
      * The current linear velocity of the body in the local coordinate system.
-     * @type LBGeometry.createVector3
+     * @type LBGeometry.Vector3
      */
     this.localLinearVelocity = this.coordSystemResults.localVel;
     
@@ -649,9 +649,9 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     
     this.physicalPropertiesDirty = true;
     this.totalMass = 0;
-    this.totalMomentInertia = LBGeometry.createMatrix3().identity();
-    this.totalInvMomentInertia = LBGeometry.createMatrix3().identity();
-    this.totalCenterOfMass = LBGeometry.createVector3();
+    this.totalMomentInertia = new LBGeometry.Matrix3().identity();
+    this.totalInvMomentInertia = new LBGeometry.Matrix3().identity();
+    this.totalCenterOfMass = new LBGeometry.Vector3();
     this.totalResultant = new LBPhysics.Resultant3D();
     
     if (obj3D) {
@@ -660,8 +660,8 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
 };
 
 LBPhysics.RigidBody._workingResultant = new LBPhysics.Resultant3D();
-LBPhysics.RigidBody._workingMoment = LBGeometry.createVector3();
-LBPhysics.RigidBody._workingPos = LBGeometry.createVector3();
+LBPhysics.RigidBody._workingMoment = new LBGeometry.Vector3();
+LBPhysics.RigidBody._workingPos = new LBGeometry.Vector3();
 
 LBPhysics.RigidBody.prototype = {
     /**
@@ -839,9 +839,9 @@ LBPhysics.RigidBody.prototype = {
      * Retrieves the resultant in world coordinates.
      * @param {Boolean} convertToWrench If true the resultant is converted to a wrench,
      * otherwise its application point is set to the total center of mass.
-     * @param {LBGeometry.createPlane} [wrenchPlane]    If convertToWrench is true, this is the
+     * @param {LBGeometry.Plane} [wrenchPlane]    If convertToWrench is true, this is the
      * optional plane passed to {@link LBPhysics.Resultant3D.convertToWrench}.
-     * @param {LBGeometry.createSphere} [wrenchBounds]  If convertToWrench is true and
+     * @param {LBGeometry.Sphere} [wrenchBounds]  If convertToWrench is true and
      * wrenchPlane is specified, this is a bounding sphere within which the application
      * point transfered to the wrenchPlane must lie for it to actually be transferred.
      * @returns {LBPhysics.Resultant3D} The resultant in world coordinates.
@@ -930,7 +930,7 @@ LBPhysics.RigidBody.prototype = {
 
     /**
      * Retrieves the composite moment of inertia tensor.
-     * @returns {LBGeometry.createMatrix3} The matrix tensor.
+     * @returns {LBGeometry.Matrix3} The matrix tensor.
      */
     getTotalMomentInertia: function() {
         this._updatePhysicalProperties();
@@ -939,7 +939,7 @@ LBPhysics.RigidBody.prototype = {
 
     /**
      * Retrieves the composite inverse moment of inertia tensor.
-     * @returns {LBGeometry.createMatrix3} The inverse matrix tensor.
+     * @returns {LBGeometry.Matrix3} The inverse matrix tensor.
      */
     getTotalInvMomentInertia: function() {
         this._updatePhysicalProperties();

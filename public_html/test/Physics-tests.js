@@ -30,9 +30,9 @@ function checkResultant3D(assert, resultant, fx, fy, fz, mx, my, mz, px, py, pz,
 
 QUnit.test( "Resultant-AddForce", function( assert ) {
     var resultant = new LBPhysics.Resultant3D(
-            LBGeometry.createVector3(1, 2, 3),   // force
-            LBGeometry.createVector3(2, 3, 4),   // moment
-            LBGeometry.createVector3(3, 4, 5));  // position
+            new LBGeometry.Vector3(1, 2, 3),   // force
+            new LBGeometry.Vector3(2, 3, 4),   // moment
+            new LBGeometry.Vector3(3, 4, 5));  // position
     checkResultant3D(assert, resultant, 1, 2, 3, 2, 3, 4, 3, 4, 5, "Constructor: ");
     
     resultant.force.set(0, 0, 0);
@@ -40,8 +40,8 @@ QUnit.test( "Resultant-AddForce", function( assert ) {
     resultant.applPoint.set(0, 0, 0);
     checkResultant3D(assert, resultant, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Zero: ");
     
-    var vec_1_2_3 = LBGeometry.createVector3(1, 2, 3);
-    var vec_2_0_0 = LBGeometry.createVector3(2, 0, 0);
+    var vec_1_2_3 = new LBGeometry.Vector3(1, 2, 3);
+    var vec_2_0_0 = new LBGeometry.Vector3(2, 0, 0);
     resultant.addForce(vec_1_2_3, vec_2_0_0);
     checkResultant3D(assert, resultant, 1, 2, 3, 0, -6, 4, 0, 0, 0, "Simple AddForce: ");
     
@@ -57,14 +57,14 @@ QUnit.test( "Resultant-AddForce", function( assert ) {
 });
 
 QUnit.test( "Resultant-AddResultant", function( assert ) {
-    var forceA = LBGeometry.createVector3(10, 5, -20);
-    var momentA = LBGeometry.createVector3(0, -10, 0);
-    var applPointA = LBGeometry.createVector3(10, 20, 30);
+    var forceA = new LBGeometry.Vector3(10, 5, -20);
+    var momentA = new LBGeometry.Vector3(0, -10, 0);
+    var applPointA = new LBGeometry.Vector3(10, 20, 30);
     var resultantA = new LBPhysics.Resultant3D(forceA, momentA, applPointA);
 
-    var forceB = LBGeometry.createVector3(5, 0, 10);
-    var momentB = LBGeometry.createVector3(0, 0, 3);
-    var applPointB = LBGeometry.createVector3(25, 3, 35);
+    var forceB = new LBGeometry.Vector3(5, 0, 10);
+    var momentB = new LBGeometry.Vector3(0, 0, 3);
+    var applPointB = new LBGeometry.Vector3(25, 3, 35);
     var resultantB = new LBPhysics.Resultant3D(forceB, momentB, applPointB);
     
     var resultantC = resultantB.clone();
@@ -82,12 +82,12 @@ QUnit.test( "Resultant-AddResultant", function( assert ) {
 function setupMoment7Test() {
     var resultant = new LBPhysics.Resultant3D();
     
-    var fa = LBGeometry.createVector3(0, 0, -80);
-    var pa = LBGeometry.createVector3(0, 0, 0);
-    var fb = LBGeometry.createVector3(0, -60, 0);
-    var pb = LBGeometry.createVector3(0, 12, 12);
-    var fc = LBGeometry.createVector3(-40, 0, 0);
-    var pc = LBGeometry.createVector3(0, 12, 0);
+    var fa = new LBGeometry.Vector3(0, 0, -80);
+    var pa = new LBGeometry.Vector3(0, 0, 0);
+    var fb = new LBGeometry.Vector3(0, -60, 0);
+    var pb = new LBGeometry.Vector3(0, 12, 12);
+    var fc = new LBGeometry.Vector3(-40, 0, 0);
+    var pc = new LBGeometry.Vector3(0, 12, 0);
     
     resultant.addForce(fa, pa);
     resultant.addForce(fb, pb);
@@ -110,8 +110,8 @@ function checkMoment7Test(assert, resultant, msg) {
     
     var end = resultant.force.clone().normalize();
     end.add(resultant.applPoint);
-    var line = LBGeometry.createLine3(resultant.applPoint, end);
-    var plane = LBGeometry.createPlane(LBGeometry.createVector3(1, 0, 0), 0);
+    var line = new LBGeometry.Line3(resultant.applPoint, end);
+    var plane = new LBGeometry.Plane(new LBGeometry.Vector3(1, 0, 0), 0);
     var p = LBGeometry.getLinePlaneIntersection(plane, line);
     
     checkResultant3D(assert, resultant, fx, fy, fz, mx, my, mz, resultant.applPoint.x, resultant.applPoint.y, resultant.applPoint.z, msg, 1e-4);
@@ -125,8 +125,8 @@ QUnit.test( "Resultant-convertToWrench", function( assert ) {
 });
 
 QUnit.test( "Resultant-applyQuaternion", function( assert ) {
-    var force = LBGeometry.createVector3(10, 0, 0);
-    var applPoint = LBGeometry.createVector3(5, 10, 15);
+    var force = new LBGeometry.Vector3(10, 0, 0);
+    var applPoint = new LBGeometry.Vector3(5, 10, 15);
     var moment = LBPhysics.calcMoment(force, applPoint);
     var resultant = new LBPhysics.Resultant3D();
     
@@ -142,15 +142,15 @@ QUnit.test( "Resultant-applyQuaternion", function( assert ) {
 });
 
 QUnit.test( "Resultant-applyMatrix4", function( assert ) {
-    var force = LBGeometry.createVector3(10, 0, 0);
-    var applPoint = LBGeometry.createVector3(5, 10, 15);
+    var force = new LBGeometry.Vector3(10, 0, 0);
+    var applPoint = new LBGeometry.Vector3(5, 10, 15);
     var moment = LBPhysics.calcMoment(force, applPoint);
     var resultant = new LBPhysics.Resultant3D(force, moment, applPoint);
     
-    var matrix = LBGeometry.createMatrix4();
+    var matrix = new LBGeometry.Matrix4();
     var rotation = LBGeometry.createQuaternionFromEulerRad(0, 0, -90 * LBMath.DEG_TO_RAD);
     matrix.makeRotationFromQuaternion(rotation);
-    matrix.setPosition(LBGeometry.createVector3(5, 6, 7));
+    matrix.setPosition(new LBGeometry.Vector3(5, 6, 7));
     
     resultant.applyMatrix4(matrix);
     checkResultant3D(assert, resultant, force.y, -force.x, force.z, moment.y, -moment.x, moment.z,
@@ -159,9 +159,9 @@ QUnit.test( "Resultant-applyMatrix4", function( assert ) {
 });
 
 QUnit.test( "Resultant-applyDistanceScale", function( assert ) {
-    var forceM = LBGeometry.createVector3(10, 20, 30);
-    var applPointM = LBGeometry.createVector3(3, 4, 0);
-    var momentM = LBGeometry.createVector3(5, 4, 3);
+    var forceM = new LBGeometry.Vector3(10, 20, 30);
+    var applPointM = new LBGeometry.Vector3(3, 4, 0);
+    var momentM = new LBGeometry.Vector3(5, 4, 3);
     var resultant = new LBPhysics.Resultant3D(forceM, momentM, applPointM);
     
     var forceKM = forceM.clone().multiplyScalar(1e-3);
@@ -174,14 +174,14 @@ QUnit.test( "Resultant-applyDistanceScale", function( assert ) {
 });
 
 QUnit.test( "CoordSystemState.calcVectorLocalToWorld()", function( assert ) {
-    var worldMatrixT0 = LBGeometry.createMatrix4();
+    var worldMatrixT0 = new LBGeometry.Matrix4();
     worldMatrixT0.makeFromEulerAndXYZ(0, 0, -90 * LBMath.DEG_TO_RAD, 5, 6, 7);
     
-    var worldMatrixT1 = LBGeometry.createMatrix4();
+    var worldMatrixT1 = new LBGeometry.Matrix4();
     worldMatrixT1.makeFromEulerAndXYZ(0, 0, -180 * LBMath.DEG_TO_RAD, 5, 6, 17);
     
-    var localP0 = LBGeometry.createVector3(10, 0, 0);
-    var localP1 = LBGeometry.createVector3(10, 3, 0);
+    var localP0 = new LBGeometry.Vector3(10, 0, 0);
+    var localP1 = new LBGeometry.Vector3(10, 3, 0);
     
     var refWorldP0 = localP0.clone().applyMatrix4(worldMatrixT0);
     var refWorldP1 = localP1.clone().applyMatrix4(worldMatrixT1);
@@ -189,13 +189,13 @@ QUnit.test( "CoordSystemState.calcVectorLocalToWorld()", function( assert ) {
     var coordSystemState = new LBPhysics.CoordSystemState();
     coordSystemState.setXfrms(worldMatrixT0);
     
-    var resultsA = { 'worldPos': LBGeometry.createVector3() };
+    var resultsA = { 'worldPos': new LBGeometry.Vector3() };
     coordSystemState.calcVectorLocalToWorld(localP0, resultsA);
     checkVector3(assert, resultsA.worldPos, refWorldP0.x, refWorldP0.y, refWorldP0.z, "ResultsA");
     
-    var resultsB = { 'worldPos': LBGeometry.createVector3(7, 8, 9),
-        'worldVel': LBGeometry.createVector3(1, 2, 3),
-        'localVel': LBGeometry.createVector3(4, 5, 6)
+    var resultsB = { 'worldPos': new LBGeometry.Vector3(7, 8, 9),
+        'worldVel': new LBGeometry.Vector3(1, 2, 3),
+        'localVel': new LBGeometry.Vector3(4, 5, 6)
     };
     coordSystemState.calcVectorLocalToWorld(localP0, resultsB);
     checkVector3(assert, resultsB.worldPos, refWorldP0.x, refWorldP0.y, refWorldP0.z, "ResultsB T0 worldPos");
@@ -217,17 +217,17 @@ QUnit.test( "CoordSystemState.calcVectorLocalToWorld()", function( assert ) {
 
 
 QUnit.test( "CoordSystemState.calcAngularVelocityAboutLocalAxis()", function( assert ) {
-    var xfrmA = LBGeometry.createMatrix4();
+    var xfrmA = new LBGeometry.Matrix4();
     xfrmA.makeFromEulerAndXYZ(0, 0, 0, 0, 0, 0);
     
-    var xfrmB = LBGeometry.createMatrix4();
+    var xfrmB = new LBGeometry.Matrix4();
     xfrmB.makeFromEulerAndXYZ(90 * LBMath.DEG_TO_RAD, 0, 0, 0, 0, 0);
     
     var coordSystemState = new LBPhysics.CoordSystemState();
     coordSystemState.setXfrms(xfrmA, 0);
     coordSystemState.setXfrms(xfrmB, 1);
     
-    var axis = LBGeometry.createVector3(0, 1, 0);
+    var axis = new LBGeometry.Vector3(0, 1, 0);
     var omega = coordSystemState.calcAngularVelocityAboutLocalAxis(axis) * LBMath.RAD_TO_DEG;
     assert.nearEqual(omega, 0, "90 deg about X-axis, Y-Axis ref");
     
@@ -251,13 +251,13 @@ QUnit.test( "CoordSystemState.calcAngularVelocityAboutLocalAxis()", function( as
 
 QUnit.test( "loadMomentInertia()", function( assert ) {
     var moment = LBPhysics.loadMomentInertia({ 'xx': 1, 'xy': 2, 'xz': 3, 'yy': 4, 'yz': 5, 'zz': 6});
-    var refMoment = LBGeometry.createMatrix3();
+    var refMoment = new LBGeometry.Matrix3();
     refMoment.set(1, 2, 3, 2, 4, 5, 3, 5, 6);
     checkMatrix(assert, moment, refMoment);
 });
 
 QUnit.test( "RigidBody()", function( assert ) {
-    var obj3DA = LBGeometry.createObject3D();
+    var obj3DA = new LBGeometry.Object3D();
     var bodyA = new LBPhysics.RigidBody(obj3DA, 10);
     
     obj3DA.translateX(5);
@@ -270,8 +270,8 @@ QUnit.test( "RigidBody()", function( assert ) {
     assert.equal(bodyA.getTotalMass(), 10, "Total Mass A");
     checkVector3(assert, bodyA.getTotalCenterOfMass(), 5, 6, 7, "Total CenterOfMass A");
     
-    var obj3DB = LBGeometry.createObject3D();
-    var bodyB = new LBPhysics.RigidBody(obj3DB, 5, LBGeometry.createVector3(10, 3, 1));
+    var obj3DB = new LBGeometry.Object3D();
+    var bodyB = new LBPhysics.RigidBody(obj3DB, 5, new LBGeometry.Vector3(10, 3, 1));
     bodyA.addPart(bodyB);
 
     obj3DB.rotateX(90 * LBMath.DEG_TO_RAD);

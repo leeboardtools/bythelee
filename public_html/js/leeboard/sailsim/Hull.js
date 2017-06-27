@@ -30,8 +30,8 @@ LBSailSim.CFVsRoughnessRatio.setup(
 LBSailSim.Hull = function(vessel) {
     this.vessel = vessel;
     
-    this.centerOfBuoyancy = LBGeometry.createVector3();
-    this.worldCenterOfBuoyancy = LBGeometry.createVector3();
+    this.centerOfBuoyancy = new LBGeometry.Vector3();
+    this.worldCenterOfBuoyancy = new LBGeometry.Vector3();
     
     /**
      * The waterline length LWL.
@@ -103,8 +103,8 @@ LBSailSim.Hull = function(vessel) {
     this.heelAngleDeg = 0;
     this.halfRhoVSq = 0;
     
-    this.workingForce = LBGeometry.createVector3();
-    this.workingVelResults = { 'worldPos' : LBGeometry.createVector3() };
+    this.workingForce = new LBGeometry.Vector3();
+    this.workingVelResults = { 'worldPos' : new LBGeometry.Vector3() };
 };
 
 LBSailSim.Hull.prototype = {

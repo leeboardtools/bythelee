@@ -518,7 +518,7 @@ LBFoils.Foil = function() {
      * leading edge of the chord. This is used to resolve the angle of attack.
      * @member {object}
      */
-    this.chordLine = LBGeometry.createLine2();
+    this.chordLine = new LBGeometry.Line2();
     
     /**
      * The z coordinate of the 2D slice.
@@ -544,10 +544,10 @@ LBFoils.Foil = function() {
      */
     this.clCdCurve = new LBFoils.ClCdCurve();
     
-    this.workingVel = LBGeometry.createVector3();
+    this.workingVel = new LBGeometry.Vector3();
     this.workingVelResults = {
-        'worldPos': LBGeometry.createVector3(), // For testing...
-        'worldVel': LBGeometry.createVector3()
+        'worldPos': new LBGeometry.Vector3(), // For testing...
+        'worldVel': new LBGeometry.Vector3()
     };
 };
 
@@ -689,7 +689,7 @@ LBFoils.Foil.prototype = {
         console.log("Deg\t\tApplPoint.x\tApplPoint.y\t\tForce.x\tForce.y\t\tMoment.z");
         var resultant = new LBPhysics.Resultant3D();
         var details = {};
-        var qInfLocal = LBGeometry.createVector2();
+        var qInfLocal = new LBGeometry.Vector2();
         for (var deg = start; deg < end; deg += delta) {
             var rad = deg * LBMath.DEG_TO_RAD;
             qInfLocal.set(Math.cos(rad) * qInfSpeed, Math.sin(rad) * qInfSpeed);

@@ -94,12 +94,12 @@ function checkOrthogonal(assert, vec, ref, msg) {
 }
 
 QUnit.test( "applyMatrix4Rotation", function( assert ) {
-    var m = LBGeometry.createMatrix4();
+    var m = new LBGeometry.Matrix4();
     var a = 30 * LBMath.DEG_TO_RAD;
     m.makeRotationZ(a);
-    m.setPosition(LBGeometry.createVector3(10, 20, 30));
+    m.setPosition(new LBGeometry.Vector3(10, 20, 30));
     
-    var v = LBGeometry.createVector3(10, 0, 0);
+    var v = new LBGeometry.Vector3(10, 0, 0);
     v.applyMatrix4(m);
     checkVector3(assert, v, 10*Math.cos(a) + 10, 10*Math.sin(a) + 20, 30, "applyMatrix4");
     
@@ -115,7 +115,7 @@ QUnit.test( "createVector2MagDeg", function( assert ) {
 
     
 QUnit.test( "normalTangent", function( assert ) {
-    var refTangent = LBGeometry.createVector2(10, 0);
+    var refTangent = new LBGeometry.Vector2(10, 0);
     var normal = LBGeometry.tangentToNormalXY(refTangent);
     
     checkVector2(assert, normal, 0, 1, "normal");
@@ -123,7 +123,7 @@ QUnit.test( "normalTangent", function( assert ) {
     var tangent = LBGeometry.normalToTangentXY(normal);
     checkVector2(assert, tangent, 1, 0, "tangent");
     
-    var refNormal = LBGeometry.createVector2(10, 20);
+    var refNormal = new LBGeometry.Vector2(10, 20);
     var normFactor = 1 / refNormal.length();
     
     tangent = LBGeometry.normalToTangentXY(refNormal);
@@ -176,7 +176,7 @@ QUnit.test( "Matrix4 Load", function( assert ) {
     var elements = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
     var mat = LBGeometry.loadMatrix4({ "elements": [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]});
     
-    var refMat = LBGeometry.createMatrix4();
+    var refMat = new LBGeometry.Matrix4();
     for (var i = 0; i < elements.length; ++i) {
         refMat.elements[i] = elements[i];
     }
@@ -184,7 +184,7 @@ QUnit.test( "Matrix4 Load", function( assert ) {
     
     mat = LBGeometry.loadMatrix4({ "origin": { 'x': 10, 'y': 11, 'z': 12 } }, mat);
     refMat.identity();
-    refMat.setPosition(LBGeometry.createVector3(10, 11, 12));
+    refMat.setPosition(new LBGeometry.Vector3(10, 11, 12));
     checkMatrix(assert, mat, refMat, "Origin");
     
     
@@ -193,13 +193,13 @@ QUnit.test( "Matrix4 Load", function( assert ) {
     checkMatrix(assert, mat, refMat, "Euler");
     
     LBGeometry.loadMatrix4({ 'origin': { 'x':10, 'y':11, 'z':15}, 'rotation': { 'qx': 1, 'qy':2, 'qz':3, 'qw':4}}, mat);
-    refMat.makeRotationFromQuaternion(LBGeometry.createQuaternion(1, 2, 3, 4));
-    refMat.setPosition(LBGeometry.createVector3(10, 11, 15));
+    refMat.makeRotationFromQuaternion(new LBGeometry.Quaternion(1, 2, 3, 4));
+    refMat.setPosition(new LBGeometry.Vector3(10, 11, 15));
     checkMatrix(assert, mat, refMat, "Quaternion-Origin");
 });
 
 QUnit.test( "makeOrthogonal", function( assert ) {
-    var vecA = LBGeometry.createVector3(2, 3, 4);
+    var vecA = new LBGeometry.Vector3(2, 3, 4);
     var result = LBGeometry.makeOrthogonal(vecA);
     checkOrthogonal(assert, result, vecA, "2, 3, 4");
     

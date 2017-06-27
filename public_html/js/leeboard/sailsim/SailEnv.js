@@ -320,7 +320,7 @@ LBSailSim.Wind.prototype = {
         var vy = 0;
 
         if (!vel) {
-            return LBGeometry.createVector3(vx, vy);
+            return new LBGeometry.Vector3(vx, vy);
         }
         vel.x = vx;
         vel.y = vy;
@@ -385,7 +385,7 @@ LBSailSim.Water.prototype = {
         //vx = -0.5;
 
         if (!vel) {
-            return new LBGeometry.createVector3(vx, vy, 0);
+            return new LBGeometry.Vector3(vx, vy, 0);
         }
         vel.x = vx;
         vel.y = vy;

@@ -17,27 +17,8 @@ Run:
 
 
 TODO:
-Sails:
-Need to figure out how to model the sail images as sprites. Same with rudder.
-Also need heeling boat sprites.
+Lateral hull resistance > longitudinal hull resistance
 
-Heel angles of:
-0
-5
-10
-20
-30
-45
+Make tiller control nonlinear (need tiller vs. rudder)
 
-Sail trim angles of:
-0
-5
-10
-20
-30
-45
-60
-80
-
-8x6 = 48
-
+Add wake sprites

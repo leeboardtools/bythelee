@@ -46,11 +46,11 @@ LBPhaser.P2Link = function(phaserEnv) {
     this.stageUpdateCount = 0;
 };
 
-LBPhaser.P2Link._working3DPos = LBGeometry.createVector3();
+LBPhaser.P2Link._working3DPos = new LBGeometry.Vector3();
 LBPhaser.P2Link._workingEuler;
-LBPhaser.P2Link._workingPlane = LBGeometry.createPlane();
-LBPhaser.P2Link._working3DNormal = LBGeometry.createVector3();
-LBPhaser.P2Link._workingSphere = LBGeometry.createSphere();
+LBPhaser.P2Link._workingPlane = new LBGeometry.Plane();
+LBPhaser.P2Link._working3DNormal = new LBGeometry.Vector3();
+LBPhaser.P2Link._workingSphere = new LBGeometry.Sphere();
 
 LBPhaser.P2Link.prototype = {
     /**
@@ -295,7 +295,7 @@ LBPhaser.P2Link.getP2TimeStep = function(p2) {
  */
 LBPhaser.P2Link.createSpriteFromData = function(game, data) {
     var sprite = new Phaser.Sprite(game, data.x, data.y, data.key, data.frame);
-    sprite.lbLocalOffset = LBGeometry.createVector3();    
+    sprite.lbLocalOffset = new LBGeometry.Vector3();    
     Leeboard.copyCommonProperties(sprite, data);
     return sprite;
 };
@@ -308,7 +308,7 @@ LBPhaser.P2Link.createSpriteFromData = function(game, data) {
  */
 LBPhaser.P2Link.createImageFromData = function(game, data) {
     var sprite = new Phaser.Image(game, data.x, data.y, data.key, data.frame);
-    sprite.lbLocalOffset = LBGeometry.createVector3();    
+    sprite.lbLocalOffset = new LBGeometry.Vector3();    
     Leeboard.copyCommonProperties(sprite, data);
     return sprite;
 };

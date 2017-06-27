@@ -27,55 +27,6 @@
  */
 var LBGeometry = LBGeometry || {};
 
-/**
- * The 3D point (0, 0, 0)
- * @constant
- * @type LBGeometry.createVector3
- */
-LBGeometry.ORIGIN = new THREE.Vector3();
-
-/**
- * A vector representing the x-axis.
- * @constant
- * @type LBGeometry.createVector3
- */
-LBGeometry.X_AXIS = new THREE.Vector3(1, 0, 0);
-
-/**
- * A vector representing the y-axis.
- * @constant
- * @type LBGeometry.createVector3
- */
-LBGeometry.Y_AXIS = new THREE.Vector3(0, 1, 0);
-
-/**
- * A vector representing the z-axis.
- * @constant
- * @type LBGeometry.createVector3
- */
-LBGeometry.Z_AXIS = new THREE.Vector3(0, 0, 1);
-
-/**
- * A plane representing the x-y plane passing through the origin.
- * @constant
- * @type LBGeometry.createPlane
- */
-LBGeometry.XY_PLANE = new THREE.Plane(LBGeometry.Z_AXIS, 0);
-
-/**
- * A plane representing the z-x plane passing through the origin.
- * @constant
- * @type LBGeometry.createPlane
- */
-LBGeometry.ZX_PLANE = new THREE.Plane(LBGeometry.Y_AXIS, 0);
-
-/**
- * A plane representing the y-z plane passing through the origin.
- * @constant
- * @type LBGeometry.createPlane
- */
-LBGeometry.YZ_PLANE = new THREE.Plane(LBGeometry.X_AXIS, 0);
-
 
 /**
  * Calculates a 2D normal from a tangent.
@@ -87,7 +38,7 @@ LBGeometry.tangentToNormalXY = function(tangent, store) {
     var nx = -tangent.y;
     var ny = tangent.x;
     if (!store) {
-        store = new THREE.Vector2(nx, ny);
+        store = new LBGeometry.Vector2(nx, ny);
     }
     else {
         store.set(nx, ny);
@@ -105,7 +56,7 @@ LBGeometry.normalToTangentXY = function(normal, store) {
     var tx = normal.y;
     var ty = -normal.x;
     if (!store) {
-        store = new THREE.Vector2(tx, ty);
+        store = new LBGeometry.Vector2(tx, ty);
     }
     else {
         store.set(tx, ty);
@@ -113,25 +64,34 @@ LBGeometry.normalToTangentXY = function(normal, store) {
     return store.normalize();
 };
 
+
 /**
- * Creates a 2D vector/point.
- * @param {number} x    Initial x coordinate value.
- * @param {number} y    Initial y coordinate value.
+ * A 2D vector, our encapsulation of {@link LBGeometry.Vector2}.
+ * @constructor
+ * @param {number} [x=0]    The x coordinate.
+ * @param {number} [y=0]    The y coordinate.
+ * @returns {LBGeometry.Vector2}
  */
-LBGeometry.createVector2 = function(x, y) {
-    return new THREE.Vector2(x, y);
+LBGeometry.Vector2 = function(x, y) {
+    THREE.Vector2.call(this, x, y);
 };
+LBGeometry.Vector2.prototype = Object.create(THREE.Vector2.prototype);
+LBGeometry.Vector2.prototype.constructor = LBGeometry.Vector2;
+LBGeometry.Vector2.prototype.clone = function() {
+    return new LBGeometry.Vector2(this.x, this.y);
+}
 
 /**
  * Creates a 2D vector from a magnitude and angle in degrees.
  * @param {number} mag  The magnitude.
  * @param {number} deg  The angle, in degrees, of the vector relative to the x axis.
+ * @returns {LBGeometry.Vector2}
  */
 LBGeometry.createVector2MagDeg = function(mag, deg) {
     var rad = LBMath.DEG_TO_RAD * deg;
     var cos = Math.cos(rad);
     var sin = Math.sin(rad);
-    return new THREE.Vector2(cos * mag, sin * mag);
+    return new LBGeometry.Vector2(cos * mag, sin * mag);
 };
 
 /**
@@ -140,7 +100,7 @@ LBGeometry.createVector2MagDeg = function(mag, deg) {
  * @param {object} v    The other vector.
  * @returns {Number}    The angle.
  */
-THREE.Vector2.prototype.angleToSigned = function(v) {
+LBGeometry.Vector2.prototype.angleToSigned = function(v) {
     var lengthSquareds = this.lengthSq() * v.lengthSq();
     if (LBMath.isLikeZero(lengthSquareds)) {
         return 0;
@@ -170,7 +130,7 @@ THREE.Vector2.prototype.angleToSigned = function(v) {
  * Sets the vector's components to all zero.
  * @returns {object} this.
  */
-THREE.Vector2.prototype.zero = function() {
+LBGeometry.Vector2.prototype.zero = function() {
     this.x = 0;
     this.y = 0;
     return this;
@@ -181,7 +141,7 @@ THREE.Vector2.prototype.zero = function() {
  * @implements {THREE.Vector2#normalize}
  * @returns {object} this.
  */
-THREE.Vector2.prototype.normalize = function() {
+LBGeometry.Vector2.prototype.normalize = function() {
     var len = this.length();
     if (LBMath.isLikeZero(len)) {
         return this.zero();
@@ -196,49 +156,41 @@ THREE.Vector2.prototype.normalize = function() {
  * Determines if all the components of the vector are zero.
  * @returns {Boolean}   True if all components of the vector are zero.
  */
-THREE.Vector2.prototype.isZero = function() {
+LBGeometry.Vector2.prototype.isZero = function() {
     return this.x === 0 && this.y === 0;
 };
 
 
 /**
- * Logs a 2D vector to the console.
- * @param {object} vec  The vector to log.
- * @param {String} msg  The optional message to precede the vector.
+ * Our encapsulation of {@link THREE.Vector3}, a 3D vector.
+ * @constructor
+ * @param {number} [x=0]    The x coordinate.
+ * @param {number} [y=0]    The y coordinate.
+ * @param {number} [z=0]    The z coordinate.
+ * @returns {LBGeometry.Vector3}
  */
-LBGeometry.logVector2 = function(vec, msg) {
-    msg = msg || "";
-    console.log(msg + vec.x + "\t" + vec.y);
+LBGeometry.Vector3 = function(x, y, z) {
+    THREE.Vector3.call(this, x, y, z);
+};
+
+LBGeometry.Vector3.prototype = Object.create(THREE.Vector3.prototype);
+LBGeometry.Vector3.constructor = LBGeometry.Vector3;
+
+/**
+ * Clones the vector.
+ * @returns {LBGeometry.Vector3}
+ */
+LBGeometry.Vector3.prototype.clone = function() {
+    return new LBGeometry.Vector3(this.x, this.y, this.z);
 };
 
 
 /**
- * Logs a 3D vector to the console.
- * @param {object} vec  The vector to log.
- * @param {String} msg  The optional message to precede the vector.
- */
-LBGeometry.logVector3 = function(vec, msg) {
-    msg = msg || "";
-    console.log(msg + vec.x + "\t" + vec.y + "\t" + vec.z);
-};
-
-
-/**
- * Creates a 3D vector/point.
- * @param {number} x    Initial x coordinate value.
- * @param {number} y    Initial y coordinate value.
- * @param {number} z      Initial z coordinate value.
- */
-LBGeometry.createVector3 = function(x, y, z) {
-    return new THREE.Vector3(x, y, z);
-};
-
-/**
- * Extension to THREE.Vector3, applies only the rotation portion of a Matrix4 to the vector.
+ * Applies only the rotation portion of a Matrix4 to the vector.
  * @param {type} m  The matrix to apply.
- * @returns {THREE.Vector3} this.
+ * @returns {LBGeometry.Vector3} this.
  */
-THREE.Vector3.prototype.applyMatrix4Rotation = function(m) {
+LBGeometry.Vector3.prototype.applyMatrix4Rotation = function(m) {
     var x = this.x, y = this.y, z = this.z;
     var e = m.elements;
 
@@ -251,9 +203,9 @@ THREE.Vector3.prototype.applyMatrix4Rotation = function(m) {
 /**
  * Normalizes the vector, this version handles the zero length case.
  * @implements {THREE.Vector3#normalize}
- * @returns {object} this.
+ * @returns {LBGeometry.Vector3} this.
  */
-THREE.Vector3.prototype.normalize = function() {
+LBGeometry.Vector3.prototype.normalize = function() {
     var len = this.length();
     if (LBMath.isLikeZero(len)) {
         return this.zero();
@@ -270,9 +222,9 @@ THREE.Vector3.prototype.normalize = function() {
  * z coordinate to 0 if the object being copied does not have a z.
  * @implements {THREE.Vector3#copy}
  * @param {object} vec  The vector to copy.
- * @returns {object}    this.
+ * @returns {LBGeometry.Vector3} this.
  */
-THREE.Vector3.prototype.copy = function(vec) {
+LBGeometry.Vector3.prototype.copy = function(vec) {
     this.x = vec.x;
     this.y = vec.y;
     this.z = vec.z || 0;
@@ -284,9 +236,9 @@ THREE.Vector3.prototype.copy = function(vec) {
  * z coordinate to 0 if the object being copied does not have a z.
  * @implements {THREE.Vector3#copy}
  * @param {object} vec  The vector to copy.
- * @returns {object}    this.
+ * @returns {LBGeometry.Vector3} this.
  */
-THREE.Vector3.prototype.add = function(vec) {
+LBGeometry.Vector3.prototype.add = function(vec) {
     this.x += vec.x;
     this.y += vec.y;
     this.z += vec.z || 0;
@@ -295,9 +247,9 @@ THREE.Vector3.prototype.add = function(vec) {
 
 /**
  * Extension to {THREE.Vector3}, sets the vector's components to all zero.
- * @returns {object} this.
+ * @returns {LBGeometry.Vector3} this.
  */
-THREE.Vector3.prototype.zero = function() {
+LBGeometry.Vector3.prototype.zero = function() {
     this.x = 0;
     this.y = 0;
     this.z = 0;
@@ -308,7 +260,7 @@ THREE.Vector3.prototype.zero = function() {
  * Determines if all the components of the vector are zero.
  * @returns {Boolean}   True if all components of the vector are zero.
  */
-THREE.Vector3.prototype.isZero = function() {
+LBGeometry.Vector3.prototype.isZero = function() {
     return this.x === 0 && this.y === 0 && this.z === 0;
 };
 
@@ -321,7 +273,7 @@ THREE.Vector3.prototype.isZero = function() {
  * @returns {object}    The loaded vector.
  */
 LBGeometry.loadVector2 = function(data, vec) {
-    vec = vec || new THREE.Vector2();
+    vec = vec || new LBGeometry.Vector2();
     if (!data) {
         vec.zero();
     }
@@ -341,7 +293,7 @@ LBGeometry.loadVector2 = function(data, vec) {
  * @returns {object}    The loaded vector.
  */
 LBGeometry.loadVector3 = function(data, vec) {
-    vec = vec || new THREE.Vector3();
+    vec = vec || new LBGeometry.Vector3();
     if (!data) {
         vec.zero();
     }
@@ -360,7 +312,7 @@ LBGeometry.loadVector3 = function(data, vec) {
  * @returns {object}    A new vector representing vecA + vecB
  */
 LBGeometry.addVectors2 = function(vecA, vecB) {
-    var vec = new THREE.Vector2(vecA.x, vecA.y);
+    var vec = new LBGeometry.Vector2(vecA.x, vecA.y);
     vec.add(vecB);
     return vec;
 };
@@ -372,7 +324,7 @@ LBGeometry.addVectors2 = function(vecA, vecB) {
  * @returns {object}    A new vector representing vecA + vecB
  */
 LBGeometry.addVectors3 = function(vecA, vecB) {
-    var vec = new THREE.Vector3(vecA.x, vecA.y, vecA.z);
+    var vec = new LBGeometry.Vector3(vecA.x, vecA.y, vecA.z);
     vec.add(vecB);
     return vec;
 };
@@ -384,7 +336,7 @@ LBGeometry.addVectors3 = function(vecA, vecB) {
  * @returns {object}    A new vector representing vecA - vecB
  */
 LBGeometry.subVectors2 = function(vecA, vecB) {
-    var vec = new THREE.Vector2(vecA.x, vecA.y);
+    var vec = new LBGeometry.Vector2(vecA.x, vecA.y);
     vec.sub(vecB);
     return vec;
 };
@@ -396,7 +348,7 @@ LBGeometry.subVectors2 = function(vecA, vecB) {
  * @returns {object}    A new vector representing vecA - vecB
  */
 LBGeometry.subVectors3 = function(vecA, vecB) {
-    var vec = new THREE.Vector3(vecA.x, vecA.y, vecA.z);
+    var vec = new LBGeometry.Vector3(vecA.x, vecA.y, vecA.z);
     vec.sub(vecB);
     return vec;
 };
@@ -408,7 +360,7 @@ LBGeometry.subVectors3 = function(vecA, vecB) {
  * @returns {object}    A new 3D vector representing vecA X vecB
  */
 LBGeometry.crossVectors2 = function(vecA, vecB) {
-    return new THREE.Vector3(0, 0, vecA.x * vecB.y - vecA.y * vecB.x);
+    return new LBGeometry.Vector3(0, 0, vecA.x * vecB.y - vecA.y * vecB.x);
 };
 
 /**
@@ -418,27 +370,18 @@ LBGeometry.crossVectors2 = function(vecA, vecB) {
  * @returns {object}    A new vector representing vecA X vecB
  */
 LBGeometry.crossVectors3 = function(vecA, vecB) {
-    var vec = new THREE.Vector3(vecA.x, vecA.y, vecA.z);
+    var vec = new LBGeometry.Vector3(vecA.x, vecA.y, vecA.z);
     vec.cross(vecB);
     return vec;
 };
 
 /**
  * Determines if all the components of a vector are near zero.
- * @param {object} vec  The vector of interest.
+ * @param {LBGeometry.Vector2|LBGeometry.Vector3} vec  The vector of interest.
  * @returns {Boolean}   True if all three components can be treated as 0.
  */
-LBGeometry.isVector2LikeZero = function(vec) {
-    return LBMath.isLikeZero(vec.x) && LBMath.isLikeZero(vec.y);
-};
-
-/**
- * Determines if all the components of a vector are near zero.
- * @param {object} vec  The vector of interest.
- * @returns {Boolean}   True if all three components can be treated as 0.
- */
-LBGeometry.isVector3LikeZero = function(vec) {
-    return LBMath.isLikeZero(vec.x) && LBMath.isLikeZero(vec.y) && LBMath.isLikeZero(vec.z);
+LBGeometry.isVectorLikeZero = function(vec) {
+    return LBMath.isLikeZero(vec.x) && LBMath.isLikeZero(vec.y) && (!vec.z || LBMath.isLikeZero(vec.z));
 };
 
 /**
@@ -458,10 +401,10 @@ LBGeometry.clampVectorMag = function(vec, mag) {
  * Sets a vector such that it is orthogonal to another vector.
  * @param {object} refVec The 3D axis to make the vec orthogonal to.
  * @param {object} [store]  If defined, the vector to be made orthogonal
- * @returns {object}    vec.
+ * @returns {object}    The orthogonal vector.
  */
 LBGeometry.makeOrthogonal = function(refVec, store) {
-    store = store || new THREE.Vector3();
+    store = store || new LBGeometry.Vector3();
     // Orthogonality is defined by vec dot axis === 0, or vec.x * axis.x + vec.y * axis.y + vec.z * axis.z === 0.
     // We'll just rotate the x and y coordinates and then solve for the z coordinate.
     store.x = refVec.y;
@@ -475,16 +418,23 @@ LBGeometry.makeOrthogonal = function(refVec, store) {
     return store;
 };
 
+
 /**
- * Creates a quaternion.
- * @param {number} x    Initial x value.
- * @param {number} y    Initial y value.
- * @param {number} z    Initial z value.
- * @param {number} w    Initial w value.
+ * Our encapsulation of {@link THREE.Quaternion}.
+ * @param {number} [x=0]    Initial x value.
+ * @param {number} [y=0]    Initial y value.
+ * @param {number} [z=0]    Initial z value.
+ * @param {number} [w=1]    Initial w value.
  */
-LBGeometry.createQuaternion = function(x, y, z, w) {
-    return new THREE.Quaternion(x, y, z, w);
+LBGeometry.Quaternion = function(x, y, z, w) {
+    THREE.Quaternion.call(this, x, y, z, w);
 };
+LBGeometry.Quaternion.prototype = Object.create(THREE.Quaternion.prototype);
+LBGeometry.Quaternion.prototype.constructor = LBGeometry.Quaternion;
+LBGeometry.Quaternion.prototype.clone = function() {
+    return new LBGeometry.Quaternion(this.x, this.y, this.z, this.w);
+};
+
 
 /**
  * Loads a quaternion from a data object.
@@ -493,7 +443,7 @@ LBGeometry.createQuaternion = function(x, y, z, w) {
  * @returns {object}    The quaternion.
  */
 LBGeometry.loadQuaternion = function(data, quat) {
-    quat = quat || new THREE.Quaternion();
+    quat = quat || new LBGeometry.Quaternion();
     if (!data) {
         quat.set(0, 0, 0, 1);
     }
@@ -514,10 +464,30 @@ LBGeometry.loadQuaternion = function(data, quat) {
  * @returns {object}    The THREE.Quaternion compatible quaternion.
  */
 LBGeometry.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
-    var euler = new THREE.Euler(xRad, yRad, zRad);
-    var quaternion = new THREE.Quaternion();
+    var euler = new LBGeometry.Euler(xRad, yRad, zRad);
+    var quaternion = new LBGeometry.Quaternion();
     quaternion.setFromEuler(euler);
     return quaternion;
+};
+
+
+/**
+ * An object representing a set of Euler angles, our encapsulation of
+ * {@link THREE.Euler}.
+ * @constructor
+ * @param {number} [xRad=0] The rotation about the x axis in radians.
+ * @param {number} [yRad=0] The rotation about the y axis in radians.
+ * @param {number} [zRad=0] The rotation about the z axis in radians.
+ * @param {String} [order='XYZ']    The order of rotation.
+ * @returns {LBGeometry.Euler}    The Euler object.
+ */
+LBGeometry.Euler = function(xRad, yRad, zRad, order) {
+    THREE.Euler.call(this, xRad, yRad, zRad, order);
+};
+LBGeometry.Euler.prototype = Object.create(THREE.Euler.prototype);
+LBGeometry.Euler.prototype.constructor = LBGeometry.Euler;
+LBGeometry.Euler.prototype.clone = function() {
+    return new LBGeometry.Euler(this.x, this.y, this.z, this.order);
 };
 
 /**
@@ -525,11 +495,11 @@ LBGeometry.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
  * @param {number} xRad The rotation about the x axis in radians.
  * @param {number} yRad The rotation about the y axis in radians.
  * @param {number} zRad The rotation about the z axis in radians.
- * @param {object} order    The order of rotation.
- * @returns {object}    The THREE.Euler compatible object.
+ * @param {String} order    The order of rotation.
+ * @returns {LBGeometry.Euler}    The Euler object.
  */
 LBGeometry.createEulerRad = function(xRad, yRad, zRad, order) {
-    return new THREE.Euler(xRad, yRad, zRad, order);
+    return new LBGeometry.Euler(xRad, yRad, zRad, order);
 };
 
 /**
@@ -537,11 +507,11 @@ LBGeometry.createEulerRad = function(xRad, yRad, zRad, order) {
  * @param {number} xDeg The rotation about the x axis in degrees.
  * @param {number} yDeg The rotation about the y axis in degrees.
  * @param {number} zDeg The rotation about the z axis in degrees.
- * @param {object} order    The order of rotation.
- * @returns {object}    The THREE.Euler compatible object.
+ * @param {String} order    The order of rotation.
+ * @returns {LBGeometry.Euler}    The Euler object.
  */
 LBGeometry.createEulerDeg = function(xDeg, yDeg, zDeg, order) {
-    return new THREE.Euler(xDeg * LBMath.DEG_TO_RAD, yDeg * LBMath.DEG_TO_RAD, zDeg * LBMath.DEG_TO_RAD, order);
+    return new LBGeometry.Euler(xDeg * LBMath.DEG_TO_RAD, yDeg * LBMath.DEG_TO_RAD, zDeg * LBMath.DEG_TO_RAD, order);
 };
 
 /**
@@ -551,7 +521,7 @@ LBGeometry.createEulerDeg = function(xDeg, yDeg, zDeg, order) {
  * @returns {object}    The euler object.
  */
 LBGeometry.loadEuler = function(data, euler) {
-    euler = euler || new THREE.Euler();
+    euler = euler || new LBGeometry.Euler();
     if (!data) {
         euler.set(0, 0, 0, THREE.Euler.DefaultOrder);
     }
@@ -574,48 +544,61 @@ LBGeometry.loadEuler = function(data, euler) {
 
 
 /**
- * Creates a 2D line segment.
- * @param {object} start    The start of the line segment.
- * @param {object} end  The end of the line segment.
- */
-LBGeometry.createLine2 = function(start, end) {
-    return new LBGeometry.Line2(start, end);
-};
-
-/**
- * A 2D line segment, modeled after THREE.Line3.
+ * A 2D line segment, modeled after {@link THREE.Line3}.
  * @constructor
- * @param {object} start    The start of the line segment.
- * @param {object} end  The end of the line segment.
+ * @param {object} [start=LBGeometry.ZERO]    The start of the line segment.
+ * @param {object} [end=LBGeometry.ZERO]  The end of the line segment.
  * @returns {LBGeometry.Line2}
  */
 LBGeometry.Line2 = function(start, end) {
-    this.start = Leeboard.copyCommonProperties(new THREE.Vector2(), start);
-    this.end = Leeboard.copyCommonProperties(new THREE.Vector2(), end);
+    this.start = Leeboard.copyCommonProperties(new LBGeometry.Vector2(), start);
+    this.end = Leeboard.copyCommonProperties(new LBGeometry.Vector2(), end);
 };
 
 LBGeometry.Line2.prototype = {
     constructor: LBGeometry.Line2,
     
+    /**
+     * Creates a copy of this.
+     * @returns {LBGeometry.Line2}
+     */
     clone: function() {
         return new LBGeometry.Line2(this.start, this.end);
     },
     
+    /**
+     * Sets this line to match the settings of another line.
+     * @param {LBGeometry.Line2} other  The line to be copied.
+     * @returns {LBGeometry.Line2}  this.
+     */
     copy: function(other) {
         this.start.copy(other.start);
         this.end.copy(other.end);
         return this;
     },
     
+    /**
+     * Returns the end minus the start.
+     * @param {LBGeometry.Vector2} [store]  If defined the vector to receive the difference.
+     * @returns {LBGeometry.Vector2}    The delta.
+     */
     delta: function(store) {
-        store = store || new THREE.Vector2();
+        store = store || new LBGeometry.Vector2();
         return store.subVectors(this.end, this.start);
     },
     
+    /**
+     * 
+     * @returns {Number}    The length of the line squared.
+     */
     lengthSq: function() {
         return this.start.distanceToSquared(this.end);
     },
     
+    /**
+     * 
+     * @returns {Number}    The length of the line.
+     */
     length: function() {
         return this.start.distanceTo(this.end);
     }
@@ -628,7 +611,7 @@ LBGeometry.Line2.prototype = {
  * @returns {object}    The loaded line.
  */
 LBGeometry.loadLine2 = function(data, line) {
-    line = line || LBGeometry.createLine2();
+    line = line || new LBGeometry.Line2();
     if (!data) {
         line.start.zero();
         line.end.zero();
@@ -641,14 +624,22 @@ LBGeometry.loadLine2 = function(data, line) {
     return line;
 };
 
+
 /**
- * Creates a 3D line.
- * @param {object} start    The starting point of the line.
- * @param {object} end  The ending point of the line.
- * @returns {THREE.Line3}   The line.
+ * A 3D line, our encapsulation of {@link THREE.Line3}..
+ * @constructor
+ * @param {LBGeometry.Vector3} [start=LBGeometry.ZERO]    The starting point of the line.
+ * @param {LBGeometry.Vector3} [end=LBGeometry.ZERO]  The ending point of the line.
+ * @returns {LBGeometry.Line3}   The line.
  */
-LBGeometry.createLine3 = function(start, end) {
-    return new THREE.Line3(start, end);
+LBGeometry.Line3 = function(start, end) {
+    THREE.Line3.call(this, start, end);
+};
+LBGeometry.Line3.prototype = Object.create(THREE.Line3.prototype);
+LBGeometry.Line3.prototype.constructor = LBGeometry.Line3;
+
+LBGeometry.Line3.prototype.clone = function() {
+    return new LBGeometry.Line3(this.start, this.end);
 };
 
 /**
@@ -658,7 +649,7 @@ LBGeometry.createLine3 = function(start, end) {
  * @returns {object}    The loaded line.
  */
 LBGeometry.loadLine3 = function(data, line) {
-    line = line || LBGeometry.createLine3();
+    line = line || new LBGeometry.Line3();
     if (!data) {
         line.start.zero();
         line.end.zero();
@@ -672,22 +663,26 @@ LBGeometry.loadLine3 = function(data, line) {
 };
 
 /**
- * Creates a plane.
- * @param {object} normal   A normal to the plane.
- * @param {object} constant The negative distance from the origin to the plane along
+ * A plane, our encapsulation of {@link THREE.Plane}.
+ * @constructor
+ * @param {LBGeometry.Vector3} [normal=LBGeometry.X_AXIS]   A normal to the plane.
+ * @param {number} [constant=LBGeometry.ORIGIN] The negative distance from the origin to the plane along
  * the normal vector.
- * @returns {THREE.Plane}
+ * @returns {LBGeometry.Plane}
  */
-LBGeometry.createPlane = function(normal, constant) {
-    return new THREE.Plane(normal, constant);
+LBGeometry.Plane = function(normal, constant) {
+    THREE.Plane.call(this, normal, constant);
 };
+
+LBGeometry.Plane.prototype = Object.create(THREE.Plane.prototype);
+LBGeometry.Plane.prototype.constructor = LBGeometry.Plane;
 
 /**
  * Determines the parametric value along a line where the line intersects a plane.
  * The parametric value is 0 at line.start and 1 and line.start + u, where u is the
  * unit vector in the direction of the line. 
- * @param {object} plane  The plane of interest.
- * @param {object} line The line of interest.
+ * @param {LBGeometry.Plane} plane  The plane of interest.
+ * @param {LBGeometry.Line3} line The line of interest.
  * @returns {Math.NaN|number}   The parametric value, Math.NaN if the line is parallel
  * to the plane or a point.
  */
@@ -712,14 +707,14 @@ LBGeometry.intersectLineWithPlane = function(plane, line) {
  * Determines the point where a line intersects a plane. This differs from THREE.Plane.intersectLine()
  * in that Plane treats the line as a line segment, and if the line segment does not intersect the
  * plane then it returns undefined. This function treats the line as a true line.
- * @param {type} plane  The plane of interest.
- * @param {type} line   The line of interest.
- * @param {LBGeometry.createVector3} [store]    If defined the 3D vector to receive the intersection point.
- * @returns {undefined|object}  The intersection point, undefined if the line does not
+ * @param {LBGeometry.Plane} plane  The plane of interest.
+ * @param {LBGeometry.Line3} line   The line of interest.
+ * @param {LBGeometry.Vector3} [store]    If defined the 3D vector to receive the intersection point.
+ * @returns {undefined|LBGeometry.Vector3}  The intersection point, undefined if the line does not
  * intersect the plane.
  */
 LBGeometry.getLinePlaneIntersection = function(plane, line, store) {
-    store = store || LBGeometry.createVector3();
+    store = store || new LBGeometry.Vector3();
     store.copy(line.end).sub(line.start);
     var nDotDir = plane.normal.dot(store);
     if (LBMath.isLikeZero(nDotDir)) {
@@ -732,29 +727,44 @@ LBGeometry.getLinePlaneIntersection = function(plane, line, store) {
     return store;
 };
 
+
 /**
- * Creates a sphere
- * @param {LBGeometry.createVector3} center The center of the sphere.
- * @param {number} radius   The radius of the sphere.
+ * A sphere, our encapsulation of {@link THREE.Sphere}.
+ * @constructor
+ * @param {LBGeometry.Vector3} [center=LBGeometry.ORIGIN] The center of the sphere.
+ * @param {number} [radius=0]   The radius of the sphere.
  * @returns {THREE.Sphere}
  */
-LBGeometry.createSphere = function(center, radius) {
-    return new THREE.Sphere(center, radius);
+LBGeometry.Sphere = function(center, radius) {
+    THREE.Sphere.call(this, center, radius);
+};
+LBGeometry.Sphere.prototype = Object.create(THREE.Sphere.prototype);
+LBGeometry.Sphere.prototype.constructor = LBGeometry.Sphere;
+LBGeometry.Sphere.prototype.clone = function() {
+    return new LBGeometry.Sphere(this.center, this.radius);
 };
 
 
 /**
- * Creates a 3x3 matrix.
+ * A 3x3 matrix, our encapsulation of {@link THREE.Matrix3}.
+ * @returns {LBGeometry.Matrix3}
  */
-LBGeometry.createMatrix3 = function() {
-    return new THREE.Matrix3();
+LBGeometry.Matrix3 = function() {
+    THREE.Matrix3.call(this);
+};
+LBGeometry.Matrix3.prototype = Object.create(THREE.Matrix3.prototype);
+LBGeometry.Matrix3.prototype.constructor = LBGeometry.Matrix3;
+
+LBGeometry.Matrix3.prototype.clone = function() {
+    var matrix = new LBGeometry.Matrix3();
+    return matrix.copy(this);
 };
 
 /**
  * Extension to {THREE.Matrix3}, sets all the elements of the matrix to 0.
  * @returns {undefined}
  */
-THREE.Matrix3.prototype.zero = function() {
+LBGeometry.Matrix3.prototype.zero = function() {
     var e = this.elements;
     e[0] = e[1] = e[2] = e[3] = e[4] = e[5] = e[6] = e[7] = e[8] = 0;
     return this;
@@ -772,7 +782,7 @@ LBGeometry.loadMatrix3 = function(data, mat) {
         mat.identity();
     }
     else {
-        mat = new THREE.Matrix3();
+        mat = new LBGeometry.Matrix3();
     }
     
     if (!data) {
@@ -794,11 +804,20 @@ LBGeometry.loadMatrix3 = function(data, mat) {
 
 
 /**
- * Creates a 4x4 matrix for performing coordinate transformations.
+ * A 4x4 matrix, our encapsulation of {@link THREE.Matrix4}.
+ * @returns {LBGeometry.Matrix3}
  */
-LBGeometry.createMatrix4 = function() {
-    return new THREE.Matrix4();
+LBGeometry.Matrix4 = function() {
+    THREE.Matrix4.call(this);
 };
+LBGeometry.Matrix4.prototype = Object.create(THREE.Matrix4.prototype);
+LBGeometry.Matrix4.prototype.constructor = LBGeometry.Matrix4;
+
+LBGeometry.Matrix4.prototype.clone = function() {
+    var matrix = new LBGeometry.Matrix4();
+    return matrix.copy(this);
+};
+
 
 /**
  * Loads a 4x4 matrix from a data object.
@@ -811,7 +830,7 @@ LBGeometry.loadMatrix4 = function(data, mat) {
         mat.identity();
     }
     else {
-        mat = new THREE.Matrix4();
+        mat = new LBGeometry.Matrix4();
     }
     
     if (!data) {
@@ -853,7 +872,7 @@ LBGeometry.loadMatrix4 = function(data, mat) {
 
 
 /**
- * Extension to THREE.Matrix4, sets the position components of the matrix using
+ * Extension to {@link THREE.Matrix4}, sets the position components of the matrix using
  * separate x,y, and z coordinates.
  * @param {number} x    The x coordinate.
  * @param {number} y    The y coordinate.
@@ -869,7 +888,7 @@ THREE.Matrix4.prototype.setXYZ = function(x, y, z) {
 };
 
 /**
- * Extension to THREE.Matrix4, sets the matrix to a rotation defined by Euler angles
+ * Extension to {@link LBGeometry.Matrix4}, sets the matrix to a rotation defined by Euler angles
  * followed by a translation to x,y,z coordinates.
  * @param {number} xRad   The rotation about the x axis, in radians.
  * @param {number} yRad   The rotation about the y axis, in radians.
@@ -879,8 +898,8 @@ THREE.Matrix4.prototype.setXYZ = function(x, y, z) {
  * @param {number} pz    The z coordinate.
  * @returns {Leeboard.Matrix4}  this.
  */
-THREE.Matrix4.prototype.makeFromEulerAndXYZ = function(xRad, yRad, zRad, px, py, pz) {
-    this.makeRotationFromEuler(new THREE.Euler(xRad, yRad, zRad));
+LBGeometry.Matrix4.prototype.makeFromEulerAndXYZ = function(xRad, yRad, zRad, px, py, pz) {
+    this.makeRotationFromEuler(new LBGeometry.Euler(xRad, yRad, zRad));
     this.setXYZ(px, py, pz);
     return this;
 };
@@ -891,7 +910,7 @@ THREE.Matrix4.prototype.makeFromEulerAndXYZ = function(xRad, yRad, zRad, px, py,
  * @param {object} mat  The matrix to log.
  * @param {String} msg  The optional message to precede the vector.
  */
-LBGeometry.logMatrix4 = function(mat, msg) {
+LBGeometry.consoleLogMatrix4 = function(mat, msg) {
     var text = "";
     if (Leeboard.isVar(msg)) {
         text = "\n" + msg + "\n";
@@ -911,12 +930,15 @@ LBGeometry.logMatrix4 = function(mat, msg) {
 
 
 /**
- * Creates a 3D object.
- * @returns {object}
+ * A 3D object, our encapsulation of {@link THREE.Object3D}.
+ * @returns {LBGeometry.Object3D}
  */
-LBGeometry.createObject3D = function() {
-    return new THREE.Object3D();
+LBGeometry.Object3D = function() {
+    THREE.Object3D.call(this);
 };
+LBGeometry.Object3D.prototype = Object.create(THREE.Object3D.prototype);
+LBGeometry.Object3D.prototype.constructor = LBGeometry.Object3D;
+
 
 /**
  * Loads the basic settings of a 3D object from a data object.
@@ -926,7 +948,7 @@ LBGeometry.createObject3D = function() {
  */
 LBGeometry.loadObject3DBasic = function(data, obj3D) {
     if (!obj3D) {
-        obj3D = LBGeometry.createObject3D();
+        obj3D = new LBGeometry.Object3D();
     }
     
     obj3D.name = data.name || "";
@@ -946,13 +968,13 @@ LBGeometry.loadObject3DBasic = function(data, obj3D) {
 /**
  * Helper that creates and loads a 3D object from a data object. If the data object contains
  * a 'construct' property, the value of that property is passed directly to eval() to create
- * the 3D object object, otherwise LBGeometry.createObject3D() is used.
+ * the 3D object object, otherwise new LBGeometry.Object3D() is used.
  * @param {object} data The data to load from.
  * @returns {object}    The 3D object.
  */
 LBGeometry.createObject3DFromData = function(data) {
     if (!data) {
-        return LBGeometry.createObject3D();
+        return new LBGeometry.Object3D();
     }
     
     var obj3D;
@@ -960,7 +982,7 @@ LBGeometry.createObject3DFromData = function(data) {
         obj3D = eval(data.construct);
     }
     else {
-        obj3D = LBGeometry.createObject3D();
+        obj3D = new LBGeometry.Object3D();
     }
     
     if (obj3D.load) {
@@ -972,4 +994,53 @@ LBGeometry.createObject3DFromData = function(data) {
     return obj3D;
 };
 
+
+/**
+ * The 3D point (0, 0, 0)
+ * @constant
+ * @type LBGeometry.Vector3
+ */
+LBGeometry.ORIGIN = new LBGeometry.Vector3();
+
+/**
+ * A vector representing the x-axis.
+ * @constant
+ * @type LBGeometry.Vector3
+ */
+LBGeometry.X_AXIS = new LBGeometry.Vector3(1, 0, 0);
+
+/**
+ * A vector representing the y-axis.
+ * @constant
+ * @type LBGeometry.Vector3
+ */
+LBGeometry.Y_AXIS = new LBGeometry.Vector3(0, 1, 0);
+
+/**
+ * A vector representing the z-axis.
+ * @constant
+ * @type LBGeometry.Vector3
+ */
+LBGeometry.Z_AXIS = new LBGeometry.Vector3(0, 0, 1);
+
+/**
+ * A plane representing the x-y plane passing through the origin.
+ * @constant
+ * @type LBGeometry.Plane
+ */
+LBGeometry.XY_PLANE = new LBGeometry.Plane(LBGeometry.Z_AXIS, 0);
+
+/**
+ * A plane representing the z-x plane passing through the origin.
+ * @constant
+ * @type LBGeometry.Plane
+ */
+LBGeometry.ZX_PLANE = new LBGeometry.Plane(LBGeometry.Y_AXIS, 0);
+
+/**
+ * A plane representing the y-z plane passing through the origin.
+ * @constant
+ * @type LBGeometry.Plane
+ */
+LBGeometry.YZ_PLANE = new LBGeometry.Plane(LBGeometry.X_AXIS, 0);
 

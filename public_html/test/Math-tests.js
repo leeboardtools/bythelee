@@ -60,6 +60,9 @@ QUnit.test( "radFromThreeSides", function( assert ) {
     assert.nearEqual(LBMath.radFromThreeSides(3, 4, 5), 90 * LBMath.DEG_TO_RAD);
 });
 
+
+var dumpCurveData;
+if (dumpCurveData) {
 QUnit.test( "dummyTest", function( assert ) {
     console.log("Ces for table");
     var xs      = [5,       10,     15,     20,     25,     30,     40,     60,     90];
@@ -148,3 +151,4 @@ QUnit.test( "Full interp", function( assert ) {
         console.log(i + "\t" + cd + "\t" + cl + "\t" + cm_27 + "\t" + cm_13_5 + "\t" + cm_7);
     }
     });
+};
