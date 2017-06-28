@@ -163,3 +163,21 @@ Leeboard.copyAndMirrorArray = function(array) {
     }
     return newArray;
 };
+
+
+Leeboard.stringToFunction = function(str) {
+    var arr = str.split(".");
+    var fn = window || this;
+    for (var i = 0, len = arr.length; i < len; i++) {
+        fn = fn[arr[i]];
+    }
+    if (typeof fn !== 'function') {
+        throw new Error("Function " + str + " not found!");
+    }
+    return fn;
+};
+
+Leeboard.stringToNewClassInstance = function(str, args) {
+    var fn = Leeboard.stringToFunction(str);
+    return new fn(args);
+};

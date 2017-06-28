@@ -497,8 +497,8 @@ LBSailSim.Vessel.prototype._createAndLoadFoilInstance = function(data, isSail) {
     // We're not using {@link LBPhysics.RigidBody#createFromData() because we need to pass
     // sailEnv to {@link LBFoils.Foil#load()}.
     var foilInstance;
-    if (data.construct) {
-        foilInstance = eval(data.construct);
+    if (data.className) {
+        foilInstance = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
     }
     else {
         if (isSail) {
@@ -551,8 +551,8 @@ LBSailSim.Vessel.prototype._loadFoils = function(data, foils, loadCallback) {
  */
 LBSailSim.Vessel.prototype._createAndLoadPropulsor = function(data) {
     var propulsor;
-    if (data.construct) {
-        propulsor = eval(data.construct);
+    if (data.className) {
+        propulsor = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
     }
     else {
         propulsor = new LBSailSim.Propulsor(this);
@@ -960,8 +960,8 @@ LBSailSim.Vessel.createFromData = function(data, sailEnv, loadCallback) {
     }
     
     var vessel;
-    if (data.construct) {
-        vessel = eval(data.construct);
+    if (data.className) {
+        vessel = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
         vessel.sailEnv = sailEnv;
     }
     else {

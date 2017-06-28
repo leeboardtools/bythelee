@@ -233,8 +233,8 @@ LBFoils.ClCdStall.createFromData = function(data) {
     }
     
     var clCdStall;
-    if (data.construct) {
-        clCdStall = eval(data.construct);
+    if (data.className) {
+        clCdStall = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
     }
     else {
         clCdStall = new LBFoils.ClCdStall();
@@ -707,8 +707,8 @@ LBFoils.Foil.prototype = {
 
 /**
  * Helper that creates and loads a foil from a data object. If the data object contains
- * a 'construct' property, the value of that property is passed directly to eval() to create
- * the foil object, otherwise if defCreatorFunc is defined it is called to create the
+ * a 'className' property, it is passed to {@link Leeboard#stringToNewClassInstance} to
+ * create the object, otherwise if defCreatorFunc is defined it is called to create the
  * foil object, otherwise LBFoils.Foil() is used.
  * @param {object} data The data to load from.
  * @param {object} curveLib The optional curve library used to obtain pre-loaded
@@ -727,8 +727,8 @@ LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
     }
     
     var foil;
-    if (data.construct) {
-        foil = eval(data.construct);
+    if (data.className) {
+        foil = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
     }
     else if (defCreatorFunc) {
         foil = defCreatorFunc(data);

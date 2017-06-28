@@ -64,6 +64,7 @@ LBControls.SmoothController = function(name, minValue, maxValue, initialValue, c
      * controllee = function(currentValue, controller) {}
      */
     this.controllee = controllee;
+    
 };
 
 LBControls.SmoothController.prototype = {
@@ -86,6 +87,9 @@ LBControls.SmoothController.prototype = {
      */
     setValue: function(value, isOffset) {
         if (isOffset) {
+            if (this.offsetValueMapper) {
+                value = this.offsetValueMapper(this, value);
+            }
             value += this.currentValue;
         }
         value = LBMath.clamp(value, this.minValue, this.maxValue);
@@ -129,6 +133,10 @@ LBControls.SmoothController.prototype = {
             this.currentValue = 0;
         }
         this.currentValue = LBMath.clamp(this.currentValue, this.minValue, this.maxValue);
+        
+        if (data.offsetValueMapper) {
+            
+        }
         
         return this;
     }
@@ -248,8 +256,8 @@ LBControls.createControllerFromData = function(data, owner) {
     }
     
     var controller;
-    if (data.construct) {
-        controller = eval(data.construct);
+    if (data.className) {
+        controller = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
     }
     else {
         controller = new LBControls.SmoothController();

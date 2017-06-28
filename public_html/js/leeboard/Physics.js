@@ -999,7 +999,8 @@ LBPhysics.RigidBody.prototype = {
 
 /**
  * Helper that creates and loads a rigid body from a data object. If the data object contains
- * a 'construct' property, the value of that property is passed directly to eval() to create
+ * a 'className' property, the value of that property is passed directly to Leeboard.stringToNewClassInstance()
+ * along with the optional 'constructorArgs' property to create
  * the rigid body object, otherwise if defCreatorFunc is defined it is called to create
  * the rigid body object, otherwise {@link LBPhysics.RigidBody} is used.
  * @param {object} data The data to load from.
@@ -1017,8 +1018,8 @@ LBPhysics.RigidBody.createFromData = function(data, defCreatorFunc) {
     }
     
     var rigidBody;
-    if (data.construct) {
-        rigidBody = eval(data.construct);
+    if (data.className) {
+        rigidBody = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
     }
     else {
         if (defCreatorFunc) {

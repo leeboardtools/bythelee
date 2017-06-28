@@ -967,8 +967,9 @@ LBGeometry.loadObject3DBasic = function(data, obj3D) {
 
 /**
  * Helper that creates and loads a 3D object from a data object. If the data object contains
- * a 'construct' property, the value of that property is passed directly to eval() to create
- * the 3D object object, otherwise new LBGeometry.Object3D() is used.
+ * a 'className' property, the value of that property is passed to {@link Leeboard#stringToNewClassInstance}
+ * along with the optional 'constructorArgs' property as the argument to the constructor.
+ * to create the 3D object object, otherwise new LBGeometry.Object3D() is used.
  * @param {object} data The data to load from.
  * @returns {object}    The 3D object.
  */
@@ -978,8 +979,8 @@ LBGeometry.createObject3DFromData = function(data) {
     }
     
     var obj3D;
-    if (data.construct) {
-        obj3D = eval(data.construct);
+    if (data.className) {
+        obj3D = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
     }
     else {
         obj3D = new LBGeometry.Object3D();

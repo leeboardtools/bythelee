@@ -242,8 +242,8 @@ LBSailSim.Hull.createFromData = function(data, vessel) {
     }
     
     var hull;
-    if (data.construct) {
-        hull = eval(data.construct);
+    if (data.className) {
+        hull = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
     }
     else {
         hull = new LBSailSim.Hull();
