@@ -234,7 +234,7 @@ LBFoils.ClCdStall.createFromData = function(data) {
     
     var clCdStall;
     if (data.className) {
-        clCdStall = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
+        clCdStall = Leeboard.newClassInstanceFromData(data);
     }
     else {
         clCdStall = new LBFoils.ClCdStall();
@@ -728,7 +728,7 @@ LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
     
     var foil;
     if (data.className) {
-        foil = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
+        foil = Leeboard.newClassInstanceFromData(data);
     }
     else if (defCreatorFunc) {
         foil = defCreatorFunc(data);

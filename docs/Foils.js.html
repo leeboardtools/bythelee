@@ -84,6 +84,40 @@ LBFoils.ClCd = function(cl, cd, cm) {
     this.cmIsChordFraction = false;
 };
 
+/**
+ * Calculates the lift and drag forces and the moment from the coefficients.
+ * @param {object} coefs    The lift/drag coefficients.
+ * @param {number} rho    The density.
+ * @param {number} area   The area.
+ * @param {number} qInfSpeed   The magnitude of the free stream velocity.
+ * @param {number} chordLength The chord length, used for calculating the moment.
+ * @param {number} aspectRatio  Optional aspect ratio, used for calculating the induced drag.
+ * @param {object} store  Optional object to store the lift, drag, and moment into.
+ * @returns {object}    The object containing the calculated lift, drag, and moment.
+ */
+LBFoils.ClCd.calcLiftDragMoment = function(coefs, rho, area, qInfSpeed, chordLength, aspectRatio, store) {
+    var scale = 0.5 * rho * area * qInfSpeed * qInfSpeed;
+    store = store || {};
+    store.lift = coefs.cl * scale;
+    store.drag = coefs.cd * scale;
+    chordLength = chordLength || 1;
+
+    var cm = coefs.cm;
+    if (coefs.cmIsChordFraction) {
+        cm *= Math.sqrt(coefs.cl * coefs.cl + coefs.cd * coefs.cd);
+    }
+    store.moment = cm * scale * chordLength;
+
+    if (aspectRatio) {
+        var ci = coefs.cl * coefs.cl / (Math.PI * aspectRatio);
+        store.inducedDrag = scale * ci;
+    }
+    else {
+        store.inducedDrag = undefined;
+    }
+    return store;
+};
+
 LBFoils.ClCd.prototype = {
     constructor: LBFoils.ClCd,
 
@@ -95,40 +129,8 @@ LBFoils.ClCd.prototype = {
         this.cd = LBMath.cleanNearZero(this.cd);
         this.cl = LBMath.cleanNearZero(this.cl);
         this.cm = LBMath.cleanNearZero(this.cm);
-    },
-    
-    /**
-     * Calculates the lift and drag forces and the moment from the coefficients.
-     * @param {number} rho    The density.
-     * @param {number} area   The area.
-     * @param {number} qInfSpeed   The magnitude of the free stream velocity.
-     * @param {number} chordLength The chord length, used for calculating the moment.
-     * @param {number} aspectRatio  Optional aspect ratio, used for calculating the induced drag.
-     * @param {object} store  Optional object to store the lift, drag, and moment into.
-     * @returns {object}    The object containing the calculated lift, drag, and moment.
-     */
-    calcLiftDragMoment : function(rho, area, qInfSpeed, chordLength, aspectRatio, store) {
-        var scale = 0.5 * rho * area * qInfSpeed * qInfSpeed;
-        store = store || {};
-        store.lift = this.cl * scale;
-        store.drag = this.cd * scale;
-        chordLength = chordLength || 1;
-        
-        var cm = this.cm;
-        if (this.cmIsChordFraction) {
-            cm *= Math.sqrt(this.cl * this.cl + this.cd * this.cd);
-        }
-        store.moment = cm * scale * chordLength;
-
-        if (aspectRatio) {
-            var ci = this.cl * this.cl / (Math.PI * aspectRatio);
-            store.inducedDrag = scale * ci;
-        }
-        else {
-            store.inducedDrag = undefined;
-        }
-        return store;
     }
+   
 };
 
 /**
@@ -259,8 +261,8 @@ LBFoils.ClCdStall.createFromData = function(data) {
     }
     
     var clCdStall;
-    if (data.construct) {
-        clCdStall = eval(data.construct);
+    if (data.className) {
+        clCdStall = Leeboard.newClassInstanceFromData(data);
     }
     else {
         clCdStall = new LBFoils.ClCdStall();
@@ -544,7 +546,7 @@ LBFoils.Foil = function() {
      * leading edge of the chord. This is used to resolve the angle of attack.
      * @member {object}
      */
-    this.chordLine = LBGeometry.createLine2();
+    this.chordLine = new LBGeometry.Line2();
     
     /**
      * The z coordinate of the 2D slice.
@@ -570,10 +572,10 @@ LBFoils.Foil = function() {
      */
     this.clCdCurve = new LBFoils.ClCdCurve();
     
-    this.workingVel = LBGeometry.createVector3();
+    this.workingVel = new LBGeometry.Vector3();
     this.workingVelResults = {
-        'worldPos': LBGeometry.createVector3(), // For testing...
-        'worldVel': LBGeometry.createVector3()
+        'worldPos': new LBGeometry.Vector3(), // For testing...
+        'worldVel': new LBGeometry.Vector3()
     };
 };
 
@@ -636,7 +638,7 @@ LBFoils.Foil.prototype = {
             details.angleDeg = angleDeg;
             details.qInfLocal = qInfLocal.clone();
         }
-        return coefs.calcLiftDragMoment(rho, this.area, qInfSpeed, chordLength, this.aspectRatio, store);
+        return LBFoils.ClCd.calcLiftDragMoment(coefs, rho, this.area, qInfSpeed, chordLength, this.aspectRatio, store);
     },
     
     /**
@@ -715,7 +717,7 @@ LBFoils.Foil.prototype = {
         console.log("Deg\t\tApplPoint.x\tApplPoint.y\t\tForce.x\tForce.y\t\tMoment.z");
         var resultant = new LBPhysics.Resultant3D();
         var details = {};
-        var qInfLocal = LBGeometry.createVector2();
+        var qInfLocal = new LBGeometry.Vector2();
         for (var deg = start; deg &lt; end; deg += delta) {
             var rad = deg * LBMath.DEG_TO_RAD;
             qInfLocal.set(Math.cos(rad) * qInfSpeed, Math.sin(rad) * qInfSpeed);
@@ -733,8 +735,8 @@ LBFoils.Foil.prototype = {
 
 /**
  * Helper that creates and loads a foil from a data object. If the data object contains
- * a 'construct' property, the value of that property is passed directly to eval() to create
- * the foil object, otherwise if defCreatorFunc is defined it is called to create the
+ * a 'className' property, it is passed to {@link Leeboard#stringToNewClassInstance} to
+ * create the object, otherwise if defCreatorFunc is defined it is called to create the
  * foil object, otherwise LBFoils.Foil() is used.
  * @param {object} data The data to load from.
  * @param {object} curveLib The optional curve library used to obtain pre-loaded
@@ -753,8 +755,8 @@ LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
     }
     
     var foil;
-    if (data.construct) {
-        foil = eval(data.construct);
+    if (data.className) {
+        foil = Leeboard.newClassInstanceFromData(data);
     }
     else if (defCreatorFunc) {
         foil = defCreatorFunc(data);
@@ -764,7 +766,8 @@ LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
     }
     
     return foil.load(data, curveLib);
-};</code></pre>
+};
+</code></pre>
         </article>
     </section>
 
@@ -774,13 +777,13 @@ LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 25 2017 15:17:11 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jun 28 2017 16:26:02 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

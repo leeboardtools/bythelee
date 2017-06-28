@@ -165,6 +165,12 @@ Leeboard.copyAndMirrorArray = function(array) {
 };
 
 
+/**
+ * Retrieves the function in the global scope with a given name.
+ * @param {string} str  The name of the function.
+ * @returns {function}  The function object.
+ * @throws {Error} An error is throw if str could not be resolved to a function object.
+ */
 Leeboard.stringToFunction = function(str) {
     var arr = str.split(".");
     var fn = window || this;
@@ -177,7 +183,21 @@ Leeboard.stringToFunction = function(str) {
     return fn;
 };
 
-Leeboard.stringToNewClassInstance = function(str, args) {
-    var fn = Leeboard.stringToFunction(str);
-    return new fn(args);
+
+/**
+ * Creates a new instance of a class object based on properties of a data object.
+ * This looks specifically for a 'className' property, which is the name of the class,
+ * and an optional 'constructorArgs' property, which is passed as the argument to the
+ * class constructor.
+ * @param {object} data The data object.
+ * @returns {object|undefined}  A new instance of the class or undefined if either data
+ * or 'className' is undefined.
+ */
+Leeboard.newClassInstanceFromData = function(data) {
+    if (!data || !data.className) {
+        return undefined;
+    }
+    
+    var fn = Leeboard.stringToFunction(data.className);
+    return new fn(data.constructorArgs);
 };

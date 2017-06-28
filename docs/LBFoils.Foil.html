@@ -98,7 +98,7 @@ local coordinate system.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line513">line 513</a>
+        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line515">line 515</a>
     </li></ul></dd>
     
 
@@ -214,7 +214,7 @@ local coordinate system.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line531">line 531</a>
+        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line533">line 533</a>
     </li></ul></dd>
     
 
@@ -286,7 +286,7 @@ local coordinate system.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line537">line 537</a>
+        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line539">line 539</a>
     </li></ul></dd>
     
 
@@ -359,7 +359,7 @@ leading edge of the chord. This is used to resolve the angle of attack.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line519">line 519</a>
+        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line521">line 521</a>
     </li></ul></dd>
     
 
@@ -431,7 +431,7 @@ leading edge of the chord. This is used to resolve the angle of attack.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line543">line 543</a>
+        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line545">line 545</a>
     </li></ul></dd>
     
 
@@ -503,7 +503,7 @@ leading edge of the chord. This is used to resolve the angle of attack.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line525">line 525</a>
+        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line527">line 527</a>
     </li></ul></dd>
     
 
@@ -538,8 +538,8 @@ leading edge of the chord. This is used to resolve the angle of attack.
 
 <div class="description">
     Helper that creates and loads a foil from a data object. If the data object contains
-a 'construct' property, the value of that property is passed directly to eval() to create
-the foil object, otherwise if defCreatorFunc is defined it is called to create the
+a 'className' property, it is passed to Leeboard#stringToNewClassInstance to
+create the object, otherwise if defCreatorFunc is defined it is called to create the
 foil object, otherwise LBFoils.Foil() is used.
 </div>
 
@@ -710,7 +710,7 @@ passed to this function is the data argument.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line719">line 719</a>
+        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line721">line 721</a>
     </li></ul></dd>
     
 
@@ -972,7 +972,7 @@ as lift, drag, induced drag, moment.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line624">line 624</a>
+        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line626">line 626</a>
     </li></ul></dd>
     
 
@@ -1233,7 +1233,7 @@ The moment is about the leading edge, or this.chordLine.start.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line589">line 589</a>
+        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line591">line 591</a>
     </li></ul></dd>
     
 
@@ -1528,7 +1528,7 @@ as lift, drag, induced drag, moment.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line665">line 665</a>
+        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line667">line 667</a>
     </li></ul></dd>
     
 
@@ -1705,7 +1705,7 @@ ClCdCurves, used for 'libClCdCurve' properties.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line562">line 562</a>
+        <a href="Foils.js.html">Foils.js</a>, <a href="Foils.js.html#line564">line 564</a>
     </li></ul></dd>
     
 
@@ -1769,13 +1769,13 @@ ClCdCurves, used for 'libClCdCurve' properties.</td>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 25 2017 15:17:11 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jun 28 2017 16:26:02 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

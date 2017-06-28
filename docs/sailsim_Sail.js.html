@@ -89,19 +89,19 @@ LBSailSim.SailInstance = function() {
     this.reef = 1;
     this.vreef = 1;
     
-    this.sheetAnchorSail = LBGeometry.createVector3();
-    this.sheetAnchorBoat = LBGeometry.createVector3();
+    this.sheetAnchorSail = new LBGeometry.Vector3();
+    this.sheetAnchorBoat = new LBGeometry.Vector3();
     
     this.sheetLength = 0;
     this.minSheetLength = 0;
     this.maxSheetLength = 1;
     
-    this.workingPos = LBGeometry.createVector3();
+    this.workingPos = new LBGeometry.Vector3();
     this.workingCoordResults = {
-        'worldPos' : LBGeometry.createVector3(),
-        'worldVel' : LBGeometry.createVector3()
+        'worldPos' : new LBGeometry.Vector3(),
+        'worldVel' : new LBGeometry.Vector3()
     };
-    this.workingMoment = LBGeometry.createVector3();
+    this.workingMoment = new LBGeometry.Vector3();
 };
 
 LBSailSim.SailInstance.prototype = Object.create(LBSailSim.FoilInstance.prototype);
@@ -112,39 +112,13 @@ LBSailSim.SailInstance.prototype.constructor = LBSailSim.SailInstance;
  */
 LBSailSim.SailInstance.prototype.updateFoilForce = function(dt, flow) {
     LBSailSim.FoilInstance.prototype.updateFoilForce.call(this, dt, flow);
-    
-    // Handle rotating the sail if needed.
-    // The force on the sail is our current force resultant, first let's move it to
-    // the center of rotation.
-    this.workingPos.zero();
-    this.coordSystem.calcVectorLocalToWorld(this.workingPos, this.workingCoordResults);
-    
-    this.resultant.moveApplPoint(this.workingCoordResults.worldPos);
-    
-    this.workingMoment.copy(this.resultant.moment);
-    this.workingMoment.applyMatrix4Rotation(this.coordSystem.localXfrm);
-    // If the moment's z-axis is positive, the rotation is positive...
-    if (!LBMath.isLikeZero(this.workingMoment.z)) {
-        // Get the current rotation and check it against the appropriate angle limit.
-        var rotationDeg = this.obj3D.rotation.z * LBMath.RAD_TO_DEG + this.rotationOffsetDegs[2];
-        if (this.workingMoment.z > 0) {
-            if (rotationDeg >= this.maxRotationDeg) {
-                return this;
-            }
-        }
-        else {
-            if (rotationDeg &lt;= this.minRotationDeg) {
-                return this;
-            }
-        }
-        
-        var currentDeg = this.obj3D.rotation.z * LBMath.RAD_TO_DEG;
-        this.integrateForceForRotation(LBGeometry.ORIGIN, LBGeometry.Z_AXIS, currentDeg, function(deg) {
-            deg += this.rotationOffsetDegs[2];
-            var deg2 = LBMath.clamp(deg, this.minRotationDeg, this.maxRotationDeg);
-            return deg2 - this.rotationOffsetDegs[2];
-        });
-    }
+
+    var currentDeg = this.obj3D.rotation.z * LBMath.RAD_TO_DEG;
+    this.integrateForceForRotation(LBGeometry.ORIGIN, LBGeometry.Z_AXIS, currentDeg, function(deg) {
+        deg += this.rotationOffsetDegs[2];
+        var deg2 = LBMath.clamp(deg, this.minRotationDeg, this.maxRotationDeg);
+        return deg2 - this.rotationOffsetDegs[2];
+    });
     
     return this;
 };
@@ -225,7 +199,7 @@ LBSailSim.SailInstance.prototype.setSheetLength = function(length) {
  * Sets the sheet length based on a ratio between the minimum and maximum sheet lengths.
  * @param {number} ratio    The sheet length ratio, 0 is the minimun sheet length,
  * 1 is the maximum sheet length.
- * @returns {LBSailSim.SailInstance.prototype}  this.
+ * @returns {LBSailSim.SailInstance}  this.
  */
 LBSailSim.SailInstance.prototype.setSheetLengthRatio = function(ratio) {
     var length = this.minSheetLength + ratio * (this.maxSheetLength - this.minSheetLength);
@@ -322,13 +296,13 @@ LBSailSim.SailController.prototype.setSheetLength = function(value) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 25 2017 15:17:11 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jun 28 2017 16:26:02 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

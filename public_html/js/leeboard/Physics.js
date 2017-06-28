@@ -1019,7 +1019,7 @@ LBPhysics.RigidBody.createFromData = function(data, defCreatorFunc) {
     
     var rigidBody;
     if (data.className) {
-        rigidBody = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
+        rigidBody = Leeboard.newClassInstanceFromData(data);
     }
     else {
         if (defCreatorFunc) {

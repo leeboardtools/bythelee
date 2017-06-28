@@ -129,6 +129,13 @@
             "controllers": [
                 {
                     "className": "LBSailSim.RudderController",
+                    "offsetValueMapper": {
+                        "className": "LBControls.CSplineValueMapper",
+                        "constructorArgs": {
+                            "xs": [ -90, 0, 90 ],
+                            "ys": [ 1, 0.25, 1 ]
+                        }
+                    },
                     "name": "Rudder",
                     "minValue": -90,
                     "maxValue": 90,

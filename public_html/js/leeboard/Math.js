@@ -235,11 +235,19 @@ LBMath.transition = function(x, ya, yb, smoothFunc) {
 /**
  * Cubic spline interpolator.
  * @constructor
-     * @param {Array} [xs]    Optional array of x values, this must be sorted such that xs[i] &lt; xs[i+1].
-     * @param {Array} [ys]    Optional array of y values corresponding to the xs.
+ * @param {Array|object} [xs]    Optional array of x values, this must be sorted such that xs[i] &lt; xs[i+1].
+ * May also be an object with two properties, 'xs' and 'ys', that are both arrays.
+ * @param {Array} [ys]    Optional array of y values corresponding to the xs.
  * @returns {LBMath.CSpline}
  */
-LBMath.CSpline = function(xs, ys) {    
+LBMath.CSpline = function(xs, ys) {
+    if (xs && !ys) {
+        if (xs.xs && xs.ys) {
+            ys = xs.ys;
+            xs = xs.xs;
+        }
+    }
+    
     if (xs && ys) {
         this.setup(xs, ys);
     }

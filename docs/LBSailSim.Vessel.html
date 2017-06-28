@@ -309,7 +309,7 @@
 
         
             
-<h4 class="name" id="apparentCurrent"><span class="type-signature"></span>apparentCurrent<span class="type-signature"> :<a href="LBGeometry.html#.createVector3">LBGeometry.createVector3</a></span></h4>
+<h4 class="name" id="apparentCurrent"><span class="type-signature"></span>apparentCurrent<span class="type-signature"> :<a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a></span></h4>
 
 
 
@@ -324,7 +324,7 @@
     <ul>
         <li>
             
-<span class="param-type"><a href="LBGeometry.html#.createVector3">LBGeometry.createVector3</a></span>
+<span class="param-type"><a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a></span>
 
 
         </li>
@@ -381,7 +381,7 @@
 
         
             
-<h4 class="name" id="apparentWind"><span class="type-signature"></span>apparentWind<span class="type-signature"> :<a href="LBGeometry.html#.createVector3">LBGeometry.createVector3</a></span></h4>
+<h4 class="name" id="apparentWind"><span class="type-signature"></span>apparentWind<span class="type-signature"> :<a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a></span></h4>
 
 
 
@@ -396,7 +396,7 @@
     <ul>
         <li>
             
-<span class="param-type"><a href="LBGeometry.html#.createVector3">LBGeometry.createVector3</a></span>
+<span class="param-type"><a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a></span>
 
 
         </li>
@@ -1019,7 +1019,15 @@ to help prevent weird oscillations.
             
 
             <td class="description last">If defined, a callback object with the following functions
-that get called back after loading of each component:</td>
+that get called back after the loading of each component:
+<li>foilInstanceLoaded = function(vessel, foilInstance, foilData, isSail);
+<li>propulsorLoaded = function(this, propulsor, propulsorData);
+<li>ballastLoaded = function(this, ballast, ballastData);
+<li>controllerLoaded = function(this, controller, controllerData);
+<li>hullLoaded = function(this, this.hull, hullData);
+<li>vesselLoaded = function(this, vesselData);
+<p>
+Each function is optional.</td>
         </tr>
 
     
@@ -1060,7 +1068,7 @@ that get called back after loading of each component:</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line949">line 949</a>
+        <a href="sailsim_Vessel.js.html">sailsim/Vessel.js</a>, <a href="sailsim_Vessel.js.html#line957">line 957</a>
     </li></ul></dd>
     
 
@@ -4713,7 +4721,7 @@ the velocity direction and the x-axis of the vessel.
 
     
 
-    <h4 class="name" id="getResultant"><span class="type-signature"></span>getResultant<span class="signature">(convertToWrench, wrenchPlane<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
+    <h4 class="name" id="getResultant"><span class="type-signature"></span>getResultant<span class="signature">(convertToWrench, wrenchPlane<span class="signature-attributes">opt</span>, wrenchBounds<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBPhysics.Resultant3D.html">LBPhysics.Resultant3D</a>}</span></h4>
 
     
 
@@ -4796,7 +4804,7 @@ otherwise its application point is set to the total center of mass.</td>
             <td class="type">
             
                 
-<span class="param-type"><a href="LBGeometry.html#.createPlane">LBGeometry.createPlane</a></span>
+<span class="param-type"><a href="LBGeometry.Plane.html">LBGeometry.Plane</a></span>
 
 
             
@@ -4818,6 +4826,41 @@ otherwise its application point is set to the total center of mass.</td>
 
             <td class="description last">If convertToWrench is true, this is the
 optional plane passed to LBPhysics.Resultant3D.convertToWrench.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>wrenchBounds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBGeometry.Sphere.html">LBGeometry.Sphere</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If convertToWrench is true and
+wrenchPlane is specified, this is a bounding sphere within which the application
+point transfered to the wrenchPlane must lie for it to actually be transferred.</td>
         </tr>
 
     
@@ -4865,7 +4908,7 @@ optional plane passed to LBPhysics.Resultant3D.convertToWrench.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line769">line 769</a>
+        <a href="Physics.js.html">Physics.js</a>, <a href="Physics.js.html#line849">line 849</a>
     </li></ul></dd>
     
 
@@ -6330,13 +6373,13 @@ based on the vessel's characteristics.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 25 2017 15:17:12 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jun 28 2017 16:26:03 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

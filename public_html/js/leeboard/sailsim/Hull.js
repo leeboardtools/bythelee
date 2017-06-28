@@ -15,7 +15,7 @@
  */
 
 
-/* global LBSailSim, LBPhysics, LBGeometry, LBMath */
+/* global LBSailSim, LBPhysics, LBGeometry, LBMath, Leeboard */
 
 /**
  * Spline used for calculating the friction coefficient Cf given the roughness
@@ -243,7 +243,7 @@ LBSailSim.Hull.createFromData = function(data, vessel) {
     
     var hull;
     if (data.className) {
-        hull = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
+        hull = Leeboard.newClassInstanceFromData(data);
     }
     else {
         hull = new LBSailSim.Hull();

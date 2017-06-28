@@ -88,7 +88,7 @@ LBControls.SmoothController.prototype = {
     setValue: function(value, isOffset) {
         if (isOffset) {
             if (this.offsetValueMapper) {
-                value = this.offsetValueMapper(this, value);
+                value = this.offsetValueMapper.mapOffset(this.currentValue, value);
             }
             value += this.currentValue;
         }
@@ -135,11 +135,38 @@ LBControls.SmoothController.prototype = {
         this.currentValue = LBMath.clamp(this.currentValue, this.minValue, this.maxValue);
         
         if (data.offsetValueMapper) {
-            
+            this.offsetValueMapper = Leeboard.newClassInstanceFromData(data.offsetValueMapper);
         }
         
         return this;
     }
+};
+
+/**
+ * A mapper object for use as the {@link LBControls.SmoothController#offsetValueMapper} that uses
+ * a simple cubic spline via {@link LBMath.CSpline}.
+ * @constructor
+ * @param {object} splineData   The spline data, this should be an object containing two properties,
+ * 'xs' and 'ys', each an array of values defining the spline values.
+ * @returns {LBControls.CSplineValueMapper}
+ */
+LBControls.CSplineValueMapper = function(splineData) {
+    this.cSpline = new LBMath.CSpline(splineData);
+};
+
+LBControls.CSplineValueMapper.prototype = {
+    /**
+     * Maps an offset value by multiplying it by the interpolated value from the spline for
+     * the current controller value.
+     * @param {number} currentValue The current controller value.
+     * @param {number} offset   The offset value to be mapped.
+     * @returns {number}    The mapped offset value.
+     */
+    mapOffset: function(currentValue, offset) {
+        return this.cSpline.interpolate(currentValue) * offset;
+    },
+    
+    constructor: LBControls.CSplineValueMapper
 };
 
 
@@ -257,7 +284,7 @@ LBControls.createControllerFromData = function(data, owner) {
     
     var controller;
     if (data.className) {
-        controller = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
+        controller = Leeboard.newClassInstanceFromData(data);
     }
     else {
         controller = new LBControls.SmoothController();

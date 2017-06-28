@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Plane</title>
+    <title>JSDoc: Class: CSplineValueMapper</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Plane</h1>
+    <h1 class="page-title">Class: CSplineValueMapper</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="LBGeometry.html">LBGeometry</a>.</span>Plane</h2>
+            <span class="ancestors"><a href="LBControls.html">LBControls</a>.</span>CSplineValueMapper</h2>
         
     
 </header>
@@ -41,14 +41,15 @@
 
     
 
-    <h4 class="name" id="Plane"><span class="type-signature"></span>new Plane<span class="signature">(normal<span class="signature-attributes">opt</span>, constant<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBGeometry.Plane.html">LBGeometry.Plane</a>}</span></h4>
+    <h4 class="name" id="CSplineValueMapper"><span class="type-signature"></span>new CSplineValueMapper<span class="signature">(splineData)</span><span class="type-signature"> &rarr; {<a href="LBControls.CSplineValueMapper.html">LBControls.CSplineValueMapper</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    A plane, our encapsulation of THREE.Plane.
+    A mapper object for use as the LBControls.SmoothController#offsetValueMapper that uses
+a simple cubic spline via <a href="LBMath.CSpline.html">LBMath.CSpline</a>.
 </div>
 
 
@@ -72,11 +73,7 @@
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
-        
-        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -88,79 +85,24 @@
 
         <tr>
             
-                <td class="name"><code>normal</code></td>
+                <td class="name"><code>splineData</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a></span>
+<span class="param-type">object</span>
 
 
             
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
-                <td class="default">
-                
-                    LBGeometry.X_AXIS
-                
-                </td>
-            
 
-            <td class="description last">A normal to the plane.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>constant</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    LBGeometry.ORIGIN
-                
-                </td>
-            
-
-            <td class="description last">The negative distance from the origin to the plane along
-the normal vector.</td>
+            <td class="description last">The spline data, this should be an object containing two properties,
+'xs' and 'ys', each an array of values defining the spline values.</td>
         </tr>
 
     
@@ -201,7 +143,7 @@ the normal vector.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Geometry-THREE.js.html">Geometry-THREE.js</a>, <a href="Geometry-THREE.js.html#line673">line 673</a>
+        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line153">line 153</a>
     </li></ul></dd>
     
 
@@ -235,7 +177,7 @@ the normal vector.</td>
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBGeometry.Plane.html">LBGeometry.Plane</a></span>
+<span class="param-type"><a href="LBControls.CSplineValueMapper.html">LBControls.CSplineValueMapper</a></span>
 
 
     </dd>
@@ -260,6 +202,187 @@ the normal vector.</td>
 
     
 
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="mapOffset"><span class="type-signature"></span>mapOffset<span class="signature">(currentValue, offset)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Maps an offset value by multiplying it by the interpolated value from the spline for
+the current controller value.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>currentValue</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The current controller value.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>offset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The offset value to be mapped.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Controls.js.html">Controls.js</a>, <a href="Controls.js.html#line165">line 165</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The mapped offset value.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
     
 
     

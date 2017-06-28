@@ -980,7 +980,7 @@ LBGeometry.createObject3DFromData = function(data) {
     
     var obj3D;
     if (data.className) {
-        obj3D = Leeboard.stringToNewClassInstance(data.className, data.constructorArgs);
+        obj3D = Leeboard.newClassInstanceFromData(data);
     }
     else {
         obj3D = new LBGeometry.Object3D();

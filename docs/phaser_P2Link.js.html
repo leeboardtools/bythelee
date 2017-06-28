@@ -74,10 +74,11 @@ LBPhaser.P2Link = function(phaserEnv) {
     this.stageUpdateCount = 0;
 };
 
-LBPhaser.P2Link._working3DPos = LBGeometry.createVector3();
+LBPhaser.P2Link._working3DPos = new LBGeometry.Vector3();
 LBPhaser.P2Link._workingEuler;
-LBPhaser.P2Link._workingPlane = LBGeometry.createPlane();
-LBPhaser.P2Link._working3DNormal = LBGeometry.createVector3();
+LBPhaser.P2Link._workingPlane = new LBGeometry.Plane();
+LBPhaser.P2Link._working3DNormal = new LBGeometry.Vector3();
+LBPhaser.P2Link._workingSphere = new LBGeometry.Sphere();
 
 LBPhaser.P2Link.prototype = {
     /**
@@ -184,13 +185,6 @@ LBPhaser.P2Link.prototype = {
         this.activeRigidBody = rigidBody;
         this.activeP2Body = rigidBody[LBPhaser.P2Link.p2BodyProperty];
         
-        // TEST
-        var x, y;
-        if (this.activeP2Body) {
-            x = this.activeP2Body.x;
-            y = this.activeP2Body.y;
-        }
-        
         this._updateDisplayObjects(rigidBody);
     },
     
@@ -206,6 +200,11 @@ LBPhaser.P2Link.prototype = {
         }
         
         rigidBody.parts.forEach(this._updateDisplayObjects, this);
+        
+        var callback = rigidBody[LBPhaser.P2Link.callbackProperty];
+        if (callback) {
+            callback.displayObjectsUpdated(this.activeRigidBody, rigidBody);
+        }
     },
     
     /**
@@ -242,7 +241,8 @@ LBPhaser.P2Link.prototype = {
      * be called.
      * &lt;p>
      * The getForceArrowResultant function has the same function signature as 
-     * {@link LBPhysics.RigidBody#getResultant}.
+     * {@link LBPhysics.RigidBody#getResultant} excluding the convertToWrench argument
+     * (the first argument).
      * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
      * @param {LBPhaser.Arrow} forceArrow   The arrow object.
      * @returns {undefined}
@@ -258,12 +258,20 @@ LBPhaser.P2Link.prototype = {
         normal.set(Math.cos(angle), Math.sin(angle), 0);
         plane.setFromNormalAndCoplanarPoint(normal, point);
         
+        var bounds;
+        if (rigidBody.massRadius) {
+            bounds = LBPhaser.P2Link._workingSphere;
+            bounds.set(rigidBody.centerOfMass, rigidBody.massRadius);
+            bounds.center.z = 0;
+            bounds.applyMatrix4(rigidBody.obj3D.matrixWorld);
+        }
+        
         var resultant;
         if (rigidBody.getForceArrowResultant) {
-            resultant = rigidBody.getForceArrowResultant(plane);
+            resultant = rigidBody.getForceArrowResultant(plane, bounds);
         }
         else {
-            resultant = rigidBody.getResultant(true, plane);
+            resultant = rigidBody.getResultant(true, plane, bounds);
         }
         if (resultant) {
             forceArrow.setFromBaseAndVector(resultant.applPoint, resultant.force);
@@ -291,6 +299,14 @@ LBPhaser.P2Link.spriteProperty = "_sprite";
 LBPhaser.P2Link.forceArrowProperty = "_forceArrow";
 
 /**
+ * The name of the property in {LBPhysics.RigidBody} objects where we store the callback object.
+ * &lt;p>
+ * The callback has the following optional functions:
+ * &lt;li>displayObjectsUpdated = function(topRigidBody, rigidBody);
+ */
+LBPhaser.P2Link.callbackProperty = "_p2Callback";
+
+/**
  * Retrieves the appropriate tie step to use based on the settings of {@link Phaser.Physics.P2}.
  * @param {Phaser.Physics.P2} p2    The P2 physics object.
  * @returns {number}    The time step.
@@ -307,7 +323,7 @@ LBPhaser.P2Link.getP2TimeStep = function(p2) {
  */
 LBPhaser.P2Link.createSpriteFromData = function(game, data) {
     var sprite = new Phaser.Sprite(game, data.x, data.y, data.key, data.frame);
-    sprite.lbLocalOffset = LBGeometry.createVector3();    
+    sprite.lbLocalOffset = new LBGeometry.Vector3();    
     Leeboard.copyCommonProperties(sprite, data);
     return sprite;
 };
@@ -320,7 +336,7 @@ LBPhaser.P2Link.createSpriteFromData = function(game, data) {
  */
 LBPhaser.P2Link.createImageFromData = function(game, data) {
     var sprite = new Phaser.Image(game, data.x, data.y, data.key, data.frame);
-    sprite.lbLocalOffset = LBGeometry.createVector3();    
+    sprite.lbLocalOffset = new LBGeometry.Vector3();    
     Leeboard.copyCommonProperties(sprite, data);
     return sprite;
 };
@@ -356,13 +372,13 @@ LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sun Jun 25 2017 15:17:11 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jun 28 2017 16:26:02 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
