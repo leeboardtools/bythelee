@@ -544,12 +544,15 @@ LBFoils.Foil = function() {
      */
     this.clCdCurve = new LBFoils.ClCdCurve();
     
-    this.workingVel = new LBGeometry.Vector3();
-    this.workingVelResults = {
+    LBFoils.Foil._workingVel = LBFoils.Foil._workingVel || new LBGeometry.Vector3();
+    LBFoils.Foil._workingVelResults = LBFoils.Foil._workingVelResults || {
         'worldPos': new LBGeometry.Vector3(), // For testing...
         'worldVel': new LBGeometry.Vector3()
     };
 };
+
+LBFoils.Foil._workingVel;
+LBFoils.Foil._workingVelResults;
 
 LBFoils.Foil.prototype = {
     constructor: LBFoils.Foil,
@@ -665,19 +668,21 @@ LBFoils.Foil.prototype = {
      * @returns {LBPhysics.Resultant3D}  The resultant force in world coordinates.
      */
     calcWorldForce: function(rho, qInfWorld, coordSystemState, details, resultant) {
-        coordSystemState.calcVectorLocalToWorld(this.chordLine.start, this.workingVelResults);
+        var appVel = LBFoils.Foil._workingVel;
+        var velResults = LBFoils.Foil._workingVelResults;
+
+        coordSystemState.calcVectorLocalToWorld(this.chordLine.start, velResults);
+        appVel.copy(velResults.worldVel);
         
-        this.workingVel.copy(this.workingVelResults.worldVel);
+        coordSystemState.calcVectorLocalToWorld(this.chordLine.end, velResults);
+        appVel.add(velResults.worldVel).multiplyScalar(0.5);
         
-        coordSystemState.calcVectorLocalToWorld(this.chordLine.end, this.workingVelResults);
-        this.workingVel.add(this.workingVelResults.worldVel).multiplyScalar(0.5);
+        appVel.negate();
+        appVel.add(qInfWorld);
         
-        this.workingVel.negate();
-        this.workingVel.add(qInfWorld);
+        appVel.applyMatrix4Rotation(coordSystemState.localXfrm);
         
-        this.workingVel.applyMatrix4Rotation(coordSystemState.localXfrm);
-        
-        resultant = this.calcLocalForce(rho, this.workingVel, details, resultant);
+        resultant = this.calcLocalForce(rho, appVel, details, resultant);
         resultant.applyMatrix4(coordSystemState.worldXfrm);
         
         return resultant;

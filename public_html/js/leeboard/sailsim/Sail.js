@@ -67,14 +67,8 @@ LBSailSim.SailInstance = function() {
     this.sheetLength = 0;
     this.minSheetLength = 0;
     this.maxSheetLength = 1;
-    
-    this.workingPos = new LBGeometry.Vector3();
-    this.workingCoordResults = {
-        'worldPos' : new LBGeometry.Vector3(),
-        'worldVel' : new LBGeometry.Vector3()
-    };
-    this.workingMoment = new LBGeometry.Vector3();
 };
+
 
 LBSailSim.SailInstance.prototype = Object.create(LBSailSim.FoilInstance.prototype);
 LBSailSim.SailInstance.prototype.constructor = LBSailSim.SailInstance;

@@ -43,8 +43,6 @@ LBSailSim.FoilInstance = function(foil, obj3D, mass, centerOfMass) {
      */
     this.rotationOffsetDegs = [0, 0, 0];
     
-    this.workingPos = new LBGeometry.Vector3();
-    
     /**
      * Object holding the details from the foil, see {@link LBFoils.Foil#calcWorldForce}.
      */
@@ -52,6 +50,10 @@ LBSailSim.FoilInstance = function(foil, obj3D, mass, centerOfMass) {
         
     };
 };
+
+LBSailSim.FoilInstance._workingPos = new LBGeometry.Vector3();
+LBSailSim.FoilInstance._workingQInf;
+LBSailSim.FoilInstance._workingResultant;
 
 LBSailSim.FoilInstance.prototype = Object.create(LBPhysics.RigidBody.prototype);
 LBSailSim.FoilInstance.prototype.constructor = LBSailSim.FoilInstance;
@@ -63,13 +65,14 @@ LBSailSim.FoilInstance.prototype.constructor = LBSailSim.FoilInstance;
  * @returns {LBSailSim.FoilInstance}    this.
  */
 LBSailSim.FoilInstance.prototype.updateFoilForce = function(dt, flow) {
-    this.workingPos.set(0, 0, this.foil.sliceZ);
-    this.workingPos.applyMatrix4(this.coordSystem.worldXfrm);
+    var pos = LBSailSim.FoilInstance._workingPos;
+    pos.set(0, 0, this.foil.sliceZ);
+    pos.applyMatrix4(this.coordSystem.worldXfrm);
     
-    this.workingQInf = LBSailSim.getFlowVelocity(flow, this.workingPos, this.workingQInf);
-    this.workingResultant = this.foil.calcWorldForce(flow.density, this.workingQInf,
-            this.coordSystem, this.foilDetails, this.workingResultant);
-    this.addWorldResultant(this.workingResultant);
+    LBSailSim.FoilInstance._workingQInf = LBSailSim.getFlowVelocity(flow, pos, LBSailSim.FoilInstance._workingQInf);
+    LBSailSim.FoilInstance._workingResultant = this.foil.calcWorldForce(flow.density, LBSailSim.FoilInstance._workingQInf,
+            this.coordSystem, this.foilDetails, LBSailSim.FoilInstance._workingResultant);
+    this.addWorldResultant(LBSailSim.FoilInstance._workingResultant);
     return this;
 };
 
@@ -112,11 +115,10 @@ LBSailSim.Propulsor = function(obj3D, maxForce, minForce) {
     this.forceDir = new LBGeometry.Vector3(1, 0, 0);
     this.maxForce = maxForce || 10;
     this.minForce = minForce || 0;
-    
-    this.workingForce = new LBGeometry.Vector3();
-    this.workingPos = new LBGeometry.Vector3();
 };
 
+LBSailSim.Propulsor._workingForce = new LBGeometry.Vector3();
+LBSailSim.Propulsor._workingPos = new LBGeometry.Vector3();
 LBSailSim.Propulsor.prototype = Object.create(LBPhysics.RigidBody.prototype);
 LBSailSim.Propulsor.prototype.constructor = LBSailSim.Propulsor;
 
@@ -131,14 +133,16 @@ LBSailSim.Propulsor.prototype.updateForce = function(dt) {
         return this;
     }
     
-    this.workingForce.copy(this.forceDir);
-    this.workingForce.multiplyScalar(forceMag);
-    this.workingForce.applyMatrix4Rotation(this.coordSystem.worldXfrm);
+    var force = LBSailSim.Propulsor._workingForce;
+    force.copy(this.forceDir);
+    force.multiplyScalar(forceMag);
+    force.applyMatrix4Rotation(this.coordSystem.worldXfrm);
     
-    this.workingPos.zero();
-    this.workingPos.applyMatrix4(this.coordSystem.worldXfrm);
+    var pos = LBSailSim.Propulsor._workingPos;
+    pos.zero();
+    pos.applyMatrix4(this.coordSystem.worldXfrm);
     
-    this.addWorldForce(this.workingForce, this.workingPos);
+    this.addWorldForce(force, pos);
             
     return this;
 };

@@ -296,11 +296,7 @@ LBPhysics.CoordSystemState = function() {
     
     
     this.isXfrmsValid = false;
-    
-    this.workingPos = new LBGeometry.Vector3();
-    this.workingPrevPos = new LBGeometry.Vector3();
-    this.workingWorldVel = new LBGeometry.Vector3();
-    this.workingLocalVel = new LBGeometry.Vector3();
+  
 };
 
 LBPhysics.CoordSystemState._workingPosA = new LBGeometry.Vector3();
@@ -386,7 +382,7 @@ LBPhysics.CoordSystemState.prototype = {
      * @returns {LBPhysics.CoordSystemState} this.
      */
     calcVectorLocalToWorld: function(localPos, results, prevLocalPos) {
-        var worldPos = results.worldPos || this.workingPos;
+        var worldPos = results.worldPos || LBPhysics.CoordSystemState._workingPosA;
         worldPos.copy(localPos);
         worldPos.applyMatrix4(this.worldXfrm);
 
@@ -404,11 +400,12 @@ LBPhysics.CoordSystemState.prototype = {
             }
             else {
                 prevLocalPos = prevLocalPos || localPos;
-                this.workingPrevPos.copy(prevLocalPos);
-                this.workingPrevPos.applyMatrix4(this.prevWorldXfrm);
+                var prevPos = LBPhysics.CoordSystemState._workingPosB;
+                prevPos.copy(prevLocalPos);
+                prevPos.applyMatrix4(this.prevWorldXfrm);
                 
-                var worldVel = (isWorldVel) ? results.worldVel : this.workingWorldVel;
-                worldVel.subVectors(worldPos, this.workingPrevPos).multiplyScalar(1/this.dt);
+                var worldVel = (isWorldVel) ? results.worldVel : LBPhysics.CoordSystemState._workingPosC;
+                worldVel.subVectors(worldPos, prevPos).multiplyScalar(1/this.dt);
                 
                 if (isLocalVel) {
                     results.localVel.copy(worldVel);

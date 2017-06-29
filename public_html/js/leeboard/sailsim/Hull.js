@@ -53,16 +53,19 @@ LBSailSim.Hull = function(vessel) {
     
     /**
      * The canoe body volumne displacement delC.
+     * @member {number}
      */
     this.delC = 7.63;
     
     /**
      * The prismatic coefficient CP.
+     * @member {number}
      */
     this.cp = 0.56;
     
     /**
      * The longitudinal center of buoyancy from the forward perpendicular, LBCfpp
+     * @member {number}
      */
     // In the book it's given as a percentage, which I'm presuming is percent of LWO
     // from the mid-point, so we have:
@@ -71,26 +74,31 @@ LBSailSim.Hull = function(vessel) {
     
     /**
      * The longitudinal center of floatation from the forward perpendicular, LFCfpp.
+     * @member {number}
      */
     this.lcf = 0.5 * this.lwl + 0.065 * this.lwl;
     
     /**
      * The area of water plane, AW
+     * @member {number}
      */
     this.aw = 22.7;
     
     /**
      * The wetted surface area of canoe body, Swc, also Sc
+     * @member {number}
      */
     this.swc = 25.2;
     
     /**
      * The unheeled wetted surface area of canoe body, Swc, also Sc
+     * @member {number}
      */
     this.swcnh = 25.2;
      
     /**
      * The midship section coefficient, CM
+     * @member {number}
      */
     this.cm = 0.752;
    
@@ -102,11 +110,10 @@ LBSailSim.Hull = function(vessel) {
     
     this.heelAngleDeg = 0;
     this.halfRhoVSq = 0;
-    
-    this.workingForce = new LBGeometry.Vector3();
-    this.workingVelResults = { 'worldPos' : new LBGeometry.Vector3() };
 };
 
+LBSailSim.Hull._workingForce = new LBGeometry.Vector3();
+LBSailSim.Hull._workingVelResults = { 'worldPos' : new LBGeometry.Vector3() };
 LBSailSim.Hull.prototype = {
     
     /**
@@ -120,8 +127,9 @@ LBSailSim.Hull.prototype = {
 
         this.heelAngleDeg = vessel.obj3D.rotation.x * LBMath.RAD_TO_DEG;
         
-        vessel.coordSystem.calcVectorLocalToWorld(this.centerOfBuoyancy, this.workingVelResults);
-        this.worldCenterOfBuoyancy.copy(this.workingVelResults.worldPos);
+        var velResults = LBSailSim.Hull._workingVelResults;
+        vessel.coordSystem.calcVectorLocalToWorld(this.centerOfBuoyancy, velResults);
+        this.worldCenterOfBuoyancy.copy(velResults.worldPos);
         
         this.swc = this.swcnh * LBSailSim.Delft.calcWettedSurfaceHeelCorrection(this);
     },
@@ -185,19 +193,20 @@ LBSailSim.Hull.prototype = {
         var waveDrag = this.calcWaveDrag();
         
         var drag = frictionDrag + residuaryResistance + formDrag + waveDrag;
-        this.workingForce.copy(this.vessel.apparentCurrent).normalize();
-        this.workingForce.multiplyScalar(drag);
+        var force = LBSailSim.Hull._workingForce;
+        force.copy(this.vessel.apparentCurrent).normalize();
+        force.multiplyScalar(drag);
         
-        resultant.addForce(this.workingForce, this.worldCenterOfBuoyancy);
+        resultant.addForce(force, this.worldCenterOfBuoyancy);
         
         // Add gravity...
         var fGravity = this.vessel.getTotalMass() * this.vessel.sailEnv.gravity;
-        this.workingForce.set(0, 0, fGravity);
-        resultant.addForce(this.workingForce, this.vessel.getTotalCenterOfMass());
+        force.set(0, 0, fGravity);
+        resultant.addForce(force, this.vessel.getTotalCenterOfMass());
         
         // And buoyancy...
-        this.workingForce.set(0, 0, -fGravity);
-        resultant.addForce(this.workingForce, this.worldCenterOfBuoyancy);
+        force.set(0, 0, -fGravity);
+        resultant.addForce(force, this.worldCenterOfBuoyancy);
         
         return resultant;
     },
