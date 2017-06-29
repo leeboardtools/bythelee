@@ -17,8 +17,29 @@ Run:
 
 
 TODO:
+
 Lateral hull resistance > longitudinal hull resistance
 
-Make tiller control nonlinear (need tiller vs. rudder)
+Add drawing of sail
+
+Projected 3D drawing.
+
+Add VMG to HUD
+
+Add alternate plane projection for resultants that are too close to the desired plane.
 
 Add wake sprites
+
+Add wind puffs on water.
+
+Animate water
+
+Wind manager
+
+Sailing boundaries
+
+
+
+Much Later:
+Boat designer:
+Lets you change different parameters of the boat.

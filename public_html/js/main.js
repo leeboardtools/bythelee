@@ -16,7 +16,7 @@
 
 
 /* global Phaser */
-/* global Leeboard, LBSailSim, LBGeometry, LBMath */
+/* global Leeboard, LBSailSim, LBGeometry, LBMath, LBPhaser */
 
 
 //
@@ -66,7 +66,7 @@ PlayState.init = function() {
         n : Phaser.KeyCode.N,
         p : Phaser.KeyCode.P,
         t : Phaser.KeyCode.T,
-        v : Phaser.KeyCode.V    // Velocity arrows?
+        v : Phaser.KeyCode.V
     });
     
     this.keys.f.onDown.add(this.toggleForceArrows, this);
@@ -140,12 +140,15 @@ PlayState._loadLevel = function (data) {
     // The worldGroup effectively lets us scroll the world...
     this.worldGroup = this.game.add.group();
     this.sailEnv.setWorldGroup(this.worldGroup);
-    
+
     this.buoys = this.game.add.group(this.worldGroup);
     
     data.buoys.forEach(this._spawnBuoys, this);
     
     this._spawnCharacters({myBoat: data.myBoat });
+    
+    this.appWindArrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.sailEnv.appWindVelocityArrowStyle);
+    this.boatVelocityArrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.sailEnv.boatVelocityArrowStyle);
     
     this._setupHUD();
 };
@@ -164,6 +167,7 @@ PlayState._spawnCharacters = function (data) {
     var centerX = 0;
     var centerY = 0;
     var rotation = -180;
+    //rotation = -120;
     //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation);
 };
@@ -231,6 +235,7 @@ PlayState.update = function() {
     
     this.sailEnv.update();
     this._updateHUD();
+    this._updateArrows();
 };
 
 //------------------------------ --------------------
@@ -282,6 +287,30 @@ PlayState._updateHUD = function() {
     }
 };
 
+//------------------------------ --------------------
+PlayState._updateArrows = function() {
+    if (!this.myBoat) {
+        this.boatVelocityArrow.isVisible = false;
+        this.appWindArrow.isVisible = false;
+    }
+    else {
+        var base = this.myBoat.getPosition();
+        
+        this.boatVelocityArrow.isVisible = true;
+        this.appWindArrow.isVisible = true;
+        
+        this.boatVelocityArrow.setFromBaseAndVector(base, this.myBoat.getVelocityMPS());
+        
+        // We want to position the apparent wind vector's tip upwind from the boat's center.
+        var appWindVelocity = this.myBoat.getApparentWindVelocityMPS();
+        var appWindDir = appWindVelocity.clone().normalize();
+        var offset = this.myBoat.hull.lwl * 0.5;
+        appWindDir.multiplyScalar(-offset).add(base);
+        this.appWindArrow.setFromTipAndVector(appWindDir, appWindVelocity);
+    }
+};
+
+//------------------------------ --------------------
 PlayState.getControlIncrement = function(controller) {
     var range = controller.maxValue - controller.minValue;
     return range / 50;

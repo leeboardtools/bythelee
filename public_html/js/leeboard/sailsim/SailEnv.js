@@ -318,6 +318,8 @@ LBSailSim.Wind.prototype = {
     getFlowVelocity: function(x, y, z, vel) {
         var vx = 4;
         var vy = 0;
+        
+        vy = 2;
 
         if (!vel) {
             return new LBGeometry.Vector3(vx, vy);

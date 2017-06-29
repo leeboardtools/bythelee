@@ -874,6 +874,14 @@ LBSailSim.Vessel.prototype.getPosition = function() {
 };
 
 /**
+ * Retrieves the linear velocity of the center of the vessel in m/s.
+ * @returns {LBGeometry.Vector2}    The velocity.
+ */
+LBSailSim.Vessel.prototype.getVelocityMPS = function() {
+    return this.worldLinearVelocity;
+};
+
+/**
  * Retrieves the heading of the vessel in compass degrees.
  * @param {Boolean} [isRound]   If true the heading is rounded to 0 decimal digits.
  * @returns {Number}    The heading in compass degrees.
@@ -935,6 +943,14 @@ LBSailSim.Vessel.prototype.getApparentWindBearingDeg = function(isRound) {
         degrees = Math.round(degrees);
     }
     return LBMath.wrapDegrees(degrees);
+};
+
+/**
+ * Retrieves the apparent wind velocity vector in m/s.
+ * @returns {LBGeometry.Vector3}    The apparent wind velocity.
+ */
+LBSailSim.Vessel.prototype.getApparentWindVelocityMPS = function() {
+    return this.apparentWind;
 };
 
 

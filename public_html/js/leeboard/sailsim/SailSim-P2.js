@@ -42,10 +42,10 @@ LBSailSim.P2Env = function(game) {
     this.hullArrowStyle = new LBPhaser.ArrowStyle(0xFF0000, forceArrowScaler);
     
     var velocityArrowScaler = function(length) {
-        return length;
+        return length * 1.2;
     };
-    this.boatVelocityArrowStyle = new LBPhaser.ArrowStyle(0x008888, velocityArrowScaler, 0.5);
-    this.appWindVelocityArrowStyle = new LBPhaser.ArrowStyle(0x008800, velocityArrowScaler, 0.5);
+    this.boatVelocityArrowStyle = new LBPhaser.ArrowStyle(0x008888, velocityArrowScaler, 0.5, 6);
+    this.appWindVelocityArrowStyle = new LBPhaser.ArrowStyle(0x008800, velocityArrowScaler, 0.5, 12);
 };
 
 LBSailSim.P2Env.prototype = Object.create(LBSailSim.Env.prototype);
