@@ -168,7 +168,7 @@ LBSailSim.P2Env.prototype.displayObjectsUpdated = function(topRigidBody, rigidBo
     var sprite = rigidBody[LBPhaser.P2Link.spriteProperty];
     if (sprite) {
         if (rigidBody.foilDetails) {
-            sprite.scale.y = (rigidBody.foilDetails.angleDeg * this.phaserEnv.ySign < 0) ? -1 : 1;
+            sprite.scale.y = (rigidBody.foilDetails.angleDeg * this.phaserEnv.ySign < 0) ? 1 : -1;
         }
     }
 };

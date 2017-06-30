@@ -7,31 +7,31 @@
                 "sprite": {
                     "key": "tubby",
                     "anchor": {
-                        "x": 0.5,
+                        "x": 0.0,
                         "y": 0.5
                     }
                 }
             },
-            "mass": 1782,
+            "mass": 378,
             "centerOfMass": { "x": 0, "y": 0, "z": 0 },
             "massRadius": 4,
-            "momentInertia": { "xx": 1, "yy": 1, "zz": 500 },
+            "momentInertia": { "xx": 1, "yy": 1, "zz": 100 },
             "hull": {
-                "lwl": 10.02,
-                "bwl": 3.17,
-                "tc": 0.57,
+                "lwl": 5.41,
+                "bwl": 2.13,
+                "tc": 0.15,
                 "delC": 7.63,
                 "k": 200e-6,
-                "centerOfBuoyancy": { "x": -0.5 }
+                "centerOfBuoyancy": { "x": 2.2 }
             },
             "airfoils": [
                 {
                     "name": "mainsail",
-                    "mass": 20,
-                    "centerOfMass": { "x": 0, "y": 0, "z": 4 },
+                    "mass": 4.55,
+                    "centerOfMass": { "x": 0.8, "y": 0, "z": 4 },
                     "massRadius": 4,
                     "obj3D": {
-                        "position" : { "x": 1.0, "y": 0, "z": 0 },
+                        "position" : { "x": 1.6, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                         },
                     "phaser_sprite": {
@@ -41,19 +41,19 @@
                             "y": 0
                         },
                         "anchor": {
-                            "x": 1,
+                            "x": 0,
                             "y": 1
                         }
                         },
                     "minSheetLength": 0,
-                    "maxSheetLength": 2,
+                    "maxSheetLength": 1.5,
                     "foil": {
                         "chordLine": {
                             "start": { "x": 0, "y": 0 },
-                            "end": { "x": -4, "y": 0 }
+                            "end": { "x": 3, "y": 0 }
                         },
                         "sliceZ": 0.2,
-                        "area": 25.5,
+                        "area": 11.01,
                         "aspectRatio": 3,
                         "libClCdCurve": "Sail"
                     }
@@ -63,17 +63,17 @@
                 {
                     "className": "LBSailSim.FoilInstance",
                     "name": "keel",
-                    "mass": 100,
-                    "centerOfMass": { "x": -0.0, "y": 0, "z": -1 },
+                    "mass": 200,
+                    "centerOfMass": { "x": 0.5, "y": 0, "z": -1 },
                     "massRadius": 4,
                     "obj3D": {
-                        "position" : { "x": 0.3, "y": 0, "z": 0 },
+                        "position" : { "x": 2.2, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                         },
                     "foil": {
                         "chordLine": {
                             "start": { "x": 0, "y": 0 },
-                            "end": { "x": -1, "y": 0 }
+                            "end": { "x": 1, "y": 0 }
                         },
                         "sliceZ": 0.2,
                         "area": 0.75,
@@ -84,27 +84,27 @@
                 {
                     "name": "rudder",
                     "mass": 4,
-                    "centerOfMass": { "x": -0.15, "y": 0, "z": -0.5 },
+                    "centerOfMass": { "x": 0.15, "y": 0, "z": -0.5 },
                     "massRadius": 4,
                     "obj3D": {
-                        "position" : { "x": -3.2, "y": 0, "z": 0 },
+                        "position" : { "x": 5.4, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                         },
                     "phaser_sprite": {
                         "key": "tubby_rudder",
                         "lbLocalOffset": {
-                            "x": -0.4,
+                            "x": 0.3,
                             "y": 0
                         },
                         "anchor": {
-                            "x": 0,
+                            "x": 1,
                             "y": 0.5
                         }
                         },
                     "foil": {
                         "chordLine": {
                             "start": { "x": 0, "y": 0 },
-                            "end": { "x": -0.3, "y": 0 }
+                            "end": { "x": 0.3, "y": 0 }
                         },
                         "sliceZ": 0.2,
                         "area": 0.3,
@@ -118,7 +118,7 @@
                     "name": "engine",
                     "mass": 0,
                     "obj3D": {
-                        "position" : { "x": -1.8, "y": 0, "z": 0 },
+                        "position" : { "x": 1.8, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                     },
                     "minForce": -250,

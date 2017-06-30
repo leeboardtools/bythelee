@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="128"
+   height="48"
+   viewBox="0 0 128 48"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="dinghy_5_4.svg"
+   inkscape:export-filename="/Users/albert/Projects/Javascript/ByTheLee/public_html/images/tubby.png"
+   inkscape:export-xdpi="89.462593"
+   inkscape:export-ydpi="89.462593">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="8.4675614"
+     inkscape:cx="64.574758"
+     inkscape:cy="23.923738"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer3"
+     showgrid="false"
+     units="px"
+     showguides="true"
+     inkscape:window-width="1680"
+     inkscape:window-height="953"
+     inkscape:window-x="0"
+     inkscape:window-y="1"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Hull"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-1004.3622)"
+     style="display:inline">
+    <g
+       id="g3343"
+       transform="matrix(0,0.81488008,0.84352745,0,-787.7426,1012.6097)"
+       inkscape:label="Hull"
+       inkscape:export-filename="/Users/albert/Projects/Javascript/ByTheLee/public_html/images/tubby.png"
+       inkscape:export-xdpi="89.462593"
+       inkscape:export-ydpi="89.462593">
+      <g
+         id="g3340">
+        <path
+           sodipodi:nodetypes="ccsc"
+           inkscape:connector-curvature="0"
+           id="tubby_hull"
+           d="M 24.239763,1051.924 C 15.05049,1051.792 10.274975,1051.0227 3.9498347,1049.9163 1.6257803,1036.7183 0.23797931,1015.9556 0.28880424,999.6067 0.38988936,967.09057 4.9198154,944.49442 24.239763,924.73273"
+           style="fill:#f8e286;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           inkscape:label="#path3336" />
+        <path
+           sodipodi:nodetypes="cczcc"
+           inkscape:connector-curvature="0"
+           id="path3338"
+           d="m 24.239763,1044.8381 c -6.810304,-0.1968 -10.578049,-0.2676 -15.8022136,-1.299 -2.9000973,-12.9967 -3.9160152,-24.9091 -4.0153237,-36.4922 -0.099309,-11.58309 0.6319203,-22.39274 3.0705417,-32.71312 5.3563716,0.0354 16.7469956,0 16.7469956,0"
+           style="fill:#f2c365;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      </g>
+    </g>
+    <use
+       x="0"
+       y="0"
+       xlink:href="#g3343"
+       id="use3345"
+       transform="matrix(0.99974225,0,0,-1.0072323,0.01577921,2072.1211)"
+       width="100%"
+       height="100%"
+       inkscape:export-filename="/Users/albert/Projects/Javascript/ByTheLee/public_html/images/tubby.png"
+       inkscape:export-xdpi="89.462593"
+       inkscape:export-ydpi="89.462593" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Mainsail"
+     style="display:inline">
+    <path
+       style="fill:#6dbaff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.76708704px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 28.13373,24.116456 59.877747,0 c 0,0 -18.824439,-5.367859 -34.485836,-5.230299 -15.661397,0.137559 -25.391911,5.230299 -25.391911,5.230299 z"
+       id="tubby_mainsail"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cczc"
+       inkscape:export-filename="/Users/albert/Projects/Javascript/ByTheLee/public_html/images/tubby_mainsail.png"
+       inkscape:export-xdpi="89.462593"
+       inkscape:export-ydpi="89.462593"
+       inkscape:label="#path3348" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="Rudder">
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#876610;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 107.97487,24 71.974871,24"
+       id="tubby_rudder"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:label="#path4151"
+       inkscape:export-filename="/Users/albert/Projects/Javascript/ByTheLee/public_html/images/tubby_rudder.png"
+       inkscape:export-xdpi="89.462593"
+       inkscape:export-ydpi="89.462593" />
+  </g>
+</svg>

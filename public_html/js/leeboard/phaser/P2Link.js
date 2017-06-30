@@ -321,7 +321,14 @@ LBPhaser.P2Link.createImageFromData = function(game, data) {
  */
 LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
     var sprite = LBPhaser.P2Link.createSpriteFromData(game, data.sprite);
+    
+    // Enabling P2 physics resets the anchor to 0.5, 0.5
+    var anchorX = sprite.anchor.x;
+    var anchorY = sprite.anchor.y;
     sprite.game.physics.enable(sprite, Phaser.Physics.P2JS);
+    sprite.anchor.x = anchorX;
+    sprite.anchor.y = anchorY;
+    
     sprite.body.collideWorldBounds = true;
 
     var p2Body = sprite.body;

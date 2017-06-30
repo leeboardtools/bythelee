@@ -347,6 +347,10 @@ LBSailSim.ThrottleController.prototype.setThrottlePosition = function(value) {
  * <li>Hydrofoils,which are {@link LBSailSim.FoilInstance} based objects that are driven by the water.
  * <li>Propulsors, which are {@link LBSailSim.Propulsor} based objects.
  * <li>Ballasts, which are {@link LBPhysics.RigidBody} based objects.
+ * <p>
+ * For boats, the local coordinate system is presumed to line up the longitudinal
+ * axis with the x-axis, the forward end of the waterline at x = 0, and the aft
+ * end in the positive x direction.
  * @constructor
  * @implements {LBPhysics.RigidBody}
  * @param {object} sailEnv  The sailing environment.
@@ -412,6 +416,12 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
      */
     this.maxForceMag = 10000;
 
+    /**
+     * The representation of the hull, this is responsible for generating the
+     * canoe body forces.
+     * @member {LBSailSim.Hull}
+     */
+    this.hull = undefined;
 };
 
 LBSailSim.Vessel.prototype = Object.create(LBPhysics.RigidBody.prototype);
@@ -891,7 +901,7 @@ LBSailSim.Vessel.prototype.getVelocityMPS = function() {
  * @returns {Number}    The heading in compass degrees.
  */
 LBSailSim.Vessel.prototype.getHeadingDeg = function(isRound) {
-    var degrees = this.obj3D.rotation.z * LBMath.RAD_TO_DEG - 90;
+    var degrees = this.obj3D.rotation.z * LBMath.RAD_TO_DEG + 90;
     if (isRound) {
         degrees = Math.round(degrees);
     }

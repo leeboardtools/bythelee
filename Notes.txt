@@ -22,6 +22,10 @@ Lateral hull resistance > longitudinal hull resistance
 
 Add drawing of sail
 
+Rotate world:
+    Option to rotate world, rotate boat
+    Ability to shift center of view, re-center.
+
 Projected 3D drawing.
 
 Add VMG to HUD
@@ -37,6 +41,8 @@ Animate water
 Wind manager
 
 Sailing boundaries
+
+Zoom?
 
 
 

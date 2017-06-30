@@ -319,7 +319,8 @@ LBSailSim.Wind.prototype = {
         var vx = 4;
         var vy = 0;
         
-        vy = 2;
+        //vx = 0;
+        //vy = 2;
 
         if (!vel) {
             return new LBGeometry.Vector3(vx, vy);

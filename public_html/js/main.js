@@ -132,7 +132,10 @@ PlayState._loadLevel = function (data) {
     this.bkgdWater = this.game.add.group();
     var maxSize = Math.sqrt(this.game.width * this.game.width + this.game.height * this.game.height);
     maxSize = Math.ceil(maxSize);
-    this.water = this.game.add.tileSprite(-maxSize/2, -maxSize/2, maxSize, maxSize, 'bkgd_water');
+
+    this.water = this.game.add.tileSprite(0, 0, maxSize, maxSize, 'bkgd_water');
+    this.water.anchor.x = 0.5;
+    this.water.anchor.y = 0.5;
     this.bkgdWater.add(this.water);
  
     // Need wind ripples...
@@ -140,6 +143,14 @@ PlayState._loadLevel = function (data) {
     // The worldGroup effectively lets us scroll the world...
     this.worldGroup = this.game.add.group();
     this.sailEnv.setWorldGroup(this.worldGroup);
+    
+    // TEST!!!
+    var grid = this.game.add.graphics(0, 0, this.worldGroup);
+    grid.lineStyle(1, 0x808080, 0.5);
+    grid.moveTo(-1000, 0);
+    grid.lineTo(1000, 0);
+    grid.moveTo(0, -1000);
+    grid.lineTo(0, 1000);
 
     this.buoys = this.game.add.group(this.worldGroup);
     
@@ -166,8 +177,11 @@ PlayState._spawnBuoys = function(data) {
 PlayState._spawnCharacters = function (data) {
     var centerX = 0;
     var centerY = 0;
-    var rotation = -180;
-    //rotation = -120;
+    var rotation = 0;
+    
+    centerX = 200;
+    centerY = 100;
+    rotation = 60;
     //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation);
 };
@@ -380,18 +394,19 @@ PlayState._updateCamera = function() {
 
     this.worldGroup.position.x = -x;
     this.worldGroup.position.y = -y;
-/*    
-    var cosBoat = Math.cos(this.myBoat.body.rotation);
-    var sinBoat = Math.sin(this.myBoat.body.rotation);
+
+    var rotation = p2Body.rotation - LBMath.PI_2;
+    var cosBoat = Math.cos(rotation);
+    var sinBoat = Math.sin(rotation);
+    var posX = -x * cosBoat - y * sinBoat;
+    var posY = x * sinBoat - y * cosBoat;
     
-    this.worldGroup.position.x = -this.myBoat.position.x * cosBoat - this.myBoat.position.y * sinBoat;
-    this.worldGroup.position.y = -this.myBoat.position.y * sinBoat + this.myBoat.position.y * cosBoat;;
+    this.worldGroup.rotation = -rotation;
+    this.worldGroup.position.x = posX;
+    this.worldGroup.position.y = posY;
     
-    //this.worldGroup.pivot.x = -this.myBoat.position.x;
-    //this.worldGroup.pivot.y = -this.myBoat.position.y;
-    
-    this.worldGroup.rotation = -this.myBoat.rotation;
-   */
+    this.water.rotation = -rotation;
+
 };
 
 

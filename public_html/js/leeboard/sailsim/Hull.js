@@ -27,11 +27,22 @@ LBSailSim.CFVsRoughnessRatio.setup(
         [ 3e3,      1e4,    3e4,    1e5,    3e5 ],
         [ 6.5e-3,   5e-3,   4e-3,   3e-3,   2.6e-3]);
 
+/**
+ * The representation of a hull, this includes the various hull parameters such as
+ * waterline length and prismatic coefficient. It handles computing the canoe body
+ * forces for the hull.
+ * @constructor
+ * @param {LBSailSim.Vessel} vessel The vessel to which the hull belongs.
+ * @return {LBSailSim.Hull}
+ */
 LBSailSim.Hull = function(vessel) {
     this.vessel = vessel;
     
+    /**
+     * The center of buoyancy in local coordinates.
+     * @member {LBGeometry.Vector3}
+     */
     this.centerOfBuoyancy = new LBGeometry.Vector3();
-    this.worldCenterOfBuoyancy = new LBGeometry.Vector3();
     
     /**
      * The waterline length LWL.
@@ -108,7 +119,32 @@ LBSailSim.Hull = function(vessel) {
      */
     this.k = 5e-6;
     
+    /**
+     * The current heeling angle about the boat's y axis, in world coordinates.
+     * @readonly
+     * @member {number}
+     */
     this.heelAngleDeg = 0;
+    
+    /**
+     * The center of buoyancy in world coordinates.
+     * @readonly
+     * @member {LBGeometry.Vector3}
+     */
+    this.worldCenterOfBuoyancy = new LBGeometry.Vector3();
+    
+    /**
+     * The center of resistance (where the hull resistance is applied) in world coordinates.
+     * @readonly
+     * @member {LBGeometry.Vector3}
+     */
+    this.worldCenterOfResistance = new LBGeometry.Vector3();
+
+    /**
+     * The scale factor 1/2 * rho * V^2.
+     * @readonly
+     * @member {number}
+     */
     this.halfRhoVSq = 0;
 };
 
@@ -130,6 +166,8 @@ LBSailSim.Hull.prototype = {
         var velResults = LBSailSim.Hull._workingVelResults;
         vessel.coordSystem.calcVectorLocalToWorld(this.centerOfBuoyancy, velResults);
         this.worldCenterOfBuoyancy.copy(velResults.worldPos);
+        
+        this.worldCenterOfResistance.copy(velResults.worldPos);
         
         this.swc = this.swcnh * LBSailSim.Delft.calcWettedSurfaceHeelCorrection(this);
     },
@@ -185,7 +223,7 @@ LBSailSim.Hull.prototype = {
         
         this._updatePropertiesFromVessel();
         
-        resultant.applPoint.copy(this.centerOfBuoyancy);
+        resultant.applPoint.copy(this.worldCenterOfResistance);
 
         var frictionDrag = this.calcFrictionalDrag();
         var residuaryResistance = this.calcResiduaryResistance();
@@ -197,7 +235,7 @@ LBSailSim.Hull.prototype = {
         force.copy(this.vessel.apparentCurrent).normalize();
         force.multiplyScalar(drag);
         
-        resultant.addForce(force, this.worldCenterOfBuoyancy);
+        resultant.addForce(force, this.worldCenterOfResistance);
         
         // Add gravity...
         var fGravity = this.vessel.getTotalMass() * this.vessel.sailEnv.gravity;
