@@ -42,6 +42,14 @@ LoadingState.preload = function() {
     this.game.load.image('tubby_mainsail', 'images/tubby_mainsail.png');
     this.game.load.image('tubby_rudder', 'images/tubby_rudder.png');
     this.game.load.image('can', 'images/can.png');
+
+    var sizeSuffix = 'med';
+    this.game.load.image('compass', 'images/compass_card_' + sizeSuffix + '.png');
+    this.game.load.image('mainsheet_thumb', 'images/mainsheet_thumb_' + sizeSuffix + '.png');
+    this.game.load.image('mainsheet_bkgd', 'images/mainsheet_bkgd_' + sizeSuffix + '.png');
+    this.game.load.image('mainsheet_logo', 'images/mainsheet_logo_' + sizeSuffix + '.png');
+    this.game.load.image('tiller_thumb', 'images/tiller_thumb_' + sizeSuffix + '.png');
+    this.game.load.image('tiller_bkgd', 'images/tiller_bkgd_' + sizeSuffix + '.png');
 };
 
 
@@ -115,7 +123,7 @@ PlayState.create = function() {
     this.game.physics.setBoundsToWorld();
     
     this.camera.focusOnXY(0, 0);
-        
+    
     var clCdCurvesJSON = this.game.cache.getJSON('clCdCurves');
     this.sailEnv.loadClCdCurves(clCdCurvesJSON);
     
@@ -144,14 +152,6 @@ PlayState._loadLevel = function (data) {
     this.worldGroup = this.game.add.group();
     this.sailEnv.setWorldGroup(this.worldGroup);
     
-    // TEST!!!
-    var grid = this.game.add.graphics(0, 0, this.worldGroup);
-    grid.lineStyle(1, 0x808080, 0.5);
-    grid.moveTo(-1000, 0);
-    grid.lineTo(1000, 0);
-    grid.moveTo(0, -1000);
-    grid.lineTo(0, 1000);
-
     this.buoys = this.game.add.group(this.worldGroup);
     
     data.buoys.forEach(this._spawnBuoys, this);
@@ -236,6 +236,68 @@ PlayState._setupHUD = function() {
     this.ticksText = this.game.add.text(left, top, "SimTicks: 0", style);
     this.hud.add(this.ticksText);
     top += this.ticksText.height + vSpacing;
+    
+    this.hInset = 5;
+    this.vInset = 5;
+    
+    this.compass = this.game.add.sprite(0, 0, 'compass', 0, this.hud);
+    this.compass.anchor.x = 0.5;
+    this.compass.anchor.y = 0.5;
+    this.compass.position.x = this.game.width - this.compass.width - this.hInset;
+    this.compass.position.y = this.compass.height / 2 + this.vInset;
+
+    
+    
+    if (this.myBoat.getMainsheetController()) {
+        var thumbSprite = this.game.add.sprite(0, 0, 'mainsheet_thumb');
+        thumbSprite.anchor.y = 0.5;
+
+        var bkgdSprite = this.game.add.tileSprite(0, 0, 32, 32, 'mainsheet_bkgd');
+        var logoSprite = this.game.add.sprite(0, 0, 'mainsheet_logo');
+        logoSprite.rotation = -LBMath.PI_2;
+        logoSprite.anchor.x = 0.2;
+        
+        this.mainsheetSlider = new LBPhaser.Slider(this.game, 1, -100, 0, 100, true, 
+                thumbSprite, bkgdSprite, undefined, logoSprite);
+        this.mainsheetSlider.group.position.x = this.game.width / 2 - thumbSprite.width - this.hInset;
+        this.mainsheetSlider.setCallback(function(newPos, controller) {
+                if (!this.myBoat) {
+                    return;
+                }
+                var controller = this.myBoat.getMainsheetController();
+                if (!controller) {
+                    return;
+                }
+                var controllerValue = controller.minValue + newPos * (controller.maxValue - controller.minValue);
+                controller.setValue(controllerValue);
+            },
+            this);
+    }
+    
+    var rudderController = this.myBoat.getRudderController();
+    if (rudderController) {
+        var thumbSprite = this.game.add.sprite(0, 0, 'tiller_thumb');
+        thumbSprite.anchor.x = 0.5;
+        thumbSprite.anchor.y = 0.8;
+        
+        var bkgdSprite = this.game.add.sprite(0, 0, 'tiller_bkgd');
+        bkgdSprite.anchor.x = 0.5;
+        bkgdSprite.anchor.y = 0.5;
+
+        this.tillerDial = new LBPhaser.Dial(this.game, rudderController.minValue, 90, rudderController.maxValue, -90, thumbSprite, bkgdSprite);
+        this.tillerDial.group.position.y = this.game.height / 2 - bkgdSprite.height / 2 - this.vInset;
+        this.tillerDial.setCallback(function(newPos, controller) {
+                if (!this.myBoat) {
+                    return;
+                }
+                var controller = this.myBoat.getRudderController();
+                if (!controller) {
+                    return;
+                }
+                controller.setValue(newPos);
+            },
+            this);
+    }
 };
 
 
@@ -344,6 +406,10 @@ PlayState.moveRudder = function(key, isDecrease) {
     }
     delta *= this.sailEnv.phaserEnv.ySign;
     this.myBoat.moveRudder(delta, true);
+    
+    if (this.tillerDial) {
+        this.tillerDial.setValue(this.myBoat.getRudderDeg());
+    }
 };
 
 //------------------------------ --------------------
@@ -359,6 +425,10 @@ PlayState.moveMainsheet = function(key, isDecrease) {
         delta = -delta;
     }
     this.myBoat.moveMainsheet(delta, true);
+    
+    if (this.mainsheetSlider) {
+        this.mainsheetSlider.setValue(this.myBoat.getMainsheetPos());
+    }
 };
 
 //------------------------------ --------------------
@@ -377,6 +447,9 @@ PlayState._handleInput = function() {
     }
     else if (this.keys.space.isDown) {
         this.myBoat.moveRudder(0, false);
+        if (this.tillerDial) {
+            this.tillerDial.setValue(0);
+        }
     }
     else if (this.keys.n.isDown) {
         this.myBoat.moveThrottle(0, false);
@@ -406,6 +479,8 @@ PlayState._updateCamera = function() {
     this.worldGroup.position.y = posY;
     
     this.water.rotation = -rotation;
+    
+    this.compass.rotation = -rotation;
 
 };
 

@@ -26,6 +26,8 @@ Rotate world:
     Option to rotate world, rotate boat
     Ability to shift center of view, re-center.
 
+Draggable controls:
+
 Projected 3D drawing.
 
 Add VMG to HUD

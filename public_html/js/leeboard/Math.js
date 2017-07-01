@@ -94,12 +94,12 @@ LBMath.cleanNearZero = function(x, tolerance) {
 /**
  * Adjusts a value as necessary to ensure it is between two limits.
  * @param {number} val  The value to clamp if necessary.
- * @param {number} low  The minimum value to allow, must be &le; high, no test is made.
- * @param {number} high The maximum value to allow, must be &ge; low.
+ * @param {number} limitA  One of the limits.
+ * @param {number} limitB The other limit.
  * @returns {number} The value clamped to the limits.
  */
-LBMath.clamp = function(val, low, high) {
-    return Math.min(Math.max(val, low), high);
+LBMath.clamp = function(val, limitA, limitB) {
+    return (limitA < limitB) ? Math.min(Math.max(val, limitA), limitB) : Math.min(Math.max(val, limitB), limitA);
 };
 
 /**
