@@ -25,15 +25,15 @@ I'm currently using NetBeans IDE 8.1 as my IDE. There's nothing special about it
 
 
 ### Code Organization ###
-The Javascript code is all within the public_html/js folder. With the exception of main.js, all the library code is within the public_html/js/leeboard folder. main.js is the main entry point to **By The Lee**.
+The Javascript code is all within the public _ html/js folder. With the exception of main.js, all the library code is within the public _ html/js/leeboard folder. main.js is the main entry point to **By The Lee**.
 
 Along with main.js are phaser.min.js, phaser.js, three.min.js, and three.js. These are the files for Phaser and three.js, respectively. The .min versions are the minimized versions, which are what should be used in the live version of the apps, while the other versions are the 'normal' versions which can easily be stepped into in the debugger.
 
-The core portion of the library consists of the files in the folder public_html/js/leeboard, but not including any of the files in the sub-folders. These files will most likely be moved into their own core folder.
+The core portion of the library is in public _ html/js/leeboard/core.
 
-The sailing simulator is in public_html/js/leeboard/sailsim.
+The sailing simulator is in public _ html/js/leeboard/sailsim.
 
-The files for interfacing with Phaser are in public_html/js/leeboard/phaser.
+The files for interfacing with Phaser are in public _ html/js/leeboard/phaser.
 
 ### Building The  Docs ###
 If you want to generate the code docs, you'll need [JSDoc3](http://usejsdoc.org/), which is part of [Node.js](https://nodejs.org). You can install JSDoc3 globally using the following under Linux/OsX:
@@ -42,14 +42,14 @@ If you want to generate the code docs, you'll need [JSDoc3](http://usejsdoc.org/
 
 To generate the docs, do the following from the root folder of the project:
 * Delete the docs folder.
-* Run: `jsdoc public_html/js/leeboard -r -d docs`
+* Run: `jsdoc public _ html/js/leeboard -r -d docs`
 
 The docs folder will then be populated with the appropriate HTML files for the docs.
 
 
 ### The Release ###
 At the moment I don't use a minimizer, some day I will.
-Other than that, the release process consists of copying the files from public_html to the root folder of the leeboardtools.github.io repository, skipping the following files:
+Other than that, the release process consists of copying the files from public _ html to the root folder of the leeboardtools.github.io repository, skipping the following files:
 
 * phaser.min.js
 * phaser.js
@@ -60,6 +60,7 @@ Other than that, the release process consists of copying the files from public_h
 
 Additionally, the index.html file needs to be updated with a commenting out of the following two lines:
 * `<script src="js/phaser.js"></script>`
+
 * `<script src="js/three.js"></script>`
 
 These lines are used to include the non-minimized versions of Phaser and three.js for debugging.
