@@ -68,8 +68,8 @@ LBGeometry.normalToTangentXY = function(normal, store) {
 /**
  * A 2D vector, our encapsulation of {@link LBGeometry.Vector2}.
  * @constructor
- * @param {number} [x=0]    The x coordinate.
- * @param {number} [y=0]    The y coordinate.
+ * @param {Number} [x=0]    The x coordinate.
+ * @param {Number} [y=0]    The y coordinate.
  * @returns {LBGeometry.Vector2}
  */
 LBGeometry.Vector2 = function(x, y) {
@@ -83,8 +83,8 @@ LBGeometry.Vector2.prototype.clone = function() {
 
 /**
  * Creates a 2D vector from a magnitude and angle in degrees.
- * @param {number} mag  The magnitude.
- * @param {number} deg  The angle, in degrees, of the vector relative to the x axis.
+ * @param {Number} mag  The magnitude.
+ * @param {Number} deg  The angle, in degrees, of the vector relative to the x axis.
  * @returns {LBGeometry.Vector2}
  */
 LBGeometry.createVector2MagDeg = function(mag, deg) {
@@ -164,9 +164,9 @@ LBGeometry.Vector2.prototype.isZero = function() {
 /**
  * Our encapsulation of {@link THREE.Vector3}, a 3D vector.
  * @constructor
- * @param {number} [x=0]    The x coordinate.
- * @param {number} [y=0]    The y coordinate.
- * @param {number} [z=0]    The z coordinate.
+ * @param {Number} [x=0]    The x coordinate.
+ * @param {Number} [y=0]    The y coordinate.
+ * @param {Number} [z=0]    The z coordinate.
  * @returns {LBGeometry.Vector3}
  */
 LBGeometry.Vector3 = function(x, y, z) {
@@ -387,7 +387,7 @@ LBGeometry.isVectorLikeZero = function(vec) {
 /**
  * Limits the magnitude of a vector.
  * @param {object} vec  The 2D or 3D vector.
- * @param {number} mag  The maximum magnitude.
+ * @param {Number} mag  The maximum magnitude.
  * @returns {object}    vec.
  */
 LBGeometry.clampVectorMag = function(vec, mag) {
@@ -421,10 +421,10 @@ LBGeometry.makeOrthogonal = function(refVec, store) {
 
 /**
  * Our encapsulation of {@link THREE.Quaternion}.
- * @param {number} [x=0]    Initial x value.
- * @param {number} [y=0]    Initial y value.
- * @param {number} [z=0]    Initial z value.
- * @param {number} [w=1]    Initial w value.
+ * @param {Number} [x=0]    Initial x value.
+ * @param {Number} [y=0]    Initial y value.
+ * @param {Number} [z=0]    Initial z value.
+ * @param {Number} [w=1]    Initial w value.
  */
 LBGeometry.Quaternion = function(x, y, z, w) {
     THREE.Quaternion.call(this, x, y, z, w);
@@ -458,9 +458,9 @@ LBGeometry.loadQuaternion = function(data, quat) {
 
 /**
  * Creates a quaternion representing three Euler angles, in radians.
- * @param {number} xRad   The rotation about the x axis, in radians.
- * @param {number} yRad   The rotation about the y axis, in radians.
- * @param {number} zRad   The rotation about the z axis, in radians.
+ * @param {Number} xRad   The rotation about the x axis, in radians.
+ * @param {Number} yRad   The rotation about the y axis, in radians.
+ * @param {Number} zRad   The rotation about the z axis, in radians.
  * @returns {object}    The THREE.Quaternion compatible quaternion.
  */
 LBGeometry.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
@@ -475,9 +475,9 @@ LBGeometry.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
  * An object representing a set of Euler angles, our encapsulation of
  * {@link THREE.Euler}.
  * @constructor
- * @param {number} [xRad=0] The rotation about the x axis in radians.
- * @param {number} [yRad=0] The rotation about the y axis in radians.
- * @param {number} [zRad=0] The rotation about the z axis in radians.
+ * @param {Number} [xRad=0] The rotation about the x axis in radians.
+ * @param {Number} [yRad=0] The rotation about the y axis in radians.
+ * @param {Number} [zRad=0] The rotation about the z axis in radians.
  * @param {String} [order='XYZ']    The order of rotation.
  * @returns {LBGeometry.Euler}    The Euler object.
  */
@@ -492,9 +492,9 @@ LBGeometry.Euler.prototype.clone = function() {
 
 /**
  * Creates an object representing Euler angles.
- * @param {number} xRad The rotation about the x axis in radians.
- * @param {number} yRad The rotation about the y axis in radians.
- * @param {number} zRad The rotation about the z axis in radians.
+ * @param {Number} xRad The rotation about the x axis in radians.
+ * @param {Number} yRad The rotation about the y axis in radians.
+ * @param {Number} zRad The rotation about the z axis in radians.
  * @param {String} order    The order of rotation.
  * @returns {LBGeometry.Euler}    The Euler object.
  */
@@ -504,9 +504,9 @@ LBGeometry.createEulerRad = function(xRad, yRad, zRad, order) {
 
 /**
  * Creates an object representing Euler angles given the angles in degrees.
- * @param {number} xDeg The rotation about the x axis in degrees.
- * @param {number} yDeg The rotation about the y axis in degrees.
- * @param {number} zDeg The rotation about the z axis in degrees.
+ * @param {Number} xDeg The rotation about the x axis in degrees.
+ * @param {Number} yDeg The rotation about the y axis in degrees.
+ * @param {Number} zDeg The rotation about the z axis in degrees.
  * @param {String} order    The order of rotation.
  * @returns {LBGeometry.Euler}    The Euler object.
  */
@@ -666,7 +666,7 @@ LBGeometry.loadLine3 = function(data, line) {
  * A plane, our encapsulation of {@link THREE.Plane}.
  * @constructor
  * @param {LBGeometry.Vector3} [normal=LBGeometry.X_AXIS]   A normal to the plane.
- * @param {number} [constant=LBGeometry.ORIGIN] The negative distance from the origin to the plane along
+ * @param {Number} [constant=LBGeometry.ORIGIN] The negative distance from the origin to the plane along
  * the normal vector.
  * @returns {LBGeometry.Plane}
  */
@@ -732,7 +732,7 @@ LBGeometry.getLinePlaneIntersection = function(plane, line, store) {
  * A sphere, our encapsulation of {@link THREE.Sphere}.
  * @constructor
  * @param {LBGeometry.Vector3} [center=LBGeometry.ORIGIN] The center of the sphere.
- * @param {number} [radius=0]   The radius of the sphere.
+ * @param {Number} [radius=0]   The radius of the sphere.
  * @returns {THREE.Sphere}
  */
 LBGeometry.Sphere = function(center, radius) {
@@ -874,9 +874,9 @@ LBGeometry.loadMatrix4 = function(data, mat) {
 /**
  * Extension to {@link THREE.Matrix4}, sets the position components of the matrix using
  * separate x,y, and z coordinates.
- * @param {number} x    The x coordinate.
- * @param {number} y    The y coordinate.
- * @param {number} z    The z coordinate.
+ * @param {Number} x    The x coordinate.
+ * @param {Number} y    The y coordinate.
+ * @param {Number} z    The z coordinate.
  * @returns {Leeboard.Matrix4}  this.
  */
 THREE.Matrix4.prototype.setXYZ = function(x, y, z) {
@@ -890,12 +890,12 @@ THREE.Matrix4.prototype.setXYZ = function(x, y, z) {
 /**
  * Extension to {@link LBGeometry.Matrix4}, sets the matrix to a rotation defined by Euler angles
  * followed by a translation to x,y,z coordinates.
- * @param {number} xRad   The rotation about the x axis, in radians.
- * @param {number} yRad   The rotation about the y axis, in radians.
- * @param {number} zRad   The rotation about the z axis, in radians.
- * @param {number} px    The x coordinate.
- * @param {number} py    The y coordinate.
- * @param {number} pz    The z coordinate.
+ * @param {Number} xRad   The rotation about the x axis, in radians.
+ * @param {Number} yRad   The rotation about the y axis, in radians.
+ * @param {Number} zRad   The rotation about the z axis, in radians.
+ * @param {Number} px    The x coordinate.
+ * @param {Number} py    The y coordinate.
+ * @param {Number} pz    The z coordinate.
  * @returns {Leeboard.Matrix4}  this.
  */
 LBGeometry.Matrix4.prototype.makeFromEulerAndXYZ = function(xRad, yRad, zRad, px, py, pz) {

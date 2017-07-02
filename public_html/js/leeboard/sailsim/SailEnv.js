@@ -55,7 +55,7 @@ LBSailSim.Env = function() {
     
     /**
      * The acceleration due to gravity.
-     * @member {number}
+     * @member {Number}
      */
     this.gravity = 9.81;
 };
@@ -65,9 +65,9 @@ LBSailSim.Env.prototype = {
     
     /**
      * Calculates the Froude number for a given speed and length.
-     * @param {number} vel  The speed.
-     * @param {number} len  The length.
-     * @returns {number}    The Froude number.
+     * @param {Number} vel  The speed.
+     * @param {Number} len  The length.
+     * @returns {Number}    The Froude number.
      */
     calcFroudeNumber: function(vel, len) {
         return vel / Math.sqrt(len * this.gravity);
@@ -75,9 +75,9 @@ LBSailSim.Env.prototype = {
     
     /**
      * Calculates the Reynolds number for a given speed and length in the air.
-     * @param {number} vel  The speed.
-     * @param {number} len  The length.
-     * @returns {number}    The Reynolds number.
+     * @param {Number} vel  The speed.
+     * @param {Number} len  The length.
+     * @returns {Number}    The Reynolds number.
      */
     calcAirRe: function(vel, len) {
         return this.wind.calcRe(vel, len);
@@ -85,9 +85,9 @@ LBSailSim.Env.prototype = {
     
     /**
      * Calculates the Reynolds number for a given speed and length in the water.
-     * @param {number} vel  The speed.
-     * @param {number} len  The length.
-     * @returns {number}    The Reynolds number.
+     * @param {Number} vel  The speed.
+     * @param {Number} len  The length.
+     * @returns {Number}    The Reynolds number.
      */
     calcWaterRe: function(vel, len) {
         return this.water.calcRe(vel, len);
@@ -274,7 +274,7 @@ LBSailSim.Env.prototype = {
 
     /**
      * Call to update the sailing environment state for a new simulation time step.
-     * @param {number} dt   The simulation time step.
+     * @param {Number} dt   The simulation time step.
      * @returns {object}    this.
      */
     update: function(dt) {
@@ -293,13 +293,13 @@ LBSailSim.Env.prototype = {
 LBSailSim.Wind = function() {
     /**
      * The density.
-     * @member {number}
+     * @member {Number}
      */
     this.density = 1.204;
     
     /**
      * The kinematic viscosity.
-     * @member {number}
+     * @member {Number}
      */
     this.kViscosity = 1.48e-5;
 };
@@ -309,9 +309,9 @@ LBSailSim.Wind.prototype = {
     
     /**
      * Retrieves the wind velocity at a given point
-     * @param {number} x    The x coordinate.
-     * @param {number} y    The y coordinate.
-     * @param {number} z    The z coordinate.
+     * @param {Number} x    The x coordinate.
+     * @param {Number} y    The y coordinate.
+     * @param {Number} z    The z coordinate.
      * @param {object} vel  The object to receive the velocity.
      * @returns {object}    The object containing the velocity.
      */
@@ -333,8 +333,8 @@ LBSailSim.Wind.prototype = {
     
     /**
      * Calculates a Reynolds number.
-     * @param {number} vel  The speed.
-     * @param {number} len  The length.
+     * @param {Number} vel  The speed.
+     * @param {Number} len  The length.
      * @returns {Number}    The Reynolds number.
      */
     calcRe: function(vel, len) {
@@ -343,7 +343,7 @@ LBSailSim.Wind.prototype = {
     
     /**
      * Called to update the state of the wind.
-     * @param {number} dt   The simulation time step.
+     * @param {Number} dt   The simulation time step.
      * @returns {LBSailSim.Wind}    this.
      */
     update: function(dt) {
@@ -374,9 +374,9 @@ LBSailSim.Water.prototype = {
     
     /**
      * Retrieves the water current velocity at a given point
-     * @param {number} x    The x coordinate.
-     * @param {number} y    The y coordinate.
-     * @param {number} z    The z coordinate.
+     * @param {Number} x    The x coordinate.
+     * @param {Number} y    The y coordinate.
+     * @param {Number} z    The z coordinate.
      * @param {object} [vel]  If defined the object to receive the velocity.
      * @returns {object}    The object containing the velocity.
      */
@@ -398,8 +398,8 @@ LBSailSim.Water.prototype = {
     
     /**
      * Calculates a Reynolds number.
-     * @param {number} vel  The speed.
-     * @param {number} len  The length.
+     * @param {Number} vel  The speed.
+     * @param {Number} len  The length.
      * @returns {Number}    The Reynolds number.
      */
     calcRe: function(vel, len) {
@@ -408,7 +408,7 @@ LBSailSim.Water.prototype = {
     
     /**
      * Called to update the state of the water.
-     * @param {number} dt   The simulation time step.
+     * @param {Number} dt   The simulation time step.
      * @returns {LBSailSim.Water}    this.
      */
     update: function(dt) {

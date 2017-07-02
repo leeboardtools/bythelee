@@ -152,7 +152,7 @@ LBSailSim.SailInstance.prototype.load = function(data, sailEnv) {
 
 /**
  * Sets the sheet length.
- * @param {number} length   The sheet length.
+ * @param {Number} length   The sheet length.
  * @returns {LBSailSim.SailInstance} this.
  */
 LBSailSim.SailInstance.prototype.setSheetLength = function(length) {
@@ -163,7 +163,7 @@ LBSailSim.SailInstance.prototype.setSheetLength = function(length) {
 
 /**
  * Sets the sheet length based on a ratio between the minimum and maximum sheet lengths.
- * @param {number} ratio    The sheet length ratio, 0 is the minimun sheet length,
+ * @param {Number} ratio    The sheet length ratio, 0 is the minimun sheet length,
  * 1 is the maximum sheet length.
  * @returns {LBSailSim.SailInstance}  this.
  */
@@ -190,7 +190,7 @@ LBSailSim.SailController = function(vessel) {
     
     /**
      * The name of the sails which are controlled by this.
-     * @member {string}
+     * @member {String}
      */
     this.sailName = 'sail';
     
@@ -244,7 +244,7 @@ LBSailSim.SailController.prototype._loadSails = function() {
 
 /**
  * Changes the sheet length for all the sails.
- * @param {number} value    The sheet length.
+ * @param {Number} value    The sheet length.
  * @returns {undefined}
  */
 LBSailSim.SailController.prototype.setSheetLength = function(value) {

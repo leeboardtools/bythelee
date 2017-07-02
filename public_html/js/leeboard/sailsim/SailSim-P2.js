@@ -64,8 +64,8 @@ LBSailSim.P2Env.prototype.setWorldGroup = function(worldGroup) {
 
 /**
  * Changes whether or not the force arrows are displayed.
- * @param {boolean} isVisible   If true the force arrows are displayed, otherwise they are hidden.
- * @returns {boolean}   True if the force arrows were visible prior to this call.
+ * @param {Boolean} isVisible   If true the force arrows are displayed, otherwise they are hidden.
+ * @returns {Boolean}   True if the force arrows were visible prior to this call.
  */
 LBSailSim.P2Env.prototype.setForceArrowsVisible = function(isVisible) {
     var wasVisible = this.areForceArrowsVisible();
@@ -84,8 +84,8 @@ LBSailSim.P2Env.prototype.areForceArrowsVisible = function() {
 
 /**
  * Changes whether or not the velocity arrows are displayed.
- * @param {boolean} isVisible   If true the velocity arrows are displayed, otherwise they are hidden.
- * @returns {boolean}   True if the velocity arrows were visible prior to this call.
+ * @param {Boolean} isVisible   If true the velocity arrows are displayed, otherwise they are hidden.
+ * @returns {Boolean}   True if the velocity arrows were visible prior to this call.
  */
 LBSailSim.P2Env.prototype.setVelocityArrowsVisible = function(isVisible) {
     var wasVisible = this.areVelocityArrowsVisible();

@@ -99,7 +99,7 @@ LBPhaser.P2Link.prototype = {
     
     /**
      * Call to apply the forces from the rigid bodies to the P2 bodies.
-     * @param {number} dt   The simulation time step.
+     * @param {Number} dt   The simulation time step.
      * @returns {LBPhaser.P2Link}   this.
      */
     applyToP2: function(dt) {
@@ -281,7 +281,7 @@ LBPhaser.P2Link.callbackProperty = "_p2Callback";
 /**
  * Retrieves the appropriate tie step to use based on the settings of {@link Phaser.Physics.P2}.
  * @param {Phaser.Physics.P2} p2    The P2 physics object.
- * @returns {number}    The time step.
+ * @returns {Number}    The time step.
  */
 LBPhaser.P2Link.getP2TimeStep = function(p2) {
     return p2.useElapsedTime ? p2.game.time.physicsElapsed : p2.frameRate;

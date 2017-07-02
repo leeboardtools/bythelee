@@ -23,34 +23,34 @@
 var LBMath = LBMath || {};
 
 /**
- * @property {number} DEG_TO_RAD    Degrees to radians scale.
+ * @property {Number} DEG_TO_RAD    Degrees to radians scale.
  */
 LBMath.DEG_TO_RAD = Math.PI / 180;
 
 /**
- * @property {number} RAD_TO_DEG    Radians to degrees scale.
+ * @property {Number} RAD_TO_DEG    Radians to degrees scale.
  */
 LBMath.RAD_TO_DEG = 180 / Math.PI;
 
 /**
- * @property {number} TWO_PI    2 * PI
+ * @property {Number} TWO_PI    2 * PI
  */
 LBMath.TWO_PI = Math.PI * 2;
 
 /**
- * @property {number} PI_2    PI / 2
+ * @property {Number} PI_2    PI / 2
  */
 LBMath.PI_2 = Math.PI / 2;
 
 /**
- * @property {number} The default zero tolerance used by {@link LBMath.isLikeZero} and {@link LBMath.isNearEqual}.
+ * @property {Number} The default zero tolerance used by {@link LBMath.isLikeZero} and {@link LBMath.isNearEqual}.
  */
 LBMath.defZeroTolerance = 1e-10;
 
 /**
  * Determines if a number should be treated as zero (usually for avoiding divide by zero)
- * @param {number} x  The number.
- * @param {number} [tolerance=LBMath.defZeroTolerance]  The optional tolerance.
+ * @param {Number} x  The number.
+ * @param {Number} [tolerance=LBMath.defZeroTolerance]  The optional tolerance.
  * @returns {Boolean}   True if x can be considered zero.
  */
 LBMath.isLikeZero = function(x, tolerance) {
@@ -60,9 +60,9 @@ LBMath.isLikeZero = function(x, tolerance) {
 
 /**
  * Determines if two numbers are approximately equal.
- * @param {number} a    The first number.
- * @param {number} b    The second number.
- * @param {number} [tolerance=LBMath.defZeroTolerance]  The optional tolerance.
+ * @param {Number} a    The first number.
+ * @param {Number} b    The second number.
+ * @param {Number} [tolerance=LBMath.defZeroTolerance]  The optional tolerance.
  * @returns {Boolean}   True if the numbers can be considered equal.
  */
 LBMath.isNearEqual = function(a, b, tolerance) {
@@ -83,8 +83,8 @@ LBMath.isNearEqual = function(a, b, tolerance) {
 
 /**
  * Converts a value to zero if it is considered like zero by {@link LBMath.isLikeZero}.
- * @param {number} x    The value.
- * @param {number} [tolerance=LBMath.defZeroTolerance]  The optional tolerance.
+ * @param {Number} x    The value.
+ * @param {Number} [tolerance=LBMath.defZeroTolerance]  The optional tolerance.
  * @returns {Number}    x or 0.
  */
 LBMath.cleanNearZero = function(x, tolerance) {
@@ -93,10 +93,10 @@ LBMath.cleanNearZero = function(x, tolerance) {
 
 /**
  * Adjusts a value as necessary to ensure it is between two limits.
- * @param {number} val  The value to clamp if necessary.
- * @param {number} limitA  One of the limits.
- * @param {number} limitB The other limit.
- * @returns {number} The value clamped to the limits.
+ * @param {Number} val  The value to clamp if necessary.
+ * @param {Number} limitA  One of the limits.
+ * @param {Number} limitB The other limit.
+ * @returns {Number} The value clamped to the limits.
  */
 LBMath.clamp = function(val, limitA, limitB) {
     return (limitA < limitB) ? Math.min(Math.max(val, limitA), limitB) : Math.min(Math.max(val, limitB), limitA);
@@ -104,8 +104,8 @@ LBMath.clamp = function(val, limitA, limitB) {
 
 /**
  * Adjusts an angle in degrees so it satisfies -180 &lt; degrees &ge; 180.
- * @param {number} degrees  The anngle in degrees to wrap.
- * @returns {number}    degrees wrapped to -180 &lt; degrees &ge; 180.
+ * @param {Number} degrees  The anngle in degrees to wrap.
+ * @returns {Number}    degrees wrapped to -180 &lt; degrees &ge; 180.
  */
 LBMath.wrapDegrees = function(degrees) {
     degrees %= 360;
@@ -121,8 +121,8 @@ LBMath.wrapDegrees = function(degrees) {
 
 /**
  * Rounds a value to a certain number of decimal places.
- * @param {number} val  The value to be rounded.
- * @param {number} [decimalPlaces]  The number of decimal places, less than zero rounds
+ * @param {Number} val  The value to be rounded.
+ * @param {Number} [decimalPlaces]  The number of decimal places, less than zero rounds
  * above the decimal place.
  * @returns {Number}    The rounded value.
  */
@@ -136,8 +136,8 @@ LBMath.round = function(val, decimalPlaces) {
 
 /**
  * Rounds a value down to a certain number of decimal places.
- * @param {number} val  The value to be rounded downward.
- * @param {number} [decimalPlaces]  The number of decimal places, less than zero rounds
+ * @param {Number} val  The value to be rounded downward.
+ * @param {Number} [decimalPlaces]  The number of decimal places, less than zero rounds
  * above the decimal place.
  * @returns {Number}    The rounded value.
  */
@@ -153,9 +153,9 @@ LBMath.roundDown = function(val, decimalPlaces) {
 /**
  * Returns the angle in radians between sides a and b of a triangle, given the lengths
  * of the sides of the triangle.
- * @param {number} a    The length of one side of the vertex of interest.
- * @param {number} b    The length of the other side of the vertex of interest.
- * @param {number} c    The length of the side opposite the vertex of interest.
+ * @param {Number} a    The length of one side of the vertex of interest.
+ * @param {Number} b    The length of the other side of the vertex of interest.
+ * @param {Number} c    The length of the side opposite the vertex of interest.
  * @returns {Number}    The angle between sides a and b in radians.
  */
 LBMath.radFromThreeSides = function(a, b, c) {

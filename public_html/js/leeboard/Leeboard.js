@@ -167,7 +167,7 @@ Leeboard.copyAndMirrorArray = function(array) {
 
 /**
  * Retrieves the function in the global scope with a given name.
- * @param {string} str  The name of the function.
+ * @param {String} str  The name of the function.
  * @returns {function}  The function object.
  * @throws {Error} An error is throw if str could not be resolved to a function object.
  */

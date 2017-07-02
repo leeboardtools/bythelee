@@ -92,13 +92,13 @@ Phaser.Point.prototype.copy = function(src) {
 /**
  * Object representing the style information used for an {@link LBPhaser.Arrow}.
  * @constructor
- * @param {number} color    The RGB color.
+ * @param {Number} color    The RGB color.
  * @param {function} [arrowLengthScaler=LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER]
  * The function to use for scaling the vector length passed to the arrow to units
  * prior to conversion to pixels.
- * @param {number} [alpha=1]    The alpha value for the arrow, 1 = opaque, 0 = transparent.
- * @param {number} [width=2]    The pixel width of the arrow line.
- * @param {number} [arrowSize=20]    The nominal pixel size of the arrow head.
+ * @param {Number} [alpha=1]    The alpha value for the arrow, 1 = opaque, 0 = transparent.
+ * @param {Number} [width=2]    The pixel width of the arrow line.
+ * @param {Number} [arrowSize=20]    The nominal pixel size of the arrow head.
  * @returns {LBPhaser.ArrowStyle}
  */
 LBPhaser.ArrowStyle = function(color, arrowLengthScaler, alpha, width, arrowSize) {
@@ -143,8 +143,8 @@ LBPhaser.ArrowStyle = function(color, arrowLengthScaler, alpha, width, arrowSize
 /**
  * The default arrow length function that is used to scale the arrow length to modeling units (modeling units
  * are what are passed to {@link LBPhaser.Env#toPixelsX} and {@link LBPhaser.Env#toPixelsY}.
- * @param {number} length   The arrow length to be scaled.
- * @returns {number}    The scaled length.
+ * @param {Number} length   The arrow length to be scaled.
+ * @returns {Number}    The scaled length.
  */
 LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER = function(length) {
     return length;
@@ -215,17 +215,17 @@ LBPhaser.ArrowStyle.prototype = {
      * arrow using a polygon. All values are in pixels.
      * @protected
      * @param {Phaser.Graphics} g   The Phaser graphics object.
-     * @param {number} dirX The normalized x component of the arrow direction.
-     * @param {number} dirY The normalized y component of the arrow direction.
-     * @param {number} baseX    The x coordinate of the base center.
-     * @param {number} baseY    The y coordinate of the base center.
-     * @param {number} tipX The x coordinate of the tip.
-     * @param {number} tipY The y coordinate of the tip.
-     * @param {number} leftX    The x coordinate of the left arrowhead point.
-     * @param {number} leftY    The y coordinate of the left arrowhead point.
-     * @param {number} rightX   The x coordinate of the right arrowhead point.
-     * @param {number} rightY   The y coordinate of the right arrowhead point.
-     * @param {number} arrowSize    The size of the arrowhead.
+     * @param {Number} dirX The normalized x component of the arrow direction.
+     * @param {Number} dirY The normalized y component of the arrow direction.
+     * @param {Number} baseX    The x coordinate of the base center.
+     * @param {Number} baseY    The y coordinate of the base center.
+     * @param {Number} tipX The x coordinate of the tip.
+     * @param {Number} tipY The y coordinate of the tip.
+     * @param {Number} leftX    The x coordinate of the left arrowhead point.
+     * @param {Number} leftY    The y coordinate of the left arrowhead point.
+     * @param {Number} rightX   The x coordinate of the right arrowhead point.
+     * @param {Number} rightY   The y coordinate of the right arrowhead point.
+     * @param {Number} arrowSize    The size of the arrowhead.
      * @returns {undefined}
      */
     _setThickArrow: function(g, dirX, dirY, baseX, baseY, tipX, tipY, leftX, leftY, rightX, rightY, arrowSize) {
@@ -263,14 +263,14 @@ LBPhaser.ArrowStyle.prototype = {
      * arrow using lines. All values are in pixels.
      * @protected
      * @param {Phaser.Graphics} g   The Phaser graphics object.
-     * @param {number} baseX    The x coordinate of the base center.
-     * @param {number} baseY    The y coordinate of the base center.
-     * @param {number} tipX The x coordinate of the tip.
-     * @param {number} tipY The y coordinate of the tip.
-     * @param {number} leftX    The x coordinate of the left arrowhead point.
-     * @param {number} leftY    The y coordinate of the left arrowhead point.
-     * @param {number} rightX   The x coordinate of the right arrowhead point.
-     * @param {number} rightY   The y coordinate of the right arrowhead point.
+     * @param {Number} baseX    The x coordinate of the base center.
+     * @param {Number} baseY    The y coordinate of the base center.
+     * @param {Number} tipX The x coordinate of the tip.
+     * @param {Number} tipY The y coordinate of the tip.
+     * @param {Number} leftX    The x coordinate of the left arrowhead point.
+     * @param {Number} leftY    The y coordinate of the left arrowhead point.
+     * @param {Number} rightX   The x coordinate of the right arrowhead point.
+     * @param {Number} rightY   The y coordinate of the right arrowhead point.
      * @returns {undefined}
      */
     _setLineArrow: function(g, baseX, baseY, tipX, tipY, leftX, leftY, rightX, rightY) {

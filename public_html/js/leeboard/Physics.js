@@ -222,7 +222,7 @@ LBPhysics.Resultant3D.prototype = {
     /**
      * Applies a scale to all the distance related components of the resultant,
      * used for changing distance units.
-     * @param {number} scale    The scale to apply.
+     * @param {Number} scale    The scale to apply.
      * @returns {LBPhysics.Resultant3D} this.
      */
     applyDistanceScale: function(scale) {
@@ -290,7 +290,7 @@ LBPhysics.CoordSystemState = function() {
     
     /**
      * The last time step.
-     * @member {number}
+     * @member {Number}
      */
     this.dt = 0;
     
@@ -312,7 +312,7 @@ LBPhysics.CoordSystemState.prototype = {
      * other matrix, if both are not defined then the matrices are set to the identity
      * matrix.
      * @param {object} [worldXfrm]    If defined, the 4x4 matrix for transforming from local to world coordinaes.
-     * @param {number} [dt]   The simulation time change from the last call to this, used
+     * @param {Number} [dt]   The simulation time change from the last call to this, used
      * to compute velocity.
      * @param {object} [localXfrm]    If defined, the 4x4 matrix for transforming from world to local coordinates.
      * @returns {LBPhysics.CoordSystemState} this.
@@ -421,7 +421,7 @@ LBPhysics.CoordSystemState.prototype = {
      * Calculates the angular velocity about an axis in the local coordinate system
      * based upon the current and past transforms.
      * @param {LBGeometry.Vector3} rotAxis   The axis, this must be normalized.
-     * @returns {number}    The angular velocity in radians/sec.
+     * @returns {Number}    The angular velocity in radians/sec.
      */
     calcAngularVelocityAboutLocalAxis: function(rotAxis) {
         if (this.dt === 0) {
@@ -490,7 +490,7 @@ LBPhysics.loadMomentInertia = function(data, store) {
 /**
  * Returns the Ixx term of an inertia tensor.
  * @param {object} inertia The inertia tensor.
- * @returns {number}    The Ixx term.
+ * @returns {Number}    The Ixx term.
  */
 LBPhysics.getInertiaXX = function(inertia) {
     return inertia.elements[0];
@@ -499,7 +499,7 @@ LBPhysics.getInertiaXX = function(inertia) {
 /**
  * Returns the Ixy term of an inertia tensor.
  * @param {object} inertia The inertia tensor.
- * @returns {number}    The Ixy term.
+ * @returns {Number}    The Ixy term.
  */
 LBPhysics.getInertiaXY = function(inertia) {
     return inertia.elements[1];
@@ -508,7 +508,7 @@ LBPhysics.getInertiaXY = function(inertia) {
 /**
  * Returns the Ixz term of an inertia tensor.
  * @param {object} inertia The inertia tensor.
- * @returns {number}    The Ixz term.
+ * @returns {Number}    The Ixz term.
  */
 LBPhysics.getInertiaXZ = function(inertia) {
     return inertia.elements[1];
@@ -517,7 +517,7 @@ LBPhysics.getInertiaXZ = function(inertia) {
 /**
  * Returns the Iyy term of an inertia tensor.
  * @param {object} inertia The inertia tensor.
- * @returns {number}    The Iyy term.
+ * @returns {Number}    The Iyy term.
  */
 LBPhysics.getInertiaYY = function(inertia) {
     return inertia.elements[4];
@@ -526,7 +526,7 @@ LBPhysics.getInertiaYY = function(inertia) {
 /**
  * Returns the Iyz term of an inertia tensor.
  * @param {object} inertia The inertia tensor.
- * @returns {number}    The Iyz term.
+ * @returns {Number}    The Iyz term.
  */
 LBPhysics.getInertiaYZ = function(inertia) {
     return inertia.elements[1];
@@ -535,7 +535,7 @@ LBPhysics.getInertiaYZ = function(inertia) {
 /**
  * Returns the Izz term of an inertia tensor.
  * @param {object} inertia The inertia tensor.
- * @returns {number}    The Izz term.
+ * @returns {Number}    The Izz term.
  */
 LBPhysics.getInertiaZZ = function(inertia) {
     return inertia.elements[8];
@@ -549,7 +549,7 @@ LBPhysics.getInertiaZZ = function(inertia) {
  * rigid body, a reference to this object is kept, the object is expected to change
  * position and orientation during a simulation. This presumes that the object's world
  * reference frame is the same as the base's world reference frame.
- * @param {number} [mass] The mass of the body, may be 0.
+ * @param {Number} [mass] The mass of the body, may be 0.
  * @param {object} [centerOfMass] The center of mass relative to the local reference 
  * frame, if not defined it will be set to {0,0,0}.
  * @param {object} [momentInertia]    The moment of inertia tensor, not yet fully supported.
@@ -744,9 +744,9 @@ LBPhysics.RigidBody.prototype = {
     
     /**
      * Sets the position of the rigid body.
-     * @param {number} x    The x-coordinate.
-     * @param {number} y    The y-coordinate.
-     * @param {number} z    The z-coordinate.
+     * @param {Number} x    The x-coordinate.
+     * @param {Number} y    The y-coordinate.
+     * @param {Number} z    The z-coordinate.
      * @returns {LBPhysics.RigidBody}    this.
      */
     setXYZ: function(x, y, z) {
@@ -756,7 +756,7 @@ LBPhysics.RigidBody.prototype = {
     
     /**
      * Sets the rotation of the rigid body about the z-axis, in radians.
-     * @param {number} rad  The rotation about the z-axis, in radians. The rotation
+     * @param {Number} rad  The rotation about the z-axis, in radians. The rotation
      * is absolute with respect to the base's coordinate system.
      * @returns {LBPhysics.RigidBody}   this.
      */
@@ -767,7 +767,7 @@ LBPhysics.RigidBody.prototype = {
     
     /**
      * Sets the rotation of the rigid body about the z-axis, in degrees.
-     * @param {number} deg  The rotation about the z-axis, in degrees. The rotation
+     * @param {Number} deg  The rotation about the z-axis, in degrees. The rotation
      * is absolute with respect to the base's coordinate system.
      * @returns {LBPhysics.RigidBody}   this.
      */
@@ -793,7 +793,7 @@ LBPhysics.RigidBody.prototype = {
      * Use to update the rigid body's coordinate system from the current position
      * and orientation of the object3D. This also updates the coordinate systems
      * of parts of this rigid body.
-     * @param {number} dt   The simulation time since the last time the coordinates
+     * @param {Number} dt   The simulation time since the last time the coordinates
      * was updated, passed to the coordinate system state.
      * @returns {LBPhysics.RigidBody}    this.
      */
@@ -950,7 +950,7 @@ LBPhysics.RigidBody.prototype = {
      * @param {LBGeometry.Vector3} axisOrigin A point defining the location of the axis, in
      * local coordinates.
      * @param {LBGeometry.Vector3} axis The axis of rotation in local coordinates, this must be normalized.
-     * @param {number} currentDeg    The current angular rotation about the axis in degrees.
+     * @param {Number} currentDeg    The current angular rotation about the axis in degrees.
      * @param {function} [constrainer]  Optional function called to enforce any constraints
      * on the rotation angle. The function signature is:
      *  constrainer = function(deltaDeg) {

@@ -46,37 +46,37 @@ LBSailSim.Hull = function(vessel) {
     
     /**
      * The waterline length LWL.
-     * @member {number}
+     * @member {Number}
      */
     this.lwl = 10.02;
     
     /**
      * The waterline beam, BWL.
-     * @member {number}
+     * @member {Number}
      */
     this.bwl = 3.17;
     
     /**
      * The canoe body draft Tc.
-     * @member {number}
+     * @member {Number}
      */
     this.tc = 0.57;
     
     /**
      * The canoe body volumne displacement delC.
-     * @member {number}
+     * @member {Number}
      */
     this.delC = 7.63;
     
     /**
      * The prismatic coefficient CP.
-     * @member {number}
+     * @member {Number}
      */
     this.cp = 0.56;
     
     /**
      * The longitudinal center of buoyancy from the forward perpendicular, LBCfpp
-     * @member {number}
+     * @member {Number}
      */
     // In the book it's given as a percentage, which I'm presuming is percent of LWO
     // from the mid-point, so we have:
@@ -85,44 +85,44 @@ LBSailSim.Hull = function(vessel) {
     
     /**
      * The longitudinal center of floatation from the forward perpendicular, LFCfpp.
-     * @member {number}
+     * @member {Number}
      */
     this.lcf = 0.5 * this.lwl + 0.065 * this.lwl;
     
     /**
      * The area of water plane, AW
-     * @member {number}
+     * @member {Number}
      */
     this.aw = 22.7;
     
     /**
      * The wetted surface area of canoe body, Swc, also Sc
-     * @member {number}
+     * @member {Number}
      */
     this.swc = 25.2;
     
     /**
      * The unheeled wetted surface area of canoe body, Swc, also Sc
-     * @member {number}
+     * @member {Number}
      */
     this.swcnh = 25.2;
      
     /**
      * The midship section coefficient, CM
-     * @member {number}
+     * @member {Number}
      */
     this.cm = 0.752;
    
     /**
      * The equivalent uniform roughness, K.
-     * @member {number}
+     * @member {Number}
      */
     this.k = 5e-6;
     
     /**
      * The current heeling angle about the boat's y axis, in world coordinates.
      * @readonly
-     * @member {number}
+     * @member {Number}
      */
     this.heelAngleDeg = 0;
     
@@ -143,7 +143,7 @@ LBSailSim.Hull = function(vessel) {
     /**
      * The scale factor 1/2 * rho * V^2.
      * @readonly
-     * @member {number}
+     * @member {Number}
      */
     this.halfRhoVSq = 0;
 };
@@ -174,7 +174,7 @@ LBSailSim.Hull.prototype = {
     
     /**
      * Calculates the drag due to friction.
-     * @return {number} The drag due to friction.
+     * @return {Number} The drag due to friction.
      */
     calcFrictionalDrag: function() {
         // Based on Larsson, pg. 66 - 70.
@@ -214,7 +214,7 @@ LBSailSim.Hull.prototype = {
     
     /**
      * Calculates the forces due to the hull, returning it as a resultant.
-     * @param {number} dt   The simulation time step.
+     * @param {Number} dt   The simulation time step.
      * @param {LBPhysics.Resultant} [resultant] If defined the resultant to store the results into.
      * @return {LBPhysics.Resultant3D}  The resultant.
      */
@@ -304,7 +304,7 @@ LBSailSim.Hull.createFromData = function(data, vessel) {
  * Calculates the midship coefficient for a set of hull parameters.
  * Larsson pg. 33
  * @param {LBSailSim.Hull} hull The hull parameters.
- * @return {number} The midship coefficient CM.
+ * @return {Number} The midship coefficient CM.
  */
 LBSailSim.Hull.calcCM = function(hull) {
     var den = hull.lwl * hull.bwl * hull.tc * hull.cp;
@@ -315,7 +315,7 @@ LBSailSim.Hull.calcCM = function(hull) {
  * Estimates the wetted surface area.
  * Larsson pg. 33
  * @param {LBSailSim.Hull} hull The hull parameters.
- * @return {number} The estimated wetted surface area SW.
+ * @return {Number} The estimated wetted surface area SW.
  */
 LBSailSim.Hull.estimateSW = function(hull) {
     var cm = (hull.cm) ? hull.cm : LBSailSim.Hull.calcCM(hull);
@@ -326,10 +326,10 @@ LBSailSim.Hull.estimateSW = function(hull) {
 
 /**
  * Calculates the prismatic coefficient CP.
- * @param {number} delC The canoe body volumetric displacement.
- * @param {number} lwl  The waterline length.
- * @param {number} ax   The maximum transverse cross-sectional area.
- * @return {number} The prismatic coefficient.
+ * @param {Number} delC The canoe body volumetric displacement.
+ * @param {Number} lwl  The waterline length.
+ * @param {Number} ax   The maximum transverse cross-sectional area.
+ * @return {Number} The prismatic coefficient.
  */
 LBSailSim.Hull.calcCP = function(delC, lwl, ax) {
     return delC / (lwl * ax);
@@ -337,11 +337,11 @@ LBSailSim.Hull.calcCP = function(delC, lwl, ax) {
 
 /**
  * Calculates the block coefficient CB.
- * @param {number} delC The canoe body volumetric displacement.
- * @param {number} lwl  The waterline length.
- * @param {number} bwl  The maximum beam at the designated waterline.
- * @param {number} tc   The canoe body draft.
- * @return {number} The block coefficient.
+ * @param {Number} delC The canoe body volumetric displacement.
+ * @param {Number} lwl  The waterline length.
+ * @param {Number} bwl  The maximum beam at the designated waterline.
+ * @param {Number} tc   The canoe body draft.
+ * @return {Number} The block coefficient.
  */
 LBSailSim.Hull.calcCB = function(delC, lwl, bwl, tc) {
     return delC / (lwl * bwl * tc);

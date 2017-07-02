@@ -65,10 +65,14 @@
  * thumb (the draggable part)
  * @param {Object} [bkgdObject]   The background drawing object. If this is a {@link Phaser.TileSprite
  * its tile position will be updated to match the pixel position of the thumb.
+ * @param {Object} [lowerImage] If defined, a label that appears outside the side of the
+ * control with corresponding to lowerValue.
+ * @param {Object} [lowerImage] If defined, a label that appears outside the side of the
+ * control with corresponding to upperValue.
  * @returns {LBPhaser.Slider}
  */
 LBPhaser.Slider = function(game, lowerValue, lowerValuePixel, upperValue, upperValuePixel, 
-        isVertical, thumbSprite, bkgdObject) {
+        isVertical, thumbSprite, bkgdObject, lowerImage, upperImage) {
     
     /**
      * One limit of the controlled value.
@@ -130,6 +134,12 @@ LBPhaser.Slider = function(game, lowerValue, lowerValuePixel, upperValue, upperV
         this.getActivePos = function(x, y) {
             return y;
         };
+        this.getActiveSize = function(sprite) {
+            return sprite.height;
+        };
+        this.getAlignedSize = function(sprite) {
+            return sprite.width;
+        };
         this.setSpritePos = function(sprite, pos) {
             sprite.position.y = pos;
         };
@@ -149,6 +159,12 @@ LBPhaser.Slider = function(game, lowerValue, lowerValuePixel, upperValue, upperV
         bounds = new Phaser.Rectangle(minPixel - thumbSprite.width / 2, -thumbSprite.height / 2, maxPixel - minPixel + thumbSprite.width, thumbSprite.height);
         this.getActivePos = function(x, y) {
             return x;
+        };
+        this.getActiveSize = function(sprite) {
+            return sprite.width;
+        };
+        this.getAlignedSize = function(sprite) {
+            return sprite.height;
         };
         this.setSpritePos = function(sprite, pos) {
             sprite.position.x = pos;
@@ -175,7 +191,7 @@ LBPhaser.Slider = function(game, lowerValue, lowerValuePixel, upperValue, upperV
     this.setSpriteAlignedPos(thumbSprite, alignment);
     
     if (bkgdObject) {
-        this.bkgd = bkgdObject;
+        this.bkgdObject = bkgdObject;
         this.group.add(bkgdObject);
         this.setSpriteAlignedPos(bkgdObject, alignment);
         if (bkgdObject.tilePosition) {
@@ -185,6 +201,27 @@ LBPhaser.Slider = function(game, lowerValue, lowerValuePixel, upperValue, upperV
             bkgdObject.width = bounds.width;
             bkgdObject.height = bounds.height;
         }
+    }
+    
+    if (lowerValue > upperValue) {
+        var tmp = lowerImage;
+        lowerImage = upperImage;
+        upperImage = tmp;
+    }
+    
+    if (lowerImage) {
+        this.group.add(lowerImage);
+        this.setSpriteAlignedPos(lowerImage, alignment);
+        var edge = this.getActivePos(bounds.left, bounds.top);
+        edge -= this.getActiveSize(lowerImage);
+        this.setSpritePos(lowerImage, edge);
+    }
+    
+    if (upperImage) {
+        this.group.add(upperImage);
+        this.setSpriteAlignedPos(upperImage, alignment);
+        var edge = this.getActivePos(bounds.right, bounds.bottom);
+        this.setSpritePos(upperImage, edge);
     }
     
     this.group.add(thumbSprite);
@@ -231,8 +268,8 @@ LBPhaser.Slider.prototype = {
     
     _setValue: function(value) {
         this.value = value;
-        if (this.bkgd.tilePosition) {
-            this.setTilePosition(this.bkgd, this.thumbSprite.position.x, this.thumbSprite.position.y);
+        if (this.bkgdObject.tilePosition) {
+            this.setTilePosition(this.bkgdObject, this.thumbSprite.position.x, this.thumbSprite.position.y);
         }
     },
     
@@ -275,7 +312,7 @@ LBPhaser.Slider.prototype = {
             this.group.destroy();
             this.group = undefined;
             this.thumbSprite = undefined;
-            this.bkgd = undefined;
+            this.bkgdObject = undefined;
             this.callback = undefined;
             this.callbackThis = undefined;
         }
@@ -289,7 +326,7 @@ LBPhaser.Slider.prototype = {
  * A Phaser based rotary dial control. The control contains a thumb that rotates
  * about the local origin.
  * &lt;p>
- * The control creates a group ({@link LBPhaser.Slider#group}) to which it adds the thumb and other drawing objects,
+ * The control creates a group ({@link LBPhaser.Dial#group}) to which it adds the thumb and other drawing objects,
  * the control can be positioned and rotated by directly accessing that group.
  * @constructor
  * @param {Phaser.Game} game    The Phaser game object.
@@ -301,10 +338,10 @@ LBPhaser.Slider.prototype = {
  * upperValue.
  * @param {Phaser.Sprite} thumbSprite  The sprite representing the thumb, this is rotated about
  * the local origin.
- * @param {Object} [bkgd]   The optional background appearing behind the thumb.
+ * @param {Object} [bkgdObject]   The optional background appearing behind the thumb.
  * @returns {LBPhaser.Dial}
  */
-LBPhaser.Dial = function(game, lowerValue, lowerDeg, upperValue, upperDeg, thumbSprite, bkgd) {
+LBPhaser.Dial = function(game, lowerValue, lowerDeg, upperValue, upperDeg, thumbSprite, bkgdObject) {
     /**
      * One limit of the controlled value.
      * @readonly
@@ -349,9 +386,9 @@ LBPhaser.Dial = function(game, lowerValue, lowerDeg, upperValue, upperDeg, thumb
      */
     this.thumbSprite = thumbSprite;
     
-    if (bkgd) {
-        this.bkgd = bkgd;
-        this.group.add(bkgd);
+    if (bkgdObject) {
+        this.bkgdObject = bkgdObject;
+        this.group.add(bkgdObject);
     }
     
     thumbSprite.inputEnabled = true;
@@ -369,7 +406,7 @@ LBPhaser.Dial.prototype = {
      * Sets the callback called whenever the dial's thumb is moved.
      * @param {function} callback   The callback function, it has the signature:
      * &lt;p>
-     * callback = function(newValue, slider);
+     * callback = function(newValue, dial);
      * @param {Object} [callbackThis]   If defined, this is the 'this' context for
      * when the callback function is called.
      * @returns {LBPhaser.Dial} this.
@@ -467,7 +504,7 @@ LBPhaser.Dial.prototype = {
             this.group.destroy();
             this.group = undefined;
             this.thumbSprite = undefined;
-            this.bkgd = undefined;
+            this.bkgdObject = undefined;
             this.callback = undefined;
             this.callbackThis = undefined;
         }
@@ -491,7 +528,7 @@ LBPhaser.Dial.prototype = {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 01 2017 18:05:47 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 01 2017 19:37:22 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
