@@ -42,7 +42,7 @@
  * limitations under the License.
  */
 
-/* global Leeboard, LBMath, Phaser */
+/* global Leeboard, LBMath, Phaser, LBGeometry */
 
 /**
  * @namespace LBPhaser
@@ -120,29 +120,198 @@ Phaser.Point.prototype.copy = function(src) {
 /**
  * Object representing the style information used for an {@link LBPhaser.Arrow}.
  * @constructor
- * @param {number} color    The RGB color.
+ * @param {Number} color    The RGB color.
  * @param {function} [arrowLengthScaler=LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER]
  * The function to use for scaling the vector length passed to the arrow to units
  * prior to conversion to pixels.
- * @param {number} [alpha=1]    The alpha value for the arrow, 1 = opaque, 0 = transparent.
- * @param {number} [width=2]    The pixel width of the arrow line.
- * @param {number} [arrowSize=20]    The nominal pixel size of the arrow head.
+ * @param {Number} [alpha=1]    The alpha value for the arrow, 1 = opaque, 0 = transparent.
+ * @param {Number} [width=2]    The pixel width of the arrow line.
+ * @param {Number} [arrowSize=20]    The nominal pixel size of the arrow head.
  * @returns {LBPhaser.ArrowStyle}
  */
 LBPhaser.ArrowStyle = function(color, arrowLengthScaler, alpha, width, arrowSize) {
+    /**
+     * The RGB color of the arrow.
+     * @type number
+     */
     this.color = color;
+    
+    /**
+     * The pixel width of the arrow.
+     * @type number
+     */
     this.width = width || 2;
+    
+    /**
+     * The maximum size of the arrowhead in pixels.
+     * @type number
+     */
     this.arrowSize = arrowSize || 20;
+    
+    /**
+     * The alpha opacity to apply when drawing the arrow.
+     * @type number
+     */
     this.alpha = alpha || 1;
+    
+    /**
+     * The function used to scale the arrow length to modeling units (modeling units
+     * are what are passed to {@link LBPhaser.Env#toPixelsX} and {@link LBPhaser.Env#toPixelsY}.
+     * @type function
+     */
     this.arrowLengthScaler = arrowLengthScaler || LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER;
+    
+    /**
+     * Style visibility flag, can be used to hide all arrows that use this style.
+     * @type boolean
+     */
     this.isVisible = true;
 };
 
+/**
+ * The default arrow length function that is used to scale the arrow length to modeling units (modeling units
+ * are what are passed to {@link LBPhaser.Env#toPixelsX} and {@link LBPhaser.Env#toPixelsY}.
+ * @param {Number} length   The arrow length to be scaled.
+ * @returns {Number}    The scaled length.
+ */
 LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER = function(length) {
     return length;
 };
 
+LBPhaser.ArrowStyle._workingPath = [0, 1, 2, 3, 4, 5, 5, 4, 3, 2, 1, 0];
 LBPhaser.ArrowStyle.prototype = {
+    /**
+     * Main function called by {@link LBPhaser.Arrow}'s setup methods to set up the
+     * graphics object with the arrow.
+     * @param {LBPhaser.Env} env    Our Phaser environment.
+     * @param {Phaser.Graphics} g   The Phaser graphics object that draws the arrow.
+     * @param {LBGeometry.Vector2} base The base of the arrow.
+     * @param {LBGeometry.Vector2} tip   The tip of the arrow.
+     * @returns {undefined}
+     */
+    setupArrowGraphics: function(env, g, base, tip) {
+        g.clear();
+        
+        var dx = tip.x - base.x;
+        var dy = tip.y - base.y;
+        var length = Math.sqrt(dx * dx + dy * dy);
+        if (LBMath.isLikeZero(length)) {
+            return;
+        }
+        
+        dx /= length;
+        dy /= length;
+        length = this.arrowLengthScaler(length);
+        
+        var baseX = env.toPixelsX(base.x);
+        var baseY = env.toPixelsY(base.y); 
+        
+        dx = env.toPixelsX(dx * length);
+        dy = env.toPixelsY(dy * length);
+        length = Math.sqrt(dx * dx + dy * dy);
+
+        var dirX = dx / length;
+        var dirY = dy / length;
+        
+        var tipX = baseX + dx;
+        var tipY = baseY + dy;
+        
+        var arrowSize = Math.min(this.arrowSize, length);
+        
+        var leftX = dy - dx;
+        var leftY = -dx - dy;
+        var endLen = Math.sqrt(leftX * leftX + leftY * leftY);
+        var arrowScale = arrowSize / endLen;
+        leftX = tipX + arrowScale * leftX;
+        leftY = tipY + arrowScale * leftY;
+        
+        var rightX = -dy - dx;
+        var rightY = dx - dy;
+        rightX = tipX + arrowScale * rightX;
+        rightY = tipY + arrowScale * rightY;
+
+        if (this.width > 2) {
+            this._setThickArrow(g, dirX, dirY, baseX, baseY, tipX, tipY, leftX, leftY, rightX, rightY, arrowSize);
+        }
+        else {
+            this._setLineArrow(g, baseX, baseY, tipX, tipY, leftX, leftY, rightX, rightY);
+        }
+    },
+    
+    /**
+     * Called by {@link LBPhaser.ArrowStyle#setupArrowGraphics} when the style width is &amp;gt; 2, this draws the
+     * arrow using a polygon. All values are in pixels.
+     * @protected
+     * @param {Phaser.Graphics} g   The Phaser graphics object.
+     * @param {Number} dirX The normalized x component of the arrow direction.
+     * @param {Number} dirY The normalized y component of the arrow direction.
+     * @param {Number} baseX    The x coordinate of the base center.
+     * @param {Number} baseY    The y coordinate of the base center.
+     * @param {Number} tipX The x coordinate of the tip.
+     * @param {Number} tipY The y coordinate of the tip.
+     * @param {Number} leftX    The x coordinate of the left arrowhead point.
+     * @param {Number} leftY    The y coordinate of the left arrowhead point.
+     * @param {Number} rightX   The x coordinate of the right arrowhead point.
+     * @param {Number} rightY   The y coordinate of the right arrowhead point.
+     * @param {Number} arrowSize    The size of the arrowhead.
+     * @returns {undefined}
+     */
+    _setThickArrow: function(g, dirX, dirY, baseX, baseY, tipX, tipY, leftX, leftY, rightX, rightY, arrowSize) {
+        var path = LBPhaser.ArrowStyle._workingPath;
+        
+        var baseDX = -0.5 * this.width * dirY;
+        var baseDY = 0.5 * this.width * dirX;
+        var innerX = 0.5 * (leftX + rightX);
+        var innerY = 0.5 * (leftY + rightY);
+        
+        path[0] = tipX;
+        path[1] = tipY;
+        path[2] = leftX;
+        path[3] = leftY;
+        path[4] = innerX + baseDX;    // Inside left
+        path[5] = innerY + baseDY;
+        path[6] = baseX + baseDX;    // Base left
+        path[7] = baseY + baseDY;
+        path[8] = baseX - baseDX;    // Base right
+        path[9] = baseY - baseDY;
+        path[10] = innerX - baseDX;   // Inside right
+        path[11] = innerY - baseDY;
+        path[12] = rightX;   // Outside right
+        path[13] = rightY;
+        path[14] = tipX;
+        path[15] = tipY;
+        
+        g.beginFill(this.color, this.alpha);
+        g.drawPolygon(path);
+        g.endFill();
+    },
+    
+    /**
+     * Called by {@link LBPhaser.ArrowStyle#setupArrowGraphics} when the style width is &amp;le; 2, this draws the
+     * arrow using lines. All values are in pixels.
+     * @protected
+     * @param {Phaser.Graphics} g   The Phaser graphics object.
+     * @param {Number} baseX    The x coordinate of the base center.
+     * @param {Number} baseY    The y coordinate of the base center.
+     * @param {Number} tipX The x coordinate of the tip.
+     * @param {Number} tipY The y coordinate of the tip.
+     * @param {Number} leftX    The x coordinate of the left arrowhead point.
+     * @param {Number} leftY    The y coordinate of the left arrowhead point.
+     * @param {Number} rightX   The x coordinate of the right arrowhead point.
+     * @param {Number} rightY   The y coordinate of the right arrowhead point.
+     * @returns {undefined}
+     */
+    _setLineArrow: function(g, baseX, baseY, tipX, tipY, leftX, leftY, rightX, rightY) {
+        g.lineStyle(this.width, this.color, this.alpha);
+        g.moveTo(baseX, baseY);
+        g.lineTo(tipX, tipY);
+
+        g.moveTo(tipX, tipY);
+        g.lineTo(leftX, leftY);
+
+        g.moveTo(tipX, tipY);
+        g.lineTo(rightX, rightY);
+    },
     
     constructor: LBPhaser.ArrowStyle
 };
@@ -164,68 +333,72 @@ LBPhaser.ArrowStyle.DEFAULT = new LBPhaser.ArrowStyle();
  * @returns {LBPhaser.Arrow}
  */
 LBPhaser.Arrow = function(env, group, style) {
+    /**
+     * The Phaser environment.
+     * @type LBPhaser.Env
+     */
     this.env = env;
+    
+    /**
+     * The graphics object used to draw the arrow.
+     * @type Phaser.Graphics
+     */
     this.graphics = env.game.add.graphics(0, 0, group);
+    
+    /**
+     * The arrow's style.
+     * @type LBPhaser.ArrowStyle
+     */
     this.style = style || LBPhaser.ArrowStyle.DEFAULT;
+    
+    /**
+     * The local visibility flag for the arrow, the arrow is only drawn
+     * if both this and the style's visibility flags are true.
+     * @type boolean
+     */
+    this.isVisible = true;
 };
 
+LBPhaser.Arrow._workingTip = new LBGeometry.Vector2();
 LBPhaser.Arrow.prototype = {
     /**
      * Sets the arrow from a point defining the base and a vector defining the
      * length and direction of the arrow from the base.
-     * @param {object} base The base of the arrow, a 2D or 3D vector.
-     * @param {object} vector   The vector describing the length and direction of the
+     * @param {LBGeometry.Vector2} base The base of the arrow.
+     * @param {LBGeometry.Vector2} vector   The vector describing the length and direction of the
      * arrow from base. A 2D or 3D vector.
      * @returns {undefined}
      */
     setFromBaseAndVector: function(base, vector) {
+        var g = this._getVisibleGraphics();
+        if (g) {
+            var tip = LBPhaser.Arrow._workingTip.copy(base);
+            tip.add(vector);
+            this.style.setupArrowGraphics(this.env, g, base, tip);
+        }
+    },
+    
+    /**
+     * Sets the arrow from a point defining the base and a vector defining the
+     * length and direction of the arrow from the base to the tip.
+     * @param {LBGeometry.Vector2} tip The tip of the arrow.
+     * @param {LBGeometry.Vector2} vector   The vector describing the length and direction of the
+     * arrow from base. A 2D or 3D vector.
+     * @returns {undefined}
+     */
+    setFromTipAndVector: function(tip, vector) {
+        var g = this._getVisibleGraphics();
+        if (g) {
+            var base = LBPhaser.Arrow._workingTip.copy(tip);
+            base.sub(vector);
+            this.style.setupArrowGraphics(this.env, g, base, tip);
+        }
+    },
+    
+    _getVisibleGraphics: function() {
         var g = this.graphics;
-        g.visible = this.style.isVisible;
-        if (!this.style.isVisible) {
-            return;
-        }
-        
-        g.clear();
-        
-        var length = vector.length();
-        if (LBMath.isLikeZero(length)) {
-            return;
-        }
-        var dx = vector.x / length;
-        var dy = vector.y / length;
-        length = this.style.arrowLengthScaler(length);
-        
-        g.lineStyle(this.style.width, this.style.color, this.style.alpha);
-        
-        var baseX = this.env.toPixelsX(base.x);
-        var baseY = this.env.toPixelsY(base.y); 
-        g.moveTo(baseX, baseY);
-        
-        dx = this.env.toPixelsX(dx * length);
-        dy = this.env.toPixelsY(dy * length);
-        length = Math.sqrt(dx * dx + dy * dy);
-        
-        var tipX = baseX + dx;
-        var tipY = baseY + dy;
-        g.lineTo(tipX, tipY);
-        
-        var arrowSize = Math.min(this.style.arrowSize, length * 0.707);
-        
-        var endX = -dy - dx;
-        var endY = dx - dy;
-        var endLen = Math.sqrt(endX * endX + endY * endY);
-        endX = arrowSize * endX / endLen;
-        endY = arrowSize * endY / endLen;
-        g.lineTo(tipX + endX, tipY + endY);
-        
-        endX = dy - dx;
-        endY = -dx - dy;
-        endLen = Math.sqrt(endX * endX + endY * endY);
-        endX = arrowSize * endX / endLen;
-        endY = arrowSize * endY / endLen;
-
-        g.moveTo(tipX, tipY);
-        g.lineTo(tipX + endX, tipY + endY);
+        g.visible = this.style.isVisible &amp;&amp; this.isVisible;
+        return (g.visible) ? g : undefined;
     },
   
     constructor: LBPhaser.Arrow
@@ -241,13 +414,13 @@ LBPhaser.Arrow.prototype = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jun 28 2017 16:26:02 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 01 2017 21:22:00 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
