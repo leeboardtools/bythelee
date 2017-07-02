@@ -19,6 +19,12 @@ The sailing simulator is basically a 2 1/2 D simulator. It maintains the state o
 
 Phaser CE does include the P2 physics engine, which is sufficient for our purposes.
 
+Why use both three.js and Phaser and not just three.js? A couple of reasons:
+
+* three.js requires WebGL, and right now I don't want to worry about determining whether WebGL is available on a device.
+* three.js does not have a physics engine, and doesn't do collision detection.
+* Phaser seems to do a reasonable job with their 2D physics engine and collision detection, and the sailing simulation can for the most part be treated as a 2.5D simulation.
+
 
 ## Development ##
 I'm currently using NetBeans IDE 8.1 as my IDE. There's nothing special about it, other than offering a Google Chrome plug-in to aid in debugging, though I normally use Firefox simply because I like it's debugger better (well, except for that it won't display getter/setter based properties).
