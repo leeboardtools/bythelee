@@ -15,7 +15,7 @@
  */
 
 
-/* global LBSailSim, LBPhysics, LBGeometry, LBMath, Leeboard */
+/* global LBSailSim, LBPhysics, LBGeometry, LBMath, Leeboard, LBVolume */
 
 /**
  * Spline used for calculating the friction coefficient Cf given the roughness
@@ -39,7 +39,8 @@ LBSailSim.Hull = function(vessel) {
     this.vessel = vessel;
     
     /**
-     * The center of buoyancy in local coordinates.
+     * The center of buoyancy in local coordinates. This is actively updated if
+     * displacementTetras have been specified.
      * @member {LBGeometry.Vector3}
      */
     this.centerOfBuoyancy = new LBGeometry.Vector3();
@@ -146,9 +147,16 @@ LBSailSim.Hull = function(vessel) {
      * @member {Number}
      */
     this.halfRhoVSq = 0;
+    
+    /**
+     * The array of {@link LBVolume.Tetra} objects representing the hull and used to compute
+     * buoyancy.
+     */
+    this.displacementTetras = [];
 };
 
 LBSailSim.Hull._workingForce = new LBGeometry.Vector3();
+LBSailSim.Hull._workingPos = new LBGeometry.Vector3();
 LBSailSim.Hull._workingVelResults = { 'worldPos' : new LBGeometry.Vector3() };
 LBSailSim.Hull.prototype = {
     
@@ -163,6 +171,13 @@ LBSailSim.Hull.prototype = {
 
         this.heelAngleDeg = vessel.obj3D.rotation.x * LBMath.RAD_TO_DEG;
         
+        if (this.displacementTetras.length > 0) {
+            this._updateBuoyancy();
+        }
+        else {
+            this.centerOfBuoyancy.copy(this.vessel.centerOfMass);
+        }
+        
         var velResults = LBSailSim.Hull._workingVelResults;
         vessel.coordSystem.calcVectorLocalToWorld(this.centerOfBuoyancy, velResults);
         this.worldCenterOfBuoyancy.copy(velResults.worldPos);
@@ -170,6 +185,41 @@ LBSailSim.Hull.prototype = {
         this.worldCenterOfResistance.copy(velResults.worldPos);
         
         this.swc = this.swcnh * LBSailSim.Delft.calcWettedSurfaceHeelCorrection(this);
+    },
+    
+    _updateBuoyancy: function() {
+        var xyPlane = LBGeometry.XY_PLANE.clone();
+        xyPlane.applyMatrix4(this.vessel.coordSystem.localXfrm);
+
+        var xSum = 0;
+        var ySum = 0;
+        var zSum = 0;
+        var volSum = 0;
+        var centroid = LBSailSim.Hull._workingPos;
+        
+        for (var i = 0; i < this.displacementTetras.length; ++i) {
+            var tetra = this.displacementTetras[i];
+            var result = LBVolume.Tetra.sliceWithPlane(tetra, xyPlane, false, true);
+            if (!result || !result[1].length) {
+                continue;
+            }
+            
+            for (var j = 0; j < result[1].length; ++j) {
+                result[1][j].centroid(centroid);
+                var vol = result[1][j].volume();
+                xSum += centroid.x * vol;
+                ySum += centroid.y * vol;
+                zSum += centroid.z * vol;
+                volSum += vol;
+            }
+        }
+        
+        if (volSum > 0) {
+            this.centerOfBuoyancy.set(xSum / volSum, ySum / volSum, zSum / volSum);
+        }
+        else {
+            this.centerOfBuoyancy.copy(this.vessel.centerOfMass);
+        }
     },
     
     /**
@@ -220,6 +270,7 @@ LBSailSim.Hull.prototype = {
      */
     updateForces: function(dt, resultant) {
         resultant = resultant || new LBPhysics.Resultant3D();
+        resultant.zero();
         
         this._updatePropertiesFromVessel();
         
@@ -238,13 +289,16 @@ LBSailSim.Hull.prototype = {
         resultant.addForce(force, this.worldCenterOfResistance);
         
         // Add gravity...
-        var fGravity = this.vessel.getTotalMass() * this.vessel.sailEnv.gravity;
+        var fGravity = -this.vessel.getTotalMass() * this.vessel.sailEnv.gravity;
         force.set(0, 0, fGravity);
         resultant.addForce(force, this.vessel.getTotalCenterOfMass());
         
         // And buoyancy...
-        force.set(0, 0, -fGravity);
-        resultant.addForce(force, this.worldCenterOfBuoyancy);
+        if (resultant.force.z < 0) {
+            // For now we'll get rid of any fore-aft moment (about the y axis)
+            force.set(0, 0, -resultant.force.z);
+            resultant.addForce(force, this.worldCenterOfBuoyancy);
+        }
         
         return resultant;
     },
@@ -269,6 +323,11 @@ LBSailSim.Hull.prototype = {
         
         this.swc = data.swc || LBSailSim.Hull.estimateSW(this);
         this.swcnh = this.swc;
+        
+        this.displacementTetras.splice(0, this.displacementTetras.length);
+        if (data.displacementTetras) {
+            LBVolume.Tetra.loadFromData(data.displacementTetras, null, this.displacementTetras);
+        }
         
         LBGeometry.loadVector3(data.centerOfBuoyancy, this.centerOfBuoyancy);
         return this;

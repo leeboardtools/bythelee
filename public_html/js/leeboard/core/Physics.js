@@ -953,18 +953,19 @@ LBPhysics.RigidBody.prototype = {
      * @param {Number} currentDeg    The current angular rotation about the axis in degrees.
      * @param {function} [constrainer]  Optional function called to enforce any constraints
      * on the rotation angle. The function signature is:
-     *  constrainer = function(deltaDeg) {
+     *  constrainer = function(newDeg, currentDeg, dt) {
      *      return constrainedDeg;
      *  }
+     * @param {LBPhysics.Resultant3D} [resultantToUse=this.resultant] If defined the resultant to use.
      * @returns {undefined}
      */
-    integrateForceForRotation: function(axisOrigin, axis, currentDeg, constrainer) {
+    integrateForceForRotation: function(axisOrigin, axis, currentDeg, constrainer, resultantToUse) {
         if ((this.coordSystem.dt === 0) || LBMath.isLikeZero(this.mass)) {
             return;
         }
         
         // Move the resultant to the axis origin, then convert it to local coordinates.
-        var resultant = LBPhysics.RigidBody._workingResultant.copy(this.resultant);
+        var resultant = LBPhysics.RigidBody._workingResultant.copy(resultantToUse || this.resultant);
 
         resultant.applyMatrix4(this.coordSystem.localXfrm);
         resultant.moveApplPoint(axisOrigin);
@@ -982,7 +983,7 @@ LBPhysics.RigidBody.prototype = {
         
         var deg = currentDeg + angularVelocity * this.coordSystem.dt * LBMath.RAD_TO_DEG;
         if (constrainer) {
-            deg = constrainer.call(this, deg);
+            deg = constrainer.call(this, deg, currentDeg, this.coordSystem.dt);
         }
         
         if (deg !== currentDeg) {
