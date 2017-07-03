@@ -25,9 +25,11 @@ Why use both three.js and Phaser and not just three.js? A couple of reasons:
 * three.js does not have a physics engine, and doesn't do collision detection.
 * Phaser seems to do a reasonable job with their 2D physics engine and collision detection, and the sailing simulation can for the most part be treated as a 2.5D simulation.
 
+However, I'm starting to look into using either cannon.js or oimo.js as a physics engine, and use the full three.js for 3D rendering. The reason for this is that I started looking into adding in support for heeling, both physics-wise and display-wise, and realized I was starting to write my own 3D projector and physics integrator.
+
 
 ## Development ##
-I'm currently using NetBeans IDE 8.1 as my IDE. There's nothing special about it, other than offering a Google Chrome plug-in to aid in debugging, though I normally use Firefox simply because I like it's debugger better (well, except for that it won't display getter/setter based properties).
+I'm currently using NetBeans IDE 8.1 as my IDE. There's nothing special about it, other than offering a Google Chrome plug-in to aid in debugging, though I normally use Firefox simply because I like its debugger better (well, except for that it won't display getter/setter based properties).
 
 
 ### Code Organization ###
