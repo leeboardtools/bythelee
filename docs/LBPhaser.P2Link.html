@@ -48,7 +48,7 @@
 
 
 <div class="description">
-    Manages linking a Phaser.Physics.P2.Body and a <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a>, updating
+    Manages linking a <a href="https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body">Phaser.Physics.P2.Body</a> and a <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a>, updating
 the position/rotation of the rigid body from the P2 body and applying the forces
 from the rigid body to the P2 body. This also supports displaying an arrow representing
 the resultant force on rigid bodies.
@@ -206,140 +206,13 @@ the resultant force on rigid bodies.
 
         
             
-<h4 class="name" id=".callbackProperty"><span class="type-signature">(static) </span>callbackProperty<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    The name of the property in {LBPhysics.RigidBody} objects where we store the callback object.
-<p>
-The callback has the following optional functions:
-<li>displayObjectsUpdated = function(topRigidBody, rigidBody);
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line279">line 279</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id=".forceArrowProperty"><span class="type-signature">(static) </span>forceArrowProperty<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    The name of the property in {LBPhysics.RigidBody} objects where we store LBPhaser.P2ForceArrow objects.
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line271">line 271</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
 <h4 class="name" id=".p2BodyProperty"><span class="type-signature">(static) </span>p2BodyProperty<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    The name of the property in {LBPhysics.RigidBody} objects where we store the {Phaser.Physics.P2.Body}.
+    The name of the property in {LBPhysics.RigidBody} objects where we store the <a href="https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body">Phaser.Physics.P2.Body</a>.
 P2 bodies control the position of the rigid body.
 </div>
 
@@ -378,70 +251,7 @@ P2 bodies control the position of the rigid body.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line260">line 260</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id=".spriteProperty"><span class="type-signature">(static) </span>spriteProperty<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    The name of the property in {LBPhysics.RigidBody} objects where we store {Phaser.Sprite} or {Phaser.Image}
-objects. Sprite/image objects are controlled by the rigid body's world position and rotation.
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line266">line 266</a>
+        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line146">line 146</a>
     </li></ul></dd>
     
 
@@ -468,182 +278,6 @@ objects. Sprite/image objects are controlled by the rigid body's world position 
 
     
 
-    <h4 class="name" id=".createImageFromData"><span class="type-signature">(static) </span>createImageFromData<span class="signature">(game, data)</span><span class="type-signature"> &rarr; {Phaser.Image}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Creates and loads a {Phaser.Image} object based on properties in a data object.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>game</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Phaser.Game</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The game to which the sprite will belong.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The data object.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line309">line 309</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Th created/loaded image.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Phaser.Image</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
     <h4 class="name" id=".createP2BodyFromData"><span class="type-signature">(static) </span>createP2BodyFromData<span class="signature">(game, data)</span><span class="type-signature"> &rarr; {Phaser.Physics.P2.Body}</span></h4>
 
     
@@ -651,7 +285,7 @@ objects. Sprite/image objects are controlled by the rigid body's world position 
 
 
 <div class="description">
-    Creates and loads a {Phaser.Physics.P2.Body} object based on properties in a data object.
+    Creates and loads a {https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body|Phaser.Physics.P2.Body} object based on properties in a data object.
 </div>
 
 
@@ -767,7 +401,7 @@ objects. Sprite/image objects are controlled by the rigid body's world position 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line322">line 322</a>
+        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line155">line 155</a>
     </li></ul></dd>
     
 
@@ -820,589 +454,7 @@ objects. Sprite/image objects are controlled by the rigid body's world position 
 
     
 
-    <h4 class="name" id=".createSpriteFromData"><span class="type-signature">(static) </span>createSpriteFromData<span class="signature">(game, data)</span><span class="type-signature"> &rarr; {Phaser.Sprite}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Creates and loads a {Phaser.Sprite} object based on properties in a data object.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>game</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Phaser.Game</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The game to which the sprite will belong.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The data object.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line296">line 296</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Th created/loaded sprite.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Phaser.Sprite</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".getP2TimeStep"><span class="type-signature">(static) </span>getP2TimeStep<span class="signature">(p2)</span><span class="type-signature"> &rarr; {Number}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Retrieves the appropriate tie step to use based on the settings of Phaser.Physics.P2.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>p2</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Phaser.Physics.P2</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The P2 physics object.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line286">line 286</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The time step.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Number</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="_stageUpdateTransform"><span class="type-signature"></span>_stageUpdateTransform<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Our hook into Phaser.Stage#updateTransform.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line139">line 139</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">undefined</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="addRigidBody"><span class="type-signature"></span>addRigidBody<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Adds a <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a> pair to the manager.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>rigidBody</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The rigid body.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line61">line 61</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    this.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="applyToP2"><span class="type-signature"></span>applyToP2<span class="signature">(dt)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a>}</span></h4>
+    <h4 class="name" id="_applyToP2"><span class="type-signature">(protected) </span>_applyToP2<span class="signature">(dt)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a>}</span></h4>
 
     
 
@@ -1502,7 +554,7 @@ objects. Sprite/image objects are controlled by the rigid body's world position 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line105">line 105</a>
+        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line111">line 111</a>
     </li></ul></dd>
     
 
@@ -1555,440 +607,7 @@ objects. Sprite/image objects are controlled by the rigid body's world position 
 
     
 
-    <h4 class="name" id="removeRigidBody"><span class="type-signature"></span>removeRigidBody<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Removes a rigid body link via index.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>rigidBody</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The rigid body.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line71">line 71</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    this.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="updateDisplayObjects"><span class="type-signature"></span>updateDisplayObjects<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Updates any sprites that have been attached to any of the rigid bodies or their
-parts via a property named <a href="LBPhaser.P2Link.html#.spriteProperty">LBPhaser.P2Link.spriteProperty</a>.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line152">line 152</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">undefined</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="updateForceArrowFromRigidBody"><span class="type-signature"></span>updateForceArrowFromRigidBody<span class="signature">(rigidBody, forceArrow)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Updates a force arrow from a rigid body's resultant. If the rigid body has
-a 'getForceArrowResultant' member function defined, that will be called
-to obtain the resultant, otherwise the rigid body's <a href="LBPhysics.RigidBody.html#getResultant">LBPhysics.RigidBody#getResultant</a> method will
-be called.
-<p>
-The getForceArrowResultant function has the same function signature as 
-<a href="LBPhysics.RigidBody.html#getResultant">LBPhysics.RigidBody#getResultant</a> excluding the convertToWrench argument
-(the first argument).
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>rigidBody</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The rigid body.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>forceArrow</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The arrow object.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line222">line 222</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">undefined</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="updateFromP2"><span class="type-signature"></span>updateFromP2<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a>}</span></h4>
+    <h4 class="name" id="_updateFromP2"><span class="type-signature">(protected) </span>_updateFromP2<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a>}</span></h4>
 
     
 
@@ -2040,7 +659,7 @@ orientation of the rigid body from that of the linked P2 body.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line84">line 84</a>
+        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line89">line 89</a>
     </li></ul></dd>
     
 
@@ -2093,14 +712,14 @@ orientation of the rigid body from that of the linked P2 body.
 
     
 
-    <h4 class="name" id="updateSpriteFromRigidBody"><span class="type-signature"></span>updateSpriteFromRigidBody<span class="signature">(rigidBody, sprite)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <h4 class="name" id="addDynamicObject"><span class="type-signature"></span>addDynamicObject<span class="signature">(object, data)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    Updates a sprite from a rigid body.
+    Adds a dynamic object to the physics link.
 </div>
 
 
@@ -2136,13 +755,13 @@ orientation of the rigid body from that of the linked P2 body.
 
         <tr>
             
-                <td class="name"><code>rigidBody</code></td>
+                <td class="name"><code>object</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+<span class="param-type">Object</span>
 
 
             
@@ -2152,23 +771,20 @@ orientation of the rigid body from that of the linked P2 body.
 
             
 
-            <td class="description last">The rigid body.</td>
+            <td class="description last">The object to add.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>sprite</code></td>
+                <td class="name"><code>data</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Phaser.Sprite</span>
-|
-
-<span class="param-type">Phaser.Image</span>
+<span class="param-type">Object</span>
 
 
             
@@ -2178,7 +794,7 @@ orientation of the rigid body from that of the linked P2 body.
 
             
 
-            <td class="description last">The sprite to be updated.</td>
+            <td class="description last">The data object to load any physics link specific info from.</td>
         </tr>
 
     
@@ -2219,7 +835,413 @@ orientation of the rigid body from that of the linked P2 body.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line188">line 188</a>
+        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line57">line 57</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="addFixedObject"><span class="type-signature"></span>addFixedObject<span class="signature">(object)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Adds a fixed object to the physics link.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>object</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A Phaser drawing object.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line44">line 44</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBPhaser.P2Link.html">LBPhaser.P2Link</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="timeStep"><span class="type-signature"></span>timeStep<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line68">line 68</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The time step for the next update call.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(dt)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Performs an update cycle.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The time step, normally what was returned by <a href="LBPhaser.P2Link.html#timeStep">LBPhaser.P2Link#timeStep</a>..</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_P2Link.js.html">phaser/P2Link.js</a>, <a href="phaser_P2Link.js.html#line78">line 78</a>
     </li></ul></dd>
     
 
@@ -2279,13 +1301,13 @@ orientation of the rigid body from that of the linked P2 body.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 01 2017 21:22:00 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jul 03 2017 21:19:11 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

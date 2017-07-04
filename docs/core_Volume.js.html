@@ -1,4 +1,32 @@
-/* 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/Volume.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/Volume.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* 
  * Copyright 2017 albert.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,12 +62,12 @@ var LBVolume = LBVolume || {};
 LBVolume.Tetra = function(vertices) {
     this.vertices = [];
     if (vertices) {
-        for (var i = 0; i < 4; ++i) {
+        for (var i = 0; i &lt; 4; ++i) {
             this.vertices.push(vertices[i]);
         }
     }
     else {
-        for (var i = 0; i < 4; ++i) {
+        for (var i = 0; i &lt; 4; ++i) {
             this.vertices.push(new LBGeometry.Vector3());
         }
     }
@@ -70,7 +98,7 @@ LBVolume.Tetra.prototype = {
      * @returns {LBVolume.Tetra}    this.
      */
     makeVerticesUnique: function() {
-        for (var i = 0; i < this.vertices.length; ++i) {
+        for (var i = 0; i &lt; this.vertices.length; ++i) {
             this.vertices[i] = this.vertices[i].clone();
         }
         return this;
@@ -113,7 +141,7 @@ LBVolume.Tetra.prototype = {
      */
     cloneMirrored: function(plane) {
         var clone = new LBVolume.Tetra();
-        for (var i = 0; i < this.vertices.length; ++i) {
+        for (var i = 0; i &lt; this.vertices.length; ++i) {
             LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i], clone.vertices[i]);
         }
         return clone;
@@ -138,7 +166,7 @@ LBVolume.Tetra.prototype = {
  */
 LBVolume.Tetra.totalVolumeOfTetras = function(tetras) {
     var vol = 0;
-    for (var i = 0; i < tetras.length; ++i) {
+    for (var i = 0; i &lt; tetras.length; ++i) {
         vol += tetras[i].volume();
     }
     return vol;
@@ -147,10 +175,10 @@ LBVolume.Tetra.totalVolumeOfTetras = function(tetras) {
 /**
  * Converts a set of 5 vertices describing a triangular bipyramid into an array of two tetrahedra
  * representing the volume.
- * <p>
+ * &lt;p>
  * This is currently a fairly simple algorithm, it does not check for vertices lying on each
  * other, and expects the vertices in a particular order.
- * <p>
+ * &lt;p>
  * The bipyramid must be described such that the first four vertices describe one tetrahedron,
  * and the last four vertices describe the other tetrahedron (the face v[1], v[2], v[3] is
  * internal and does not exist).
@@ -184,10 +212,10 @@ LBVolume.Tetra.triangularBipyramidToTetras = function(vertexIndices, vertexArray
 /**
  * Converts a set of 6 vertices describing a triangular prism into an array of three tetrahedra
  * representing the volume.
- * <p>
+ * &lt;p>
  * This is currently a fairly simple algorithm, it does not check for vertices lying on each
  * other, and expects the vertices in a particular order.
- * <p>
+ * &lt;p>
  * The prism must be described such that the first 3 vertices represent one triangular
  * face and the second 3 vertices the other triangular face, and v[0] is connected to v[3],
  * v[1] is connected to v[4], and v[2] is connected to v[5].
@@ -227,19 +255,19 @@ LBVolume.Tetra.triangularPrismToTetras = function(vertexIndices, vertexArray, te
 /**
  * Converts a set of 8 vertices describing a cuboid (a convex polyhedron with 6 quadrilateral faces)
  * into an array of 6 tetrahedra representing the volume.
- * <p>
+ * &lt;p>
  * This is currently a fairly simple algorithm, it does not check for vertices lying on each
  * other, and expects the vertices in a particular order.
- * <p>
+ * &lt;p>
  * The cuboid must be described such that the faces are described by the following index groups:
- * <p>
- * <li>0, 1, 2, 3
- * <li>4, 5, 6, 7
- * <li>4, 0, 3, 7
- * <li>7, 3, 2, 7
- * <li>6, 2, 1, 5
- * <li>5, 1, 0, 4
- * <p>
+ * &lt;p>
+ * &lt;li>0, 1, 2, 3
+ * &lt;li>4, 5, 6, 7
+ * &lt;li>4, 0, 3, 7
+ * &lt;li>7, 3, 2, 7
+ * &lt;li>6, 2, 1, 5
+ * &lt;li>5, 1, 0, 4
+ * &lt;p>
  * This is basically the first 4 vertices are one face and the second 4 vertices are the
  * opposite face, with the vertices on the each such that v[0] is connected to v[4], v[1]
  * is connected to v[5], etc.
@@ -326,7 +354,7 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
     below.splice(0, below.length);
     onPlane.splice(0, onPlane.length);
 
-    for (var i = 0; i < 4; ++i) {
+    for (var i = 0; i &lt; 4; ++i) {
         var distance = plane.distanceToPoint(tetra.vertices[i]);
         if (LBMath.isLikeZero(distance)) {
             onPlane.push(i);
@@ -334,7 +362,7 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
         else if (distance > 0) {
             above.push(i);
         }
-        else if (distance < 0) {
+        else if (distance &lt; 0) {
             below.push(i);
         }
     }
@@ -541,7 +569,7 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
     var firstIndex = tetras.length;
     
     var indices = data.indices;
-    for (var i = 0; i < indices.length; ++i) {
+    for (var i = 0; i &lt; indices.length; ++i) {
         switch (indices[i].length) {
             case 4 :
                 tetras.push(new LBVolume.Tetra(indices[i], vertices));
@@ -573,7 +601,7 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
         else {
             var endIndex = tetras.length;
 
-            for (var i = firstIndex; i < endIndex; ++i) {
+            for (var i = firstIndex; i &lt; endIndex; ++i) {
                 tetras.push(tetras[i].cloneMirrored(mirrorPlane));
             }
         }
@@ -581,3 +609,26 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
     
     return tetras;
 };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jul 03 2017 21:19:11 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

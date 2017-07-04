@@ -84,7 +84,7 @@ PlayState.init = function() {
     
     this.game.physics.startSystem(Phaser.Physics.P2JS);
 
-    this.sailEnv = new LBSailSim.P2Env(this.game);
+    this.sailEnv = new LBSailSim.PhaserEnv(this.game);
 };
 
 //
@@ -167,10 +167,7 @@ PlayState._loadLevel = function (data) {
 //--------------------------------------------------
 PlayState._spawnBuoys = function(data) {
     var buoy = this.buoys.create(data.x, data.y, data.image);
-    
-    this.physics.enable(buoy);
-    buoy.body.allowGravity = false;
-    buoy.body.immovable = true;
+    this.sailEnv.physicsLink.addFixedObject(buoy);
 };
 
 //--------------------------------------------------
@@ -310,6 +307,7 @@ PlayState.update = function() {
     this._handleInput();
     
     this.sailEnv.update();
+    
     this._updateHUD();
     this._updateArrows();
 };
@@ -359,7 +357,7 @@ PlayState._updateHUD = function() {
     }
     
     if (this.ticksText) {
-        this.ticksText.text = "SimTicks:" + this.sailEnv.p2Link.updateCount;
+        this.ticksText.text = "SimTicks:" + this.sailEnv.physicsLink.updateCount;
     }
 };
 

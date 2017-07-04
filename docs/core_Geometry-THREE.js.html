@@ -94,7 +94,7 @@ LBGeometry.normalToTangentXY = function(normal, store) {
 
 
 /**
- * A 2D vector, our encapsulation of {@link LBGeometry.Vector2}.
+ * A 2D vector, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Vector2|THREE.Vector2}.
  * @constructor
  * @param {Number} [x=0]    The x coordinate.
  * @param {Number} [y=0]    The y coordinate.
@@ -190,7 +190,7 @@ LBGeometry.Vector2.prototype.isZero = function() {
 
 
 /**
- * Our encapsulation of {@link THREE.Vector3}, a 3D vector.
+ * Our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Vector3|THREE.Vector3}, a 3D vector.
  * @constructor
  * @param {Number} [x=0]    The x coordinate.
  * @param {Number} [y=0]    The y coordinate.
@@ -246,7 +246,7 @@ LBGeometry.Vector3.prototype.normalize = function() {
 };
 
 /**
- * Override of THREE.Vector3.copy(), supports copying a Vector2 by setting the
+ * Override of {@link https://threejs.org/docs/index.html#api/math/Vector3|THREE.Vector3#copy}, supports copying a Vector2 by setting the
  * z coordinate to 0 if the object being copied does not have a z.
  * @implements {THREE.Vector3#copy}
  * @param {object} vec  The vector to copy.
@@ -260,7 +260,7 @@ LBGeometry.Vector3.prototype.copy = function(vec) {
 };
 
 /**
- * Override of {@link THREE.Vector3#add}, supports copying a Vector2 by setting the
+ * Override of {@link https://threejs.org/docs/index.html#api/math/Vector3|THREE.Vector3#add}, supports copying a Vector2 by setting the
  * z coordinate to 0 if the object being copied does not have a z.
  * @implements {THREE.Vector3#copy}
  * @param {object} vec  The vector to copy.
@@ -274,7 +274,7 @@ LBGeometry.Vector3.prototype.add = function(vec) {
 };
 
 /**
- * Extension to {THREE.Vector3}, sets the vector's components to all zero.
+ * Extension to {@link https://threejs.org/docs/index.html#api/math/Vector3|THREE.Vector3}, sets the vector's components to all zero.
  * @returns {LBGeometry.Vector3} this.
  */
 LBGeometry.Vector3.prototype.zero = function() {
@@ -331,6 +331,21 @@ LBGeometry.loadVector3 = function(data, vec) {
         vec.z = data.z || 0;
     }
     return vec;
+};
+
+/**
+ * Creates an array of {@link LBGeometry.Vector3} objects from a numeric array containing
+ * a sequence of coordinate values.
+ * @param {Number[]} data  The array of coordinates.
+ * @returns {LBGeometry.Vector3[]} The array of vertices.
+ */
+LBGeometry.loadVector3ArrayFromCoordArray = function(data) {
+    var vectors = [];
+    for (var i = 0; i &lt; data.length; i += 3) {
+        vectors.push(new LBGeometry.Vector3(data[i], data[i + 1], data[i + 2]));
+    }
+    
+    return vectors;
 };
 
 /**
@@ -448,7 +463,7 @@ LBGeometry.makeOrthogonal = function(refVec, store) {
 
 
 /**
- * Our encapsulation of {@link THREE.Quaternion}.
+ * Our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Quaternion|THREE.Quaternion}.
  * @param {Number} [x=0]    Initial x value.
  * @param {Number} [y=0]    Initial y value.
  * @param {Number} [z=0]    Initial z value.
@@ -501,7 +516,7 @@ LBGeometry.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
 
 /**
  * An object representing a set of Euler angles, our encapsulation of
- * {@link THREE.Euler}.
+ * {@link https://threejs.org/docs/index.html#api/math/Euler|THREE.Euler}.
  * @constructor
  * @param {Number} [xRad=0] The rotation about the x axis in radians.
  * @param {Number} [yRad=0] The rotation about the y axis in radians.
@@ -572,7 +587,7 @@ LBGeometry.loadEuler = function(data, euler) {
 
 
 /**
- * A 2D line segment, modeled after {@link THREE.Line3}.
+ * A 2D line segment, modeled after {@link https://threejs.org/docs/index.html#api/math/Line3|THREE.Line3}.
  * @constructor
  * @param {object} [start=LBGeometry.ZERO]    The start of the line segment.
  * @param {object} [end=LBGeometry.ZERO]  The end of the line segment.
@@ -654,7 +669,7 @@ LBGeometry.loadLine2 = function(data, line) {
 
 
 /**
- * A 3D line, our encapsulation of {@link THREE.Line3}..
+ * A 3D line, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Line3|THREE.Line3}..
  * @constructor
  * @param {LBGeometry.Vector3} [start=LBGeometry.ZERO]    The starting point of the line.
  * @param {LBGeometry.Vector3} [end=LBGeometry.ZERO]  The ending point of the line.
@@ -691,7 +706,7 @@ LBGeometry.loadLine3 = function(data, line) {
 };
 
 /**
- * A plane, our encapsulation of {@link THREE.Plane}.
+ * A plane, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Plane|THREE.Plane}.
  * @constructor
  * @param {LBGeometry.Vector3} [normal=LBGeometry.X_AXIS]   A normal to the plane.
  * @param {Number} [constant=LBGeometry.ORIGIN] The negative distance from the origin to the plane along
@@ -704,6 +719,25 @@ LBGeometry.Plane = function(normal, constant) {
 
 LBGeometry.Plane.prototype = Object.create(THREE.Plane.prototype);
 LBGeometry.Plane.prototype.constructor = LBGeometry.Plane;
+
+/**
+ * Loads a plane from a data object.
+ * @param {object} data The data to load from.
+ * @param {LBGeometry.Plane} [plane] If defined the plane to be loaded.
+ * @returns {LBGeometry.Plane}    The loaded plane.
+ */
+LBGeometry.loadPlane = function(data, plane) {
+    plane = plane || new LBGeometry.Plane();
+    if (data) {
+        if (data.normal) {
+            LBGeometry.loadVector3(data.normal, plane.normal).normalize();
+        }
+        if (Leeboard.isVar(data.constant)) {
+            plane.constant = data.constant;
+        }
+    }
+    return plane;
+};
 
 /**
  * Determines the parametric value along a line where the line intersects a plane.
@@ -755,9 +789,35 @@ LBGeometry.getLinePlaneIntersection = function(plane, line, store) {
     return store;
 };
 
+/**
+ * Mirrors a point about a plane.
+ * @param {LBGeometry.Plane} plane  The plane to mirror about.
+ * @param {LBGeometry.Vector3} point    The point to be mirrored.
+ * @param {LBGeometry.Vector3} [store]  If defined the object to store the mirroed point in.
+ * @returns {LBGeometry.Vector3}    The mirrored point.
+ */
+LBGeometry.mirrorPointAboutPlane = function(plane, point, store) {
+    if (!store) {
+        store = new LBGeometry.Vector3();
+    }
+    
+    var onPlane = LBGeometry._workingVector3A;
+    plane.projectPoint(point, onPlane);
+    
+    var dx = point.x - onPlane.x;
+    var dy = point.y - onPlane.y;
+    var dz = point.z - onPlane.z;
+    
+    store.x = onPlane.x - dx;
+    store.y = onPlane.y - dy;
+    store.z = onPlane.z - dz;
+    
+    return store;
+};
+
 
 /**
- * A sphere, our encapsulation of {@link THREE.Sphere}.
+ * A sphere, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Sphere|THREE.Sphere}.
  * @constructor
  * @param {LBGeometry.Vector3} [center=LBGeometry.ORIGIN] The center of the sphere.
  * @param {Number} [radius=0]   The radius of the sphere.
@@ -774,7 +834,7 @@ LBGeometry.Sphere.prototype.clone = function() {
 
 
 /**
- * A 3x3 matrix, our encapsulation of {@link THREE.Matrix3}.
+ * A 3x3 matrix, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Matrix3|THREE.Matrix3}.
  * @returns {LBGeometry.Matrix3}
  */
 LBGeometry.Matrix3 = function() {
@@ -832,7 +892,7 @@ LBGeometry.loadMatrix3 = function(data, mat) {
 
 
 /**
- * A 4x4 matrix, our encapsulation of {@link THREE.Matrix4}.
+ * A 4x4 matrix, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Matrix4|THREE.Matrix4}.
  * @returns {LBGeometry.Matrix3}
  */
 LBGeometry.Matrix4 = function() {
@@ -900,7 +960,7 @@ LBGeometry.loadMatrix4 = function(data, mat) {
 
 
 /**
- * Extension to {@link THREE.Matrix4}, sets the position components of the matrix using
+ * Extension to {@link https://threejs.org/docs/index.html#api/math/Matrix4|THREE.Matrix4}, sets the position components of the matrix using
  * separate x,y, and z coordinates.
  * @param {Number} x    The x coordinate.
  * @param {Number} y    The y coordinate.
@@ -958,7 +1018,7 @@ LBGeometry.consoleLogMatrix4 = function(mat, msg) {
 
 
 /**
- * A 3D object, our encapsulation of {@link THREE.Object3D}.
+ * A 3D object, our encapsulation of {@link https://threejs.org/docs/index.html#api/core/Object3D|THREE.Object3D}.
  * @returns {LBGeometry.Object3D}
  */
 LBGeometry.Object3D = function() {
@@ -1025,6 +1085,40 @@ LBGeometry.createObject3DFromData = function(data) {
 
 
 /**
+ * A color object, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Color|THREE.Color}.
+ * @param {Number|String|LBGeometry.Color} [r] The red component, a hex triplet, a CSS-style string, or a {LBGeometry.Color} instance.
+ * @param {Number} [g] If defined the green component.
+ * @param {Number} [b] If defined the blue component.
+ * @returns {LBGeometry.Color}
+ */
+LBGeometry.Color = function(r, g, b) {
+    THREE.Color.call(this, r, g, b);
+};
+
+LBGeometry.Color.prototype = Object.create(THREE.Color.prototype);
+LBGeometry.Color.constructor = LBGeometry.Color;
+
+LBGeometry.Color.createFromData = function(data, defColor) {
+    return new THREE.Color(LBGeometry.Color.colorValueFromData(data, defColor));
+};
+
+/**
+ * Retrieves a numeric color value from a data object. This currently supports the
+ * data object being a Number or a String parseable by {@link parseInt}. May some day
+ * support parsing an object with r,g,b properties or other color formats.
+ * @param {Object} data The data object.
+ * @param {Number} defColor The value to return if data was not convertable.
+ * @returns {Number}    The numeric value of the color.
+ */
+LBGeometry.Color.colorValueFromData = function(data, defColor) {
+    var value = parseInt(data);
+    if (value === Number.NaN) {
+        return defColor;
+    }
+    return value;
+};
+
+/**
  * The 3D point (0, 0, 0)
  * @constant
  * @type LBGeometry.Vector3
@@ -1073,6 +1167,39 @@ LBGeometry.ZX_PLANE = new LBGeometry.Plane(LBGeometry.Y_AXIS, 0);
  */
 LBGeometry.YZ_PLANE = new LBGeometry.Plane(LBGeometry.X_AXIS, 0);
 
+
+LBGeometry._workingVector3A = new LBGeometry.Vector3();
+
+
+/**
+ * A geometry object, our encapsulation of {@link https://threejs.org/docs/index.html#api/core/Geometry|THREE.Geometry}.
+ * @returns {LBGeometry.Geometry}
+ */
+LBGeometry.Geometry = function() {
+    THREE.Geometry.call(this);
+};
+
+LBGeometry.Geometry.prototype = Object.create(THREE.Geometry.prototype);
+LBGeometry.Geometry.constructor = LBGeometry.Geometry;
+
+
+/**
+ * A face object, our encapsulation of {@link https://threejs.org/docs/index.html#api/core/Face3|THREE.Face3}.
+ * @param {Number} a    The index of vertex A.
+ * @param {Number} b The index of vertex B.
+ * @param {Number} c The index of vertex C.
+ * @param {LBGeometry.Vector3|Number[]} [normal]   The face normal.
+ * @param {LBGeometry.Color|Number[]} [color]  The face color or colors for the vertices.
+ * @param {Number} [materialIndex]  The index of the face material.
+ * @returns {LBGeometry.Face3}
+ */
+LBGeometry.Face3 = function(a, b, c, normal, color, materialIndex) {
+    THREE.Face3.call(this, a, b, c, normal, color, materialIndex);
+};
+
+LBGeometry.Face3.prototype = Object.create(THREE.Face3.prototype);
+LBGeometry.Face3.constructor = LBGeometry.Face3;
+
 </code></pre>
         </article>
     </section>
@@ -1083,13 +1210,13 @@ LBGeometry.YZ_PLANE = new LBGeometry.Plane(LBGeometry.X_AXIS, 0);
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.P2Env.html">P2Env</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 01 2017 21:22:00 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jul 03 2017 21:19:11 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -308,8 +308,8 @@ LBGeometry.loadVector3 = function(data, vec) {
 /**
  * Creates an array of {@link LBGeometry.Vector3} objects from a numeric array containing
  * a sequence of coordinate values.
- * @param {Array[Number]} data  The array of coordinates.
- * @returns {Array[LBGeometry.Vector3]} The array of vertices.
+ * @param {Number[]} data  The array of coordinates.
+ * @returns {LBGeometry.Vector3[]} The array of vertices.
  */
 LBGeometry.loadVector3ArrayFromCoordArray = function(data) {
     var vectors = [];
@@ -1160,8 +1160,8 @@ LBGeometry.Geometry.constructor = LBGeometry.Geometry;
  * @param {Number} a    The index of vertex A.
  * @param {Number} b The index of vertex B.
  * @param {Number} c The index of vertex C.
- * @param {LBGeometry.Vector3|Array} [normal]   The face normal.
- * @param {LBGeometry.Color|Array[LBGeometry.Color]} [color]  The face color or colors for the vertices.
+ * @param {LBGeometry.Vector3|Number[]} [normal]   The face normal.
+ * @param {LBGeometry.Color|Number[]} [color]  The face color or colors for the vertices.
  * @param {Number} [materialIndex]  The index of the face material.
  * @returns {LBGeometry.Face3}
  */
