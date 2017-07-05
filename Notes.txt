@@ -36,6 +36,10 @@ Add alternate plane projection for resultants that are too close to the desired 
 
 Add wake sprites
 
+Add optional traveled path (i.e. long wake)
+
+Add hull windage.
+
 Add wind puffs on water.
 
 Animate water

@@ -326,4 +326,29 @@ QUnit.test( "Tetra.sliceWithPlane()", function( assert ) {
         "Two Vertices Each Side, opposite direction",
         true);
 });
+
+QUnit.test( "centerOfMassOfTetras", function( assert ) {
+    var data = {
+        vertices: [
+            0, 0, 0,
+            2, 0, 0,
+            2, 1, 0,
+            0, 1, 0,
+            
+            0, 0, 3,
+            2, 0, 3,
+            2, 1, 3,
+            0, 1, 3
+        ],
+        indices: [
+            [ 0, 1, 2, 3, 4, 5, 6, 7]
+        ]
+    };
     
+    var tetras = LBVolume.Tetra.loadFromData(data);
+    LBVolume.Tetra.allocateMassToTetras(tetras, 5);
+    
+    var result = LBVolume.Tetra.centerOfMassOfTetras(tetras);
+    checkVector3(assert, result.position, 1, 0.5, 1.5, "Position");
+    assert.nearEqual(result.mass, 5, "Mass");
+});

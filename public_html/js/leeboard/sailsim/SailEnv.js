@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global Leeboard, Phaser, LBGeometry, LBFoils, LBSailSim */
+/* global Leeboard, Phaser, LBGeometry, LBFoils, LBSailSim, LBMath */
 
 /**
  * 
@@ -197,9 +197,12 @@ LBSailSim.Env.prototype = {
      * Creates and loads a new boat instance. The boat is attached to the sailing environment.
      * @param {object} typeName The boat's type.
      * @param {object} [boatName] The name of the particular boat instance.
+     * @param {Number} [centerX=0] The initial x coordinate of the boat.
+     * @param {Number} [centerY=0] The initial y coordinate of the boat.
+     * @param {Number} [rotDeg=0] The initial rotation of the boat, in degrees.
      * @returns {object}    The boat instance, undefined if the boat is not available.
      */
-    checkoutBoat: function(typeName, boatName) {
+    checkoutBoat: function(typeName, boatName, centerX, centerY, rotDeg) {
         if (!this.isBoatAvailable(typeName, boatName)) {
             return undefined;
         }
@@ -214,9 +217,14 @@ LBSailSim.Env.prototype = {
         if (!boat) {
             return undefined;
         }
+        
+        boat.obj3D.position.x = centerX || 0;
+        boat.obj3D.position.y = centerY || 0;
+        boat.obj3D.rotation.z = (rotDeg || 0) * LBMath.DEG_TO_RAD;
+        boat.obj3D.updateMatrixWorld(true);
 
         this.boatsByType[typeName][boatName] = boat;
-        this._boatCheckedOut(boat);
+        this._boatCheckedOut(boat, boatData);
         return boat;
     },
     
@@ -236,12 +244,13 @@ LBSailSim.Env.prototype = {
     },
     
     /**
-     * Called by {@link LBSailSim.Env.checkoutBoat} when a boat has been checked out, lets derived
+     * Called by {@link LBSailSim.Env#checkoutBoat} when a boat has been checked out, lets derived
      * objects update their state.
      * @protected
      * @param {object} boat The boat that was checked out.
+     * @param {Object} data The data object that was passed to {@link LBSailSim.Env#checkoutBoat}.
      */
-    _boatCheckedOut: function(boat) {
+    _boatCheckedOut: function(boat, data) {
     },
 
     /**

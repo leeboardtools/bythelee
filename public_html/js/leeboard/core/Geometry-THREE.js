@@ -218,6 +218,44 @@ LBGeometry.Vector3.prototype.normalize = function() {
 };
 
 /**
+ * Sets the components of this vector to the smaller of either this vector's component
+ * or another vector's component.
+ * @param {LBGeometry.Vector3} vec  The vector to copy from.
+ * @returns {LBGeometry.Vector3.prototype}
+ */
+LBGeometry.Vector3.prototype.copyIfMin = function(vec) {
+    if (vec.x < this.x) {
+        this.x = vec.x;
+    }
+    if (vec.y < this.y) {
+        this.y = vec.y;
+    }
+    if (vec.z < this.z) {
+        this.z = vec.z;
+    }
+    return this;
+};
+
+/**
+ * Sets the components of this vector to the larger of either this vector's component
+ * or another vector's component.
+ * @param {LBGeometry.Vector3} vec  The vector to copy from.
+ * @returns {LBGeometry.Vector3.prototype}
+ */
+LBGeometry.Vector3.prototype.copyIfMax = function(vec) {
+    if (vec.x > this.x) {
+        this.x = vec.x;
+    }
+    if (vec.y > this.y) {
+        this.y = vec.y;
+    }
+    if (vec.z > this.z) {
+        this.z = vec.z;
+    }
+    return this;
+};
+
+/**
  * Override of {@link https://threejs.org/docs/index.html#api/math/Vector3|THREE.Vector3#copy}, supports copying a Vector2 by setting the
  * z coordinate to 0 if the object being copied does not have a z.
  * @implements {THREE.Vector3#copy}

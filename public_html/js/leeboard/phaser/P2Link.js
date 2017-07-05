@@ -29,6 +29,7 @@
 LBPhaser.P2Link = function(phaserEnv) {
     LBPhaser.PhysicsLink.call(this, phaserEnv);
     
+    this.game.physics.startSystem(Phaser.Physics.P2JS);
     this.game.physics.p2.world.applyGravity = false;
     
     this.fixedObjectCollisionGroup = this.game.physics.p2.createCollisionGroup();
@@ -47,7 +48,7 @@ LBPhaser.P2Link.prototype.constructor = LBPhaser.P2Link;
 LBPhaser.P2Link.prototype.addFixedObject = function(object) {
     this.game.physics.p2.enable(object);
     object.body.allowGravity = false;
-    object.body.immovable = true;
+    object.body.static = true;
     
     object.body.setCollisionGroup(this.fixedObjectCollisionGroup);
     object.body.collides(this.dynamicObjectCollisionGroup);
@@ -55,20 +56,33 @@ LBPhaser.P2Link.prototype.addFixedObject = function(object) {
 };
 
 /**
- * Adds a dynamic object to the physics link.
- * @param {Object} object   The object to add.
- * @param {Object} data The data object to load any physics link specific info from.
- * @returns {LBPhaser.P2Link}   this.
+ * @inheritdoc
+ * @param {type} rigidBody
+ * @param {type} data
+ * @returns {undefined}
  */
-LBPhaser.P2Link.prototype.addDynamicObject = function(object, data) {
-    var p2Body = LBPhaser.P2Link.createP2BodyFromData(this.game, data.p2Body);
-    object[LBPhaser.P2Link.p2BodyProperty] = p2Body;
+LBPhaser.P2Link.prototype.addRigidBody = function(rigidBody, data) {
+    LBPhaser.PhysicsLink.prototype.addRigidBody.call(this, rigidBody);
+    
+    var p2Body = LBPhaser.P2Link.createP2BodyFromData(this.game, data.phaser);
+    rigidBody._lbP2Body = p2Body;
     p2Body.damping = 0;
     
     p2Body.setCollisionGroup(this.dynamicObjectCollisionGroup);
     p2Body.collides(this.fixedObjectCollisionGroup);
-    
-    return this;
+
+    p2Body.x = this.phaserEnv.toPixelsX(rigidBody.obj3D.position.x);
+    p2Body.y = this.phaserEnv.toPixelsY(rigidBody.obj3D.position.y);
+    p2Body.rotation = this.phaserEnv.toPixelsRotationRad(rigidBody.obj3D.rotation.z);
+    this.setRigidBodyDisplayObject(rigidBody, p2Body.sprite);
+};
+
+LBPhaser.P2Link.prototype._rigidBodyRemoved = function(rigidBody) {
+    if (rigidBody._lbP2Body) {
+        rigidBody._lbP2Body.world.removeBody(rigidBody._lbP2Body);
+        this.setRigidBodyDisplayObject(undefined);
+        rigidBody._lbP2Body = undefined;
+    }
 };
 
 /**
@@ -101,7 +115,7 @@ LBPhaser.P2Link.prototype._updateFromP2 = function() {
 };
     
 LBPhaser.P2Link.prototype._updateRigidBodyFromPhaser = function(rigidBody) {
-    var p2Body = rigidBody[LBPhaser.P2Link.p2BodyProperty];
+    var p2Body = rigidBody._lbP2Body;
     if (p2Body) {
         // Phaser negates the coordinate system between P2 and {@link PHaser.Physics.P2}.
         rigidBody.setXYZ(this.phaserEnv.fromPixelsX(p2Body.x), this.phaserEnv.fromPixelsY(p2Body.y), 
@@ -124,7 +138,7 @@ LBPhaser.P2Link.prototype._applyToP2 = function(dt) {
 };
 
 LBPhaser.P2Link.prototype._updateP2BodyFromLB3 = function(rigidBody) {
-    var p2Body = rigidBody[LBPhaser.P2Link.p2BodyProperty];
+    var p2Body = rigidBody._lbP2Body;
     if (!p2Body) {
         return;
     }
@@ -146,15 +160,8 @@ LBPhaser.P2Link.prototype._updateP2BodyFromLB3 = function(rigidBody) {
     p2Body.applyForce([-resultant.force.x, -resultant.force.y], 
         pEnv.toPixelsX(x), pEnv.toPixelsY(y));
 };
+
     
-
-/**
- * The name of the property in {LBPhysics.RigidBody} objects where we store the {@link https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body|Phaser.Physics.P2.Body}.
- * P2 bodies control the position of the rigid body.
- */
-LBPhaser.P2Link.p2BodyProperty = "_p2Body";
-
-
 /**
  * Creates and loads a {https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body|Phaser.Physics.P2.Body} object based on properties in a data object.
  * @param {Phaser.Game} game    The game to which the body will belong.

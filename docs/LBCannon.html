@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Sphere</title>
+    <title>JSDoc: Namespace: LBCannon</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Sphere</h1>
+    <h1 class="page-title">Namespace: LBCannon</h1>
 
     
 
@@ -28,8 +28,7 @@
 
 <header>
     
-        <h2>
-            <span class="ancestors"><a href="LBGeometry.html">LBGeometry</a>.</span>Sphere</h2>
+        <h2>LBCannon</h2>
         
     
 </header>
@@ -39,16 +38,84 @@
     
         
 
+        
+
+
+<dl class="details">
+
     
 
-    <h4 class="name" id="Sphere"><span class="type-signature"></span>new Sphere<span class="signature">(center<span class="signature-attributes">opt</span>, radius<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {THREE.Sphere}</span></h4>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="cannon_CannonUtil.js.html">cannon/CannonUtil.js</a>, <a href="cannon_CannonUtil.js.html#line20">line 20</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".addTetrasToBody"><span class="type-signature">(static) </span>addTetrasToBody<span class="signature">(body, tetras)</span><span class="type-signature"> &rarr; {CANNON.Body}</span></h4>
 
     
 
 
 
 <div class="description">
-    A sphere, our encapsulation of <a href="https://threejs.org/docs/index.html#api/math/Sphere">THREE.Sphere</a>.
+    Adds tetras as shapes to a <a href="http://schteppe.github.io/cannon.js/docs/classes/Body.html">CANNON.Body</a>.
+Once tetras have been added to a body, <a href="LBCannon.html#.updateBodyCenterOfMass">LBCannon.updateBodyCenterOfMass</a> should be called
+to properly align the body's center of mass with the origin.
 </div>
 
 
@@ -72,11 +139,7 @@
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
-        
-        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -88,78 +151,46 @@
 
         <tr>
             
-                <td class="name"><code>center</code></td>
+                <td class="name"><code>body</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a></span>
+<span class="param-type">CANNON.Body</span>
 
 
             
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
-                <td class="default">
-                
-                    LBGeometry.ORIGIN
-                
-                </td>
-            
 
-            <td class="description last">The center of the sphere.</td>
+            <td class="description last">The body to add the tetras to.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>radius</code></td>
+                <td class="name"><code>tetras</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">Array.&lt;<a href="LBVolume.Tetra.html">LBVolume.Tetra</a>></span>
 
 
             
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
-                <td class="default">
-                
-                    0
-                
-                </td>
-            
 
-            <td class="description last">The radius of the sphere.</td>
+            <td class="description last">The array of tetras to be added.</td>
         </tr>
 
     
@@ -200,7 +231,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Geometry-THREE.js.html">core/Geometry-THREE.js</a>, <a href="core_Geometry-THREE.js.html#line836">line 836</a>
+        <a href="cannon_CannonUtil.js.html">cannon/CannonUtil.js</a>, <a href="cannon_CannonUtil.js.html#line111">line 111</a>
     </li></ul></dd>
     
 
@@ -226,6 +257,10 @@
 <h5>Returns:</h5>
 
         
+<div class="param-desc">
+    body.
+</div>
+
 
 
 <dl>
@@ -234,7 +269,7 @@
     </dt>
     <dd>
         
-<span class="param-type">THREE.Sphere</span>
+<span class="param-type">CANNON.Body</span>
 
 
     </dd>
@@ -244,21 +279,234 @@
 
 
 
-    
-    </div>
+        
+            
 
     
 
+    <h4 class="name" id=".updateBodyCenterOfMass"><span class="type-signature">(static) </span>updateBodyCenterOfMass<span class="signature">(body, centerOfMass, mass<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {CANNON.Body}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Updates the center of mass of a body. The local origin of the body is the center of mass.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>body</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CANNON.Body</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The Cannon body.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>centerOfMass</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The position of the center of mass.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mass</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The mass, if undefined the mass will not be modified.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
     
 
     
 
-     
+    
+
+    
 
     
 
     
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="cannon_CannonUtil.js.html">cannon/CannonUtil.js</a>, <a href="cannon_CannonUtil.js.html#line133">line 133</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    body.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">CANNON.Body</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
     
 
     
@@ -280,7 +528,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:04 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:03 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -818,7 +818,7 @@ LBSailSim.Vessel.prototype.getMainsheetController = function() {
     if (this.mainsheetController === undefined) {
         this.mainsheetController = Leeboard.findArrayElementWithName(this.controllers, 'Mainsheet', null);        
     }
-    return this.mainsheetController ? this.mainsheetController : undefined;
+    return (this.mainsheetController && (this.mainsheetController.sails.length > 0)) ? this.mainsheetController : undefined;
 };
 
 /**

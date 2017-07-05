@@ -40,7 +40,7 @@ LBSailSim.Hull = function(vessel) {
     
     /**
      * The center of buoyancy in local coordinates. This is actively updated if
-     * displacementTetras have been specified.
+     * volumeTetras have been specified for the vessel.
      * @member {LBGeometry.Vector3}
      */
     this.centerOfBuoyancy = new LBGeometry.Vector3();
@@ -147,12 +147,6 @@ LBSailSim.Hull = function(vessel) {
      * @member {Number}
      */
     this.halfRhoVSq = 0;
-    
-    /**
-     * The array of {@link LBVolume.Tetra} objects representing the hull and used to compute
-     * buoyancy.
-     */
-    this.displacementTetras = [];
 };
 
 LBSailSim.Hull._workingForce = new LBGeometry.Vector3();
@@ -171,7 +165,7 @@ LBSailSim.Hull.prototype = {
 
         this.heelAngleDeg = vessel.obj3D.rotation.x * LBMath.RAD_TO_DEG;
         
-        if (this.displacementTetras.length > 0) {
+        if (this.vessel.volumeTetras.length > 0) {
             this._updateBuoyancy();
         }
         else {
@@ -197,8 +191,8 @@ LBSailSim.Hull.prototype = {
         var volSum = 0;
         var centroid = LBSailSim.Hull._workingPos;
         
-        for (var i = 0; i < this.displacementTetras.length; ++i) {
-            var tetra = this.displacementTetras[i];
+        for (var i = 0; i < this.vessel.volumeTetras.length; ++i) {
+            var tetra = this.vessel.volumeTetras[i];
             var result = LBVolume.Tetra.sliceWithPlane(tetra, xyPlane, false, true);
             if (!result || !result[1].length) {
                 continue;
@@ -323,11 +317,6 @@ LBSailSim.Hull.prototype = {
         
         this.swc = data.swc || LBSailSim.Hull.estimateSW(this);
         this.swcnh = this.swc;
-        
-        this.displacementTetras.splice(0, this.displacementTetras.length);
-        if (data.displacementTetras) {
-            LBVolume.Tetra.loadFromData(data.displacementTetras, null, this.displacementTetras);
-        }
         
         LBGeometry.loadVector3(data.centerOfBuoyancy, this.centerOfBuoyancy);
         return this;

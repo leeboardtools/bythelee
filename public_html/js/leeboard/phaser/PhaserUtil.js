@@ -35,6 +35,11 @@ LBPhaser.Env = function(game) {
      * go down.
      */
     this.ySign = 1;
+    
+    this.toPixX = 20;
+    this.toPixY = -20;
+    this.fromPixX = 1/this.toPixX;
+    this.fromPixY = 1/this.toPixY;
 };
 
 LBPhaser.Env.prototype = {
@@ -44,7 +49,7 @@ LBPhaser.Env.prototype = {
      * @returns {Number}    The pixels.
      */
     toPixelsX: function(x) {
-        return -this.game.physics.p2.mpxi(x);
+        return x * this.toPixX;
     },
     
     /**
@@ -53,7 +58,25 @@ LBPhaser.Env.prototype = {
      * @returns {Number}    The pixels.
      */
     toPixelsY: function(y) {
-        return -this.ySign * this.game.physics.p2.mpxi(y);
+        return y * this.toPixY;
+    },
+    
+    /**
+     * Converts a right-hand rotation about the z-axis in radians to pixel space.
+     * @param {Number} rad  The radians to convert.
+     * @returns {Number}    The radians.
+     */
+    toPixelsRotationRad: function(rad) {
+        return this.ySign * rad;
+    },
+    
+    /**
+     * Converts a right-hand rotation about the z-axis in degrees to pixel space.
+     * @param {Number} deg  The degrees to convert.
+     * @returns {Number}    The degrees.
+     */
+    toPixelsRotationDeg: function(deg) {
+        return this.ySign * deg;
     },
     
     /**
@@ -62,7 +85,7 @@ LBPhaser.Env.prototype = {
      * @returns {Number}    Our units.
      */
     fromPixelsX: function(x) {
-        return -this.game.physics.p2.pxmi(x);
+        return x * this.fromPixX;
     },
     
     /**
@@ -71,7 +94,25 @@ LBPhaser.Env.prototype = {
      * @returns {Number}    Our units.
      */
     fromPixelsY: function(y) {
-        return -this.ySign * this.game.physics.p2.pxmi(y);
+        return y * this.fromPixY;
+    },
+    
+    /**
+     * Converts pixel space rotation in radians to a right-hand rotation about the z-axis.
+     * @param {Number} rad  The radians to convert.
+     * @returns {Number}    The radians.
+     */
+    fromPixelsRotationRad: function(rad) {
+        return this.ySign * rad;
+    },
+    
+    /**
+     * Converts pixel space rotation in degrees to a right-hand rotation about the z-axis.
+     * @param {Number} deg  The degrees to convert.
+     * @returns {Number}    The degrees.
+     */
+    fromPixelsRotationDeg: function(deg) {
+        return this.ySign * deg;
     },
     
     constructor: LBPhaser.Env

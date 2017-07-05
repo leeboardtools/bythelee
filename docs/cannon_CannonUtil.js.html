@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: cannon/CannonUtil.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: cannon/CannonUtil.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* 
+ * Copyright 2017 albert.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/* global CANNON, LBGeometry, LBMath, Leeboard */
+
+/**
+ * @namespace LBCannon
+ */
+var LBCannon = LBCannon || {};
+
+/**
+ * A proxy for {@link http://schteppe.github.io/cannon.js/docs/classes/Vec3.html|CANNON.Vec3} that
+ * links it to a {@link LBGeometry.Vector3} and utilizes the {@link LBGeometry.Vector3} as the
+ * underlying storage object.
+ * &lt;p>
+ * Note that for any given {@link LBGeometry.Vector3} there should be only one proxy.
+ * @private
+ * @constructor
+ * @param {LBGeometry.Vector3} [vector3=new LBGeometry.Vector3()]    The underlying {@link LBGeometry.Vector3} object.
+ * @returns {LBCannon.Vec3Proxy}
+ */
+LBCannon.Vec3Proxy = function(vector3) {
+    /**
+     * The underlying {@link LBGeometry.Vector3}.
+     */
+    this.vector3 = vector3 || new LBGeometry.Vector3();
+    
+    // Need to pass in the current values of this.vector3 so they don't get overwritten.
+    CANNON.Vec3.call(this, this.vector3.x, this.vector3.y, this.vector3.z);
+
+    this.vector3._cannonVec3Proxy = this;
+};
+
+LBCannon.Vec3Proxy.prototype = Object.create(CANNON.Vec3.prototype);
+LBCannon.Vec3Proxy.prototype.constructor = LBCannon.Vec3Proxy;
+Object.defineProperty(LBCannon.Vec3Proxy.prototype, 'x', {
+    get: function() {
+        return this.vector3.x;
+    },
+    set: function(val) {
+        this.vector3.x = val;
+        return val;
+    }
+});
+
+Object.defineProperty(LBCannon.Vec3Proxy.prototype, 'y', {
+    get: function() {
+        return this.vector3.y;
+    },
+    set: function(val) {
+        this.vector3.y = val;
+        return val;
+    }
+});
+
+Object.defineProperty(LBCannon.Vec3Proxy.prototype, 'z', {
+    get: function() {
+        return this.vector3.z;
+    },
+    set: function(val) {
+        this.vector3.z = val;
+        return val;
+    }
+});
+
+/**
+ * Retrieves the proxy associated with an {@link LBGeometry.Vector3}, creating one
+ * if necessary.
+ * @param {LBGeometry.Vector3} vector3  The vector3 object, may be undefined.
+ * @returns {undefined|LBCannon.Vec3Proxy}  The proxy, undefined if vector3 is undefined.
+ */
+LBCannon.Vec3Proxy.getProxy = function(vector3) {
+    if (!vector3) {
+        return undefined;
+    }
+    if (vector3._cannonVec3Proxy) {
+        return vector3._cannonVec3Proxy;
+    }
+    return new LBCannon.Vec3Proxy(vector3);
+};
+
+LBCannon._tetraFaces = [
+    [0, 1, 2],
+    [0, 2, 3],
+    [0, 3, 1],
+    [1, 3, 2]
+];
+
+/**
+ * Adds tetras as shapes to a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}.
+ * Once tetras have been added to a body, {@link LBCannon.updateBodyCenterOfMass} should be called
+ * to properly align the body's center of mass with the origin.
+ * @param {CANNON.Body} body    The body to add the tetras to.
+ * @param {LBVolume.Tetra[]} tetras The array of tetras to be added.
+ * @returns {CANNON.Body}   body.
+ */
+LBCannon.addTetrasToBody = function(body, tetras) {
+    for (var i = 0; i &lt; tetras.length; ++i) {
+        var tv = tetras[i].vertices;
+        var vertices = [];
+        for (var j = 0; j &lt; 4; ++j) {
+            vertices.push(LBCannon.Vec3Proxy.getProxy(tv[j]));
+        }
+        
+        var shape = new CANNON.ConvexPolyhedron(vertices, LBCannon._tetraFaces);
+        shape._lbTetra = tetras[i];
+        body.addShape(shape);
+    }
+    return body;
+};
+
+/**
+ * Updates the center of mass of a body. The local origin of the body is the center of mass.
+ * @param {CANNON.Body} body    The Cannon body.
+ * @param {LBGeometry.Vector3} centerOfMass The position of the center of mass.
+ * @param {Number}  [mass]  The mass, if undefined the mass will not be modified.
+ * @returns {CANNON.Body}   body.
+ */
+LBCannon.updateBodyCenterOfMass = function(body, centerOfMass, mass) {
+    if (Leeboard.isVar(mass)) {
+        body.mass = mass;
+    }
+    
+    for (var i = 0; i &lt; body.shapes.length; ++i) {
+        var shape = body.shapes[i];
+        if (shape._lbTetra &amp;&amp; (shape._lbTetra.mass > 0)) {
+            body.shapeOffsets[i].x = -centerOfMass.x;
+            body.shapeOffsets[i].y = -centerOfMass.y;
+            body.shapeOffsets[i].z = -centerOfMass.z;
+        }
+    }
+    
+    body.updateMassProperties();
+    
+    body.position.x += centerOfMass.x;
+    body.position.y += centerOfMass.y;
+    body.position.z += centerOfMass.z;
+    
+    return body;
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:03 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

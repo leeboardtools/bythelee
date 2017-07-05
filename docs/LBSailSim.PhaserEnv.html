@@ -41,7 +41,7 @@
 
     
 
-    <h4 class="name" id="PhaserEnv"><span class="type-signature"></span>new PhaserEnv<span class="signature">(game)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.PhaserEnv.html">LBSailSim.PhaserEnv</a>}</span></h4>
+    <h4 class="name" id="PhaserEnv"><span class="type-signature"></span>new PhaserEnv<span class="signature">(game, physicsType)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.PhaserEnv.html">LBSailSim.PhaserEnv</a>}</span></h4>
 
     
 
@@ -104,6 +104,32 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>physicsType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBSailSim.PhaserEnv.html#.P2_PHYSICS">LBSailSim.PhaserEnv.P2_PHYSICS</a></span>
+|
+
+<span class="param-type"><a href="LBSailSim.PhaserEnv.html#.CANNON_PHYSICS">LBSailSim.PhaserEnv.CANNON_PHYSICS</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The physics engine to use.</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -141,7 +167,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line27">line 27</a>
+        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line28">line 28</a>
     </li></ul></dd>
     
 
@@ -199,6 +225,154 @@
     
 
     
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id=".CANNON_PHYSICS"><span class="type-signature">(static, constant) </span>CANNON_PHYSICS<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    Value to pass to <a href="LBSailSim.PhaserEnv.html">LBSailSim.PhaserEnv</a>'s contructor to use the Cannon JS physics engine.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line76">line 76</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".P2_PHYSICS"><span class="type-signature">(static, constant) </span>P2_PHYSICS<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    Value to pass to <a href="LBSailSim.PhaserEnv.html">LBSailSim.PhaserEnv</a>'s contructor to use the P2 physics engine from Phaser.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line69">line 69</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -255,7 +429,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line81">line 81</a>
+        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line108">line 108</a>
     </li></ul></dd>
     
 
@@ -355,7 +529,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line100">line 100</a>
+        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line127">line 127</a>
     </li></ul></dd>
     
 
@@ -596,7 +770,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line113">line 113</a>
+        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line140">line 140</a>
     </li></ul></dd>
     
 
@@ -815,7 +989,7 @@ is where we attach the force arrows and graphic objects.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line150">line 150</a>
+        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line177">line 177</a>
     </li></ul></dd>
     
 
@@ -964,7 +1138,7 @@ is where we attach the force arrows and graphic objects.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line70">line 70</a>
+        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line97">line 97</a>
     </li></ul></dd>
     
 
@@ -1117,7 +1291,7 @@ is where we attach the force arrows and graphic objects.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line90">line 90</a>
+        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line117">line 117</a>
     </li></ul></dd>
     
 
@@ -1271,7 +1445,7 @@ belong.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line60">line 60</a>
+        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line87">line 87</a>
     </li></ul></dd>
     
 
@@ -1371,7 +1545,7 @@ belong.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line210">line 210</a>
+        <a href="sailsim_SailSim-Phaser.js.html">sailsim/SailSim-Phaser.js</a>, <a href="sailsim_SailSim-Phaser.js.html#line237">line 237</a>
     </li></ul></dd>
     
 
@@ -1431,13 +1605,13 @@ belong.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jul 03 2017 21:19:11 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:04 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

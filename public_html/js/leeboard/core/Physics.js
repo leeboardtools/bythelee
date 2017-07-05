@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global Leeboard, LBGeometry, LBMath */
+/* global Leeboard, LBGeometry, LBMath, LBVolume */
 
 /**
  * @namespace   LBPhysics
@@ -602,6 +602,12 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     this.obj3D = obj3D || new LBGeometry.Object3D();
     
     /**
+     * Array of {@link LBVolume.Tetra}s that define the volume of the body.
+     * @type LBVolume.Tetra
+     */
+    this.volumeTetras = [];
+    
+    /**
      * The coordinate system state used to track changes in the location of the
      * local coordinate system in the world space. Primarily used to track velocity.
      * @type LBPhysics.CoordSystemState
@@ -689,8 +695,24 @@ LBPhysics.RigidBody.prototype = {
         LBGeometry.loadVector3(data.centerOfMass, this.centerOfMass);
         this.massRadius = data.massRadius || this.massRadius;
         
+        this.volumeTetras.splice(0, this.volumeTetras.length);
+        if (data.volumeTetras) {
+            LBVolume.Tetra.loadFromData(data.volumeTetras, null, this.volumeTetras);
+            if (data.mass) {
+                LBVolume.Tetra.allocateMassToTetras(this.volumeTetras, data.mass);
+            }
+            
+            var comResult = LBVolume.Tetra.centerOfMassOfTetras(this.volumeTetras);
+            if (comResult && (comResult.mass > 0)) {
+                this.centerOfMass.copy(comResult.position);
+            }
+        }
+        
         if (data.momentInertia) {
             LBPhysics.loadMomentInertia(data.momentInertia, this.momentInertia);
+        }
+        else if (this.volumeTetras.length > 0) {
+            LBVolume.Tetra.calcInertiaTensor(this.volumeTetras, this.momentInertia);
         }
         else {
             this.momentInertia.identity().multiplyScalar(this.mass);

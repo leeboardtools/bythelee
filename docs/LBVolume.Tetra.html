@@ -41,7 +41,7 @@
 
     
 
-    <h4 class="name" id="Tetra"><span class="type-signature"></span>new Tetra<span class="signature">(vertices<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBVolume.Tetra.html">LBVolume.Tetra</a>}</span></h4>
+    <h4 class="name" id="Tetra"><span class="type-signature"></span>new Tetra<span class="signature">(vertices<span class="signature-attributes">opt</span>, mass<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBVolume.Tetra.html">LBVolume.Tetra</a>}</span></h4>
 
     
 
@@ -75,6 +75,8 @@
         <th>Attributes</th>
         
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -111,10 +113,53 @@
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last">If defined an array containing the
 four vertices for the tetrahedron. References to the vertices are used, they are not copied.
 If not defined the vertices are all set to new instances of <a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a>.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mass</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    Number.NaN
+                
+                </td>
+            
+
+            <td class="description last">Optional mass associated with the tetra.</td>
         </tr>
 
     
@@ -155,7 +200,7 @@ If not defined the vertices are all set to new instances of <a href="LBGeometry.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line34">line 34</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line35">line 35</a>
     </li></ul></dd>
     
 
@@ -213,9 +258,832 @@ If not defined the vertices are all set to new instances of <a href="LBGeometry.
     
 
     
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="mass"><span class="type-signature"></span>mass<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    Mass associated with the volume, set to Number.NaN if a mass is not assigned.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line56">line 56</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="vertices"><span class="type-signature"></span>vertices<span class="type-signature"> :<a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a></span></h4>
+
+
+
+
+<div class="description">
+    The array of vertices of the tetra.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line40">line 40</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
 
     
         <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".allocateMassToTetras"><span class="type-signature">(static) </span>allocateMassToTetras<span class="signature">(tetras, totalMass, startIndex<span class="signature-attributes">opt</span>, endIndex<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Allocates a mass amongst all the tetras in an array based upon the volume
+of the tetras.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tetras</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="LBVolume.Tetra.html">LBVolume.Tetra</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The array of tetras.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>totalMass</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The total mass to assign, may be Number.NaN.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>startIndex</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">If specified the index in tetras at which to start.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>endIndex</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    tetras.length
+                
+                </td>
+            
+
+            <td class="description last">If specified the index after the last index
+in tetras to process.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line215">line 215</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".calcInertiaTensor"><span class="type-signature">(static) </span>calcInertiaTensor<span class="signature">(tetras, tensor<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBGeometry.html#.Matrix3">LBGeometry.Matrix3</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Calculates a simplified inertia tensor from the tetras in a array of tetras. The
+tensor is simplified in that each tetra is treated as a point mass at the centroid
+of the tetra.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tetras</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="LBVolume.Tetra.html">LBVolume.Tetra</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The array of tetras.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tensor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBGeometry.html#.Matrix3">LBGeometry.Matrix3</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If defined the 3x3 matrix to receive the tensor.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line250">line 250</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The tensor.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBGeometry.html#.Matrix3">LBGeometry.Matrix3</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".centerOfMassOfTetras"><span class="type-signature">(static) </span>centerOfMassOfTetras<span class="signature">(tetras, store<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Calculates the center of mass and total mass of the tetras in an array of tetras.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tetras</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="LBVolume.Tetra.html">LBVolume.Tetra</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The array of tetras.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>store</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If defined the object to store the results into.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line152">line 152</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The results, the position property is compatible with <a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a>
+and contains the coordinates of the center of mass, the mass property is the total mass.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
 
         
             
@@ -413,7 +1281,7 @@ is connected to v[5], etc.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line251">line 251</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line382">line 382</a>
     </li></ul></dd>
     
 
@@ -644,7 +1512,7 @@ This is NOT cleared.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line533">line 533</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line664">line 664</a>
     </li></ul></dd>
     
 
@@ -929,7 +1797,7 @@ the volume on the side of the plane to which the normal does not point.</td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line312">line 312</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line443">line 443</a>
     </li></ul></dd>
     
 
@@ -1089,7 +1957,7 @@ tetras for the volume on the negative side of the plane (empty if negativeDir is
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line139">line 139</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line197">line 197</a>
     </li></ul></dd>
     
 
@@ -1324,7 +2192,7 @@ internal and does not exist).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line162">line 162</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line293">line 293</a>
     </li></ul></dd>
     
 
@@ -1559,7 +2427,7 @@ v[1] is connected to v[4], and v[2] is connected to v[5].
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line199">line 199</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line330">line 330</a>
     </li></ul></dd>
     
 
@@ -1724,7 +2592,7 @@ v[1] is connected to v[4], and v[2] is connected to v[5].
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line84">line 84</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line95">line 95</a>
     </li></ul></dd>
     
 
@@ -1828,7 +2696,7 @@ v[1] is connected to v[4], and v[2] is connected to v[5].
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line63">line 63</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line74">line 74</a>
     </li></ul></dd>
     
 
@@ -1981,7 +2849,7 @@ v[1] is connected to v[4], and v[2] is connected to v[5].
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line114">line 114</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line125">line 125</a>
     </li></ul></dd>
     
 
@@ -2081,7 +2949,7 @@ v[1] is connected to v[4], and v[2] is connected to v[5].
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line126">line 126</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line137">line 137</a>
     </li></ul></dd>
     
 
@@ -2182,7 +3050,7 @@ tetra.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line72">line 72</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line83">line 83</a>
     </li></ul></dd>
     
 
@@ -2282,7 +3150,7 @@ tetra.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line99">line 99</a>
+        <a href="core_Volume.js.html">core/Volume.js</a>, <a href="core_Volume.js.html#line110">line 110</a>
     </li></ul></dd>
     
 
@@ -2346,13 +3214,13 @@ tetra.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jul 03 2017 21:19:11 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:04 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -29,9 +29,14 @@ var LBVolume = LBVolume || {};
  * @param {Number[]} [vertices]    If defined an array containing the
  * four vertices for the tetrahedron. References to the vertices are used, they are not copied.
  * If not defined the vertices are all set to new instances of {@link LBGeometry.Vector3}.
+ * @param {Number} [mass=Number.NaN] Optional mass associated with the tetra.
  * @returns {LBVolume.Tetra}
  */
-LBVolume.Tetra = function(vertices) {
+LBVolume.Tetra = function(vertices, mass) {
+    /**
+     * The array of vertices of the tetra.
+     * @type LBGeometry.Vector3
+     */
     this.vertices = [];
     if (vertices) {
         for (var i = 0; i < 4; ++i) {
@@ -43,6 +48,12 @@ LBVolume.Tetra = function(vertices) {
             this.vertices.push(new LBGeometry.Vector3());
         }
     }
+    
+    /**
+     * Mass associated with the volume, set to {@link Number.NaN} if a mass is not assigned.
+     * @type Number
+     */
+    this.mass = Leeboard.isVar(mass) ? mass : Number.NaN;
 };
 
 LBVolume.Tetra._workingVertexArray = [ null, null, null, null, null, null, null, null ];
@@ -61,7 +72,7 @@ LBVolume.Tetra.prototype = {
      * @returns {LBVolume.Tetra}    The shallow copy.
      */
     clone: function() {
-        return new LBVolume.Tetra(this.vertices);
+        return new LBVolume.Tetra(this.vertices, this.mass);
     },
     
     /**
@@ -112,7 +123,7 @@ LBVolume.Tetra.prototype = {
      * @returns {LBVolume.Tetra}
      */
     cloneMirrored: function(plane) {
-        var clone = new LBVolume.Tetra();
+        var clone = new LBVolume.Tetra(undefined, this.mass);
         for (var i = 0; i < this.vertices.length; ++i) {
             LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i], clone.vertices[i]);
         }
@@ -132,6 +143,53 @@ LBVolume.Tetra.prototype = {
 
 
 /**
+ * Calculates the center of mass and total mass of the tetras in an array of tetras.
+ * @param {LBVolume.Tetra[]} tetras    The array of tetras.
+ * @param {Object} [store]  If defined the object to store the results into.
+ * @returns {Object}    The results, the position property is compatible with {@link LBGeometry.Vector3}
+ * and contains the coordinates of the center of mass, the mass property is the total mass.
+ */
+LBVolume.Tetra.centerOfMassOfTetras = function(tetras, store) {
+    store = store || {};
+    
+    var centroid = LBVolume.Tetra._workingVectorA;
+    var sumX = 0, sumY = 0, sumZ = 0;
+    var totalMass = 0;
+    for (var i = 0; i < tetras.length; ++i) {
+        if (tetras[i].mass > 0) {
+            var mass = tetras[i].mass;
+            totalMass += mass;
+            centroid = tetras[i].centroid(centroid);
+            sumX += centroid.x * mass;
+            sumY += centroid.y * mass;
+            sumZ += centroid.z * mass;
+        }
+    }
+    
+    var x, y, z;
+    if (totalMass > 0) {
+        x = sumX / totalMass;
+        y = sumY / totalMass;
+        z = sumZ / totalMass;
+    }
+    else {
+        x = y = z = 0;
+    }
+    
+    if (!store.position) {
+        store.position = new LBGeometry.Vector3(x, y, z);
+    }
+    else {
+        store.position.set(x, y, z);
+    }
+    
+    store.mass = totalMass;
+    
+    return store;
+};
+
+
+/**
  * Returns the total volume of tetras in an array.
  * @param {LBVolume.Tetra[]} tetras    The array of tetras.
  * @returns {Number}    The total volume.
@@ -142,6 +200,79 @@ LBVolume.Tetra.totalVolumeOfTetras = function(tetras) {
         vol += tetras[i].volume();
     }
     return vol;
+};
+
+/**
+ * Allocates a mass amongst all the tetras in an array based upon the volume
+ * of the tetras.
+ * @param {LBVolume.Tetra[]} tetras    The array of tetras.
+ * @param {Number} totalMass    The total mass to assign, may be {@link Number.NaN}.
+ * @param {Number} [startIndex=0] If specified the index in tetras at which to start.
+ * @param {Number} [endIndex=tetras.length] If specified the index after the last index
+ * in tetras to process.
+ * @returns {undefined}
+ */
+LBVolume.Tetra.allocateMassToTetras = function(tetras, totalMass, startIndex, endIndex) {
+    startIndex = startIndex || 0;
+    if (!Leeboard.isVar(endIndex)) {
+        endIndex = tetras.length;
+    }
+    
+    if (Number.isNaN(totalMass)) {
+        for (var i = startIndex; i < endIndex; ++i) {
+            tetras[i].mass = Number.NaN;
+        }
+    }
+    else {
+        var volumes = [];
+        var totalVol = 0;
+        for (var i = startIndex; i < endIndex; ++i) {
+            var vol = tetras[i].volume();
+            volumes.push(vol);
+            totalVol += vol;
+        }
+        
+        var massVol = (LBMath.isLikeZero(totalVol)) ? 0 : totalMass / totalVol;
+        for (var i = startIndex; i < endIndex; ++i) {
+            tetras[i].mass = volumes[i] * massVol;
+        }
+    }
+};
+
+/**
+ * Calculates a simplified inertia tensor from the tetras in a array of tetras. The
+ * tensor is simplified in that each tetra is treated as a point mass at the centroid
+ * of the tetra.
+ * @param {LBVolume.Tetra[]} tetras    The array of tetras.
+ * @param {LBGeometry.Matrix3} [tensor] If defined the 3x3 matrix to receive the tensor.
+ * @returns {LBGeometry.Matrix3}    The tensor.
+ */
+LBVolume.Tetra.calcInertiaTensor = function(tetras, tensor) {
+    tensor = tensor || new LBGeometry.Matrix3();
+    tensor.zero();
+    
+    var centroid;
+    
+    for (var i = 0; i < tetras.length; ++i) {
+        var tetra = tetras[i];
+        centroid = tetra.centroid(centroid);
+        var xx = centroid.x * centroid.x;
+        var yy = centroid.y * centroid.y;
+        var zz = centroid.z * centroid.z;
+        tensor.elements[0] += tetra.mass * (yy + zz);
+        tensor.elements[4] += tetra.mass * (xx + zz);
+        tensor.elements[8] += tetra.mass * (xx + yy);
+        
+        tensor.elements[1] += -tetra.mass * centroid.x * centroid.y;
+        tensor.elements[2] += -tetra.mass * centroid.x * centroid.z;
+        tensor.elements[5] += -tetra.mass * centroid.y * centroid.z;
+    }
+    
+    tensor.elements[3] = tensor.elements[1];
+    tensor.elements[6] = tensor.elements[2];
+    tensor.elements[7] = tensor.elements[5];
+    
+    return tensor;
 };
 
 /**
@@ -299,9 +430,9 @@ LBVolume.Tetra.cuboidToTetras = function(vertexIndices, vertexArray, tetras) {
  * generates the tetras representing the volumes on each side of the plane.
  * @param {LBVolume.Tetra} tetra    The tetra of interest.
  * @param {LBGeometry.Plane} plane  The slicing plane.
- * @param {Boolean} [positiveDir = true]    If true then tetras are generated to represent
+ * @param {Boolean} [positiveDir=true]    If true then tetras are generated to represent
  * the volume on the side of the plane to which the normal points.
- * @param {Boolean} [negativeDir = true]    If true then tetras are generated to represent
+ * @param {Boolean} [negativeDir=true]    If true then tetras are generated to represent
  * the volume on the side of the plane to which the normal does not point.
  * @returns {undefined | LBVolume.Tetra[]}  If the plane does not slice the tetra,
  * returns undefined, otherwise an array of two elements, with the first element
@@ -540,28 +671,48 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
     
     var firstIndex = tetras.length;
     
-    var indices = data.indices;
-    for (var i = 0; i < indices.length; ++i) {
-        switch (indices[i].length) {
+    for (var i = 0; i < data.indices.length; ++i) {
+        var item = data.indices[i];
+        var indices;
+        var mass;
+        if (!Array.isArray(item)) {
+            mass = Leeboard.isVar(item.mass) ? item.mass : Number.NaN;
+            indices = item.indices;
+        }
+        else {
+            mass = Number.NaN;
+            indices = item;
+        }
+        
+        var startIndex = tetras.length;
+        switch (indices.length) {
             case 4 :
-                tetras.push(new LBVolume.Tetra(indices[i], vertices));
+                var myVertices = LBVolume.Tetra._workingVertexArray;
+                for (var j = 0; j < 4; ++j) {
+                    myVertices[j] = vertices[indices[j]];
+                }
+                tetras.push(new LBVolume.Tetra(myVertices));
                 break;
                 
             case 5 :
-                LBVolume.Tetra.triangularBipyramidToTetras(indices[i], vertices, tetras);
+                LBVolume.Tetra.triangularBipyramidToTetras(indices, vertices, tetras);
                 break;
                 
             case 6 :
-                LBVolume.Tetra.triangularPrismToTetras(indices[i], vertices, tetras);
+                LBVolume.Tetra.triangularPrismToTetras(indices, vertices, tetras);
                 break;
                 
             case 8 :
-                LBVolume.Tetra.cuboidToTetras(indices[i], vertices, tetras);
+                LBVolume.Tetra.cuboidToTetras(indices, vertices, tetras);
                 break;
                 
             default :
-                console.warn("LBVolume.Tetra.loadFromData: " + indices[i].length + " indices not supported, data.indices[" + i + "]");
+                console.warn("LBVolume.Tetra.loadFromData: " + indices.length + " indices not supported, data.indices[" + i + "]");
                 break;
+        }
+        
+        if (!Number.isNaN(mass)) {
+            LBVolume.Tetra.allocateMassToTetras(tetras, mass, startIndex, tetras.length);
         }
     }
     

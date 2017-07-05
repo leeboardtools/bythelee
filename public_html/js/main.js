@@ -82,9 +82,9 @@ PlayState.init = function() {
     this.keys.t.onDown.add(this.doTest, this);
     this.keys.v.onDown.add(this.toggleVelocityArrows, this);
     
-    this.game.physics.startSystem(Phaser.Physics.P2JS);
-
-    this.sailEnv = new LBSailSim.PhaserEnv(this.game);
+    var physicsEngine = LBSailSim.PhaserEnv.P2_PHYSICS;
+    physicsEngine = LBSailSim.PhaserEnv.CANNON_PHYSICS;
+    this.sailEnv = new LBSailSim.PhaserEnv(this.game, physicsEngine);
 };
 
 //
@@ -176,9 +176,9 @@ PlayState._spawnCharacters = function (data) {
     var centerY = 0;
     var rotation = 0;
     
-    centerX = 200;
-    centerY = 100;
-    rotation = 60;
+    centerX = this.sailEnv.phaserEnv.fromPixelsX(200);
+    centerY = this.sailEnv.phaserEnv.fromPixelsY(100);
+    rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(60);
     //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation);
 };
@@ -301,8 +301,6 @@ PlayState._setupHUD = function() {
 //
 //--------------------------------------------------
 PlayState.update = function() {
-    this._handleCollisions();
-    
     this._updateCamera();
     this._handleInput();
     
@@ -310,11 +308,6 @@ PlayState.update = function() {
     
     this._updateHUD();
     this._updateArrows();
-};
-
-//------------------------------ --------------------
-PlayState._handleCollisions = function() {
-    this.game.physics.arcade.collide(this.myBoat, this.buoys);  
 };
 
 //------------------------------ --------------------
@@ -430,6 +423,26 @@ PlayState.moveMainsheet = function(key, isDecrease) {
 };
 
 //------------------------------ --------------------
+PlayState.moveThrottle = function(key, isDecrease) {
+    var delta = PlayState.getControlIncrement(this.myBoat.getThrottleController());
+    
+    if (key.shiftKey) {
+        delta *= 0.25;
+    }
+    else if (key.altKey) {
+        delta *= 4.0;
+    }
+    if (isDecrease) {
+        delta = -delta;
+    }
+    this.myBoat.moveThrottle(delta, true);
+    
+    if (this.throttleSlider) {
+        this.throttleSlider.setValue(this.myBoat.getThrottlePos());
+    }
+};
+
+//------------------------------ --------------------
 PlayState._handleInput = function() {
     if (this.cursorKeys.left.isDown) {
         this.moveRudder(this.cursorKeys.left, false);
@@ -438,10 +451,20 @@ PlayState._handleInput = function() {
         this.moveRudder(this.cursorKeys.right, true);
     }
     else if (this.cursorKeys.up.isDown) {
-        this.moveMainsheet(this.cursorKeys.up, false);
+        if (this.myBoat.getMainsheetController()) {
+            this.moveMainsheet(this.cursorKeys.up, false);
+        }
+        else if (this.myBoat.getThrottleController()) {
+            this.moveThrottle(this.cursorKeys.up, false);
+        }
     }
     else if (this.cursorKeys.down.isDown) {
-        this.moveMainsheet(this.cursorKeys.up, true);
+        if (this.myBoat.getMainsheetController()) {
+            this.moveMainsheet(this.cursorKeys.up, true);
+        }
+        else if (this.myBoat.getThrottleController()) {
+            this.moveThrottle(this.cursorKeys.down, true);
+        }
     }
     else if (this.keys.space.isDown) {
         this.myBoat.moveRudder(0, false);
@@ -456,17 +479,17 @@ PlayState._handleInput = function() {
 
 //--------------------------------------------------
 PlayState._updateCamera = function() {
-    var p2Body = this.myBoat[LBPhaser.P2Link.p2BodyProperty];
-    var x = p2Body.x;
-    var y = p2Body.y;
-    
+    var phaserEnv = this.sailEnv.phaserEnv;
+    var x = phaserEnv.toPixelsX(this.myBoat.obj3D.position.x);
+    var y = phaserEnv.toPixelsY(this.myBoat.obj3D.position.y);
+    var rotation = phaserEnv.toPixelsRotationRad(this.myBoat.obj3D.rotation.z) - LBMath.PI_2;
+
     this.water.tilePosition.x = -x;
     this.water.tilePosition.y = -y;
 
     this.worldGroup.position.x = -x;
     this.worldGroup.position.y = -y;
 
-    var rotation = p2Body.rotation - LBMath.PI_2;
     var cosBoat = Math.cos(rotation);
     var sinBoat = Math.sin(rotation);
     var posX = -x * cosBoat - y * sinBoat;
@@ -479,9 +502,14 @@ PlayState._updateCamera = function() {
     this.water.rotation = -rotation;
     
     this.compass.rotation = -rotation;
-
+    
+    this.buoys.forEach(PlayState._updateBuoys, this, true, rotation);
 };
 
+//--------------------------------------------------
+PlayState._updateBuoys = function(buoy, rotation) {
+    buoy.rotation = rotation;
+};
 
 // PlayState.shutdown
 

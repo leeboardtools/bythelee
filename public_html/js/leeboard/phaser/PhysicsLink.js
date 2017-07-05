@@ -53,19 +53,32 @@ LBPhaser.PhysicsLink._working3DNormal = new LBGeometry.Vector3();
 LBPhaser.PhysicsLink._workingSphere = new LBGeometry.Sphere();
 
 LBPhaser.PhysicsLink.prototype = {
+
     /**
-     * Adds a {@link LBPhysics.RigidBody} to the manager.
-     * @param {object} rigidBody The rigid body.
+     * Adds a fixed object to the physics link.
+     * @param {Object} object   A Phaser drawing object.
+     * @returns {LBPhaser.P2Link}   this.
+     */
+    addFixedObject: function(object) {
+        
+    },
+    
+    /**
+     * Adds a top-level {@link LBPhysics.RigidBody} to the manager. This rigid body
+     * should not be a part of any other rigid body.
+     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
+     * @param {Object}  [data]  Optional data containing additional information for
+     * loading other items associated with the rigid body, such as a Phaser display object.
      * @returns {LBPhaser.PhysicsLink}   this.
      */
-    addRigidBody: function(rigidBody) {
+    addRigidBody: function(rigidBody, data) {
         this.rigidBodies.push(rigidBody);
         return this;
     },
     
     /**
      * Removes a rigid body from the manager.
-     * @param {object} rigidBody The rigid body.
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
      * @returns {LBPhaser.PhysicsLink}   this.
      */
     removeRigidBody: function(rigidBody) {
@@ -74,6 +87,78 @@ LBPhaser.PhysicsLink.prototype = {
             this.rigidBodies.splice(index, 1);
         }
         return this;
+    },
+    
+    /**
+     * Called by {@link LBPhaser.PhysicsLink#removeRigidBody} when a rigid body is going to be
+     * removed.
+     * @protected
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @returns {undefined}
+     */
+    _rigidBodyRemoved: function(rigidBody) {
+        
+    },
+    
+    /**
+     * Retrieves the Phaser {@link https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject|DisplayObject} 
+     * associated with a rigid body.
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @returns {Phaser.Sprite} The display object associated with rigidBody, may be undefined.
+     */
+    getRigidBodyDisplayObject: function(rigidBody) {
+        return rigidBody._lbDisplayObject;
+    },
+    
+    /**
+     * Associates a Phaser {@link https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject|DisplayObject} 
+     * with a rigid body. A rigid body can only have one display object associated with it.
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @param {Object} drawingObject    The drawing object to associate.
+     * @returns {undefined}
+     */
+    setRigidBodyDisplayObject: function(rigidBody, drawingObject) {
+        rigidBody._lbDisplayObject = drawingObject;
+    },
+
+
+    /**
+     * Retrieves the force arrow associated with a rigid body.
+     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
+     * @returns {LBPhaser.Arrow}    The force arrow, may be undefined.
+     */
+    getBodyForceArrow: function(rigidBody) {
+        return rigidBody._lbForceArrow;
+    },
+    
+    /**
+     * Sets the force arrow associated with a rigid body.
+     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
+     * @param {LBPhaser.Arrow} forceArrow   The force arrow.
+     * @returns {undefined}
+     */
+    setBodyForceArrow: function(rigidBody, forceArrow) {
+        rigidBody._lbForceArrow = forceArrow;
+    },
+    
+    /**
+     * Retrieves the callback object associated with a rigid body.
+     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
+     * @returns {Object}    The callback object, may be undefined.
+     */
+    getBodyCallback: function(rigidBody) {
+        return rigidBody._lbCallback;
+    },
+    
+    /**
+     * Sets the callback object associated with a rigid body. The callback has the
+     * following optional functions:
+     * <li>displayObjectsUpdated = function(topRigidBody, rigidBody);
+     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
+     * @param {Object}  callback    The callback object.
+     */
+    setBodyCallback: function(rigidBody, callback) {
+        rigidBody._lbCallback = callback;
     },
     
     /**
@@ -90,8 +175,8 @@ LBPhaser.PhysicsLink.prototype = {
     },
     
     /**
-     * Updates any sprites that have been attached to any of the rigid bodies or their
-     * parts via a property named {@link LBPhaser.PhysicsLink.spriteProperty}.
+     * Updates any Phaser display object that have been attached to any of the rigid bodies or their
+     * parts.
      * <p>
      * This is automatically called from {@link LBPhaser.PhysicsLink#_stageUpdateTransform}.
      * @returns {undefined}
@@ -107,19 +192,19 @@ LBPhaser.PhysicsLink.prototype = {
     },
     
     _updateDisplayObjects: function(rigidBody) {
-        var sprite = rigidBody[LBPhaser.PhysicsLink.spriteProperty];
+        var sprite = this.getRigidBodyDisplayObject(rigidBody);
         if (sprite) {
             this.updateSpriteFromRigidBody(rigidBody, sprite);
         }
         
-        var forceArrow = rigidBody[LBPhaser.PhysicsLink.forceArrowProperty];
+        var forceArrow = this.getBodyForceArrow(rigidBody);
         if (forceArrow) {
             this.updateForceArrowFromRigidBody(rigidBody, forceArrow);
         }
         
         rigidBody.parts.forEach(this._updateDisplayObjects, this);
         
-        var callback = rigidBody[LBPhaser.PhysicsLink.callbackProperty];
+        var callback = this.getBodyCallback(rigidBody);
         if (callback) {
             callback.displayObjectsUpdated(this.activeRigidBody, rigidBody);
         }
@@ -204,24 +289,6 @@ LBPhaser.PhysicsLink.prototype = {
 };
 
 
-/**
- * The name of the property in {@link LBPhysics.RigidBody} objects where we store {Phaser.Sprite} or {Phaser.Image}
- * objects. Sprite/image objects are controlled by the rigid body's world position and rotation.
- */
-LBPhaser.PhysicsLink.spriteProperty = "_sprite";
-
-/**
- * The name of the property in {@link LBPhysics.RigidBody} objects where we store {@link LBPhaser.P2ForceArrow} objects.
- */
-LBPhaser.PhysicsLink.forceArrowProperty = "_forceArrow";
-
-/**
- * The name of the property in {@link LBPhysics.RigidBody} objects where we store the callback object.
- * <p>
- * The callback has the following optional functions:
- * <li>displayObjectsUpdated = function(topRigidBody, rigidBody);
- */
-LBPhaser.PhysicsLink.callbackProperty = "_p2Callback";
 
 /**
  * Creates and loads a {@link https://photonstorm.github.io/phaser-ce/Phaser.Sprite|Phaser.Sprite} object based on properties in a data object.
