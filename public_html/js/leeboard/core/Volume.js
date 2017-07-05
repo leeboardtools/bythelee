@@ -453,9 +453,9 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
     var above = LBVolume.Tetra._workingArrayA;
     var below = LBVolume.Tetra._workingArrayB;
     var onPlane = LBVolume.Tetra._workingArrayC;
-    above.splice(0, above.length);
-    below.splice(0, below.length);
-    onPlane.splice(0, onPlane.length);
+    above.length = 0;
+    below.length = 0;
+    onPlane.length = 0;
 
     for (var i = 0; i < 4; ++i) {
         var distance = plane.distanceToPoint(tetra.vertices[i]);

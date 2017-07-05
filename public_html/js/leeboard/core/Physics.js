@@ -695,7 +695,7 @@ LBPhysics.RigidBody.prototype = {
         LBGeometry.loadVector3(data.centerOfMass, this.centerOfMass);
         this.massRadius = data.massRadius || this.massRadius;
         
-        this.volumeTetras.splice(0, this.volumeTetras.length);
+        this.volumeTetras.length = 0;
         if (data.volumeTetras) {
             LBVolume.Tetra.loadFromData(data.volumeTetras, null, this.volumeTetras);
             if (data.mass) {

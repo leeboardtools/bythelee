@@ -225,7 +225,7 @@ LBSailSim.RudderController.prototype._loadRudders = function() {
         return;
     }
     
-    this.rudders.splice(0, this.rudders.length);
+    this.rudders.length = 0;
     for (var i = 0; i < this.vessel.hydroFoils.length; ++i) {
         if (this.vessel.hydroFoils[i].name === this.foilName) {
             this.rudders.push(this.vessel.hydroFoils[i]);
@@ -301,7 +301,7 @@ LBSailSim.ThrottleController.prototype._loadEngines = function() {
         return;
     }
     
-    this.engines.splice(0, this.engines.length);
+    this.engines.length = 0;
     for (var i = 0; i < this.vessel.propulsors.length; ++i) {
         if (this.vessel.propulsors[i].name === this.propulsorName) {
             this.engines.push(this.vessel.propulsors[i]);            
@@ -397,6 +397,13 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
     
     // Later:
     //this.crew = [];
+    
+    /**
+     * Stores the true wind velocity.
+     * @member {LBGeometry.Vector3}
+     */
+    this.trueWind = new LBGeometry.Vector3();
+    
     /**
      * Stores the current apparent wind.
      * @member {LBGeometry.Vector3}
@@ -495,7 +502,7 @@ LBSailSim.Vessel.prototype._removeParts = function(foils) {
     for (var i = 0; i < foils.length; ++i) {
         this.removePart(foils[i]);
     }
-    foils.splice(0, foils.length);
+    foils.length = 0;
     return this;
 };
 
@@ -686,7 +693,7 @@ LBSailSim.Vessel.prototype.load = function(data, loadCallback) {
     this._removeParts(this.hydroFoils);
     this._removeParts(this.propulsors);
     this._removeParts(this.ballasts);
-    this.controllers.splice(0, this.controllers.length);
+    this.controllers.length = 0;
     
     this.rudderController = undefined;
     this.mainsheetController = undefined;
@@ -745,7 +752,8 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
     
     this.updateCoords(dt);
     
-    this.sailEnv.wind.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, 0, this.apparentWind);
+    this.sailEnv.wind.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, 0, this.trueWind);
+    this.apparentWind.copy(this.trueWind);
     this.apparentWind.sub(this.worldLinearVelocity);
     
     this.sailEnv.water.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, 0, this.apparentCurrent);
@@ -934,6 +942,14 @@ LBSailSim.Vessel.prototype.getLeewayDeg = function(isRound) {
         leeway = Math.round(leeway);
     }
     return LBMath.wrapDegrees(leeway);
+};
+
+/**
+ * Retrieves the true wind velocity at the vessel's location.
+ * @returns {LBGeometry.Vector3}
+ */
+LBSailSim.Vessel.prototype.getTrueWindVelocityMPS = function() {
+    return this.trueWind;
 };
 
 /**

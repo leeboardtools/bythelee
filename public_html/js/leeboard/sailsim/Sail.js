@@ -234,7 +234,7 @@ LBSailSim.SailController.prototype._loadSails = function() {
         return;
     }
     
-    this.sails.splice(0, this.sails.length);
+    this.sails.length = 0;
     for (var i = 0; i < this.vessel.airfoils.length; ++i) {
         if (this.vessel.airfoils[i].name === this.sailName) {
             this.sails.push(this.vessel.airfoils[i]);            

@@ -18,7 +18,18 @@ Run:
 
 TODO:
 
+Straighten out tetras:
+    - Get rid of warnings about normal pointing into shape, faces should have
+        vertices ordered CCW
+    - Consolidate tetras into as few convex polygons as can be done. Maybe do this
+        based on the cuboids and prisms?
+
+    - Add spars rigid bodies, handling of tetra volumes for those.
+
+Figure out why collisions with buoys isn't working.
+
 Lateral hull resistance > longitudinal hull resistance
+Hull windage
 
 Add drawing of sail
 
@@ -29,8 +40,6 @@ Rotate world:
 Draggable controls:
 
 Projected 3D drawing.
-
-Add VMG to HUD
 
 Add alternate plane projection for resultants that are too close to the desired plane.
 

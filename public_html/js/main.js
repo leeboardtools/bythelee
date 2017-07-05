@@ -202,6 +202,10 @@ PlayState._setupHUD = function() {
     this.hud.add(this.speedText);
     top += this.speedText.height + vSpacing;
     
+    this.vmgText = this.game.add.text(left, top, "vmg: 0", style);
+    this.hud.add(this.vmgText);
+    top += this.vmgText.height + vSpacing;
+    
     this.leewayText = this.game.add.text(left, top, "leeway: 0", style);
     this.hud.add(this.leewayText);
     top += this.leewayText.height + vSpacing;
@@ -317,6 +321,15 @@ PlayState._updateHUD = function() {
     
     var speed = this.myBoat.getKnots();
     this.speedText.text = "Speed: " + speed.toFixed(2);
+    
+    var trueWind = this.myBoat.getTrueWindVelocityMPS();
+    var trueWindSpeed = trueWind.length();
+    var vmg = 0;
+    if (!LBMath.isLikeZero(trueWindSpeed)) {
+        vmg = -this.myBoat.getVelocityMPS().dot(trueWind) / trueWindSpeed;
+        vmg = Leeboard.mps2kt(vmg);
+    }
+    this.vmgText.text = "VMG: " + vmg.toFixed(2);
     
     var leewayAngle = this.myBoat.getLeewayDeg(true);
     if (leewayAngle < 0) {

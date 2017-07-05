@@ -65,7 +65,7 @@ LBSailSim.Delft.calcResiduaryResistance = function(hull) {
     }
     
     var coefs = LBSailSim.Delft._workingResiduaryResistanceCoefs;
-    coefs.splice(0, coefs.length);
+    coefs.length = 0;
     for (var i = 0; i < LBSailSim.Delft.residuaryResitanceInterps.length; ++i) {
         coefs.push(LBSailSim.Delft.residuaryResitanceInterps[i].interpolate(fn));
     }
@@ -123,7 +123,7 @@ LBSailSim.Delft._workingWettedSurfaceHeelCoefs = [];
  */
 LBSailSim.Delft.calcWettedSurfaceHeelCorrection = function(hull) {
     var coefs = LBSailSim.Delft._workingWettedSurfaceHeelCoefs;
-    coefs.splice(0, coefs.length);
+    coefs.length = 0;
 
     var deg = Math.abs(hull.heelAngleDeg);
     for (var i = 0; i < LBSailSim.Delft.wettedSurfaceHeelInterps.length; ++i) {
