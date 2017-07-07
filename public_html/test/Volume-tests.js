@@ -18,7 +18,7 @@
 /* global QUnit, LBGeometry, LBVolume */
 
 checkVolume = function(assert, tetras, refVol, msg) {
-    var vol = LBVolume.Tetra.totalVolumeOfTetras(tetras);
+    var vol = LBVolume.Volume.totalVolume(tetras);
     assert.nearEqual(vol, refVol, msg);
 };
 
@@ -157,8 +157,8 @@ checkTetraSliceWithPlaneResultSide = function(assert, result, ref, msg, volOnly)
     assert.equal(result.length, ref.length, msg + " - Lengths");
     
     if (volOnly) {
-        var vol = LBVolume.Tetra.totalVolumeOfTetras(result);
-        var refVol = LBVolume.Tetra.totalVolumeOfTetras(ref);
+        var vol = LBVolume.Volume.totalVolume(result);
+        var refVol = LBVolume.Volume.totalVolume(ref);
         assert.nearEqual(vol, refVol, msg + " - Volumes");
     }
     else {
@@ -355,9 +355,9 @@ QUnit.test( "centerOfMassOfTetras", function( assert ) {
     };
     
     var tetras = LBVolume.Tetra.loadFromData(data);
-    LBVolume.Tetra.allocateMassToTetras(tetras, 5);
+    LBVolume.Volume.allocateMassToVolumess(tetras, 5);
     
-    var result = LBVolume.Tetra.centerOfMassOfTetras(tetras);
+    var result = LBVolume.Volume.totalCenterOfMass(tetras);
     checkVector3(assert, result.position, 1, 0.5, 1.5, "Position");
     assert.nearEqual(result.mass, 5, "Mass");
 });
@@ -390,16 +390,16 @@ QUnit.test( "TriBipyramid", function( assert ) {
     var volume = new LBVolume.TriBipyramid(vertices, data.mass, data.indices[0]);
     
     var refTetras = LBVolume.Tetra.loadFromData(data);
-    LBVolume.Tetra.allocateMassToTetras(refTetras, data.mass);
+    LBVolume.Volume.allocateMassToVolumess(refTetras, data.mass);
     
     var volumeTetras = volume.equivalentTetras();
     checkTetraArraysSimilar(assert, volumeTetras, refTetras, "Equivalent Tetras");
     assert.equal(volume.mass, data.mass, "Mass");
     
-    var refVol = LBVolume.Tetra.totalVolumeOfTetras(refTetras);
+    var refVol = LBVolume.Volume.totalVolume(refTetras);
     assert.equal(volume.volume(), refVol, "Volume");
     
-    var refCentroid = LBVolume.Tetra.centerOfMassOfTetras(refTetras).position;
+    var refCentroid = LBVolume.Volume.totalCenterOfMass(refTetras).position;
     var centroid = volume.centroid();
     checkVector3(assert, centroid, refCentroid.x, refCentroid.y, refCentroid.z, "Centroid");
 });
@@ -427,7 +427,7 @@ QUnit.test( "Tri-Prism", function( assert ) {
     var volume = new LBVolume.TriPrism(vertices, data.mass, data.indices[0]);
     
     var refTetras = LBVolume.Tetra.loadFromData(data);
-    LBVolume.Tetra.allocateMassToTetras(refTetras, data.mass);
+    LBVolume.Volume.allocateMassToVolumess(refTetras, data.mass);
     
     var tetras = volume.equivalentTetras();
     checkTetraArraysSimilar(assert, tetras, refTetras, "Equivalent Tetras");
@@ -435,7 +435,7 @@ QUnit.test( "Tri-Prism", function( assert ) {
     
     assert.equal(volume.volume(), 2 * 1 * 3 / 2, "Volume");
     
-    var refCentroid = LBVolume.Tetra.centerOfMassOfTetras(refTetras).position;
+    var refCentroid = LBVolume.Volume.totalCenterOfMass(refTetras).position;
     var centroid = volume.centroid();
     checkVector3(assert, centroid, refCentroid.x, refCentroid.y, refCentroid.z, "Centroid");
 });
@@ -464,7 +464,7 @@ QUnit.test( "Cuboid", function( assert ) {
     var cuboid = new LBVolume.Cuboid(vertices, data.mass);
     
     var refTetras = LBVolume.Tetra.loadFromData(data);
-    LBVolume.Tetra.allocateMassToTetras(refTetras, data.mass);
+    LBVolume.Volume.allocateMassToVolumess(refTetras, data.mass);
     
     var cuboidTetras = cuboid.equivalentTetras();
     checkTetraArraysSimilar(assert, cuboidTetras, refTetras, "Equivalent Tetras");

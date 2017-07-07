@@ -699,10 +699,10 @@ LBPhysics.RigidBody.prototype = {
         if (data.volumeTetras) {
             LBVolume.Tetra.loadFromData(data.volumeTetras, null, this.volumeTetras);
             if (data.mass) {
-                LBVolume.Tetra.allocateMassToTetras(this.volumeTetras, data.mass);
+                LBVolume.Volume.allocateMassToVolumess(this.volumeTetras, data.mass);
             }
             
-            var comResult = LBVolume.Tetra.centerOfMassOfTetras(this.volumeTetras);
+            var comResult = LBVolume.Volume.totalCenterOfMass(this.volumeTetras);
             if (comResult && (comResult.mass > 0)) {
                 this.centerOfMass.copy(comResult.position);
             }
@@ -712,7 +712,7 @@ LBPhysics.RigidBody.prototype = {
             LBPhysics.loadMomentInertia(data.momentInertia, this.momentInertia);
         }
         else if (this.volumeTetras.length > 0) {
-            LBVolume.Tetra.calcInertiaTensor(this.volumeTetras, this.momentInertia);
+            LBVolume.Volume.overallInertiaTensor(this.volumeTetras, this.momentInertia);
         }
         else {
             this.momentInertia.identity().multiplyScalar(this.mass);
