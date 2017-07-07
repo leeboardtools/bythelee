@@ -24,23 +24,167 @@
 var LBVolume = LBVolume || {};
 
 /**
- * Represents a tetrahedron.
+ * Base class for volumes. A volume has a set of vertices and faces, and can be
+ * broken down into a set of tetrahedra via {@link LBVolume.Volume#equivalentTetras}.
  * @constructor
- * @param {Number[]} [vertices]    If defined an array containing the
- * four vertices for the tetrahedron. References to the vertices are used, they are not copied.
- * If not defined the vertices are all set to new instances of {@link LBGeometry.Vector3}.
- * @param {Number} [mass=Number.NaN] Optional mass associated with the tetra.
- * @returns {LBVolume.Tetra}
+ * @param {String} typeName The type name of the volume class.
+ * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
+ * @returns {LBVolume.Volume}
  */
-LBVolume.Tetra = function(vertices, mass) {
+LBVolume.Volume = function(typeName, mass) {
+    /**
+     * The type name of the volume, used to describe it in messages.
+     */
+    this.typeName = typeName || "Unknown";
+
     /**
      * The array of vertices of the tetra.
      * @type LBGeometry.Vector3
      */
-    this.vertices = [];
+    this.vertices = [];    
+    
+    /**
+     * Mass associated with the volume, set to {@link Number.NaN} if a mass is not assigned.
+     * @type Number
+     */
+    this.mass = Leeboard.isVar(mass) ? mass : Number.NaN;
+};
+
+LBVolume.Volume._workingCenterOfMassResult;
+
+LBVolume.Volume.prototype = {
+    /**
+     * Creates a shallow copy of the volume.
+     * @abstract
+     * @returns {LBVolume.Tetra}    The shallow copy.
+     */
+    clone: function() {
+        throw 'clone() not implemented by ' + this.typeName;
+    },
+    
+    /**
+     * Creates a clone of the volume mirrored about a plane.
+     * @abstract
+     * @param {LBGeometry.Plane} plane  The plane to mirror about.
+     * @returns {LBVolume.Volume}   The clone.
+     */
+    cloneMirrored: function(plane) {
+        throw 'cloneMirrored() not implemented by ' + this.cloneMirrored;
+    },
+
+    /**
+     * Helper that can be called by implementations of {@link LBVolume.Volume#cloneMirrored}
+     * to handle the actual cloning of the vertices.
+     * @protected
+     * @param {LBGeometry.Plane} plane  The mirror plane.
+     * @param {LBVolume.Volume} clone   The clone whose vertices are to be mirrored from
+     * this volume's vertices..
+     * @returns {LBVolume.Volume}   clone.
+     */
+    _cloneVerticesMirrored: function(plane, clone) {
+        for (var i = 0; i < this.vertices.length; ++i) {
+            LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i], clone.vertices[i]);
+        }
+        return clone;
+    },
+    
+    /**
+     * Makes the vertices of the volume unique by cloning them.
+     * @returns {LBVolume.Volume}   this.
+     */
+    makeVerticesUnique: function() {
+        for (var i = 0; i < this.vertices.length; ++i) {
+            this.vertices[i] = this.vertices[i].clone();
+        }
+        return this;
+    },
+    
+    /**
+     * Retrieves an array of arrays of indices into the vertices array describing each
+     * face. The face indices should be specified in CCW order so the normal is pointing
+     * outward.
+     * @abstract
+     * @returns {Number[][]}    Array of arrays of indices.
+     */
+    faces: function() {
+        throw 'faces() not implemented by ' + this.typeName;
+    },
+    
+    /**
+     * Computes the centroid of the volume.
+     * @param {LBGeometry.Vector3} [store] If defined the object to store the centroid into.
+     * @returns {LBGeometry.Vector3}    The centroid.
+     */
+    centroid: function(store) {
+        var tetras = this.equivalentTetras();
+        var result = LBVolume.Volume._workingCenterOfMassResult = LBVolume.Tetra.centerOfMassOfTetras(tetras);
+        if (store) {
+            return store.copy(result.position);
+        }
+        return result.position.clone();
+    },
+    
+    /**
+     * Computes the volume of the volume.
+     * @returns {Number}    The volume.
+     */
+    volume: function() {
+        var tetras = this.equivalentTetras();
+        return LBVolume.Tetra.totalVolumeOfTetras(tetras);
+    },
+    
+    /**
+     * Retrieves an array of {@link LBVolume.Tetra} objects that make up the volume.
+     * For the case of {@link LBVolume.Tetra} this is a one element array containing
+     * the tetra.
+     * <p>
+     * Note that the tetras returned should be considered to be owned by this volume,
+     * and should not be modified directly.
+     * @abstract
+     * @returns {LBVolume.Tetra[]}  The array of tetras.
+     */
+    equivalentTetras: function() {
+        throw 'equivalentTetras() not implemented by ' + this.typeName;
+    },
+    
+    /**
+     * Removes all references to other objects so this could hopefully be garbage collected.
+     * @returns {undefined}
+     */
+    dispose: function() {
+        this.vertices.length = 0;
+        this.vertices = null;
+    },
+    
+    constructor: LBVolume.Volume
+};
+
+
+/**
+ * Represents a tetrahedron. The four vertices of the tetra are ordered such that
+ * v[0],v[1],v[2] are CCW about the face (right hand rule), as are v[0],[v2],v[3].
+ * @constructor
+ * @param {Number[]} [vertices]    If defined an array containing the
+ * four vertices for the tetrahedron. References to the vertices are used, they are not copied.
+ * If not defined the vertices are all set to new instances of {@link LBGeometry.Vector3}.
+ * @param {Number} [mass=Number.NaN] If defined the mass assigned to the volume.
+ * @param {Number[]} [indices]  If defined an array of the indices of the four vertices
+ * in vertices of the tetra.
+ * @returns {LBVolume.Tetra}
+ */
+LBVolume.Tetra = function(vertices, mass, indices) {
+    LBVolume.Volume.call(this, LBVolume.Tetra.TYPE_NAME, mass);
+    
     if (vertices) {
-        for (var i = 0; i < 4; ++i) {
-            this.vertices.push(vertices[i]);
+        if (indices) {
+            for (var i = 0; i < 4; ++i) {
+                this.vertices.push(vertices[indices[i]]);
+            }
+        }
+        else {
+            for (var i = 0; i < 4; ++i) {
+                this.vertices.push(vertices[i]);
+            }
         }
     }
     else {
@@ -49,12 +193,15 @@ LBVolume.Tetra = function(vertices, mass) {
         }
     }
     
-    /**
-     * Mass associated with the volume, set to {@link Number.NaN} if a mass is not assigned.
-     * @type Number
-     */
-    this.mass = Leeboard.isVar(mass) ? mass : Number.NaN;
+    this._equivalentTetrasArray = [this];
 };
+
+/**
+ * The tetra type name, the value of {@link LBVolume.Volume#typeName} for tetras.
+ * @constant
+ * @type String
+ */
+LBVolume.Tetra.TYPE_NAME = "Tetra";
 
 LBVolume.Tetra._workingVertexArray = [ null, null, null, null, null, null, null, null ];
 LBVolume.Tetra._workingVectorA = new LBGeometry.Vector3();
@@ -66,84 +213,96 @@ LBVolume.Tetra._workingArrayC = [];
 LBVolume.Tetra._workingLine3 = new LBGeometry.Line3();
 LBVolume.Tetra._workingOrderedIndices = [ 0, 1, 2, 3, 4, 5, 6, 7, 8];
 
-LBVolume.Tetra.prototype = {
-    /**
-     * Creates a shallow copy of the tetra.
-     * @returns {LBVolume.Tetra}    The shallow copy.
-     */
-    clone: function() {
-        return new LBVolume.Tetra(this.vertices, this.mass);
-    },
-    
-    /**
-     * Takes all the vertices of the tetra and clones them, making them unique to this
-     * tetra.
-     * @returns {LBVolume.Tetra}    this.
-     */
-    makeVerticesUnique: function() {
-        for (var i = 0; i < this.vertices.length; ++i) {
-            this.vertices[i] = this.vertices[i].clone();
-        }
-        return this;
-    },
-    
-    /**
-     * Computes the centroid (center of mass) of the tetra.
-     * @param {LBGeometry.Vector3} [store] If defined the vector to store the centroid in.
-     * @returns {LBGeometry.Vector3}    The centroid.
-     */
-    centroid: function(store) {
-        store = store || new LBGeometry.Vector3();
-        
-        store.copy(this.vertices[0]);
-        store.add(this.vertices[1]);
-        store.add(this.vertices[2]);
-        store.add(this.vertices[3]);
-        store.divideScalar(4);
-        
-        return store;
-    },
-    
-    /**
-     * @returns {Number}    The volume of the tetrahedron.
-     */
-    volume: function() {
-        // From https://en.wikipedia.org/wiki/Tetrahedron#Volume
-        var a = LBVolume.Tetra._workingVectorA.copy(this.vertices[0]).sub(this.vertices[3]);
-        var b = LBVolume.Tetra._workingVectorB.copy(this.vertices[1]).sub(this.vertices[3]);
-        var c = LBVolume.Tetra._workingVectorC.copy(this.vertices[2]).sub(this.vertices[3]);
-        b.cross(c);
-        var volume = Math.abs(a.dot(b)) / 6;
-        return volume;
-    },
-    
-    /**
-     * Creates a clone of this tetra that is mirrored about a plane.
-     * @param {LBGeometry.Plane} plane  The mirror plane.
-     * @returns {LBVolume.Tetra}
-     */
-    cloneMirrored: function(plane) {
-        var clone = new LBVolume.Tetra(undefined, this.mass);
-        for (var i = 0; i < this.vertices.length; ++i) {
-            LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i], clone.vertices[i]);
-        }
-        return clone;
-    },
+LBVolume.Tetra.prototype = Object.create(LBVolume.Volume.prototype);
+LBVolume.Tetra.prototype.constructor = LBVolume.Tetra;
 
-    /**
-     * Removes all references to other objects so this could hopefully be garbage collected.
-     * @returns {undefined}
-     */
-    dispose: function() {
-        this.vertices = null;
-    },
+/**
+ * Creates a shallow copy of the tetra.
+ * @returns {LBVolume.Tetra}    The shallow copy.
+ */
+LBVolume.Tetra.prototype.clone = function() {
+    return new LBVolume.Tetra(this.vertices, this.mass);
+};
+
+/**
+ * Retrieves an array of arrays of indices into the vertices array describing each
+ * face. The face indices should be specified in CCW order so the normal is pointing
+ * outward.
+ * @abstract
+ * @returns {Number[][]}    Array of arrays of indices.
+ */
+LBVolume.Tetra.prototype.faces = function() {
+    return LBVolume.Tetra._faces;
+};
+LBVolume.Tetra._faces = [
+    [0, 1, 2],
+    [0, 2, 3],
+    [0, 3, 1],
+    [1, 3, 2]
+];
+
+/**
+ * Computes the centroid (center of mass) of the tetra.
+ * @param {LBGeometry.Vector3} [store] If defined the vector to store the centroid in.
+ * @returns {LBGeometry.Vector3}    The centroid.
+ */
+LBVolume.Tetra.prototype.centroid = function(store) {
+    store = store || new LBGeometry.Vector3();
+
+    store.copy(this.vertices[0]);
+    store.add(this.vertices[1]);
+    store.add(this.vertices[2]);
+    store.add(this.vertices[3]);
+    store.divideScalar(4);
+
+    return store;
+};
+
     
-    constructor: LBVolume.Tetra
+/**
+ * Computes the volume of the volume.
+ * @returns {Number}    The volume.
+ */
+LBVolume.Tetra.prototype.volume = function() {
+    // From https://en.wikipedia.org/wiki/Tetrahedron#Volume
+    var a = LBVolume.Tetra._workingVectorA.copy(this.vertices[0]).sub(this.vertices[3]);
+    var b = LBVolume.Tetra._workingVectorB.copy(this.vertices[1]).sub(this.vertices[3]);
+    var c = LBVolume.Tetra._workingVectorC.copy(this.vertices[2]).sub(this.vertices[3]);
+    b.cross(c);
+    var volume = Math.abs(a.dot(b)) / 6;
+    return volume;
+};
+
+/**
+ * Retrieves an array of {@link LBVolume.Tetra} objects that make up the volume.
+ * For the case of {@link LBVolume.Tetra} this is a one element array containing
+ * the tetra.
+ * @returns {LBVolume.Tetra}    A single element array containing this.
+ */
+LBVolume.Tetra.prototype.equivalentTetras = function() {
+    return this._equivalentTetrasArray;
+};
+
+/**
+ * Creates a clone of this tetra that is mirrored about a plane.
+ * @param {LBGeometry.Plane} plane  The mirror plane.
+ * @returns {LBVolume.Tetra}
+ */
+LBVolume.Tetra.prototype.cloneMirrored = function(plane) {
+    var clone = new LBVolume.Tetra(undefined, this.mass);
+    return this._cloneVerticesMirrored(plane, clone);
 };
 
 
+//
+//----------
+//
+
 /**
  * Calculates the center of mass and total mass of the tetras in an array of tetras.
+ * Note that if a tetra does not have a mass assigned, it's volume is used, so to
+ * ensure consistency the tetras should either have all their masses defined (use 0
+ * to ignore a tetra) or not have a mass defined at all.
  * @param {LBVolume.Tetra[]} tetras    The array of tetras.
  * @param {Object} [store]  If defined the object to store the results into.
  * @returns {Object}    The results, the position property is compatible with {@link LBGeometry.Vector3}
@@ -156,14 +315,12 @@ LBVolume.Tetra.centerOfMassOfTetras = function(tetras, store) {
     var sumX = 0, sumY = 0, sumZ = 0;
     var totalMass = 0;
     for (var i = 0; i < tetras.length; ++i) {
-        if (tetras[i].mass > 0) {
-            var mass = tetras[i].mass;
-            totalMass += mass;
-            centroid = tetras[i].centroid(centroid);
-            sumX += centroid.x * mass;
-            sumY += centroid.y * mass;
-            sumZ += centroid.z * mass;
-        }
+        var mass = (tetras[i].mass !== undefined) ? tetras[i].mass : tetras[i].volume();
+        totalMass += mass;
+        centroid = tetras[i].centroid(centroid);
+        sumX += centroid.x * mass;
+        sumY += centroid.y * mass;
+        sumZ += centroid.z * mass;
     }
     
     var x, y, z;
@@ -362,18 +519,10 @@ LBVolume.Tetra.triangularPrismToTetras = function(vertexIndices, vertexArray, te
  * This is currently a fairly simple algorithm, it does not check for vertices lying on each
  * other, and expects the vertices in a particular order.
  * <p>
- * The cuboid must be described such that the faces are described by the following index groups:
- * <p>
- * <li>0, 1, 2, 3
- * <li>4, 5, 6, 7
- * <li>4, 0, 3, 7
- * <li>7, 3, 2, 7
- * <li>6, 2, 1, 5
- * <li>5, 1, 0, 4
- * <p>
- * This is basically the first 4 vertices are one face and the second 4 vertices are the
- * opposite face, with the vertices on the each such that v[0] is connected to v[4], v[1]
- * is connected to v[5], etc.
+ * The vertices should be specified such that the first 4 vertices are one face, with
+ * the order in the CCW direction (right-hand rule), while the second 4 vertices are the
+ * opposite face, with the opposite order so that v[4] is connected to v[0], v[5] to v[1],
+ * v[6] to v[2], and v[7] to v[3].
  * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
  * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
  * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
@@ -404,22 +553,22 @@ LBVolume.Tetra.cuboidToTetras = function(vertexIndices, vertexArray, tetras) {
     vertices[3] = vertexArray[vertexIndices[5]];
     tetras.push(new LBVolume.Tetra(vertices));
     
-    vertices[0] = vertexArray[vertexIndices[5]];
-    vertices[1] = vertexArray[vertexIndices[6]];
+    vertices[0] = vertexArray[vertexIndices[6]];
+    vertices[1] = vertexArray[vertexIndices[5]];
     vertices[2] = vertexArray[vertexIndices[7]];
     vertices[3] = vertexArray[vertexIndices[3]];
     tetras.push(new LBVolume.Tetra(vertices));
     
-    vertices[0] = vertexArray[vertexIndices[5]];
-    vertices[1] = vertexArray[vertexIndices[7]];
+    vertices[0] = vertexArray[vertexIndices[7]];
+    vertices[1] = vertexArray[vertexIndices[5]];
     vertices[2] = vertexArray[vertexIndices[4]];
     vertices[3] = vertexArray[vertexIndices[3]];
     tetras.push(new LBVolume.Tetra(vertices));
     
     vertices[0] = vertexArray[vertexIndices[5]];
-    vertices[1] = vertexArray[vertexIndices[4]];
-    vertices[2] = vertexArray[vertexIndices[3]];
-    vertices[3] = vertexArray[vertexIndices[0]];
+    vertices[1] = vertexArray[vertexIndices[0]];
+    vertices[2] = vertexArray[vertexIndices[4]];
+    vertices[3] = vertexArray[vertexIndices[3]];
     tetras.push(new LBVolume.Tetra(vertices));
 
     return tetras;
@@ -731,4 +880,327 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
     }
     
     return tetras;
+};
+
+// Need a composite volume.
+// This will be a list of vertices, plus a list of
+// volumes that refer to those vertices.
+// A volume may have a list of tetras that represent the same volume.
+// Volumes to support:
+// Tetra
+// Cuboid
+// Triangular Prism
+// Triangular Bipyramid
+//
+// What properties does a volume need?
+// Centroid
+// Vertices
+// 
+
+
+
+/**
+ * A tri-bipyramid volume. A tri-bipyramid is basically two tetras that are joined
+ * together at one face.
+ * <p>
+ * The vertices must be specified such that v[0]-v[1]-v[2]-v[3] define one tetra and
+ * v[1]-v[2]-v[3]-v[4] defines the other tetra (v[1]-v[2]-v[3] defines the shared
+ * face, with the vertices v[0], v[1], v[2] ordered CCW (right hand rule).
+ * @param {LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
+ * volume is set to so each vertex is approximately 0.5 from the center, and the center
+ * is at 0,0,0.
+ * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
+ * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
+ * vertices identifiying the vertices, the ordering must be as described above.
+ * @returns {LBVolume.TriBipyramid}
+ */
+LBVolume.TriBipyramid = function(vertices, mass, indices) {
+    LBVolume.Volume.call(this, LBVolume.TriBipyramid.TYPE_NAME, mass);
+    
+    if (vertices) {
+        if (!indices) {
+            indices = LBVolume.TriBipyramid._defaultIndices;
+        }
+        for (var i = 0; i < 5; ++i) {
+            this.vertices.push(vertices[indices[i]]);
+        }
+    }
+    else {
+        this.vertices.push(new LBGeometry.Vector3(-0.5, 0, 0));
+        this.vertices.push(new LBGeometry.Vector3(0, 0, 0.5));
+        this.vertices.push(new LBGeometry.Vector3(0, 0.4330127, -0.25));
+        this.vertices.push(new LBGeometry.Vector3(0, -0.4330127, -0.25));
+        this.vertices.push(new LBGeometry.Vector3(0.5, 0, 0));
+    }
+};
+
+/**
+ * The triangular bipyramid type name, the value of {@link LBVolume.Volume#typeName} for cuboids.
+ * @constant
+ * @type String
+ */
+LBVolume.TriBipyramid.TYPE_NAME = "TriBipyramid";
+
+LBVolume.TriBipyramid.prototype = Object.create(LBVolume.Volume.prototype);
+
+/**
+ * Creates a shallow copy of the cuboid.
+ * @returns {LBVolume.Tetra}    The shallow copy.
+ */
+LBVolume.TriBipyramid.prototype.clone = function() {
+    return new LBVolume.TriBipyramid(this.mass, this.vertices);
+};
+
+LBVolume.TriBipyramid._faces = [
+    [0, 1, 2],
+    [0, 2, 3],
+    [0, 3, 1],
+    [5, 2, 1],
+    [5, 3, 2],
+    [5, 1, 3]
+];
+/**
+ * Retrieves an array of arrays of indices into the vertices array describing each
+ * face. The face indices should be specified in CCW order so the normal is pointing
+ * outward.
+ * @abstract
+ * @returns {Number[][]}    Array of arrays of indices.
+ */
+LBVolume.TriBipyramid.prototype.faces = function() {
+    return LBVolume.TriBipyramid._faces;
+};
+LBVolume.TriBipyramid._defaultIndices = [
+    0, 1, 2, 3, 4
+];
+
+/**
+ * Retrieves an array of {@link LBVolume.Tetra} objects that make up the volume.
+ * For the case of {@link LBVolume.Tetra} this is a one element array containing
+ * the tetra.
+ * @returns {LBVolume.Tetra}    A single element array containing this.
+ */
+LBVolume.TriBipyramid.prototype.equivalentTetras = function() {
+    if (!this._equivalentTetrasArray) {
+        this._equivalentTetrasArray = LBVolume.Tetra.triangularBipyramidToTetras(LBVolume.TriBipyramid._defaultIndices, 
+            this.vertices);
+        if (this.mass) {
+            LBVolume.Tetra.allocateMassToTetras(this._equivalentTetrasArray, this.mass);
+        }
+    }
+    return this._equivalentTetrasArray;
+};
+
+/**
+ * Creates a clone of this tetra that is mirrored about a plane.
+ * @param {LBGeometry.Plane} plane  The mirror plane.
+ * @returns {LBVolume.Tetra}
+ */
+LBVolume.TriBipyramid.prototype.cloneMirrored = function(plane) {
+    var clone = new LBVolume.TriBipyramid(undefined, this.mass);
+    return this._cloneVerticesMirrored(plane, clone);
+};
+
+
+/**
+ * A triangular prism. A tri-prism is basically an extruded triangle.
+ * <p>
+ * The vertices must be specified such that v[0]-v[1]-v[2] defines one triangular
+ * face ordered CCW (right hand rule), while v[3]-v[4]-v[5] defines the other
+ * triangular face, with v[3] connected to v[0], v[4] connected to v[1], and v[5]
+ * connected to v[2] (these vertices are therefore ordered CW looking into the prism).
+ * @param {LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
+ * volume is set to so each vertex on the triangular face is 0.5 from the center of
+ * that face, and each face is positioned 0.5 on each side of the origin.
+ * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
+ * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
+ * vertices identifiying the vertices, the ordering must be as described above.
+ * @returns {LBVolume.TriPrism}
+ */
+LBVolume.TriPrism = function(vertices, mass, indices) {
+    LBVolume.Volume.call(this, LBVolume.TriPrism.TYPE_NAME, mass);
+    
+    if (vertices) {
+        if (!indices) {
+            indices = LBVolume.TriPrism._defaultIndices;
+        }
+        for (var i = 0; i < 6; ++i) {
+            this.vertices.push(vertices[indices[i]]);
+        }
+    }
+    else {
+        this.vertices.push(new LBGeometry.Vector3(-0.5, 0, 0.5));
+        this.vertices.push(new LBGeometry.Vector3(-0.5, 0.4330127, -0.25));
+        this.vertices.push(new LBGeometry.Vector3(-0.5, -0.4330127, -0.25));
+        this.vertices.push(new LBGeometry.Vector3(0.5, 0, 0.5));
+        this.vertices.push(new LBGeometry.Vector3(0.5, 0.4330127, -0.25));
+        this.vertices.push(new LBGeometry.Vector3(0.5, -0.4330127, -0.25));
+    }
+};
+
+/**
+ * The triangular bipyramid type name, the value of {@link LBVolume.Volume#typeName} for cuboids.
+ * @constant
+ * @type String
+ */
+LBVolume.TriPrism.TYPE_NAME = "TriPrism";
+
+LBVolume.TriPrism.prototype = Object.create(LBVolume.Volume.prototype);
+
+/**
+ * Creates a shallow copy of the cuboid.
+ * @returns {LBVolume.Tetra}    The shallow copy.
+ */
+LBVolume.TriPrism.prototype.clone = function() {
+    return new LBVolume.TriPrism(this.mass, this.vertices);
+};
+
+LBVolume.TriPrism._faces = [
+    [0, 1, 2],
+    [1, 4, 5, 2],
+    [2, 5, 3, 0],
+    [0, 3, 4, 1],
+    [3, 5, 4]
+];
+/**
+ * Retrieves an array of arrays of indices into the vertices array describing each
+ * face. The face indices should be specified in CCW order so the normal is pointing
+ * outward.
+ * @abstract
+ * @returns {Number[][]}    Array of arrays of indices.
+ */
+LBVolume.TriPrism.prototype.faces = function() {
+    return LBVolume.TriPrism._faces;
+};
+LBVolume.TriPrism._defaultIndices = [
+    0, 1, 2, 3, 4, 5
+];
+
+/**
+ * Retrieves an array of {@link LBVolume.Tetra} objects that make up the volume.
+ * For the case of {@link LBVolume.Tetra} this is a one element array containing
+ * the tetra.
+ * @returns {LBVolume.Tetra}    A single element array containing this.
+ */
+LBVolume.TriPrism.prototype.equivalentTetras = function() {
+    if (!this._equivalentTetrasArray) {
+        this._equivalentTetrasArray = LBVolume.Tetra.triangularPrismToTetras(LBVolume.TriPrism._defaultIndices, 
+            this.vertices);
+        if (this.mass) {
+            LBVolume.Tetra.allocateMassToTetras(this._equivalentTetrasArray, this.mass);
+        }
+    }
+    return this._equivalentTetrasArray;
+};
+
+/**
+ * Creates a clone of this tetra that is mirrored about a plane.
+ * @param {LBGeometry.Plane} plane  The mirror plane.
+ * @returns {LBVolume.Tetra}
+ */
+LBVolume.TriPrism.prototype.cloneMirrored = function(plane) {
+    var clone = new LBVolume.TriPrism(undefined, this.mass);
+    return this._cloneVerticesMirrored(plane, clone);
+};
+
+
+/**
+ * A cuboid volume. A cuboid is a six sided convex polyhedron with each of the
+ * sides a quadrilateral (having four edges).
+ * @param {LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
+ * cuboid is set to a unit cube (each side is length 1) centered at 0,0,0.
+ * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
+ * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
+ * vertices identifiying two opposing faces of the cuboid. The first set of indices should
+ * be ordered CCW (right-hand rule), while the second set of indices is such that v[4] is
+ * jointed to v[0], v[5] is joined to v[1], v[6] is joined to v[2], v[7] is joined to
+ * v[3].
+ * @returns {LBVolume.Cuboid}
+ */
+LBVolume.Cuboid = function(vertices, mass, indices) {
+    LBVolume.Volume.call(this, LBVolume.Cuboid.TYPE_NAME, mass);
+    
+    if (vertices) {
+        if (!indices) {
+            indices = LBVolume.Cuboid._defaultIndices;
+        }
+        for (var i = 0; i < 8; ++i) {
+            this.vertices.push(vertices[indices[i]]);
+        }
+    }
+    else {
+        this.vertices.push(new LBGeometry.Vector3(-0.5, -0.5, -0.5));
+        this.vertices.push(new LBGeometry.Vector3(0.5, -0.5, -0.5));
+        this.vertices.push(new LBGeometry.Vector3(0.5, -0.5, 0.5));
+        this.vertices.push(new LBGeometry.Vector3(-0.5, -0.5, 0.5));
+        this.vertices.push(new LBGeometry.Vector3(-0.5, 0.5, -0.5));
+        this.vertices.push(new LBGeometry.Vector3(0.5, 0.5, -0.5));
+        this.vertices.push(new LBGeometry.Vector3(0.5, 0.5, 0.5));
+        this.vertices.push(new LBGeometry.Vector3(-0.5, 0.5, 0.5));
+    }
+};
+
+/**
+ * The cuboid type name, the value of {@link LBVolume.Volume#typeName} for cuboids.
+ * @constant
+ * @type String
+ */
+LBVolume.Cuboid.TYPE_NAME = "Cuboid";
+
+LBVolume.Cuboid.prototype = Object.create(LBVolume.Volume.prototype);
+
+/**
+ * Creates a shallow copy of the cuboid.
+ * @returns {LBVolume.Tetra}    The shallow copy.
+ */
+LBVolume.Cuboid.prototype.clone = function() {
+    return new LBVolume.Cuboid(this.mass, this.vertices);
+};
+
+LBVolume.Cuboid._faces = [
+    [0, 1, 2, 3],
+    [1, 5, 6, 2],
+    [5, 4, 7, 6],
+    [4, 0, 3, 7],
+    [0, 4, 5, 1],
+    [2, 6, 7, 3]
+];
+/**
+ * Retrieves an array of arrays of indices into the vertices array describing each
+ * face. The face indices should be specified in CCW order so the normal is pointing
+ * outward.
+ * @abstract
+ * @returns {Number[][]}    Array of arrays of indices.
+ */
+LBVolume.Cuboid.prototype.faces = function() {
+    return LBVolume.Cuboid._faces;
+};
+LBVolume.Cuboid._defaultIndices = [
+    0, 1, 2, 3, 4, 5, 6, 7
+];
+
+/**
+ * Retrieves an array of {@link LBVolume.Tetra} objects that make up the volume.
+ * For the case of {@link LBVolume.Tetra} this is a one element array containing
+ * the tetra.
+ * @returns {LBVolume.Tetra}    A single element array containing this.
+ */
+LBVolume.Cuboid.prototype.equivalentTetras = function() {
+    if (!this._equivalentTetrasArray) {
+        this._equivalentTetrasArray = LBVolume.Tetra.cuboidToTetras(LBVolume.Cuboid._defaultIndices, 
+            this.vertices);
+        if (this.mass) {
+            LBVolume.Tetra.allocateMassToTetras(this._equivalentTetrasArray, this.mass);
+        }
+    }
+    return this._equivalentTetrasArray;
+};
+
+/**
+ * Creates a clone of this tetra that is mirrored about a plane.
+ * @param {LBGeometry.Plane} plane  The mirror plane.
+ * @returns {LBVolume.Tetra}
+ */
+LBVolume.Cuboid.prototype.cloneMirrored = function(plane) {
+    var clone = new LBVolume.Cuboid(undefined, this.mass);
+    return this._cloneVerticesMirrored(plane, clone);
 };

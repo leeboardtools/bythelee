@@ -52,18 +52,20 @@ QUnit.test( "addTetrasToBody", function( assert ) {
             0, 1, 3
         ],
         indices: [
-            [ 0, 1, 2, 3, 4, 5, 6, 7]
+            [ 4, 5, 6, 7, 0, 1, 2, 3]
         ]
     };
     
     var tetras = LBVolume.Tetra.loadFromData(data);
     LBVolume.Tetra.allocateMassToTetras(tetras, 5);
     
+    var centerOfMassResults = LBVolume.Tetra.centerOfMassOfTetras(tetras);
+    
     var body = new CANNON.Body();
     LBCannon.addTetrasToBody(body, tetras);
     assert.equal(body.shapes.length, tetras.length, "Shape Count");
     
-    LBCannon.updateBodyCenterOfMass(body);
+    LBCannon.updateBodyCenterOfMass(body, centerOfMassResults.position);
     assert.nearEqual(body.position.x, 1, "COM-x");
     assert.nearEqual(body.position.y, 0.5, "COM-y");
     assert.nearEqual(body.position.z, 1.5, "COM-z");
