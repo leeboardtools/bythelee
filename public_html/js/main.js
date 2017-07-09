@@ -181,6 +181,8 @@ PlayState._spawnCharacters = function (data) {
     rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(60);
     //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation);
+    
+//    this.otherBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyB", centerX, centerY - 10, 0);
 };
 
 //--------------------------------------------------

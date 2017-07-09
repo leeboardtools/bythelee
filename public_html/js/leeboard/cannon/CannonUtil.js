@@ -22,6 +22,8 @@
  */
 var LBCannon = LBCannon || {};
 
+LBCannon._workingVector3 = new LBGeometry.Vector3();
+
 /**
  * A proxy for {@link http://schteppe.github.io/cannon.js/docs/classes/Vec3.html|CANNON.Vec3} that
  * links it to a {@link LBGeometry.Vector3} and utilizes the {@link LBGeometry.Vector3} as the
@@ -31,16 +33,21 @@ var LBCannon = LBCannon || {};
  * @private
  * @constructor
  * @param {LBGeometry.Vector3} [vector3=new LBGeometry.Vector3()]    The underlying {@link LBGeometry.Vector3} object.
+ * @param {LBGeometry.Vector3} [offset=LBGeometry.ORIGIN]  The underlying offset added 
+ * to the underlying vector3 to get the Cannon coordinates.
  * @returns {LBCannon.Vec3Proxy}
  */
-LBCannon.Vec3Proxy = function(vector3) {
+LBCannon.Vec3Proxy = function(vector3, offset) {
+    this.vector3 = LBCannon._workingVector3;
+    this._cannonOffset = offset || LBGeometry.ORIGIN;
+    
+    // Need to pass in the current values of this.vector3 so they don't get overwritten.
+    CANNON.Vec3.call(this, this.vector3.x, this.vector3.y, this.vector3.z);
+
     /**
      * The underlying {@link LBGeometry.Vector3}.
      */
     this.vector3 = vector3 || new LBGeometry.Vector3();
-    
-    // Need to pass in the current values of this.vector3 so they don't get overwritten.
-    CANNON.Vec3.call(this, this.vector3.x, this.vector3.y, this.vector3.z);
 
     this.vector3._cannonVec3Proxy = this;
 };
@@ -49,30 +56,30 @@ LBCannon.Vec3Proxy.prototype = Object.create(CANNON.Vec3.prototype);
 LBCannon.Vec3Proxy.prototype.constructor = LBCannon.Vec3Proxy;
 Object.defineProperty(LBCannon.Vec3Proxy.prototype, 'x', {
     get: function() {
-        return this.vector3.x;
+        return this.vector3.x + this._cannonOffset.x;
     },
     set: function(val) {
-        this.vector3.x = val;
+        this.vector3.x = val - this._cannonOffset.x;
         return val;
     }
 });
 
 Object.defineProperty(LBCannon.Vec3Proxy.prototype, 'y', {
     get: function() {
-        return this.vector3.y;
+        return this.vector3.y + this._cannonOffset.y;
     },
     set: function(val) {
-        this.vector3.y = val;
+        this.vector3.y = val - this._cannonOffset.y;
         return val;
     }
 });
 
 Object.defineProperty(LBCannon.Vec3Proxy.prototype, 'z', {
     get: function() {
-        return this.vector3.z;
+        return this.vector3.z + this._cannonOffset.z;
     },
     set: function(val) {
-        this.vector3.z = val;
+        this.vector3.z = val - this._cannonOffset.z;
         return val;
     }
 });
@@ -81,16 +88,18 @@ Object.defineProperty(LBCannon.Vec3Proxy.prototype, 'z', {
  * Retrieves the proxy associated with an {@link LBGeometry.Vector3}, creating one
  * if necessary.
  * @param {LBGeometry.Vector3} vector3  The vector3 object, may be undefined.
+ * @param {LBGeometry.Vector3} [offset=LBGeometry.ORIGIN]  The underlying offset added 
+ * to the underlying vector3 to get the Cannon coordinates.
  * @returns {undefined|LBCannon.Vec3Proxy}  The proxy, undefined if vector3 is undefined.
  */
-LBCannon.Vec3Proxy.getProxy = function(vector3) {
+LBCannon.Vec3Proxy.getProxy = function(vector3, offset) {
     if (!vector3) {
         return undefined;
     }
     if (vector3._cannonVec3Proxy) {
         return vector3._cannonVec3Proxy;
     }
-    return new LBCannon.Vec3Proxy(vector3);
+    return new LBCannon.Vec3Proxy(vector3, offset);
 };
 
 LBCannon._tetraFaces = [
@@ -101,27 +110,46 @@ LBCannon._tetraFaces = [
 ];
 
 /**
- * Adds tetras as shapes to a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}.
- * Once tetras have been added to a body, {@link LBCannon.updateBodyCenterOfMass} should be called
+ * Adds volumes as shapes to a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}.
+ * Once volumes have been added to a body, {@link LBCannon.updateBodyCenterOfMass} should be called
  * to properly align the body's center of mass with the origin.
  * @param {CANNON.Body} body    The body to add the tetras to.
- * @param {LBVolume.Tetra[]} tetras The array of tetras to be added.
+ * @param {LBVolume.Volume[]} volumes The array of tetras to be added.
  * @returns {CANNON.Body}   body.
  */
-LBCannon.addTetrasToBody = function(body, tetras) {
-    for (var i = 0; i < tetras.length; ++i) {
-        var tv = tetras[i].vertices;
+LBCannon.addVolumesToBody = function(body, volumes) {
+    var offset = LBCannon._workingVector3;
+    
+    for (var i = 0; i < volumes.length; ++i) {
+        var tv = volumes[i].vertices;
+        
+        // It looks like Cannon expects shapes to be centered on their origin (based
+        // on the way CANNON.ConvexPolyhedron#computeNormals() checks the face normals
+        // for pointing in the proper direction.
+        // What we end up doing is offsetting the vertex coordinates by the centroid
+        // via the {@link LBCannon.Vec3Proxy} before we pass the vertices to
+        // {@link http://schteppe.github.io/cannon.js/docs/classes/ConvexPolyhedron.hmtl|CANNON.ConvexPolyhedron}
+        // this way they have the origin at their center. Then, when we add the
+        // shape to the body, we offset the shape by the centroid location.
+        var centerOffset = volumes[i].centroid();
+        offset.copy(centerOffset);
+        centerOffset.negate();
+        
         var vertices = [];
-        for (var j = 0; j < 4; ++j) {
-            vertices.push(LBCannon.Vec3Proxy.getProxy(tv[j]));
+        for (var j = 0; j < tv.length; ++j) {
+            // Unfortunately, because of the center offsets we need to clone each vertex...
+            vertices.push(new LBCannon.Vec3Proxy(tv[j].clone(), centerOffset));
         }
         
-        var shape = new CANNON.ConvexPolyhedron(vertices, LBCannon._tetraFaces);
-        shape._lbTetra = tetras[i];
-        body.addShape(shape);
+        var shape = new CANNON.ConvexPolyhedron(vertices, volumes[i].faces());
+        shape._lbVolume = volumes[i];
+        shape._lbCenterOffset = centerOffset;
+                
+        body.addShape(shape, offset);
     }
     return body;
 };
+
 
 /**
  * Updates the center of mass of a body. The local origin of the body is the center of mass.
@@ -137,10 +165,11 @@ LBCannon.updateBodyCenterOfMass = function(body, centerOfMass, mass) {
     
     for (var i = 0; i < body.shapes.length; ++i) {
         var shape = body.shapes[i];
-        if (shape._lbTetra && (shape._lbTetra.mass > 0)) {
-            body.shapeOffsets[i].x = -centerOfMass.x;
-            body.shapeOffsets[i].y = -centerOfMass.y;
-            body.shapeOffsets[i].z = -centerOfMass.z;
+        if (shape._lbVolume && (shape._lbVolume.mass > 0)) {
+            var centerOffset = shape._lbCenterOffset;
+            body.shapeOffsets[i].x = -centerOfMass.x - centerOffset.x;
+            body.shapeOffsets[i].y = -centerOfMass.y - centerOffset.y;
+            body.shapeOffsets[i].z = -centerOfMass.z - centerOffset.z;
         }
     }
     

@@ -54,8 +54,8 @@ LBPhaser.CannonLink.prototype.constructor = LBPhaser.CannonLink;
 LBPhaser.CannonLink.prototype.addFixedObject = function(object) {
     var body = new CANNON.Body();
     body.type = CANNON.Body.STATIC;
-    var width = this.phaserEnv.fromPixelsX(object.width / 2);
-    var height = this.phaserEnv.fromPixelsY(object.height / 2);
+    var width = Math.abs(this.phaserEnv.fromPixelsX(object.width / 2));
+    var height = Math.abs(this.phaserEnv.fromPixelsY(object.height / 2));
     var box = new CANNON.Box(new CANNON.Vec3(width, height, 0.5));
     body.addShape(box);
     body.position.x = this.phaserEnv.fromPixelsX(object.position.x);
@@ -81,7 +81,7 @@ LBPhaser.CannonLink.prototype.addRigidBody = function(rigidBody, data) {
     body.type = CANNON.Body.DYNAMIC;
     
     // TODO: Need to add volume tetras for the rigid body parts.
-    LBCannon.addTetrasToBody(body, rigidBody.volumeTetras);    
+    LBCannon.addVolumesToBody(body, rigidBody.volumes);    
     LBCannon.updateBodyCenterOfMass(body, rigidBody.centerOfMass, rigidBody.mass);
     this.world.add(body);
     

@@ -605,7 +605,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
      * Array of {@link LBVolume.Tetra}s that define the volume of the body.
      * @type LBVolume.Tetra
      */
-    this.volumeTetras = [];
+    this.volumes = [];
     
     /**
      * The coordinate system state used to track changes in the location of the
@@ -695,14 +695,14 @@ LBPhysics.RigidBody.prototype = {
         LBGeometry.loadVector3(data.centerOfMass, this.centerOfMass);
         this.massRadius = data.massRadius || this.massRadius;
         
-        this.volumeTetras.length = 0;
-        if (data.volumeTetras) {
-            LBVolume.Tetra.loadFromData(data.volumeTetras, null, this.volumeTetras);
+        this.volumes.length = 0;
+        if (data.volumes) {
+            LBVolume.Volume.loadVolumesFromData(data.volumes, null, this.volumes);
             if (data.mass) {
-                LBVolume.Volume.allocateMassToVolumess(this.volumeTetras, data.mass);
+                LBVolume.Volume.allocateMassToVolumess(this.volumes, data.mass);
             }
             
-            var comResult = LBVolume.Volume.totalCenterOfMass(this.volumeTetras);
+            var comResult = LBVolume.Volume.totalCenterOfMass(this.volumes);
             if (comResult && (comResult.mass > 0)) {
                 this.centerOfMass.copy(comResult.position);
             }
@@ -711,8 +711,8 @@ LBPhysics.RigidBody.prototype = {
         if (data.momentInertia) {
             LBPhysics.loadMomentInertia(data.momentInertia, this.momentInertia);
         }
-        else if (this.volumeTetras.length > 0) {
-            LBVolume.Volume.overallInertiaTensor(this.volumeTetras, this.momentInertia);
+        else if (this.volumes.length > 0) {
+            LBVolume.Volume.overallInertiaTensor(this.volumes, this.momentInertia);
         }
         else {
             this.momentInertia.identity().multiplyScalar(this.mass);

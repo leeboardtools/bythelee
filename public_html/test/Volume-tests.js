@@ -22,6 +22,30 @@ checkVolume = function(assert, tetras, refVol, msg) {
     assert.nearEqual(vol, refVol, msg);
 };
 
+checkFaces = function(assert, volume, msg) {
+    var centroid = volume.centroid();
+    var normal;
+    var faces = volume.faces();
+    for (var f = 0; f < faces.length; ++f) {
+        normal = volume.faceNormal(f, normal);
+        var vec = volume.vertices[faces[f][0]].clone();
+        vec.sub(centroid);
+        var dir = vec.dot(normal);
+        assert.ok(dir > 0, msg + " Face " + f + " Normal Pointing Outward");
+    }
+};
+
+checkMirrored = function(assert, volume, plane, msg) {
+    var mirroredVol = volume.cloneMirrored(plane);
+    checkFaces(assert, mirroredVol, msg + " - Faces");
+    assert.equal(mirroredVol.volume(), volume.volume(), msg + " - Volume");
+    
+    var centroid = volume.centroid();
+    var refMirroredCentroid = LBGeometry.mirrorPointAboutPlane(plane, centroid);
+    var mirroredCentroid = mirroredVol.centroid();
+    checkVector3(assert, mirroredCentroid, refMirroredCentroid.x, refMirroredCentroid.y, refMirroredCentroid.z, msg + " - Centroid");
+};
+
 QUnit.test( "Tetra.volume()", function( assert ) {
     var x = 1;
     var y = 2;
@@ -45,94 +69,8 @@ QUnit.test( "Tetra.volume()", function( assert ) {
     }
     assert.nearEqual(tetra.volume(), vol, "Transformed Volume");
     
-    });
-    
-
-QUnit.test( "Tetra.triangularBipyramidToTetras()", function( assert ) {
-    var x = 1;
-    var y = 2;
-    var z = 3;
-    var vertices = [
-        new LBGeometry.Vector3(0, 0, 0),
-        new LBGeometry.Vector3(x, 0, 0),
-        new LBGeometry.Vector3(x, y, 0),
-        new LBGeometry.Vector3(0, y, 0),
-
-        new LBGeometry.Vector3(0, 0, z),
-        new LBGeometry.Vector3(x, 0, z),
-        new LBGeometry.Vector3(x, y, z),
-        new LBGeometry.Vector3(0, y, z)
-    ];
-    
-    var vertexIndices = [
-        0, 1, 3, 4, 7
-    ];
-    
-    var tetras = LBVolume.Tetra.triangularBipyramidToTetras(vertexIndices, vertices);
-    assert.equal(tetras.length, 2, "OK Tetra Count");
-    
-    var refVol = x * y * z / 3;
-    checkVolume(assert, tetras, refVol, "OK Tetras Volume");
-    
-    });
-    
-    
-QUnit.test( "Tetra.triangularPrismToTetras()()", function( assert ) {
-    var x = 1;
-    var y = 2;
-    var z = 3;
-    var vertices = [
-        new LBGeometry.Vector3(0, 0, 0),
-        new LBGeometry.Vector3(x, 0, 0),
-        new LBGeometry.Vector3(x, y, 0),
-        new LBGeometry.Vector3(0, y, 0),
-
-        new LBGeometry.Vector3(0, 0, z),
-        new LBGeometry.Vector3(x, 0, z),
-        new LBGeometry.Vector3(x, y, z),
-        new LBGeometry.Vector3(0, y, z)
-    ];
-    
-    var vertexIndices = [
-        0, 1, 3, 4, 5, 7
-    ];
-    
-    var tetras = LBVolume.Tetra.triangularPrismToTetras(vertexIndices, vertices);
-    assert.equal(tetras.length, 3, "OK Tetra Count");
-    
-    var refVol = x * y * z / 2;
-    checkVolume(assert, tetras, refVol, "OK Tetras Volume");
-    
-    });
-    
-
-QUnit.test( "Tetra.cuboidToTetras()", function( assert ) {
-    var x = 1;
-    var y = 2;
-    var z = 3;
-    var vertices = [
-        new LBGeometry.Vector3(0, 0, 0),
-        new LBGeometry.Vector3(x, 0, 0),
-        new LBGeometry.Vector3(x, y, 0),
-        new LBGeometry.Vector3(0, y, 0),
-
-        new LBGeometry.Vector3(0, 0, z),
-        new LBGeometry.Vector3(x, 0, z),
-        new LBGeometry.Vector3(x, y, z),
-        new LBGeometry.Vector3(0, y, z)
-    ];
-    
-    var vertexIndices = [
-        1, 2, 6, 5, 0, 3, 7, 4
-    ];
-    
-    var tetras = LBVolume.Tetra.cuboidToTetras(vertexIndices, vertices);
-    assert.equal(tetras.length, 6, "OK Tetra Count");
-    
-    var refVol = x * y * z;
-    checkVolume(assert, tetras, refVol, "OK Tetras Volume");    
 });
-
+    
 
 checkTetrasSimilar = function(assert, test, ref, msg) {
     for (var i = 0; i < 4; ++i) {
@@ -336,32 +274,6 @@ QUnit.test( "Tetra.sliceWithPlane()", function( assert ) {
         true);
 });
 
-QUnit.test( "centerOfMassOfTetras", function( assert ) {
-    var data = {
-        vertices: [
-            0, 0, 0,
-            2, 0, 0,
-            2, 1, 0,
-            0, 1, 0,
-            
-            0, 0, 3,
-            2, 0, 3,
-            2, 1, 3,
-            0, 1, 3
-        ],
-        indices: [
-            [ 0, 1, 2, 3, 4, 5, 6, 7]
-        ]
-    };
-    
-    var tetras = LBVolume.Tetra.loadFromData(data);
-    LBVolume.Volume.allocateMassToVolumess(tetras, 5);
-    
-    var result = LBVolume.Volume.totalCenterOfMass(tetras);
-    checkVector3(assert, result.position, 1, 0.5, 1.5, "Position");
-    assert.nearEqual(result.mass, 5, "Mass");
-});
-
 QUnit.test( "TriBipyramid", function( assert ) {
     var data = {
         mass: 5,
@@ -402,6 +314,12 @@ QUnit.test( "TriBipyramid", function( assert ) {
     var refCentroid = LBVolume.Volume.totalCenterOfMass(refTetras).position;
     var centroid = volume.centroid();
     checkVector3(assert, centroid, refCentroid.x, refCentroid.y, refCentroid.z, "Centroid");
+    
+    checkFaces(assert, volume, "Faces");
+    
+    checkMirrored(assert, volume, LBGeometry.XY_PLANE, "X-Y");
+    checkMirrored(assert, volume, LBGeometry.YZ_PLANE, "Y-Z");
+    checkMirrored(assert, volume, LBGeometry.ZX_PLANE, "Z-X");
 });
 
 QUnit.test( "Tri-Prism", function( assert ) {
@@ -438,6 +356,12 @@ QUnit.test( "Tri-Prism", function( assert ) {
     var refCentroid = LBVolume.Volume.totalCenterOfMass(refTetras).position;
     var centroid = volume.centroid();
     checkVector3(assert, centroid, refCentroid.x, refCentroid.y, refCentroid.z, "Centroid");
+    
+    checkFaces(assert, volume, "Faces");
+    
+    checkMirrored(assert, volume, LBGeometry.XY_PLANE, "X-Y");
+    checkMirrored(assert, volume, LBGeometry.YZ_PLANE, "Y-Z");
+    checkMirrored(assert, volume, LBGeometry.ZX_PLANE, "Z-X");
 });
 
 
@@ -445,15 +369,15 @@ QUnit.test( "Cuboid", function( assert ) {
     var data = {
         mass: 5,
         vertices: [
-            0, 0, 0,
-            2, 0, 0,
-            2, 1, 0,
-            0, 1, 0,
-            
             0, 0, 3,
             2, 0, 3,
             2, 1, 3,
-            0, 1, 3
+            0, 1, 3,
+            
+            0, 0, 0,
+            2, 0, 0,
+            2, 1, 0,
+            0, 1, 0
         ],
         indices: [
             [ 0, 1, 2, 3, 4, 5, 6, 7]
@@ -461,17 +385,23 @@ QUnit.test( "Cuboid", function( assert ) {
     };
     
     var vertices = LBGeometry.loadVector3ArrayFromCoordArray(data.vertices);
-    var cuboid = new LBVolume.Cuboid(vertices, data.mass);
+    var volume = new LBVolume.Cuboid(vertices, data.mass);
     
     var refTetras = LBVolume.Tetra.loadFromData(data);
     LBVolume.Volume.allocateMassToVolumess(refTetras, data.mass);
     
-    var cuboidTetras = cuboid.equivalentTetras();
+    var cuboidTetras = volume.equivalentTetras();
     checkTetraArraysSimilar(assert, cuboidTetras, refTetras, "Equivalent Tetras");
-    assert.equal(cuboid.mass, data.mass, "Mass");
+    assert.equal(volume.mass, data.mass, "Mass");
     
-    assert.equal(cuboid.volume(), 2 * 1 * 3, "Volume");
+    assert.equal(volume.volume(), 2 * 1 * 3, "Volume");
     
-    var centroid = cuboid.centroid();
+    var centroid = volume.centroid();
     checkVector3(assert, centroid, 1, 0.5, 1.5, "Centroid");
+    
+    checkFaces(assert, volume, "Faces");
+    
+    checkMirrored(assert, volume, LBGeometry.XY_PLANE, "X-Y");
+    checkMirrored(assert, volume, LBGeometry.YZ_PLANE, "Y-Z");
+    checkMirrored(assert, volume, LBGeometry.ZX_PLANE, "Z-X");
 });

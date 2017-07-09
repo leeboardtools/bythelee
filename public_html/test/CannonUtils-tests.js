@@ -62,7 +62,7 @@ QUnit.test( "addTetrasToBody", function( assert ) {
     var centerOfMassResults = LBVolume.Volume.totalCenterOfMass(tetras);
     
     var body = new CANNON.Body();
-    LBCannon.addTetrasToBody(body, tetras);
+    LBCannon.addVolumesToBody(body, tetras);
     assert.equal(body.shapes.length, tetras.length, "Shape Count");
     
     LBCannon.updateBodyCenterOfMass(body, centerOfMassResults.position);

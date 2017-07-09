@@ -51,6 +51,9 @@ LBVolume.Volume = function(typeName, mass) {
 };
 
 LBVolume.Volume._workingCenterOfMassResult;
+LBVolume.Volume._workingVector3A = new LBGeometry.Vector3();
+LBVolume.Volume._workingVector3B = new LBGeometry.Vector3();
+LBVolume.Volume._workingVector3C = new LBGeometry.Vector3();
 
 LBVolume.Volume.prototype = {
     /**
@@ -70,22 +73,6 @@ LBVolume.Volume.prototype = {
      */
     cloneMirrored: function(plane) {
         throw 'cloneMirrored() not implemented by ' + this.cloneMirrored;
-    },
-
-    /**
-     * Helper that can be called by implementations of {@link LBVolume.Volume#cloneMirrored}
-     * to handle the actual cloning of the vertices.
-     * @protected
-     * @param {LBGeometry.Plane} plane  The mirror plane.
-     * @param {LBVolume.Volume} clone   The clone whose vertices are to be mirrored from
-     * this volume's vertices..
-     * @returns {LBVolume.Volume}   clone.
-     */
-    _cloneVerticesMirrored: function(plane, clone) {
-        for (var i = 0; i < this.vertices.length; ++i) {
-            LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i], clone.vertices[i]);
-        }
-        return clone;
     },
     
     /**
@@ -111,13 +98,33 @@ LBVolume.Volume.prototype = {
     },
     
     /**
+     * Retrieves the normal vector of a face.
+     * @param {Number} f    The face index.
+     * @param {LBGeometry.Vector3} [store]  If defined set to the normal.
+     * @returns {LBGeometry.Vector3}    The normal.
+     */
+    faceNormal: function(f, store) {
+        var face = this.faces()[f];
+        var v0 = this.vertices[face[0]];
+        var v1 = this.vertices[face[1]];
+        var v2 = this.vertices[face[2]];
+        var v1m0 = LBVolume.Volume._workingVector3A.copy(v1).sub(v0);
+        var v2m1 = LBVolume.Volume._workingVector3B.copy(v2).sub(v1);
+        
+        store = (store) ? store.copy(v1m0) : v1m0.clone();
+        store.cross(v2m1).normalize();
+        return store;
+    },
+    
+    /**
      * Computes the centroid of the volume.
      * @param {LBGeometry.Vector3} [store] If defined the object to store the centroid into.
      * @returns {LBGeometry.Vector3}    The centroid.
      */
     centroid: function(store) {
         var tetras = this.equivalentTetras();
-        var result = LBVolume.Volume._workingCenterOfMassResult = LBVolume.Volume.totalCenterOfMass(tetras);
+        var result = LBVolume.Volume._workingCenterOfMassResult = LBVolume.Volume.totalCenterOfMass(tetras,
+            LBVolume.Volume._workingCenterOfMassResult);
         if (store) {
             return store.copy(result.position);
         }
@@ -191,7 +198,7 @@ LBVolume.Volume.totalCenterOfMass = function(volume, store) {
     var sumX = 0, sumY = 0, sumZ = 0;
     var totalMass = 0;
     for (var i = 0; i < volume.length; ++i) {
-        var mass = (volume[i].mass !== undefined) ? volume[i].mass : volume[i].volume();
+        var mass = !Number.isNaN(volume[i].mass) ? volume[i].mass : volume[i].volume();
         totalMass += mass;
         centroid = volume[i].centroid(centroid);
         sumX += centroid.x * mass;
@@ -294,6 +301,88 @@ LBVolume.Volume.overallInertiaTensor = function(volumes, tensor) {
     tensor.elements[7] = tensor.elements[5];
     
     return tensor;
+};
+
+
+/**
+ * Loads an array of volumes from properties in a data object.
+ * @param {Object} data The data object.
+ * @param {LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
+ * otherwise data should have a vertices property.
+ * @param {LBVolume.Volume[]} [volumes] If defined, the array to store the volumes into.
+ * This is NOT cleared.
+ * @returns {LBVolume.Volume[]} The array of volumes.
+ */
+LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
+    if (!vertices) {
+        vertices = LBGeometry.loadVector3ArrayFromCoordArray(data.vertices);
+    }
+    if (!volumes) {
+        volumes = [];
+    }
+    
+    var firstIndex = volumes.length;
+    
+    for (var i = 0; i < data.indices.length; ++i) {
+        var item = data.indices[i];
+        var indices;
+        var mass;
+        if (!Array.isArray(item)) {
+            mass = Leeboard.isVar(item.mass) ? item.mass : Number.NaN;
+            indices = item.indices;
+        }
+        else {
+            mass = Number.NaN;
+            indices = item;
+        }
+        
+        var startIndex = volumes.length;
+        switch (indices.length) {
+            case 4 :
+                var myVertices = LBVolume.Tetra._workingVertexArray;
+                for (var j = 0; j < 4; ++j) {
+                    myVertices[j] = vertices[indices[j]];
+                }
+                volumes.push(new LBVolume.Tetra(myVertices));
+                break;
+                
+            case 5 :
+                volumes.push(new LBVolume.TriBipyramid(vertices, mass, indices));
+                break;
+                
+            case 6 :
+                volumes.push(new LBVolume.TriPrism(vertices, mass, indices));
+                break;
+                
+            case 8 :
+                volumes.push(new LBVolume.Cuboid(vertices, mass, indices));
+                break;
+                
+            default :
+                console.warn("LBVolume.Volume.loadVolumesFromData: " + indices.length + " indices not supported, data.indices[" + i + "]");
+                break;
+        }
+        
+        if (!Number.isNaN(mass)) {
+            LBVolume.Volume.allocateMassToVolumess(volumes, mass, startIndex, volumes.length);
+        }
+    }
+    
+    if (data.mirrorPlane) {
+        var mirrorPlane = LBGeometry.loadPlane(data.mirrorPlane);
+        if (!mirrorPlane) {
+            console.warn("LBVolume.Volume.loadVolumesFromData: data.mirrorPlane could not be loaded into an LBGeometry.Plane object.");
+        }
+        else {
+            var endIndex = volumes.length;
+
+            for (var i = firstIndex; i < endIndex; ++i) {
+                volumes.push(volumes[i].cloneMirrored(mirrorPlane));
+            }
+        }
+    }
+    
+    return volumes;
 };
 
 
@@ -426,8 +515,13 @@ LBVolume.Tetra.prototype.equivalentTetras = function() {
  * @returns {LBVolume.Tetra}
  */
 LBVolume.Tetra.prototype.cloneMirrored = function(plane) {
-    var clone = new LBVolume.Tetra(undefined, this.mass);
-    return this._cloneVerticesMirrored(plane, clone);
+    var vertices = LBVolume.Tetra._workingArrayA;
+    vertices.length = 0;
+    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[2]));
+    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[1]));
+    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[0]));
+    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[3]));
+    return new LBVolume.Tetra(vertices, this.mass);
 };
 
 
@@ -943,9 +1037,9 @@ LBVolume.TriBipyramid._faces = [
     [0, 1, 2],
     [0, 2, 3],
     [0, 3, 1],
-    [5, 2, 1],
-    [5, 3, 2],
-    [5, 1, 3]
+    [4, 2, 1],
+    [4, 3, 2],
+    [4, 1, 3]
 ];
 /**
  * Retrieves an array of arrays of indices into the vertices array describing each
@@ -984,9 +1078,16 @@ LBVolume.TriBipyramid.prototype.equivalentTetras = function() {
  * @returns {LBVolume.Tetra}
  */
 LBVolume.TriBipyramid.prototype.cloneMirrored = function(plane) {
-    var clone = new LBVolume.TriBipyramid(undefined, this.mass);
-    return this._cloneVerticesMirrored(plane, clone);
+    var vertices = LBVolume.TriBipyramid._workingVertices;
+    vertices.length = 0;
+    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[0]));
+    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[1]));
+    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[3]));
+    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[2]));
+    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[4]));
+    return new LBVolume.TriBipyramid(vertices, this.mass);
 };
+LBVolume.TriBipyramid._workingVertices = [];
 
 
 /**
@@ -1086,9 +1187,15 @@ LBVolume.TriPrism.prototype.equivalentTetras = function() {
  * @returns {LBVolume.Tetra}
  */
 LBVolume.TriPrism.prototype.cloneMirrored = function(plane) {
-    var clone = new LBVolume.TriPrism(undefined, this.mass);
-    return this._cloneVerticesMirrored(plane, clone);
+    var vertices = LBVolume.TriPrism._workingVertexArray;
+    vertices.length = 0;
+    for (var i = 0; i < 3; ++i) {
+        vertices[i] = LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i + 3]);
+        vertices[i + 3] = LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i]);
+    }
+    return new LBVolume.TriPrism(vertices, this.mass);
 };
+LBVolume.TriPrism._workingVertexArray = [];
 
 
 /**
@@ -1189,6 +1296,12 @@ LBVolume.Cuboid.prototype.equivalentTetras = function() {
  * @returns {LBVolume.Tetra}
  */
 LBVolume.Cuboid.prototype.cloneMirrored = function(plane) {
-    var clone = new LBVolume.Cuboid(undefined, this.mass);
-    return this._cloneVerticesMirrored(plane, clone);
+    var vertices = LBVolume.Cuboid._workingVertexArray;
+    vertices.length = 0;
+    for (var i = 0; i < 4; ++i) {
+        vertices[i] = LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i + 4]);
+        vertices[i + 4] = LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i]);
+    }
+    return new LBVolume.Cuboid(vertices, this.mass);
 };
+LBVolume.Cuboid._workingVertexArray = [];

@@ -40,7 +40,7 @@ LBSailSim.Hull = function(vessel) {
     
     /**
      * The center of buoyancy in local coordinates. This is actively updated if
-     * volumeTetras have been specified for the vessel.
+     * volumes have been specified for the vessel.
      * @member {LBGeometry.Vector3}
      */
     this.centerOfBuoyancy = new LBGeometry.Vector3();
@@ -165,7 +165,7 @@ LBSailSim.Hull.prototype = {
 
         this.heelAngleDeg = vessel.obj3D.rotation.x * LBMath.RAD_TO_DEG;
         
-        if (this.vessel.volumeTetras.length > 0) {
+        if (this.vessel.volumes.length > 0) {
             this._updateBuoyancy();
         }
         else {
@@ -191,20 +191,24 @@ LBSailSim.Hull.prototype = {
         var volSum = 0;
         var centroid = LBSailSim.Hull._workingPos;
         
-        for (var i = 0; i < this.vessel.volumeTetras.length; ++i) {
-            var tetra = this.vessel.volumeTetras[i];
-            var result = LBVolume.Tetra.sliceWithPlane(tetra, xyPlane, false, true);
-            if (!result || !result[1].length) {
-                continue;
-            }
-            
-            for (var j = 0; j < result[1].length; ++j) {
-                result[1][j].centroid(centroid);
-                var vol = result[1][j].volume();
-                xSum += centroid.x * vol;
-                ySum += centroid.y * vol;
-                zSum += centroid.z * vol;
-                volSum += vol;
+        var volumes = this.vessel.volumes;
+        for (var v = 0; v < volumes.length; ++v) {
+            var tetras = volumes[v].equivalentTetras();
+            for (var i = 0; i < tetras.length; ++i) {
+                var result = LBVolume.Tetra.sliceWithPlane(tetras[i], xyPlane, false, true);
+                if (!result || !result[1].length) {
+                    // result[1] contains tetras below waterline...
+                    continue;
+                }
+
+                for (var j = 0; j < result[1].length; ++j) {
+                    result[1][j].centroid(centroid);
+                    var vol = result[1][j].volume();
+                    xSum += centroid.x * vol;
+                    ySum += centroid.y * vol;
+                    zSum += centroid.z * vol;
+                    volSum += vol;
+                }
             }
         }
         
