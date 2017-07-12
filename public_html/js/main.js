@@ -16,7 +16,7 @@
 
 
 /* global Phaser */
-/* global Leeboard, LBSailSim, LBGeometry, LBMath, LBPhaser */
+/* global Leeboard, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils */
 
 
 //
@@ -82,9 +82,9 @@ PlayState.init = function() {
     this.keys.t.onDown.add(this.doTest, this);
     this.keys.v.onDown.add(this.toggleVelocityArrows, this);
     
-    var physicsEngine = LBSailSim.PhaserEnv.P2_PHYSICS;
-    physicsEngine = LBSailSim.PhaserEnv.CANNON_PHYSICS;
-    this.sailEnv = new LBSailSim.PhaserEnv(this.game, physicsEngine);
+    var physicsEngine = LBSailSim.PhaserSailEnv.P2_PHYSICS;
+    physicsEngine = LBSailSim.PhaserSailEnv.CANNON_PHYSICS;
+    this.sailEnv = new LBSailSim.PhaserSailEnv(this.game, physicsEngine);
 };
 
 //
@@ -104,6 +104,20 @@ PlayState.toggleForceArrows = function() {
 PlayState.toggleVelocityArrows = function() {
     this.sailEnv.setVelocityArrowsVisible(!this.sailEnv.areVelocityArrowsVisible());
 };
+
+
+//
+//--------------------------------------------------
+LBFoils.ClCdCurve.prototype.test = function(start, end, delta) {
+    console.log("Test ClCdCurve:");
+    var clCd;
+    for (var i = start; i < end; i += delta) {
+        clCd = this.calcCoefsDeg(i, clCd);
+        console.log(i + "\t" + clCd.cl + "\t" + clCd.cd + "\t" + clCd.cm + "\t" + clCd.stallFraction + "\t"
+                + "\t" + clCd.clLift + "\t" + clCd.cdLift + "\t" + clCd.cmLift + "\t"
+                + "\t" + clCd.clStalled + "\t" + clCd.cdStalled + "\t" + clCd.cmStalled + "\t");
+    }
+};    
 
 //
 //--------------------------------------------------
@@ -178,7 +192,7 @@ PlayState._spawnCharacters = function (data) {
     
     centerX = this.sailEnv.phaserEnv.fromPixelsX(200);
     centerY = this.sailEnv.phaserEnv.fromPixelsY(100);
-    rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(60);
+    rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(-60);
     //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation);
     
@@ -239,6 +253,14 @@ PlayState._setupHUD = function() {
     this.ticksText = this.game.add.text(left, top, "SimTicks: 0", style);
     this.hud.add(this.ticksText);
     top += this.ticksText.height + vSpacing;
+    
+    this.rollText = this.game.add.text(left, top, "Roll: 0", style);
+    this.hud.add(this.rollText);
+    top += this.rollText.height + vSpacing;
+    
+    this.pitchText = this.game.add.text(left, top, "Pitch: 0", style);
+    this.hud.add(this.pitchText);
+    top += this.pitchText.height + vSpacing;
     
     this.hInset = 5;
     this.vInset = 5;
@@ -361,11 +383,18 @@ PlayState._updateHUD = function() {
     
     var throttle = this.myBoat.getThrottlePos();
     if (throttle !== undefined) {
-        this.throttleText.text = "Throttle:" + LBMath.round(throttle, 1);
+        this.throttleText.text = "Throttle: " + LBMath.round(throttle, 1);
     }
     
     if (this.ticksText) {
-        this.ticksText.text = "SimTicks:" + this.sailEnv.physicsLink.updateCount;
+        this.ticksText.text = "SimTicks: " + this.sailEnv.physicsLink.updateCount;
+    }
+    
+    if (this.rollText) {
+        var euler = new LBGeometry.Euler();
+        euler.setFromRotationMatrix(this.myBoat.obj3D.matrixWorld);
+        this.rollText.text = "Roll: " + LBMath.round(euler.x * LBMath.RAD_TO_DEG);
+        this.pitchText.text = "Pitch: " + LBMath.round(euler.y * LBMath.RAD_TO_DEG);
     }
 };
 

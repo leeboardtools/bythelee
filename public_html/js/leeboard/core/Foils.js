@@ -485,19 +485,8 @@ LBFoils.ClCdCurve.prototype = {
         
         store.clean();
         return store;
-    },
-
-    test: function(start, end, delta) {
-        console.log("Test ClCdCurve:");
-        var clCd;
-        for (var i = start; i < end; i += delta) {
-            clCd = this.calcCoefsDeg(i, clCd);
-            console.log(i + "\t" + clCd.cl + "\t" + clCd.cd + "\t" + clCd.cm + "\t" + clCd.stallFraction + "\t"
-                    + "\t" + clCd.clLift + "\t" + clCd.cdLift + "\t" + clCd.cmLift + "\t"
-                    + "\t" + clCd.clStalled + "\t" + clCd.cdStalled + "\t" + clCd.cmStalled + "\t");
-        }
     }
-    
+
 };
 
 
@@ -686,27 +675,8 @@ LBFoils.Foil.prototype = {
         resultant.applyMatrix4(coordSystemState.worldXfrm);
         
         return resultant;
-    },
-    
-    
-    localForceTest: function(rho, qInfSpeed, start, end, delta) {
-        console.log("LBFoils.Foil.localForceTest:");
-        console.log("Deg\t\tApplPoint.x\tApplPoint.y\t\tForce.x\tForce.y\t\tMoment.z");
-        var resultant = new LBPhysics.Resultant3D();
-        var details = {};
-        var qInfLocal = new LBGeometry.Vector2();
-        for (var deg = start; deg < end; deg += delta) {
-            var rad = deg * LBMath.DEG_TO_RAD;
-            qInfLocal.set(Math.cos(rad) * qInfSpeed, Math.sin(rad) * qInfSpeed);
-            this.calcLocalForce(rho, qInfLocal, details, resultant);
-            var string = deg + "\t" 
-                    //+ "\t" + resultant.applPoint.x + "\t" + resultant.applPoint.y + "\t" 
-                    + "\t" + resultant.force.x + "\t" + resultant.force.y + "\t"
-                    + "\t" + resultant.moment.z
-                    + "\t" + details.coefs.stallFraction;
-            console.log(string);
-        }
     }
+    
 };
 
 

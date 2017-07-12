@@ -22,10 +22,10 @@
  * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2}.
  * @constructor
  * @param {Phaser.Game} game    The Phaser game object.
- * @param {LBSailSim.PhaserEnv.P2_PHYSICS|LBSailSim.PhaserEnv.CANNON_PHYSICS} physicsType  The physics engine to use.
- * @returns {LBSailSim.PhaserEnv}
+ * @param {LBSailSim.PhaserSailEnv.P2_PHYSICS|LBSailSim.PhaserSailEnv.CANNON_PHYSICS} physicsType  The physics engine to use.
+ * @returns {LBSailSim.PhaserSailEnv}
  */
-LBSailSim.PhaserEnv = function(game, physicsType) {
+LBSailSim.PhaserSailEnv = function(game, physicsType) {
     LBSailSim.Env.call(this);
     this.game = game;
     this.phaserEnv = new LBPhaser.Env(game);
@@ -34,13 +34,13 @@ LBSailSim.PhaserEnv = function(game, physicsType) {
     this.phaserEnv.ySign = -1;
     
     switch (physicsType) {
-        case LBSailSim.PhaserEnv.P2_PHYSICS :
+        case LBSailSim.PhaserSailEnv.P2_PHYSICS :
         default :
-            physicsType = LBSailSim.PhaserEnv.P2_PHYSICS;
+            physicsType = LBSailSim.PhaserSailEnv.P2_PHYSICS;
             this.physicsLink = new LBPhaser.P2Link(this.phaserEnv);
             break;
         
-        case LBSailSim.PhaserEnv.CANNON_PHYSICS :
+        case LBSailSim.PhaserSailEnv.CANNON_PHYSICS :
             this.physicsLink = new LBPhaser.CannonLink(this.phaserEnv);
             break;
     }
@@ -62,21 +62,21 @@ LBSailSim.PhaserEnv = function(game, physicsType) {
 };
 
 /**
- * Value to pass to {@link LBSailSim.PhaserEnv}'s contructor to use the P2 physics engine from Phaser.
+ * Value to pass to {@link LBSailSim.PhaserSailEnv}'s contructor to use the P2 physics engine from Phaser.
  * @constant
  * @type Number
  */
-LBSailSim.PhaserEnv.P2_PHYSICS = 0;
+LBSailSim.PhaserSailEnv.P2_PHYSICS = 0;
 
 /**
- * Value to pass to {@link LBSailSim.PhaserEnv}'s contructor to use the Cannon JS physics engine.
+ * Value to pass to {@link LBSailSim.PhaserSailEnv}'s contructor to use the Cannon JS physics engine.
  * @constant
  * @type Number
  */
-LBSailSim.PhaserEnv.CANNON_PHYSICS = 1;
+LBSailSim.PhaserSailEnv.CANNON_PHYSICS = 1;
 
-LBSailSim.PhaserEnv.prototype = Object.create(LBSailSim.Env.prototype);
-LBSailSim.PhaserEnv.prototype.constructor = LBSailSim.PhaserEnv;
+LBSailSim.PhaserSailEnv.prototype = Object.create(LBSailSim.Env.prototype);
+LBSailSim.PhaserSailEnv.prototype.constructor = LBSailSim.PhaserSailEnv;
 
 /**
  * Sets the world group to which all the sailing environment graphic objects will
@@ -84,7 +84,7 @@ LBSailSim.PhaserEnv.prototype.constructor = LBSailSim.PhaserEnv;
  * @param {Phaser.Group} worldGroup The world group.
  * @returns {undefined}
  */
-LBSailSim.PhaserEnv.prototype.setWorldGroup = function(worldGroup) {
+LBSailSim.PhaserSailEnv.prototype.setWorldGroup = function(worldGroup) {
     this.worldGroup = worldGroup;
     this.physicsLink.worldGroup = worldGroup;
 };
@@ -94,7 +94,7 @@ LBSailSim.PhaserEnv.prototype.setWorldGroup = function(worldGroup) {
  * @param {Boolean} isVisible   If true the force arrows are displayed, otherwise they are hidden.
  * @returns {Boolean}   True if the force arrows were visible prior to this call.
  */
-LBSailSim.PhaserEnv.prototype.setForceArrowsVisible = function(isVisible) {
+LBSailSim.PhaserSailEnv.prototype.setForceArrowsVisible = function(isVisible) {
     var wasVisible = this.areForceArrowsVisible();
     this.sailArrowStyle.isVisible = isVisible;
     this.foilArrowStyle.isVisible = isVisible;
@@ -105,7 +105,7 @@ LBSailSim.PhaserEnv.prototype.setForceArrowsVisible = function(isVisible) {
 /**
  * @returns {Boolean}   True if the force arrows are currently displayed.
  */
-LBSailSim.PhaserEnv.prototype.areForceArrowsVisible = function() {
+LBSailSim.PhaserSailEnv.prototype.areForceArrowsVisible = function() {
     return this.sailArrowStyle.isVisible;
 };
 
@@ -114,7 +114,7 @@ LBSailSim.PhaserEnv.prototype.areForceArrowsVisible = function() {
  * @param {Boolean} isVisible   If true the velocity arrows are displayed, otherwise they are hidden.
  * @returns {Boolean}   True if the velocity arrows were visible prior to this call.
  */
-LBSailSim.PhaserEnv.prototype.setVelocityArrowsVisible = function(isVisible) {
+LBSailSim.PhaserSailEnv.prototype.setVelocityArrowsVisible = function(isVisible) {
     var wasVisible = this.areVelocityArrowsVisible();
     this.boatVelocityArrowStyle.isVisible = isVisible;
     this.appWindVelocityArrowStyle.isVisible = isVisible;
@@ -124,7 +124,7 @@ LBSailSim.PhaserEnv.prototype.setVelocityArrowsVisible = function(isVisible) {
 /**
  * @returns {Boolean}   True if the velocity arrows are currently displayed.
  */
-LBSailSim.PhaserEnv.prototype.areVelocityArrowsVisible = function() {
+LBSailSim.PhaserSailEnv.prototype.areVelocityArrowsVisible = function() {
     return this.boatVelocityArrowStyle.isVisible;
 };
 
@@ -137,7 +137,7 @@ LBSailSim.PhaserEnv.prototype.areVelocityArrowsVisible = function() {
  * @param {type} rotDeg
  * @returns {LBSailSim.Vessel}
  */
-LBSailSim.PhaserEnv.prototype.checkoutBoat = function(typeName, boatName, centerX, centerY, rotDeg) {
+LBSailSim.PhaserSailEnv.prototype.checkoutBoat = function(typeName, boatName, centerX, centerY, rotDeg) {
     var childIndex = this.worldGroup.children.length;
     
     var boat = LBSailSim.Env.prototype.checkoutBoat.call(this, typeName, boatName, centerX, centerY, rotDeg);
@@ -149,10 +149,16 @@ LBSailSim.PhaserEnv.prototype.checkoutBoat = function(typeName, boatName, center
     if (sprite) {
         this.worldGroup.addAt(sprite, childIndex);
     }
+    
+    // TEST!!!
+    var cannonBoat = new LBSailSim.CannonBoat(this, boat);
+    this.worldGroup.add(cannonBoat.graphics);
+    this.physicsLink.setBodyCallback(boat, this);
+    
     return boat;
 };
 
-LBSailSim.PhaserEnv.prototype._createBoatInstance = function(typeName, boatName, data) {
+LBSailSim.PhaserSailEnv.prototype._createBoatInstance = function(typeName, boatName, data) {
     var boat = LBSailSim.Env.prototype._createBoatInstance.call(this, typeName, boatName, data, this);
     
     boat.getForceArrowResultant = function(plane, bounds) {
@@ -174,7 +180,7 @@ LBSailSim.PhaserEnv.prototype._createBoatInstance = function(typeName, boatName,
  * @param {Boolean} isSail  True if the foil instance is an airfoil, false if hydrofoil.
  * @returns {undefined}
  */
-LBSailSim.PhaserEnv.prototype.foilInstanceLoaded = function(vessel, foilInstance, data, isSail) {
+LBSailSim.PhaserSailEnv.prototype.foilInstanceLoaded = function(vessel, foilInstance, data, isSail) {
     var sprite = this._loadObj3DSprite(vessel, foilInstance, data);
     
     var arrowStyle = (isSail) ? this.sailArrowStyle : this.foilArrowStyle;
@@ -187,16 +193,20 @@ LBSailSim.PhaserEnv.prototype.foilInstanceLoaded = function(vessel, foilInstance
     }
 };
 
-LBSailSim.PhaserEnv.prototype.displayObjectsUpdated = function(topRigidBody, rigidBody) {
+LBSailSim.PhaserSailEnv.prototype.displayObjectsUpdated = function(topRigidBody, rigidBody) {
     var sprite = this.physicsLink.getRigidBodyDisplayObject(rigidBody);
     if (sprite) {
         if (rigidBody.foilDetails) {
             sprite.scale.y = (rigidBody.foilDetails.angleDeg * this.phaserEnv.ySign < 0) ? 1 : -1;
         }
     }
+    
+    if (rigidBody._lbCannonBoat) {
+        rigidBody._lbCannonBoat.update();
+    }
 };
 
-LBSailSim.PhaserEnv.prototype._loadObj3DSprite = function(vessel, object, data) {
+LBSailSim.PhaserSailEnv.prototype._loadObj3DSprite = function(vessel, object, data) {
     if (!object || !object.obj3D || !data) {
         return undefined;
     }
@@ -222,11 +232,11 @@ LBSailSim.PhaserEnv.prototype._loadObj3DSprite = function(vessel, object, data) 
     return sprite;
 };
 
-LBSailSim.PhaserEnv.prototype._boatCheckedOut = function(boat, data) {
+LBSailSim.PhaserSailEnv.prototype._boatCheckedOut = function(boat, data) {
     this.physicsLink.addRigidBody(boat, data);
 };
 
-LBSailSim.PhaserEnv.prototype._boatReturned = function(boat) {
+LBSailSim.PhaserSailEnv.prototype._boatReturned = function(boat) {
     this.physicsLink.removeRigidBody(boat);
 };
 
@@ -234,10 +244,46 @@ LBSailSim.PhaserEnv.prototype._boatReturned = function(boat) {
  * The main simulation update method, call from the {@Phaser.State}'s update() method.
  * @returns {undefined}
  */
-LBSailSim.PhaserEnv.prototype.update = function() {
+LBSailSim.PhaserSailEnv.prototype.update = function() {
     var dt = this.physicsLink.timeStep();
     LBSailSim.Env.prototype.update.call(this, dt);
     
     this.physicsLink.update(dt);
 };
 
+LBSailSim.CannonBoat = function(phaserEnv, boat) {
+    this.phaserSailEnv = phaserEnv;
+    this.boat = boat;
+    this.graphics = phaserEnv.game.add.graphics();
+    boat._lbCannonBoat = this;
+};
+
+LBSailSim.CannonBoat.prototype = {
+    update: function() {
+        var g = this.graphics;
+        var phaserEnv = this.phaserSailEnv.phaserEnv;
+        var body = LBPhaser.CannonLink.getCannonBody(this.boat);
+        this.phaserSailEnv.physicsLink.updateSpriteFromRigidBody(this.boat, g);
+        
+        g.clear();
+        
+        g.lineStyle(1, 0x00FF00);
+        
+        for (var s = 0; s < body.shapes.length; ++s) {
+            var shape = body.shapes[s];
+            var sx = body.shapeOffsets[s].x + this.boat.centerOfMass.x;
+            var sy = body.shapeOffsets[s].y + this.boat.centerOfMass.y;
+            for (var f = 0; f < shape.faces.length; ++f) {
+                var face = shape.faces[f];
+                var v = shape.vertices[face[0]];
+                g.moveTo(phaserEnv.toPixelsX(v.x + sx), phaserEnv.toPixelsY(v.y + sy));
+                for (var v = 1; v < face.length; ++v) {
+                    var v = shape.vertices[face[v]];
+                    g.lineTo(phaserEnv.toPixelsX(v.x + sx), phaserEnv.toPixelsY(v.y + sy));
+                }
+            }
+        }
+    },
+    
+    constructor: LBSailSim.CannonBoat
+};

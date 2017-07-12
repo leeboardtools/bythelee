@@ -101,6 +101,7 @@ LBPhaser.P2Link.prototype.timeStep = function() {
 LBPhaser.P2Link.prototype.update = function(dt) {
     this._updateFromP2();
     this._applyToP2(dt);
+    ++this.updateCount;
 };
 
 /**
@@ -133,7 +134,6 @@ LBPhaser.P2Link.prototype._updateRigidBodyFromPhaser = function(rigidBody) {
  */
 LBPhaser.P2Link.prototype._applyToP2 = function(dt) {
     this.rigidBodies.forEach(this._updateP2BodyFromLB3, { 'p2link': this, 'dt': dt });
-    ++this.updateCount;
     return this;
 };
 

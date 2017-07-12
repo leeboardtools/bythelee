@@ -17,6 +17,27 @@
 
 /* global Leeboard, QUnit, LBPhysics, LBGeometry, LBMath, LBFoils */
 
+
+LBFoils.Foil.prototype.localForceTest = function(rho, qInfSpeed, start, end, delta) {
+    console.log("LBFoils.Foil.localForceTest:");
+    console.log("Deg\t\tApplPoint.x\tApplPoint.y\t\tForce.x\tForce.y\t\tMoment.z");
+    var resultant = new LBPhysics.Resultant3D();
+    var details = {};
+    var qInfLocal = new LBGeometry.Vector2();
+    for (var deg = start; deg < end; deg += delta) {
+        var rad = deg * LBMath.DEG_TO_RAD;
+        qInfLocal.set(Math.cos(rad) * qInfSpeed, Math.sin(rad) * qInfSpeed);
+        this.calcLocalForce(rho, qInfLocal, details, resultant);
+        var string = deg + "\t" 
+                //+ "\t" + resultant.applPoint.x + "\t" + resultant.applPoint.y + "\t" 
+                + "\t" + resultant.force.x + "\t" + resultant.force.y + "\t"
+                + "\t" + resultant.moment.z
+                + "\t" + details.coefs.stallFraction;
+        console.log(string);
+    }
+};
+
+
 QUnit.test( "ClCd.calcLiftDragMoment()", function( assert ) {
     var cl = 1;
     var cd = 2;

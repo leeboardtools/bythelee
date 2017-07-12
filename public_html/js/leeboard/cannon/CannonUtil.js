@@ -15,7 +15,7 @@
  */
 
 
-/* global CANNON, LBGeometry, LBMath, Leeboard */
+/* global CANNON, LBGeometry, LBMath, Leeboard, LBPhysics */
 
 /**
  * @namespace LBCannon
@@ -144,7 +144,10 @@ LBCannon.addVolumesToBody = function(body, volumes) {
         var shape = new CANNON.ConvexPolyhedron(vertices, volumes[i].faces());
         shape._lbVolume = volumes[i];
         shape._lbCenterOffset = centerOffset;
-                
+        
+        if (volumes[i].mass) {
+            body.mass += volumes[i].mass;
+        }
         body.addShape(shape, offset);
     }
     return body;
@@ -156,9 +159,11 @@ LBCannon.addVolumesToBody = function(body, volumes) {
  * @param {CANNON.Body} body    The Cannon body.
  * @param {LBGeometry.Vector3} centerOfMass The position of the center of mass.
  * @param {Number}  [mass]  The mass, if undefined the mass will not be modified.
+ * @param {LBGeometry.Matrix3}  [inertia\   The inertia, if undefined the inertia computed
+ * by the Cannon body will be used.
  * @returns {CANNON.Body}   body.
  */
-LBCannon.updateBodyCenterOfMass = function(body, centerOfMass, mass) {
+LBCannon.updateBodyCenterOfMass = function(body, centerOfMass, mass, inertia) {
     if (Leeboard.isVar(mass)) {
         body.mass = mass;
     }
@@ -173,11 +178,24 @@ LBCannon.updateBodyCenterOfMass = function(body, centerOfMass, mass) {
         }
     }
     
-    body.updateMassProperties();
-    
     body.position.x += centerOfMass.x;
     body.position.y += centerOfMass.y;
     body.position.z += centerOfMass.z;
+    
+    body.updateMassProperties();
+    
+    if (inertia) {
+        var I = body.inertia;
+        I.x = LBPhysics.getInertiaXX(inertia);
+        I.y = LBPhysics.getInertiaYY(inertia);
+        I.z = LBPhysics.getInertiaXZ(inertia);
+        body.invInertia.set(
+            I.x > 0 ? 1.0 / I.x : 0,
+            I.y > 0 ? 1.0 / I.y : 0,
+            I.z > 0 ? 1.0 / I.z : 0
+        );
+        body.updateInertiaWorld(true);
+    }
     
     return body;
 };

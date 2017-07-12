@@ -60,7 +60,7 @@ LBPhaser.PhysicsLink.prototype = {
      * @returns {LBPhaser.P2Link}   this.
      */
     addFixedObject: function(object) {
-        
+        throw 'addFixedObject not implemented';
     },
     
     /**
@@ -225,8 +225,8 @@ LBPhaser.PhysicsLink.prototype = {
         }        
 
         var pos = LBPhaser.PhysicsLink._working3DPos;
-        if (sprite.lbLocalOffset) {
-            pos.copy(sprite.lbLocalOffset);
+        if (sprite._lbLocalOffset) {
+            pos.copy(sprite._lbLocalOffset);
         }
         else {
             pos.zero();
@@ -298,7 +298,7 @@ LBPhaser.PhysicsLink.prototype = {
  */
 LBPhaser.PhysicsLink.createSpriteFromData = function(game, data) {
     var sprite = new Phaser.Sprite(game, data.x, data.y, data.key, data.frame);
-    sprite.lbLocalOffset = new LBGeometry.Vector3();    
+    sprite._lbLocalOffset = new LBGeometry.Vector3();    
     Leeboard.copyCommonProperties(sprite, data);
     return sprite;
 };
@@ -311,7 +311,7 @@ LBPhaser.PhysicsLink.createSpriteFromData = function(game, data) {
  */
 LBPhaser.PhysicsLink.createImageFromData = function(game, data) {
     var sprite = new Phaser.Image(game, data.x, data.y, data.key, data.frame);
-    sprite.lbLocalOffset = new LBGeometry.Vector3();    
+    sprite._lbLocalOffset = new LBGeometry.Vector3();    
     Leeboard.copyCommonProperties(sprite, data);
     return sprite;
 };

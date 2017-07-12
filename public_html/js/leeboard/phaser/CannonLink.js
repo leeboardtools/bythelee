@@ -29,6 +29,7 @@ LBPhaser.CannonLink = function(phaserEnv) {
     
     this.world = new CANNON.World();
     this.world.broadphase = new CANNON.NaiveBroadphase();
+    this.world.defaultContactMaterial.restitution = 0;
     
 /*    this.ground = new CANNON.Body();
     this.ground.type = CANNON.Body.STATIC;
@@ -82,7 +83,7 @@ LBPhaser.CannonLink.prototype.addRigidBody = function(rigidBody, data) {
     
     // TODO: Need to add volume tetras for the rigid body parts.
     LBCannon.addVolumesToBody(body, rigidBody.volumes);    
-    LBCannon.updateBodyCenterOfMass(body, rigidBody.centerOfMass, rigidBody.mass);
+    LBCannon.updateBodyCenterOfMass(body, rigidBody.centerOfMass, rigidBody.mass);//, rigidBody.momentInertia);
     this.world.add(body);
     
     rigidBody._lbCannonBody = body;
@@ -100,6 +101,7 @@ LBPhaser.CannonLink.prototype.addRigidBody = function(rigidBody, data) {
     
     return this;
 };
+
 
 /**
  * @inheritdoc
@@ -133,6 +135,7 @@ LBPhaser.CannonLink.prototype.update = function(dt) {
     
     // Update the Phaser objects.
     this.rigidBodies.forEach(this._updateFromSimStep, this);
+    ++this.updateCount;
 };
 
 /**
@@ -152,9 +155,10 @@ LBPhaser.CannonLink.prototype._applyRigidBodyForces = function(rigidBody) {
     var resultant = rigidBody.getResultant(true);
     
     // TEST!!!
-    resultant.applPoint.z = body.position.z;
+/*    resultant.applPoint.z = body.position.z;
     resultant.force.z = 0;
     resultant.moment.x = resultant.moment.y = 0;
+*/    
     
     body.applyForce(resultant.force, LBPhaser.CannonLink._workingVec3.copy(resultant.applPoint));
     body.torque.vadd(resultant.moment, body.torque);
@@ -179,9 +183,14 @@ LBPhaser.CannonLink.prototype._updateFromSimStep = function(rigidBody) {
     rigidBody.obj3D.position.copy(pos);
     rigidBody.obj3D.quaternion.copy(body.quaternion);
     
+    rigidBody.obj3D.updateMatrixWorld(true);
+    
     var sprite = this.getRigidBodyDisplayObject(rigidBody);
     if (sprite) {
         this.updateSpriteFromRigidBody(rigidBody, sprite);
     }
 };
 
+LBPhaser.CannonLink.getCannonBody = function(rigidBody) {
+    return rigidBody._lbCannonBody;
+};

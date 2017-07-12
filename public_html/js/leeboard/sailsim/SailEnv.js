@@ -280,6 +280,7 @@ LBSailSim.Env.prototype = {
      */
     _boatReturned: function(boat) {
     },
+    
 
     /**
      * Call to update the sailing environment state for a new simulation time step.

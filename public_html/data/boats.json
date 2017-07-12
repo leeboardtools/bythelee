@@ -127,7 +127,7 @@
                         },
                     "phaser_sprite": {
                         "key": "tubby_mainsail",
-                        "lbLocalOffset": {
+                        "_lbLocalOffset": {
                             "x": 0,
                             "y": 0
                         },
@@ -185,7 +185,7 @@
                             "start": { "x": 0, "y": 0 },
                             "end": { "x": 3, "y": 0 }
                         },
-                        "sliceZ": 0.2,
+                        "sliceZ": 2.5,
                         "area": 11.01,
                         "aspectRatio": 3,
                         "libClCdCurve": "Sail"
@@ -208,7 +208,7 @@
                             "start": { "x": 0, "y": 0 },
                             "end": { "x": 1, "y": 0 }
                         },
-                        "sliceZ": 0.2,
+                        "sliceZ": -0.5,
                         "area": 0.75,
                         "aspectRatio": 3,
                         "libClCdCurve": "FlatPlate"
@@ -225,7 +225,7 @@
                         },
                     "phaser_sprite": {
                         "key": "tubby_rudder",
-                        "lbLocalOffset": {
+                        "_lbLocalOffset": {
                             "x": 0.3,
                             "y": 0
                         },
@@ -239,7 +239,7 @@
                             "start": { "x": 0, "y": 0 },
                             "end": { "x": 0.3, "y": 0 }
                         },
-                        "sliceZ": 0.2,
+                        "sliceZ": -0.2,
                         "area": 0.3,
                         "aspectRatio": 5,
                         "libClCdCurve": "FlatPlate"
