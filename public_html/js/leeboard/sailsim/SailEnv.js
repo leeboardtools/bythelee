@@ -58,6 +58,14 @@ LBSailSim.Env = function() {
      * @member {Number}
      */
     this.gravity = 9.81;
+    
+    /**
+     * Array of callback objects. These callback objects are examimed for
+     * the appropriate functions, and if present that function is called at the
+     * appropriate time.
+     * @member {Array}
+     */
+    this.boatCallbacks = [];
 };
 
 LBSailSim.Env.prototype = {
@@ -119,6 +127,29 @@ LBSailSim.Env.prototype = {
         return this.clCdCurves[name];
     },
     
+    
+    /**
+     * Adds a boat callback object.
+     * @param {Object} callback The callback object.
+     * @returns {LBSailSim.Env} this.
+     */
+    addBoatCallback: function(callback) {
+        this.boatCallbacks.push(callback);
+        return this;
+    },
+    
+    /**
+     * Removes a boat callback object.
+     * @param {Object} callback The callback object to remove.
+     * @returns {LBSailSim.Env} this.
+     */
+    removeBoatCallback: function(callback) {
+        var index = this.boatCallbacks.indexOf(callback);
+        if (index >= 0) {
+            this.boatCallbacks.splice(index, 1);
+        }
+        return this;
+    },
 
     /**
      * Loads the boat data objects, actual boat instances are not created.
@@ -195,6 +226,13 @@ LBSailSim.Env.prototype = {
 
     /**
      * Creates and loads a new boat instance. The boat is attached to the sailing environment.
+     * <p>
+     * This will call the function:
+     * <p>
+     * onBoatCheckedOut = function(boat, data) {}
+     * <p>
+     * on any callbacks that have it defined.
+     * 
      * @param {object} typeName The boat's type.
      * @param {object} [boatName] The name of the particular boat instance.
      * @param {Number} [centerX=0] The initial x coordinate of the boat.
@@ -251,6 +289,13 @@ LBSailSim.Env.prototype = {
      * @param {Object} data The data object that was passed to {@link LBSailSim.Env#checkoutBoat}.
      */
     _boatCheckedOut: function(boat, data) {
+        this.boatCallbacks.forEach(
+            function(callback) {
+                if (callback.onBoatCheckedOut) {
+                    callback.onBoatCheckedOut(boat, data);
+                }
+            },
+            this);
     },
 
     /**
@@ -275,10 +320,23 @@ LBSailSim.Env.prototype = {
     /**
      * Called by {@link LBSailSim.Env.returnBoat} when a boat has been returned, lets derived
      * objects update their state.
+     * <p>
+     * This will call the function:
+     * <p>
+     * onBoatReturned = function(boat) {}
+     * <p>
+     * for any callbacks that define it.
      * @protected
      * @param {object} boat The boat that was returned.
      */
     _boatReturned: function(boat) {
+        this.boatCallbacks.forEach(
+            function(callback) {
+                if (callback.onBoatReturned) {
+                    callback.onBoatReturned(boat);
+                }
+            },
+            this);
     },
     
 

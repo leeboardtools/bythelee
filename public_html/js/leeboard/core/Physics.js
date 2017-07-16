@@ -150,9 +150,13 @@ LBPhysics.Resultant3D.prototype = {
      * is a sphere within which the plane application point must be for the application point
      * to be moved to the plane. This prevents the application point from shooting far away
      * when the force direction is near the same direction as the plane.
+     * @param {LBGeometry.Plane} [secondaryPlane]   If defined, a secondary plane, which is
+     * used instead of plane if the intersection point is outside of planeBoundSphere.
+     * planeBoundSphere must be defined for this to be used. This should be orthogonal
+     * to plane.
      * @returns {LBPhysics.Resultant3D}  this.
      */
-    convertToWrench: function(plane, planeBoundsSphere) {
+    convertToWrench: function(plane, planeBoundsSphere, secondaryPlane) {
         var forceMagSq = this.force.lengthSq();
         if (LBMath.isLikeZero(forceMagSq)) {
             return this;
@@ -180,9 +184,18 @@ LBPhysics.Resultant3D.prototype = {
             var line = LBPhysics.Resultant3D._workingLine3;
             line.start.copy(this.applPoint);
             line.end.copy(this.applPoint).add(this.force);
+            var isMoved = false;
             var pos = LBGeometry.getLinePlaneIntersection(plane, line, LBPhysics.Resultant3D._workingPos);
             if (pos) {
                 if (!planeBoundsSphere || planeBoundsSphere.containsPoint(pos)) {
+                    this.applPoint.copy(pos);
+                    isMoved = true;
+                }
+            }
+            
+            if (!isMoved && planeBoundsSphere && secondaryPlane) {
+                pos = LBGeometry.getLinePlaneIntersection(secondaryPlane, line, LBPhysics.Resultant3D._workingPos);
+                if (pos && planeBoundsSphere.containsPoint(pos)) {
                     this.applPoint.copy(pos);
                 }
             }
@@ -660,6 +673,13 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     if (obj3D) {
         this.updateCoords(0);
     }
+    
+    /**
+     * If defined this is the object from which the rigid body was loaded, the object
+     * passed to {@link LBPhysics.RigidBody#load} ({@link LBPhysics.RigidBody#loadBase} really).
+     * @type Object
+     */
+    this.loadData = undefined;
 };
 
 LBPhysics.RigidBody._workingResultant = new LBPhysics.Resultant3D();
@@ -719,6 +739,8 @@ LBPhysics.RigidBody.prototype = {
         }
         
         this.physicalPropertiesDirty = true;
+        
+        this.loadData = data;
         return this;
     },
     
@@ -863,15 +885,18 @@ LBPhysics.RigidBody.prototype = {
      * @param {LBGeometry.Sphere} [wrenchBounds]  If convertToWrench is true and
      * wrenchPlane is specified, this is a bounding sphere within which the application
      * point transfered to the wrenchPlane must lie for it to actually be transferred.
+     * @param {LBGeometry.Plane} [secondaryWrenchPlane] If convertToWrench is true and
+     * both wrenchPlane and wrenchBounds are specified, this is a secondary plane to use
+     * if the wrench force is not within wrenchBounds.
      * @returns {LBPhysics.Resultant3D} The resultant in world coordinates.
      */
-    getResultant: function(convertToWrench, wrenchPlane, wrenchBounds) {
+    getResultant: function(convertToWrench, wrenchPlane, wrenchBounds, secondaryWrenchPlane) {
         this.totalResultant.copy(this.resultant);
         for (var i = 0; i < this.parts.length; ++i) {
             this.totalResultant.addResultant(this.parts[i].getResultant());
         }
         if (convertToWrench) {
-            this.totalResultant.convertToWrench(wrenchPlane, wrenchBounds);
+            this.totalResultant.convertToWrench(wrenchPlane, wrenchBounds, secondaryWrenchPlane);
         }
         else {
             this.totalResultant.moveApplPoint(this.getTotalCenterOfMass());

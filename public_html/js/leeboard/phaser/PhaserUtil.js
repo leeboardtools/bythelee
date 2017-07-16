@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global Leeboard, LBMath, Phaser, LBGeometry */
+/* global Leeboard, LBMath, Phaser, LBGeometry, LBCamera */
 
 /**
  * @namespace LBPhaser
@@ -412,6 +412,20 @@ LBPhaser.Arrow.prototype = {
         var g = this.graphics;
         g.visible = this.style.isVisible && this.isVisible;
         return (g.visible) ? g : undefined;
+    },
+    
+    /**
+     * Call when done with the arrow, this releases references to other objects in the
+     * hope that it can be garbage collected.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        if (this.graphics) {
+            this.graphics.destroy();
+            this.graphics = null;
+            this.env = null;
+            this.style = null;
+        }
     },
   
     constructor: LBPhaser.Arrow

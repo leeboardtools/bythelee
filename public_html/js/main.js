@@ -96,13 +96,13 @@ PlayState.togglePause = function() {
 //
 //--------------------------------------------------
 PlayState.toggleForceArrows = function() {
-    this.sailEnv.setForceArrowsVisible(!this.sailEnv.areForceArrowsVisible());
+    this.sailSimView.setForceArrowsVisible(!this.sailSimView.areForceArrowsVisible());
 };
 
 //
 //--------------------------------------------------
 PlayState.toggleVelocityArrows = function() {
-    this.sailEnv.setVelocityArrowsVisible(!this.sailEnv.areVelocityArrowsVisible());
+    this.sailSimView.setVelocityArrowsVisible(!this.sailSimView.areVelocityArrowsVisible());
 };
 
 
@@ -164,7 +164,8 @@ PlayState._loadLevel = function (data) {
     
     // The worldGroup effectively lets us scroll the world...
     this.worldGroup = this.game.add.group();
-    this.sailEnv.setWorldGroup(this.worldGroup);
+
+    this.sailSimView = new LBSailSim.Phaser2DView(this.sailEnv, this.worldGroup);
     
     this.buoys = this.game.add.group(this.worldGroup);
     
@@ -172,8 +173,8 @@ PlayState._loadLevel = function (data) {
     
     this._spawnCharacters({myBoat: data.myBoat });
     
-    this.appWindArrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.sailEnv.appWindVelocityArrowStyle);
-    this.boatVelocityArrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.sailEnv.boatVelocityArrowStyle);
+    this.appWindArrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.sailSimView.appWindVelocityArrowStyle);
+    this.boatVelocityArrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.sailSimView.boatVelocityArrowStyle);
     
     this._setupHUD();
 };

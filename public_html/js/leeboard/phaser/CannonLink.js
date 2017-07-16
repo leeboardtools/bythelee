@@ -31,13 +31,7 @@ LBPhaser.CannonLink = function(phaserEnv) {
     this.world.broadphase = new CANNON.NaiveBroadphase();
     this.world.defaultContactMaterial.restitution = 0;
     
-/*    this.ground = new CANNON.Body();
-    this.ground.type = CANNON.Body.STATIC;
-    this.ground.addShape(new CANNON.Plane());
-    this.ground.position.z = -1;
-    this.world.add(this.ground);
-*/    
-    this.dt = 1/60;
+   this.dt = 1/60;
 };
 
 LBPhaser.CannonLink._workingVec3 = new CANNON.Vec3();
@@ -75,9 +69,7 @@ LBPhaser.CannonLink.prototype.addFixedObject = function(object) {
  * @param {type} data
  * @returns {undefined}
  */
-LBPhaser.CannonLink.prototype.addRigidBody = function(rigidBody, data) {
-    LBPhaser.PhysicsLink.prototype.addRigidBody.call(this, rigidBody, data);
-    
+LBPhaser.CannonLink.prototype._rigidBodyAdded = function(rigidBody, data) {
     var body = new CANNON.Body();
     body.type = CANNON.Body.DYNAMIC;
     
@@ -93,12 +85,7 @@ LBPhaser.CannonLink.prototype.addRigidBody = function(rigidBody, data) {
     
     body.position.copy(pos);
     body.quaternion.copy(rigidBody.obj3D.quaternion);
-    
-    if (data && data.phaser) {
-        var sprite = LBPhaser.PhysicsLink.createSpriteFromData(this.game, data.phaser.sprite);
-        this.setRigidBodyDisplayObject(rigidBody, sprite);
-    }
-    
+
     return this;
 };
 
@@ -184,11 +171,6 @@ LBPhaser.CannonLink.prototype._updateFromSimStep = function(rigidBody) {
     rigidBody.obj3D.quaternion.copy(body.quaternion);
     
     rigidBody.obj3D.updateMatrixWorld(true);
-    
-    var sprite = this.getRigidBodyDisplayObject(rigidBody);
-    if (sprite) {
-        this.updateSpriteFromRigidBody(rigidBody, sprite);
-    }
 };
 
 LBPhaser.CannonLink.getCannonBody = function(rigidBody) {

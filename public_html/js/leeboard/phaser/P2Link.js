@@ -169,7 +169,7 @@ LBPhaser.P2Link.prototype._updateP2BodyFromLB3 = function(rigidBody) {
  * @returns {Phaser.Physics.P2.Body}    The created/loaded body.
  */
 LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
-    var sprite = LBPhaser.PhysicsLink.createSpriteFromData(game, data.sprite);
+    var sprite = LBPhaser.PhysicsView.createSpriteFromData(game, data.sprite);
     
     // Enabling P2 physics resets the anchor to 0.5, 0.5
     var anchorX = sprite.anchor.x;
