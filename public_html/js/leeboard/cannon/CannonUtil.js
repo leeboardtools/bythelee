@@ -159,7 +159,7 @@ LBCannon.addVolumesToBody = function(body, volumes) {
  * @param {CANNON.Body} body    The Cannon body.
  * @param {LBGeometry.Vector3} centerOfMass The position of the center of mass.
  * @param {Number}  [mass]  The mass, if undefined the mass will not be modified.
- * @param {LBGeometry.Matrix3}  [inertia\   The inertia, if undefined the inertia computed
+ * @param {LBGeometry.Matrix3}  [inertia]   The inertia, if undefined the inertia computed
  * by the Cannon body will be used.
  * @returns {CANNON.Body}   body.
  */

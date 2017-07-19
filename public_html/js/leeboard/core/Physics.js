@@ -717,7 +717,13 @@ LBPhysics.RigidBody.prototype = {
         
         this.volumes.length = 0;
         if (data.volumes) {
-            LBVolume.Volume.loadVolumesFromData(data.volumes, null, this.volumes);
+            var vertices = LBGeometry.loadVector3ArrayFromCoordArray(data.volumes.vertices);
+            
+            this.volumes.length = 0;
+            LBVolume.Volume.loadVolumesFromData(data.volumes, vertices, this.volumes);
+            
+            this.xyOutline = LBVolume.Volume.loadXYOutlineFromData(data.volumes, vertices);
+            
             if (data.mass) {
                 LBVolume.Volume.allocateMassToVolumess(this.volumes, data.mass);
             }

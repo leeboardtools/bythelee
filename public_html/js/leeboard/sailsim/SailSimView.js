@@ -17,7 +17,13 @@
 
 /* global LBSailSim, LBPhaser */
 
-LBSailSim.Phaser2DView = function(sailEnv, worldGroup) {
+/**
+ * Base class for the sailsim Phaser views.
+ * @param {LBSailSim.Env} sailEnv   The sailing environment.
+ * @param {Phaser.Group} worldGroup The parent group for all display objects.
+ * @returns {LBSailSim.PhaserView}
+ */
+LBSailSim.PhaserView = function(sailEnv, worldGroup) {
     LBPhaser.PhysicsView.call(this, sailEnv.physicsLink, worldGroup);
     
     this.sailEnv = sailEnv;    
@@ -38,57 +44,18 @@ LBSailSim.Phaser2DView = function(sailEnv, worldGroup) {
     this.sailEnv.addBoatCallback(this);
     
     this.sailEnv.physicsLink.addView(this);
-    
-/*    
-    // TEST!!!
-    var camera = new LBCamera.OrthographicCamera(-100, 100, 100, -100, 1, 1000);
-    camera = new LBCamera.PerspectiveCamera();
-    camera.position.x = 100;
-    camera.position.y = 50;
-    camera.position.z = 100;
-    camera.updateMatrixWorld(true);
-    
-    var lookAt = new LBGeometry.Vector3(camera.position.x, camera.position.y, -100);
-    camera.lookAt(lookAt);
-    
-    var pos = [
-        new LBGeometry.Vector3(101, 51, -1),
-        new LBGeometry.Vector3(101, 49, -1),
-        new LBGeometry.Vector3(99, 49, -1),
-        new LBGeometry.Vector3(99, 51, -1),
-        new LBGeometry.Vector3(101, 51, 1),
-        new LBGeometry.Vector3(101, 49, 1),
-        new LBGeometry.Vector3(99, 49, 1),
-        new LBGeometry.Vector3(99, 51, 1)
-    ];
-    
-    var matrix = camera.matrixWorld.clone();
-    matrix.getInverse(camera.matrixWorld);
-    var mat2 = matrix;
-    matrix = camera.projectionMatrix.clone();
-    matrix.multiply(mat2);
-    
-    var pos2 = new LBGeometry.Vector3();
-    for (var i = 0; i < pos.length; ++i) {
-        pos2.copy(pos[i]);
-        pos2.applyMatrix4(matrix);
-        console.log(pos[i].x + "\t" + pos[i].y + "\t" + pos[i].z + "\t\t" + pos2.x + "\t" + pos2.y + "\t" + pos2.z);
-    }
-    
-    camera = new LBCamera.PerspectiveCamera();
-    camera.lookAt(lookAt);
-*/
+
 };
 
-LBSailSim.Phaser2DView.prototype = Object.create(LBPhaser.PhysicsView.prototype);
-LBSailSim.Phaser2DView.prototype.constructor = LBSailSim.Phaser2DView;
+LBSailSim.PhaserView.prototype = Object.create(LBPhaser.PhysicsView.prototype);
+LBSailSim.PhaserView.prototype.constructor = LBSailSim.PhaserView;
 
 /**
  * Changes whether or not the force arrows are displayed.
  * @param {Boolean} isVisible   If true the force arrows are displayed, otherwise they are hidden.
  * @returns {Boolean}   True if the force arrows were visible prior to this call.
  */
-LBSailSim.Phaser2DView.prototype.setForceArrowsVisible = function(isVisible) {
+LBSailSim.PhaserView.prototype.setForceArrowsVisible = function(isVisible) {
     var wasVisible = this.areForceArrowsVisible();
     this.sailArrowStyle.isVisible = isVisible;
     this.foilArrowStyle.isVisible = isVisible;
@@ -99,7 +66,7 @@ LBSailSim.Phaser2DView.prototype.setForceArrowsVisible = function(isVisible) {
 /**
  * @returns {Boolean}   True if the force arrows are currently displayed.
  */
-LBSailSim.Phaser2DView.prototype.areForceArrowsVisible = function() {
+LBSailSim.PhaserView.prototype.areForceArrowsVisible = function() {
     return this.sailArrowStyle.isVisible;
 };
 
@@ -108,7 +75,7 @@ LBSailSim.Phaser2DView.prototype.areForceArrowsVisible = function() {
  * @param {Boolean} isVisible   If true the velocity arrows are displayed, otherwise they are hidden.
  * @returns {Boolean}   True if the velocity arrows were visible prior to this call.
  */
-LBSailSim.Phaser2DView.prototype.setVelocityArrowsVisible = function(isVisible) {
+LBSailSim.PhaserView.prototype.setVelocityArrowsVisible = function(isVisible) {
     var wasVisible = this.areVelocityArrowsVisible();
     this.boatVelocityArrowStyle.isVisible = isVisible;
     this.appWindVelocityArrowStyle.isVisible = isVisible;
@@ -118,7 +85,7 @@ LBSailSim.Phaser2DView.prototype.setVelocityArrowsVisible = function(isVisible) 
 /**
  * @returns {Boolean}   True if the velocity arrows are currently displayed.
  */
-LBSailSim.Phaser2DView.prototype.areVelocityArrowsVisible = function() {
+LBSailSim.PhaserView.prototype.areVelocityArrowsVisible = function() {
     return this.boatVelocityArrowStyle.isVisible;
 };
 
@@ -130,49 +97,86 @@ LBSailSim.Phaser2DView.prototype.areVelocityArrowsVisible = function() {
  * @param {Object} data The data object from which the boat was loaded.
  * @returns {undefined}
  */
-LBSailSim.Phaser2DView.prototype.onBoatCheckedOut = function(boat, data) {    
+LBSailSim.PhaserView.prototype.onBoatCheckedOut = function(boat, data) {    
     // The hull is at the bottom...
-    var game = this.sailEnv.phaserEnv.game;
-    if (data && data.phaser) {
-        var sprite = LBPhaser.PhysicsView.createSpriteFromData(game, data.phaser.sprite);
-        this.setRigidBodyDisplayObject(boat, sprite);
-        this.worldGroup.add(sprite);
-    }
+    this._loadDisplayObjectForHull(boat);
     
     // Add the hydrofoils...
-    this._isSail = false;
-    boat.hydroFoils.forEach(this._loadDisplayObjectForRigidBody, this);
+    boat.hydroFoils.forEach(this._loadDisplayObjectForHydrofoil, this);
     
     // Add the airfoils...
-    this._isSail = true;
-    boat.airfoils.forEach(this._loadDisplayObjectForRigidBody, this);
+    boat.airfoils.forEach(this._loadDisplayObjectForAirfoil, this);
 
-    // TEST!!!
-/*        var cannonBoat = new LBSailSim.CannonBoat(this.sailEnv, boat);
-    this.worldGroup.add(cannonBoat.graphics);
-*/        
+    // Add the arrows...
+    this._loadForceArrowHull(boat);
+    boat.hydroFoils.forEach(this._loadForceArrowHydrofoil, this);
+    boat.airfoils.forEach(this._loadForceArrowAirfoil, this);
+};
+
+/**
+ * Called by {@link LBSailSim.PhaserView#onBoatCheckedOut} to handle loading the display
+ * objects for the hull.
+ * @param {LBSailSim.Vessel} boat   The boat to load for.
+ * @returns {undefined}
+ */
+LBSailSim.PhaserView.prototype._loadDisplayObjectForHull = function(boat) {
+};
+
+/**
+ * Called by {@link LBSailSim.PhaserView#onBoatCheckedOut} to handle loading the display
+ * objects for a hydrofoil.
+ * @param {LBSailSim.FoilInstance} rigidBody    The hydrofoil to load for.
+ * @returns {undefined}
+ */
+LBSailSim.PhaserView.prototype._loadDisplayObjectForHydrofoil = function(rigidBody) {
+};
+
+/**
+ * Called by {@link LBSailSim.PhaserView#onBoatCheckedOut} to handle loading the display
+ * objects for an airfoil.
+ * @param {LBSailSim.FoilInstance} rigidBody    The airfoil to load for.
+ * @returns {undefined}
+ */
+LBSailSim.PhaserView.prototype._loadDisplayObjectForAirfoil = function(rigidBody) {
+};
+
+/**
+ * Called by {@link LBSailSim.PhaserView#onBoatCheckedOut} to add the force arrow
+ * for the hull.
+ * @param {LBSailSim.Vessel} boat   The boat.
+ * @returns {undefined}
+ */
+LBSailSim.PhaserView.prototype._loadForceArrowHull = function(boat) {
+    var hullArrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.hullArrowStyle);
+    this.setBodyForceArrow(boat, hullArrow);
 
     boat.getForceArrowResultant = function(plane, bounds, secondaryPlane) {
         return boat.hullResultant.convertToWrench(plane, bounds, secondaryPlane);
     };
 
-    // Add the arrows...
-    var hullArrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.hullArrowStyle);
-    this.setBodyForceArrow(boat, hullArrow);
-
 };
 
-LBSailSim.Phaser2DView.prototype._loadDisplayObjectForRigidBody = function(rigidBody) {
-    var sprite = this._loadObj3DSprite(rigidBody, rigidBody.loadData);
-    
-    var arrowStyle = (this._isSail) ? this.sailArrowStyle : this.foilArrowStyle;
+/**
+ * Called by {@link LBSailSim.PhaserView#onBoatCheckedOut} to add the force arrow
+ * for a hydrofoil.
+ * @param {LBSailSim.FoilInstance} rigidBody    The hydrofoil.
+ * @returns {undefined}
+ */
+LBSailSim.PhaserView.prototype._loadForceArrowHydrofoil = function(rigidBody) {
+    var arrowStyle = this.foilArrowStyle;
     var arrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, arrowStyle);    
     this.setBodyForceArrow(rigidBody, arrow);
-    
-    if (this._isSail && sprite) {
-        // Need a sail flipper...
-        this.setBodyCallback(rigidBody, this);
-    }
+};
+
+/**
+ * Called by {@link LBSailSim.PhaserView#onBoatCheckedOut} to add the force arrow
+ * for an airfoil.
+ * @param {LBSailSim.FoilInstance} rigidBody    The airfoil.
+ * @returns {undefined}
+ */
+LBSailSim.PhaserView.prototype._loadForceArrowAirfoil = function(rigidBody) {
+    var arrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.sailArrowStyle);    
+    this.setBodyForceArrow(rigidBody, arrow);    
 };
 
 /**
@@ -181,7 +185,7 @@ LBSailSim.Phaser2DView.prototype._loadDisplayObjectForRigidBody = function(rigid
  * @param {LBSailSim.Vessel} boat   The boat that was returned..
  * @returns {undefined}
  */
-LBSailSim.Phaser2DView.prototype.onBoatReturned = function(boat) {
+LBSailSim.PhaserView.prototype.onBoatReturned = function(boat) {
     var sprite = this.getRigidBodyDisplayObject(boat);
     if (sprite) {
         this.worldGroup.removeChild(sprite);
@@ -192,7 +196,7 @@ LBSailSim.Phaser2DView.prototype.onBoatReturned = function(boat) {
     // Handle all the parts of the boat...
 };
 
-LBSailSim.Phaser2DView.prototype._loadObj3DSprite = function(object, data) {
+LBSailSim.PhaserView.prototype._loadObj3DSprite = function(object, data) {
     if (!object || !object.obj3D || !data) {
         return undefined;
     }
@@ -227,7 +231,7 @@ LBSailSim.Phaser2DView.prototype._loadObj3DSprite = function(object, data) {
  * @param {LBPhysics.RigidBody} rigidBody   The rigid body with the callback assigned to it.
  * @returns {undefined}
  */
-LBSailSim.Phaser2DView.prototype.onDisplayObjectsUpdated = function(topRigidBody, rigidBody) {
+LBSailSim.PhaserView.prototype.onDisplayObjectsUpdated = function(topRigidBody, rigidBody) {
     var sprite = this.getRigidBodyDisplayObject(rigidBody);
     if (sprite) {
         if (rigidBody.foilDetails) {
@@ -245,7 +249,7 @@ LBSailSim.Phaser2DView.prototype.onDisplayObjectsUpdated = function(topRigidBody
  * hoping this will eventually get garbage collected.
  * @returns {undefined}
  */
-LBSailSim.Phaser2DView.prototype.destroy = function() {
+LBSailSim.PhaserView.prototype.destroy = function() {
     if (this.sailEnv) {
         this.worldGroup = null;
 
@@ -254,6 +258,88 @@ LBSailSim.Phaser2DView.prototype.destroy = function() {
     }
     
     LBPhaser.PhysicsView.protoype.destroy.call(this);
+};
+
+
+/**
+ * Sailing simulator 2D Phaser view, uses sprites.
+ * @param {LBSailSim.Env} sailEnv   The sailing environment.
+ * @param {Phaser.Group} worldGroup The parent group for all display objects.
+ * @returns {LBSailSim.Phaser2DView}
+ */
+LBSailSim.Phaser2DView = function(sailEnv, worldGroup) {
+    LBSailSim.PhaserView.call(this, sailEnv, worldGroup);
+};
+
+LBSailSim.Phaser2DView.prototype = Object.create(LBSailSim.PhaserView.prototype);
+LBSailSim.Phaser2DView.prototype.constructor = LBSailSim.Phaser2DView;
+
+
+LBSailSim.Phaser2DView.prototype._loadDisplayObjectForHull = function(boat) {
+    if (LBPhaser.P2Link.getP2Body(boat)) {
+        // The sprite is already loaded...
+        return;
+    }
+    
+    var data = boat.loadData;
+    if (data && data.phaser) {
+        var game = this.sailEnv.phaserEnv.game;
+        var sprite = LBPhaser.PhysicsView.createSpriteFromData(game, data.phaser.sprite);
+        this.setRigidBodyDisplayObject(boat, sprite);
+        this.worldGroup.add(sprite);
+    }
+};
+
+LBSailSim.Phaser2DView.prototype._loadDisplayObjectForHydrofoil = function(rigidBody) {
+    this._loadObj3DSprite(rigidBody, rigidBody.loadData);
+};
+
+LBSailSim.Phaser2DView.prototype._loadDisplayObjectForAirfoil = function(rigidBody) {
+    var sprite = this._loadObj3DSprite(rigidBody, rigidBody.loadData);
+    
+    if (sprite) {
+        // Need a sail flipper...
+        this.setBodyCallback(rigidBody, this);
+    }
+};
+
+
+/**
+ * Sailing simulator 3D Phaser view, uses a {@link LBPhaser.Project3D} to handle the
+ * projection into 2D.
+ * @param {LBSailSim.Env} sailEnv   The sailing environment.
+ * @param {Phaser.Group} worldGroup The parent group for all display objects.
+ * @returns {LBSailSim.Phaser2DView}
+ */
+LBSailSim.Phaser3DView = function(sailEnv, worldGroup) {
+    LBSailSim.PhaserView.call(this, sailEnv, worldGroup);
+};
+
+LBSailSim.Phaser3DView.prototype = Object.create(LBSailSim.PhaserView.prototype);
+LBSailSim.Phaser3DView.prototype.constructor = LBSailSim.Phaser3DView;
+
+
+LBSailSim.Phaser3DView.prototype._loadDisplayObjectForHull = function(boat) {
+    var data = boat.loadData;
+    if (data && data.phaser) {
+        var game = this.sailEnv.phaserEnv.game;
+        var sprite = LBPhaser.PhysicsView.createSpriteFromData(game, data.phaser.sprite);
+        this.setRigidBodyDisplayObject(boat, sprite);
+        this.worldGroup.add(sprite);
+    }
+};
+
+LBSailSim.Phaser3DView.prototype._loadDisplayObjectForHydrofoil = function(rigidBody) {
+    this._loadObj3DSprite(rigidBody, rigidBody.loadData);
+};
+
+LBSailSim.Phaser3DView.prototype._loadDisplayObjectForAirfoil = function(rigidBody) {
+    var sprite = this._loadObj3DSprite(rigidBody, rigidBody.loadData);
+    
+    if (sprite) {
+        // Need a sail flipper...
+        this.setBodyCallback(rigidBody, this);
+    }
 };
 
 

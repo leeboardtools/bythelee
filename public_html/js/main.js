@@ -83,7 +83,7 @@ PlayState.init = function() {
     this.keys.v.onDown.add(this.toggleVelocityArrows, this);
     
     var physicsEngine = LBSailSim.PhaserSailEnv.P2_PHYSICS;
-    physicsEngine = LBSailSim.PhaserSailEnv.CANNON_PHYSICS;
+    //physicsEngine = LBSailSim.PhaserSailEnv.CANNON_PHYSICS;
     this.sailEnv = new LBSailSim.PhaserSailEnv(this.game, physicsEngine);
 };
 
@@ -165,9 +165,12 @@ PlayState._loadLevel = function (data) {
     // The worldGroup effectively lets us scroll the world...
     this.worldGroup = this.game.add.group();
 
-    this.sailSimView = new LBSailSim.Phaser2DView(this.sailEnv, this.worldGroup);
+    this.sailSimView = new LBSailSim.Phaser3DView(this.sailEnv, this.worldGroup);
     
     this.buoys = this.game.add.group(this.worldGroup);
+    
+    // TEST!!!
+    this.buoys.create(100, 0, "can");
     
     data.buoys.forEach(this._spawnBuoys, this);
     
@@ -194,6 +197,10 @@ PlayState._spawnCharacters = function (data) {
     centerX = this.sailEnv.phaserEnv.fromPixelsX(200);
     centerY = this.sailEnv.phaserEnv.fromPixelsY(100);
     rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(-60);
+
+    centerX = this.sailEnv.phaserEnv.fromPixelsX(100);
+    centerY = this.sailEnv.phaserEnv.fromPixelsY(0);
+    rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(-90);
     //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation);
     

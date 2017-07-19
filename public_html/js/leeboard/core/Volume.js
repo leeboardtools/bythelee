@@ -317,9 +317,7 @@ LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
     if (!vertices) {
         vertices = LBGeometry.loadVector3ArrayFromCoordArray(data.vertices);
     }
-    if (!volumes) {
-        volumes = [];
-    }
+    volumes = volumes || [];
     
     var firstIndex = volumes.length;
     
@@ -383,6 +381,44 @@ LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
     }
     
     return volumes;
+};
+
+/**
+ * Loads an array of vertices representing the outline of a volume in the x-y plane
+ * from properties in a data object. The data object is typically the same as that passed
+ * to {@link LBVolume.Volume.loadVolumesFromData}.
+ * @param {Object} data The data object.
+ * @param {LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
+ * otherwise data should have a vertices property.
+ * @param {Array} [outlineVertices] If defined the array to store the vertices into.
+ * @returns {Array} The array of outline vertices.
+ */
+LBVolume.Volume.loadXYOutlineFromData = function(data, vertices, outlineVertices) {
+    if (!vertices) {
+        vertices = LBGeometry.loadVector3ArrayFromCoordArray(data.vertices);
+    }
+    outlineVertices = outlineVertices || [];
+    
+    if (!data.xyOutlineIndices) {
+        return outlineVertices;
+    }
+    
+    for (var i = 0; i < data.xyOutlineIndices.length; ++i) {
+        var vertex = vertices[data.xyOutlineIndices[i]];
+        outlineVertices.push(new LBGeometry.Vector3(vertex.x, vertex.y));
+    }
+
+    if (data.mirrorPlane) {
+        var mirrorPlane = LBGeometry.loadPlane(data.mirrorPlane);
+        for (var i = outlineVertices.length - 1; i >= 0; --i) {
+            var mirroredVertex = LBGeometry.mirrorPointAboutPlane(mirrorPlane, outlineVertices[i]);
+            if (!LBGeometry.areVectorsNearEqual(mirroredVertex, outlineVertices[i])) {
+                outlineVertices.push(mirroredVertex);
+            }
+        }
+    }
+    
+    return outlineVertices;
 };
 
 

@@ -15,7 +15,7 @@
  */
 
 
-/* global Leeboard, Phaser, LBPhysics, LBGeometry, LBMath, LBPhaser */
+/* global Leeboard, Phaser, LBPhysics, LBGeometry, LBMath, LBPhaser, p2 */
 
 /**
  * Manages linking a {@link https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body|Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody}, updating
@@ -68,19 +68,54 @@ LBPhaser.P2Link.prototype.addRigidBody = function(rigidBody, data) {
     rigidBody._lbP2Body = p2Body;
     p2Body.damping = 0;
     
+    if (rigidBody.xyOutline && (rigidBody.xyOutline.length > 2)) {        
+        var xy = [];
+        var env = this.phaserEnv;
+        
+        var iBegin;
+        var iEnd;
+        var iDelta;
+        // We're presuming the outline is convex...
+        if (LBGeometry.whichSideOfLine(rigidBody.xyOutline[0], rigidBody.xyOutline[1], rigidBody.xyOutline[2]) === LBGeometry.LINE_SIDE_RIGHT) {
+            // Going clockwise...
+            iBegin = rigidBody.xyOutline.length - 1;
+            iEnd = -1;
+            iDelta = -1;
+        }
+        else {
+            iBegin = 0;
+            iEnd = rigidBody.xyOutline.length;
+            iDelta = 1;
+        }
+        
+        for (var i = iBegin; i !== iEnd; i += iDelta) {
+            xy.push([rigidBody.xyOutline[i].x, rigidBody.xyOutline[i].y]);
+        }
+        
+        var convex = new p2.Convex({ vertices: xy });
+        p2Body.clearShapes();
+        
+        var offsetX = env.toPixelsX(convex.centerOfMass[0]);
+        var offsetY = env.toPixelsY(convex.centerOfMass[1]);
+        var sprite = p2Body.sprite;
+        if (sprite) {
+            offsetX += (0.5 - sprite.anchor.x) * sprite.width;
+            offsetY += (0.5 - sprite.anchor.y) * sprite.height;
+        }
+        p2Body.addShape(convex, offsetX, offsetY);
+    }
+    
     p2Body.setCollisionGroup(this.dynamicObjectCollisionGroup);
     p2Body.collides(this.fixedObjectCollisionGroup);
 
     p2Body.x = this.phaserEnv.toPixelsX(rigidBody.obj3D.position.x);
     p2Body.y = this.phaserEnv.toPixelsY(rigidBody.obj3D.position.y);
     p2Body.rotation = this.phaserEnv.toPixelsRotationRad(rigidBody.obj3D.rotation.z);
-    this.setRigidBodyDisplayObject(rigidBody, p2Body.sprite);
-};
+ };
 
 LBPhaser.P2Link.prototype._rigidBodyRemoved = function(rigidBody) {
     if (rigidBody._lbP2Body) {
         rigidBody._lbP2Body.world.removeBody(rigidBody._lbP2Body);
-        this.setRigidBodyDisplayObject(undefined);
         rigidBody._lbP2Body = undefined;
     }
 };
@@ -182,6 +217,8 @@ LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
 
     var p2Body = sprite.body;
     p2Body.mass = data.mass || p2Body.mass;
+    p2Body.clearShapes();
+    p2Body.addRectangle(sprite.width, sprite.height, (0.5 - anchorX) * sprite.width, (0.5 - anchorY) * sprite.height);
 
     Leeboard.copyCommonProperties(p2Body, data.p2Body, function(val) {
         return val !== 'sprite';
@@ -190,3 +227,11 @@ LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
     return p2Body;
 };
 
+/**
+ * Helper that retrieves the P2 body associated with a rigid body object.
+ * @param {LBPhysics.RigidBody} object  The rigid body object.
+ * @returns {Phaser.Physics.P2.Body}    The P2 body, undefined if none assigned.
+ */
+LBPhaser.P2Link.getP2Body = function(object) {
+    return object._lbP2Body;
+};

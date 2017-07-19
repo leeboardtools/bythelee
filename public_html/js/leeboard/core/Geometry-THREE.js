@@ -438,6 +438,18 @@ LBGeometry.isVectorLikeZero = function(vec) {
 };
 
 /**
+ * Determines if two vectors are near equal. 2D vectors are presumed to have a z coordinate of 0.
+ * @param {LBGeometry.Vector2|LBGeometry.Vector3} a The first vector.
+ * @param {LBGeometry.Vector2|LBGeometry.Vector3} b The first vector.
+ * @returns {Boolean}   True if a is very nearly b.
+ */
+LBGeometry.areVectorsNearEqual = function(a, b) {
+    var az = a.z || 0;
+    var bz = b.z || 0;
+    return LBMath.isNearEqual(a.x, b.x) && LBMath.isNearEqual(a.y, b.y) && LBMath.isNearEqual(az, bz);
+};
+
+/**
  * Limits the magnitude of a vector.
  * @param {object} vec  The 2D or 3D vector.
  * @param {Number} mag  The maximum magnitude.
@@ -470,6 +482,43 @@ LBGeometry.makeOrthogonal = function(refVec, store) {
     }
     return store;
 };
+
+/**
+ * Determines which side of a line formed by two points a third point lies.
+ * @param {LBGeometry.Vector2} from The point of the line looking from.
+ * @param {LBGeometry.Vector2} to   The point on the line being looked towards.
+ * @param {LBGeometry.Vector2} point    The point to detemine the side of.
+ * @returns {LBGeometry.LINE_SIDE_RIGHT|LBGeometry.LINE_SIDE_ON_LINE|LBGeometry.LINE_SIDE_LEFT}
+ */
+LBGeometry.whichSideOfLine = function(from, to, point) {
+    var dX = point.x - from.x;
+    var dY = point.y - from.y;
+    var lineX = to.x - from.x;
+    var lineY = to.y - from.y;
+    var cross = dX * lineY - dY * lineX;
+    if (LBMath.isLikeZero(cross)) {
+        return LBGeometry.LINE_SIDE_ON_LINE;
+    }
+    return (cross < 0) ? LBGeometry.LINE_SIDE_LEFT : LBGeometry.LINE_SIDE_RIGHT;
+};
+
+/**
+ * Result returned by {@link LBGeometry.whichSideOfLine} when the point is on the left side.
+ * @constant
+ */
+LBGeometry.LINE_SIDE_LEFT = -1;
+
+/**
+ * Result returned by {@link LBGeometry.whichSideOfLine} when the point is on the line.
+ * @constant
+ */
+LBGeometry.LINE_SIDE_ON_LINE = 0;
+
+/**
+ * Result returned by {@link LBGeometry.whichSideOfLine} when the point is on the right side.
+ * @constant
+ */
+LBGeometry.LINE_SIDE_RIGHT = 1;
 
 
 /**

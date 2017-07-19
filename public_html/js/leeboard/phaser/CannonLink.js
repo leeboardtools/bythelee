@@ -120,8 +120,9 @@ LBPhaser.CannonLink.prototype.update = function(dt) {
     
     this.world.step(dt);
     
-    // Update the Phaser objects.
+    // Update the rigid body objects.
     this.rigidBodies.forEach(this._updateFromSimStep, this);
+    
     ++this.updateCount;
 };
 

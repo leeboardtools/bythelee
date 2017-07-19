@@ -20,6 +20,7 @@
 
 /**
  * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2} or Cannon physics.
+ * This pretty much just ties together the physics link and the sailing environment.
  * @constructor
  * @param {Phaser.Game} game    The Phaser game object.
  * @param {LBSailSim.PhaserSailEnv.P2_PHYSICS|LBSailSim.PhaserSailEnv.CANNON_PHYSICS} physicsType  The physics engine to use.
