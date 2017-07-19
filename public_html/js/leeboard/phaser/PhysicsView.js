@@ -79,6 +79,20 @@ LBPhaser.PhysicsView.prototype = {
     setRigidBodyDisplayObject: function(rigidBody, drawingObject) {
         this._getRigidBodyEntry(rigidBody).displayObject = drawingObject;
     },
+    
+    /**
+     * Destroys the Phaser {@link https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject|DisplayObject} 
+     * associated with a rigid body, if any.
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @returns {undefined}
+     */
+    destroyRigidBodyDisplayObject: function(rigidBody) {
+        var obj = this.getRigidBodyDisplayObject(rigidBody);
+        if (obj) {
+            obj.destroy();
+            this.setRigidBodyDisplayObject(rigidBody, undefined);
+        }
+    },
 
 
     /**
@@ -86,7 +100,7 @@ LBPhaser.PhysicsView.prototype = {
      * @param {LBPhysics.RigidBody} rigidBody The rigid body.
      * @returns {LBPhaser.Arrow}    The force arrow, may be undefined.
      */
-    getBodyForceArrow: function(rigidBody) {
+    getRigidBodyForceArrow: function(rigidBody) {
         return this._getRigidBodyEntry(rigidBody).forceArrow;
     },
     
@@ -96,9 +110,23 @@ LBPhaser.PhysicsView.prototype = {
      * @param {LBPhaser.Arrow} forceArrow   The force arrow.
      * @returns {undefined}
      */
-    setBodyForceArrow: function(rigidBody, forceArrow) {
+    setRigidBodyForceArrow: function(rigidBody, forceArrow) {
         this._getRigidBodyEntry(rigidBody).forceArrow = forceArrow;
     },
+    
+    /**
+     * Destroys the force arrow associated with a rigid body, if any.
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @returns {undefined}
+     */
+    destroyRigidBodyForceArrow: function(rigidBody) {
+        var obj = this.getRigidBodyForceArrow(rigidBody);
+        if (obj) {
+            obj.destroy();
+            this.setRigidBodyForceArrow(rigidBody, undefined);
+        }
+    },
+
     
     /**
      * Retrieves the callback object associated with a rigid body.
@@ -163,7 +191,7 @@ LBPhaser.PhysicsView.prototype = {
             this.updateSpriteFromRigidBody(rigidBody, sprite);
         }
         
-        var forceArrow = this.getBodyForceArrow(rigidBody);
+        var forceArrow = this.getRigidBodyForceArrow(rigidBody);
         if (forceArrow) {
             this.updateForceArrowFromRigidBody(rigidBody, forceArrow);
         }

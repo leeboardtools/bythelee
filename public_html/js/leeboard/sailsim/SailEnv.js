@@ -278,7 +278,9 @@ LBSailSim.Env.prototype = {
      * @returns {object}    The boat instance.
      */
     _createBoatInstance: function(typeName, boatName, data, loadCallback) {
-        return LBSailSim.Vessel.createFromData(data, this, loadCallback);
+        var boat = LBSailSim.Vessel.createFromData(data, this, loadCallback);
+        boat.boatName = boatName;
+        return boat;
     },
     
     /**

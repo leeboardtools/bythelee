@@ -148,10 +148,10 @@ LBSailSim.PhaserView.prototype._loadDisplayObjectForAirfoil = function(rigidBody
  */
 LBSailSim.PhaserView.prototype._loadForceArrowHull = function(boat) {
     var hullArrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.hullArrowStyle);
-    this.setBodyForceArrow(boat, hullArrow);
+    this.setRigidBodyForceArrow(boat, hullArrow);
 
     boat.getForceArrowResultant = function(plane, bounds, secondaryPlane) {
-        return boat.hullResultant.convertToWrench(plane, bounds, secondaryPlane);
+        return boat.hullResultant ? boat.hullResultant.convertToWrench(plane, bounds, secondaryPlane) : undefined;
     };
 
 };
@@ -163,9 +163,8 @@ LBSailSim.PhaserView.prototype._loadForceArrowHull = function(boat) {
  * @returns {undefined}
  */
 LBSailSim.PhaserView.prototype._loadForceArrowHydrofoil = function(rigidBody) {
-    var arrowStyle = this.foilArrowStyle;
-    var arrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, arrowStyle);    
-    this.setBodyForceArrow(rigidBody, arrow);
+    var arrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.foilArrowStyle);    
+    this.setRigidBodyForceArrow(rigidBody, arrow);
 };
 
 /**
@@ -176,7 +175,7 @@ LBSailSim.PhaserView.prototype._loadForceArrowHydrofoil = function(rigidBody) {
  */
 LBSailSim.PhaserView.prototype._loadForceArrowAirfoil = function(rigidBody) {
     var arrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.sailArrowStyle);    
-    this.setBodyForceArrow(rigidBody, arrow);    
+    this.setRigidBodyForceArrow(rigidBody, arrow);    
 };
 
 /**
@@ -186,15 +185,23 @@ LBSailSim.PhaserView.prototype._loadForceArrowAirfoil = function(rigidBody) {
  * @returns {undefined}
  */
 LBSailSim.PhaserView.prototype.onBoatReturned = function(boat) {
-    var sprite = this.getRigidBodyDisplayObject(boat);
-    if (sprite) {
-        this.worldGroup.removeChild(sprite);
-        sprite.destroy();
-    }
+    this.destroyRigidBodyDisplayObject(boat);
+    this.destroyRigidBodyForceArrow(boat);
     
-    // TODO:
-    // Handle all the parts of the boat...
+    boat.hydroFoils.forEach(this._destroyDisplayObjectForHydrofoil, this);
+    boat.airfoils.forEach(this._destroyDisplayObjectForAirfoil, this);
+
+    boat.hydroFoils.forEach(this._destroyForceArrowHydrofoil, this);
+    boat.airfoils.forEach(this._destroyForceArrowAirfoil, this);
 };
+
+LBSailSim.PhaserView.prototype._destroyDisplayObjectForHydrofoil = LBPhaser.PhysicsView.prototype.destroyRigidBodyDisplayObject;
+
+LBSailSim.PhaserView.prototype._destroyDisplayObjectForAirfoil = LBPhaser.PhysicsView.prototype.destroyRigidBodyDisplayObject;
+
+LBSailSim.PhaserView.prototype._destroyForceArrowHydrofoil  = LBPhaser.PhysicsView.prototype.destroyRigidBodyForceArrow;
+
+LBSailSim.PhaserView.prototype._destroyForceArrowAirfoil  = LBPhaser.PhysicsView.prototype.destroyRigidBodyForceArrow;
 
 LBSailSim.PhaserView.prototype._loadObj3DSprite = function(object, data) {
     if (!object || !object.obj3D || !data) {

@@ -124,8 +124,16 @@ LBFoils.ClCdCurve.prototype.test = function(start, end, delta) {
 PlayState.doTest = function() {
     //var cspline = new LBMath.CSpline();
     //cspline.test();
-    var clCdCurve = this.sailEnv.clCdCurves["FlatPlate"];
-    clCdCurve.test(-180, 180, 2);
+//    var clCdCurve = this.sailEnv.clCdCurves["FlatPlate"];
+//    clCdCurve.test(-180, 180, 2);
+   
+    this.sailEnv.returnBoat(this.myBoat);
+   
+    var centerX = this.sailEnv.phaserEnv.fromPixelsX(100);
+    var centerY = this.sailEnv.phaserEnv.fromPixelsY(0);
+    var rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(-90);
+    //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
+    this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyB", centerX, centerY, rotation);
 };
 
 //
