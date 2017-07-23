@@ -341,6 +341,13 @@ LBSailSim.Env.prototype = {
             this);
     },
     
+    /**
+     * Call after physics have been updated to handle any pre-rendering updates.
+     * @returns {object} this.
+     */
+    preRender: function() {
+        
+    },
 
     /**
      * Call to update the sailing environment state for a new simulation time step.

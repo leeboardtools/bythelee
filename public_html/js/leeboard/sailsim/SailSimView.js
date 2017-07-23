@@ -282,12 +282,7 @@ LBSailSim.Phaser2DView.prototype = Object.create(LBSailSim.PhaserView.prototype)
 LBSailSim.Phaser2DView.prototype.constructor = LBSailSim.Phaser2DView;
 
 
-LBSailSim.Phaser2DView.prototype._loadDisplayObjectForHull = function(boat) {
-    if (LBPhaser.P2Link.getP2Body(boat)) {
-        // The sprite is already loaded...
-        return;
-    }
-    
+LBSailSim.Phaser2DView.prototype._loadDisplayObjectForHull = function(boat) {    
     var data = boat.loadData;
     if (data && data.phaser) {
         var game = this.sailEnv.phaserEnv.game;
@@ -316,10 +311,13 @@ LBSailSim.Phaser2DView.prototype._loadDisplayObjectForAirfoil = function(rigidBo
  * projection into 2D.
  * @param {LBSailSim.Env} sailEnv   The sailing environment.
  * @param {Phaser.Group} worldGroup The parent group for all display objects.
+ * @param {LBCamera.Camera} [camera]    If defined the camera for the 3D projection.
  * @returns {LBSailSim.Phaser2DView}
  */
-LBSailSim.Phaser3DView = function(sailEnv, worldGroup) {
+LBSailSim.Phaser3DView = function(sailEnv, worldGroup, camera) {
     LBSailSim.PhaserView.call(this, sailEnv, worldGroup);
+    
+    this.project3D = new LBPhaser.Project3D(sailEnv.phaserEnv, worldGroup, camera);
 };
 
 LBSailSim.Phaser3DView.prototype = Object.create(LBSailSim.PhaserView.prototype);
@@ -328,11 +326,19 @@ LBSailSim.Phaser3DView.prototype.constructor = LBSailSim.Phaser3DView;
 
 LBSailSim.Phaser3DView.prototype._loadDisplayObjectForHull = function(boat) {
     var data = boat.loadData;
-    if (data && data.phaser) {
-        var game = this.sailEnv.phaserEnv.game;
-        var sprite = LBPhaser.PhysicsView.createSpriteFromData(game, data.phaser.sprite);
-        this.setRigidBodyDisplayObject(boat, sprite);
-        this.worldGroup.add(sprite);
+    if (data) {
+        var rigidBodyEntry = this._getRigidBodyEntry(boat);
+
+        if (data.volumes && data.volumes.panels) {
+            rigidBodyEntry.volumePanels = LBPhaser.Project3D.loadVolumePanels(boat.volumes, data.volumes.panels);
+        }
+
+        if (!rigidBodyEntry.volumePanels && data.phaser) {
+            var game = this.sailEnv.phaserEnv.game;
+            var sprite = LBPhaser.PhysicsView.createSpriteFromData(game, data.phaser.sprite);
+            this.setRigidBodyDisplayObject(boat, sprite);
+            this.worldGroup.add(sprite);
+        }
     }
 };
 
@@ -349,43 +355,23 @@ LBSailSim.Phaser3DView.prototype._loadDisplayObjectForAirfoil = function(rigidBo
     }
 };
 
-
-/*
-LBSailSim.CannonBoat = function(phaserEnv, boat) {
-    this.phaserSailEnv = phaserEnv;
-    this.boat = boat;
-    this.graphics = phaserEnv.game.add.graphics();
-    boat._lbCannonBoat = this;
+LBSailSim.Phaser3DView.prototype.beginDisplayObjectsUpdate = function() {
+    this.project3D.start();
 };
 
-LBSailSim.CannonBoat.prototype = {
-    update: function() {
-        var g = this.graphics;
-        var phaserEnv = this.phaserSailEnv.phaserEnv;
-        var body = LBPhaser.CannonLink.getCannonBody(this.boat);
-        this.phaserSailEnv.physicsLink.updateSpriteFromRigidBody(this.boat, g);
-        
-        g.clear();
-        
-        g.lineStyle(1, 0x00FF00);
-        
-        for (var s = 0; s < body.shapes.length; ++s) {
-            var shape = body.shapes[s];
-            var sx = body.shapeOffsets[s].x + this.boat.centerOfMass.x;
-            var sy = body.shapeOffsets[s].y + this.boat.centerOfMass.y;
-            for (var f = 0; f < shape.faces.length; ++f) {
-                var face = shape.faces[f];
-                var v = shape.vertices[face[0]];
-                g.moveTo(phaserEnv.toPixelsX(v.x + sx), phaserEnv.toPixelsY(v.y + sy));
-                for (var v = 1; v < face.length; ++v) {
-                    var v = shape.vertices[face[v]];
-                    g.lineTo(phaserEnv.toPixelsX(v.x + sx), phaserEnv.toPixelsY(v.y + sy));
-                }
-            }
-        }
-    },
+LBSailSim.Phaser3DView.prototype._updateDisplayObjects = function(rigidBody) {
     
-    constructor: LBSailSim.CannonBoat
+    // TEST!!!
+//    rigidBody.obj3D.setRotationFromQuaternion(new LBGeometry.Quaternion(-0.269453714815565, 0.653754308262741, 0.269453714815564, 0.653754308262738));
+    
+    var rigidBodyEntry = this._getRigidBodyEntry(rigidBody);
+    LBPhaser.Project3D.projectVolumePanels(this.project3D, rigidBodyEntry.volumePanels, 
+            rigidBody.obj3D.matrixWorld);
+    
+    LBSailSim.PhaserView.prototype._updateDisplayObjects.call(this, rigidBody);
 };
-*/
+
+LBSailSim.Phaser3DView.prototype.endDisplayObjectsUpdate = function() {
+    this.project3D.end();
+};
 

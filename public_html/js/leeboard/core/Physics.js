@@ -685,6 +685,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
 LBPhysics.RigidBody._workingResultant = new LBPhysics.Resultant3D();
 LBPhysics.RigidBody._workingMoment = new LBGeometry.Vector3();
 LBPhysics.RigidBody._workingPos = new LBGeometry.Vector3();
+LBPhysics.RigidBody._workingEuler = new LBGeometry.Euler();
 
 LBPhysics.RigidBody.prototype = {
     /**
@@ -808,10 +809,20 @@ LBPhysics.RigidBody.prototype = {
      * Sets the rotation of the rigid body about the z-axis, in radians.
      * @param {Number} rad  The rotation about the z-axis, in radians. The rotation
      * is absolute with respect to the base's coordinate system.
+     * @param {Boolean} [keepOtherRotations=false]  If true the rotations about the
+     * x and y axes are kept.
      * @returns {LBPhysics.RigidBody}   this.
      */
-    setZRotationRad: function(rad) {
-        this.obj3D.setRotationFromEuler(LBGeometry.createEulerRad(0, 0, rad));
+    setZRotationRad: function(rad, keepOtherRotations) {
+        if (keepOtherRotations) {
+            var euler = LBPhysics.RigidBody._workingEuler.setFromRotationMatrix(this.obj3D.matrixWorld, "ZXY");
+            euler.z = rad;
+            this.obj3D.setRotationFromEuler(euler, "ZXY");
+        }
+        else {
+            this.obj3D.setRotationFromEuler(LBGeometry.createEulerRad(0, 0, rad));
+        }
+        this.obj3D.updateMatrixWorld();
         return this;
     },
     
@@ -819,10 +830,12 @@ LBPhysics.RigidBody.prototype = {
      * Sets the rotation of the rigid body about the z-axis, in degrees.
      * @param {Number} deg  The rotation about the z-axis, in degrees. The rotation
      * is absolute with respect to the base's coordinate system.
+     * @param {Boolean} [keepOtherRotations=false]  If true the rotations about the
+     * x and y axes are kept.
      * @returns {LBPhysics.RigidBody}   this.
      */
-    setZRotationDeg: function(deg) {
-        return this.setZRotationRad(deg * LBMath.DEG_TO_RAD);
+    setZRotationDeg: function(deg, keepOtherRotations) {
+        return this.setZRotationRad(deg * LBMath.DEG_TO_RAD, keepOtherRotations);
     },
 
     /**

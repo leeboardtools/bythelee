@@ -156,7 +156,7 @@ LBPhaser.P2Link.prototype._updateRigidBodyFromPhaser = function(rigidBody) {
         // Phaser negates the coordinate system between P2 and {@link PHaser.Physics.P2}.
         rigidBody.setXYZ(this.phaserEnv.fromPixelsX(p2Body.x), this.phaserEnv.fromPixelsY(p2Body.y), 
             rigidBody.obj3D.position.z);
-        rigidBody.setZRotationRad(this.phaserEnv.ySign * p2Body.rotation);
+        rigidBody.setZRotationRad(this.phaserEnv.ySign * p2Body.rotation, true);
         rigidBody.obj3D.updateMatrixWorld();
     }
 };
@@ -182,8 +182,22 @@ LBPhaser.P2Link.prototype._updateP2BodyFromLB3 = function(rigidBody) {
 
     var resultant = rigidBody.getResultant(true);
 
-    p2Body.mass = rigidBody.getTotalMass();
-    p2Body.inertia = LBPhysics.getInertiaZZ(rigidBody.momentInertia);
+    var mass = rigidBody.getTotalMass();
+    if ((mass > 0) && (mass !== p2Body.mass)) {
+        p2Body.mass = mass;
+        p2Body.invMass = 1./mass;
+        p2Body.data.mass = mass;
+        p2Body.data.invMass = p2Body.invMass;
+    }
+
+    var inertia = LBPhysics.getInertiaZZ(rigidBody.momentInertia);
+    if ((inertia > 0) && (inertia !== p2Body.inertia)) {
+        p2Body.inertia = inertia;
+        p2Body.invInertia = 1./inertia;
+        p2Body.data.inertia = p2Body.inertia;
+        p2Body.data.invInertia = p2Body.invInertia;
+        p2Body.data.updateSolveMassProperties();
+    }
 
     var x = resultant.applPoint.x - rigidBody.obj3D.position.x;
     var y = resultant.applPoint.y - rigidBody.obj3D.position.y;

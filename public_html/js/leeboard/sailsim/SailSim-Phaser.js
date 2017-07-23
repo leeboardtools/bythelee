@@ -78,6 +78,14 @@ LBSailSim.PhaserSailEnv.prototype._boatReturned = function(boat) {
 };
 
 /**
+ * Call after physics have been updated to updated the display objects.
+ * @returns {undefined}
+ */
+LBSailSim.PhaserSailEnv.prototype.preRender = function() {
+    this.physicsLink.updateDisplayObjects();
+};
+
+/**
  * The main simulation update method, call from the {@link Phaser.State}'s update() method.
  * @returns {undefined}
  */

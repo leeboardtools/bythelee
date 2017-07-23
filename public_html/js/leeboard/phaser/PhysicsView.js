@@ -171,6 +171,24 @@ LBPhaser.PhysicsView.prototype = {
         var id = this.physicsLink.getRigidBodyId(rigidBody);
         this.rigidBodyEntries[id] = undefined;
     },
+    
+    /**
+     * Called by {@link LBPhaser.PhysicsLink} before it starts calling {@link LBPhaser.PhysicsView#updateRigidBodyDisplayObjects}
+     * for each rigid body.
+     * @returns {undefined}
+     */
+    beginDisplayObjectsUpdate: function() {
+        
+    },
+    
+    /**
+     * Called by {@link LBPhaser.PhysicsLink} after it has finished calling {@link LBPhaser.PhysicsView#updateRigidBodyDisplayObjects}
+     * for each rigid body.
+     * @returns {undefined}
+     */
+    endDisplayObjectsUpdate: function() {
+        
+    },
 
     /**
      * Called by {@link LBPhaser.PhysicsLink} to have the view update from the current

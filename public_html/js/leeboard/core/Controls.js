@@ -260,7 +260,7 @@ LBControls.SteppedController.prototype = {
         this.name = data.name || "";
         
         if (data.steps) {
-            this.steps = data.steps.slice(0, data.steps.length);
+            this.steps = data.steps.slice();
         }
         
         this.currentValue = data.currentValue || 0;

@@ -139,7 +139,7 @@ PlayState.doTest = function() {
 //
 //--------------------------------------------------
 PlayState.create = function() {
-    this.camera.flash('#000000');
+    //this.camera.flash('#000000');
     this.world.setBounds(-this.game.width / 2, -this.game.height / 2, this.game.width, this.game.height);
     this.game.world.bounds.setTo(-10000, -10000, 20000, 20000);
     this.game.physics.setBoundsToWorld();
@@ -174,11 +174,9 @@ PlayState._loadLevel = function (data) {
     this.worldGroup = this.game.add.group();
 
     this.sailSimView = new LBSailSim.Phaser3DView(this.sailEnv, this.worldGroup);
+    //this.sailSimView = new LBSailSim.Phaser2DView(this.sailEnv, this.worldGroup);
     
     this.buoys = this.game.add.group(this.worldGroup);
-    
-    // TEST!!!
-    this.buoys.create(100, 0, "can");
     
     data.buoys.forEach(this._spawnBuoys, this);
     
@@ -192,7 +190,9 @@ PlayState._loadLevel = function (data) {
 
 //--------------------------------------------------
 PlayState._spawnBuoys = function(data) {
-    var buoy = this.buoys.create(data.x, data.y, data.image);
+    var x = this.sailEnv.phaserEnv.toPixelsX(data.x);
+    var y = this.sailEnv.phaserEnv.toPixelsY(data.y);
+    var buoy = this.buoys.create(x, y, data.image);
     this.sailEnv.physicsLink.addFixedObject(buoy);
 };
 
@@ -213,6 +213,11 @@ PlayState._spawnCharacters = function (data) {
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation);
     
 //    this.otherBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyB", centerX, centerY - 10, 0);
+    // TEST!!!
+    var roll = 0;
+    var pitch = 0;
+    this.myBoat.obj3D.setRotationFromEuler(new LBGeometry.Euler(roll * LBMath.DEG_TO_RAD, pitch * LBMath.DEG_TO_RAD, 0));
+    this.myBoat.obj3D.updateMatrixWorld(true);
 };
 
 //--------------------------------------------------
@@ -341,6 +346,13 @@ PlayState._setupHUD = function() {
     }
 };
 
+//
+//--------------------------------------------------
+PlayState.preRender = function() {
+    if (!this.game.paused) {
+        this.sailEnv.preRender();
+    }
+};
 
 //
 //--------------------------------------------------
@@ -408,7 +420,7 @@ PlayState._updateHUD = function() {
     
     if (this.rollText) {
         var euler = new LBGeometry.Euler();
-        euler.setFromRotationMatrix(this.myBoat.obj3D.matrixWorld);
+        euler.setFromRotationMatrix(this.myBoat.obj3D.matrixWorld, "ZXY");
         this.rollText.text = "Roll: " + LBMath.round(euler.x * LBMath.RAD_TO_DEG);
         this.pitchText.text = "Pitch: " + LBMath.round(euler.y * LBMath.RAD_TO_DEG);
     }
@@ -549,6 +561,11 @@ PlayState._updateCamera = function() {
 
     this.worldGroup.position.x = -x;
     this.worldGroup.position.y = -y;
+    
+    if (this.sailSimView.project3D && this.sailSimView.project3D.camera) {
+        this.sailSimView.project3D.camera.position.x = this.myBoat.obj3D.position.x;
+        this.sailSimView.project3D.camera.position.y = this.myBoat.obj3D.position.y;
+    }
 
     var cosBoat = Math.cos(rotation);
     var sinBoat = Math.sin(rotation);
@@ -594,10 +611,13 @@ window.onload = function() {
     var config = {
         width: "100",
         height: "100",
-        renderer: Phaser.AUTO,
+        // There is a bug in the WebGL renderer
+        renderer: Phaser.CANVAS,
         parent: "game",
         physicsConfig: PlayState
     };
+    //config.width = 800;
+    //config.height = 800;
     
     game = new Phaser.Game(config);
 

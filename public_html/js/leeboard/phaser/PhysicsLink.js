@@ -31,15 +31,6 @@ LBPhaser.PhysicsLink = function(phaserEnv) {
     this.phaserEnv = phaserEnv;
     this.game = phaserEnv.game;
     
-    // We're overriding the stage's updateTransform() method so we can update the
-    // sprites from the current obj3D positions of the rigid bodies. The postUpdate()
-    // methods all seem to be internal, so I'm hooking into updateTransform() because
-    // that's currently called right after the P2 bodies update the positions of their
-    // sprites (which is done in {Phaser.Physics.P2.Body.postUpdate()}.
-    this.savedUpdateTransform = this.game.stage.updateTransform;
-    this.game.stage._physicsLink = this;
-    this.game.stage.updateTransform = this._stageUpdateTransform;
-    
     this.rigidBodies = [];
     
     this.views = [];
@@ -181,19 +172,6 @@ LBPhaser.PhysicsLink.prototype = {
     
     
     /**
-     * Our hook into {@link https://photonstorm.github.io/phaser-ce/Phaser.Stage#updateTransform|Phaser.Stage#updateTransform}.
-     * @protected
-     * @returns {undefined}
-     */
-    _stageUpdateTransform: function() {
-        var me = this._physicsLink;
-        me.savedUpdateTransform.call(this);
-        
-        me.updateDisplayObjects();
-        ++this.stageUpdateCount;
-    },
-    
-    /**
      * Updates any Phaser display object that have been attached to any of the rigid bodies or their
      * parts.
      * <p>
@@ -201,7 +179,15 @@ LBPhaser.PhysicsLink.prototype = {
      * @returns {undefined}
      */
     updateDisplayObjects: function() {
+        this.views.forEach(function(view) {
+            view.beginDisplayObjectsUpdate();
+        });
+        
         this.rigidBodies.forEach(this._updateDisplayObjects, this);
+
+        this.views.forEach(function(view) {
+            view.endDisplayObjectsUpdate();
+        });        
     },
 
     _updateDisplayObjects: function(rigidBody) {
