@@ -115,6 +115,15 @@ LBPhaser.CannonLink.prototype.timeStep = function() {
  * @returns {undefined}
  */
 LBPhaser.CannonLink.prototype.update = function(dt) {
+    if (this.updateCount === 0) {
+        // Gotta sync up first time through...
+        this.rigidBodies.forEach(this._updateFromSimStep, this);
+        this.dtCurrent = 0;
+    }
+    else {
+        this.dtCurrent = this.dt;
+    }
+    
     // Generate the forces...
     this.rigidBodies.forEach(this._applyRigidBodyForces, this);
     
@@ -138,7 +147,7 @@ LBPhaser.CannonLink.prototype._applyRigidBodyForces = function(rigidBody) {
         return;
     }
 
-    rigidBody.updateForces(this.dt);
+    rigidBody.updateForces(this.dtCurrent);
 
     var resultant = rigidBody.getResultant(true);
     
@@ -146,7 +155,7 @@ LBPhaser.CannonLink.prototype._applyRigidBodyForces = function(rigidBody) {
 /*    resultant.applPoint.z = body.position.z;
     resultant.force.z = 0;
     resultant.moment.x = resultant.moment.y = 0;
-*/    
+  */ 
     
     body.applyForce(resultant.force, LBPhaser.CannonLink._workingVec3.copy(resultant.applPoint));
     body.torque.vadd(resultant.moment, body.torque);

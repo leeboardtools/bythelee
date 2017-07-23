@@ -83,7 +83,7 @@ PlayState.init = function() {
     this.keys.v.onDown.add(this.toggleVelocityArrows, this);
     
     var physicsEngine = LBSailSim.PhaserSailEnv.P2_PHYSICS;
-    //physicsEngine = LBSailSim.PhaserSailEnv.CANNON_PHYSICS;
+    physicsEngine = LBSailSim.PhaserSailEnv.CANNON_PHYSICS;
     this.sailEnv = new LBSailSim.PhaserSailEnv(this.game, physicsEngine);
 };
 

@@ -245,10 +245,6 @@ LBSailSim.PhaserView.prototype.onDisplayObjectsUpdated = function(topRigidBody, 
             sprite.scale.y = (rigidBody.foilDetails.angleDeg * this.sailEnv.phaserEnv.ySign < 0) ? 1 : -1;
         }
     }
-    
-    if (rigidBody._lbCannonBoat) {
-        rigidBody._lbCannonBoat.update();
-    }
 };
 
 /**
@@ -359,11 +355,7 @@ LBSailSim.Phaser3DView.prototype.beginDisplayObjectsUpdate = function() {
     this.project3D.start();
 };
 
-LBSailSim.Phaser3DView.prototype._updateDisplayObjects = function(rigidBody) {
-    
-    // TEST!!!
-//    rigidBody.obj3D.setRotationFromQuaternion(new LBGeometry.Quaternion(-0.269453714815565, 0.653754308262741, 0.269453714815564, 0.653754308262738));
-    
+LBSailSim.Phaser3DView.prototype._updateDisplayObjects = function(rigidBody) {    
     var rigidBodyEntry = this._getRigidBodyEntry(rigidBody);
     LBPhaser.Project3D.projectVolumePanels(this.project3D, rigidBodyEntry.volumePanels, 
             rigidBody.obj3D.matrixWorld);
