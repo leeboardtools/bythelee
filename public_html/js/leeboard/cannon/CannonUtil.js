@@ -84,6 +84,13 @@ Object.defineProperty(LBCannon.Vec3Proxy.prototype, 'z', {
     }
 });
 
+    
+LBCannon.Vec3Proxy.prototype.transformProxy = function(xfrm) {
+    this.vector3.applyMatrix4(xfrm);
+    this._cannonOffset.applyMatrix4(xfrm);
+};
+
+
 /**
  * Retrieves the proxy associated with an {@link LBGeometry.Vector3}, creating one
  * if necessary.
@@ -102,12 +109,9 @@ LBCannon.Vec3Proxy.getProxy = function(vector3, offset) {
     return new LBCannon.Vec3Proxy(vector3, offset);
 };
 
-LBCannon._tetraFaces = [
-    [0, 1, 2],
-    [0, 2, 3],
-    [0, 3, 1],
-    [1, 3, 2]
-];
+
+LBCannon._workingMatrix4A = new LBGeometry.Matrix4();
+LBCannon._workingMatrix4B = new LBGeometry.Matrix4();
 
 /**
  * Adds volumes as shapes to a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}.
@@ -115,9 +119,11 @@ LBCannon._tetraFaces = [
  * to properly align the body's center of mass with the origin.
  * @param {CANNON.Body} body    The body to add the tetras to.
  * @param {LBVolume.Volume[]} volumes The array of tetras to be added.
+ * @param {LBGeometry.Matrix4}  [volToBodyXfrm] If defined the transform to apply to
+ * each vertex to bring it to the coordinate system of the body.
  * @returns {CANNON.Body}   body.
  */
-LBCannon.addVolumesToBody = function(body, volumes) {
+LBCannon.addVolumesToBody = function(body, volumes, volToBodyXfrm) {
     var offset = LBCannon._workingVector3;
     
     for (var i = 0; i < volumes.length; ++i) {
@@ -140,10 +146,16 @@ LBCannon.addVolumesToBody = function(body, volumes) {
             // Unfortunately, because of the center offsets we need to clone each vertex...
             vertices.push(new LBCannon.Vec3Proxy(tv[j].clone(), centerOffset));
         }
+        if (volToBodyXfrm) {
+            vertices.forEach(function(vertex) {
+                vertex.transformProxy(volToBodyXfrm);
+            });
+        }
         
         var shape = new CANNON.ConvexPolyhedron(vertices, volumes[i].faces());
         shape._lbVolume = volumes[i];
         shape._lbCenterOffset = centerOffset;
+        volumes[i]._lbCannonShape = shape;
         
         if (volumes[i].mass) {
             body.mass += volumes[i].mass;
@@ -198,4 +210,26 @@ LBCannon.updateBodyCenterOfMass = function(body, centerOfMass, mass, inertia) {
     }
     
     return body;
+};
+
+LBCannon.addRigidBodyVolumesToBody = function(body, rigidBody) {
+    LBCannon.addVolumesToBody(body, rigidBody.volumes);
+
+/*    var worldToBody = LBCannon._workingMatrix4A;
+    rigidBody.obj3D.matrixWorld.getInverse(worldToBody);
+    var xfrm = LBCannon._workingMatrix4B;
+    rigidBody.parts.forEach(function(part) {
+        if (!part.volumes || (part.volumes.length === 0)) {
+            return;
+        }
+        xfrm.copy(part.obj3D.matrixWorld);
+        xfrm.multiply(worldToBody);
+        LBCannon.addVolumesToBody(body, part.volumes, xfrm);
+    });
+*/    
+    LBCannon.updateBodyCenterOfMass(body, rigidBody.centerOfMass, rigidBody.mass);//, rigidBody.momentInertia);    
+};
+
+LBCannon.updateBodyFromRigidBodyVolumes = function(body, rigidBody) {
+//    LBCannon.updateBodyCenterOfMass(body, rigidBody.centerOfMass, rigidBody.mass);//, rigidBody.momentInertia);    
 };

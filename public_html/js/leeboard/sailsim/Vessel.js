@@ -89,12 +89,16 @@ LBSailSim.FoilInstance.prototype.load = function(data, sailEnv) {
         this.foil = LBFoils.Foil.createFromData(data.foil, sailEnv);
     }
     
-    if (data.rotationOffset) {
-        this.rotationOffsetDegs = data.rotationOffset;
-    }
-    else {
-        this.rotationOffsetDegs = [0, 0, 0];
-    }
+    this.rotationOffsetDegs = data.rotationOffset || [0, 0, 0];
+    return this;
+};
+
+/**
+ * Called by the vessel after loading and prior to use.
+ * @param {LBSailSim.Vessel} vessel The vessel calling this.
+ * @returns {LBSailSim.FoilInstance}    this.
+ */
+LBSailSim.FoilInstance.prototype.vesselLoaded = function(vessel) {
     return this;
 };
 
@@ -225,12 +229,7 @@ LBSailSim.RudderController.prototype._loadRudders = function() {
         return;
     }
     
-    this.rudders.length = 0;
-    for (var i = 0; i < this.vessel.hydroFoils.length; ++i) {
-        if (this.vessel.hydroFoils[i].name === this.foilName) {
-            this.rudders.push(this.vessel.hydroFoils[i]);
-        }
-    }
+    LBPhysics.RigidBody.getRigidBodiesWithName(this.vessel.hydroFoils, this.foilName, this.rudders);
 };
 
 /**
@@ -368,24 +367,30 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
     
     /**
      * The array of hydrofoils {@link LBSaimSim.FoilInstance}.
-     * @member {Array}
+     * @member {LBSailSim.FoilInstance[]}
      */
     this.hydroFoils = [];
     
     /**
      * The array of airfoils {@link LBSailSim.FoilInstance}.
-     * @member {Array}
+     * @member {LBSailSim.FoilInstance[]}
      */
     this.airfoils = [];
     
     /**
      * The array of propulsors {@link LBSaimSim.Propulsor}.
-     * @member {Array}
+     * @member {LBSailSim.Propulsor[]}
      */
     this.propulsors = [];
     
     /**
+     * The array of spars {@link LBPhysics.RigidBody}.
+     */
+    this.spars = [];
+    
+    /**
      * The array of ballasts {@link LBPhysics.RigidBody}.
+     * @member {LBPhysics.RigidBody[]}
      */
     this.ballasts = [];
     
@@ -434,12 +439,13 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
 LBSailSim.Vessel.prototype = Object.create(LBPhysics.RigidBody.prototype);
 LBSailSim.Vessel.prototype.constructor = LBSailSim.Vessel;
 
+
 /**
  * Adds an airfoil to the vessel.
  * @param {LBSailSim.FoilInstance} foilInstance The foil instance representing the airfoil.
  * @returns {LBSailSim.Vessel}  this.
  */
-LBSailSim.Vessel.prototype.addairfoil = function(foilInstance) {
+LBSailSim.Vessel.prototype.addAirfoil = function(foilInstance) {
     this.airfoils.push(foilInstance);
     this.addPart(foilInstance);
     return this;
@@ -464,6 +470,17 @@ LBSailSim.Vessel.prototype.addHydroFoil = function(foilInstance) {
 LBSailSim.Vessel.prototype.addPropulsor = function(propulsor) {
     this.propulsors.push(propulsor);
     this.addPart(propulsor);
+    return this;
+};
+
+/**
+ * Adds a spar to the vessel.
+ * @param {LBPhysics.RigidBody} spar    The spar.
+ * @returns {LBSailSim.Vessel}  this.
+ */
+LBSailSim.Vessel.prototype.addSpar = function(spar) {
+    this.spars.push(spar);
+    this.addPart(spar);
     return this;
 };
 
@@ -606,6 +623,45 @@ LBSailSim.Vessel.prototype._loadPropulsors = function(data, loadCallback) {
     return this;
 };
 
+
+/**
+ * Called from {@link LBSailSim.Vessel#_loadSpars} to create and load a spar 
+ * object from properties in a data object.
+ * @protected
+ * @param {object} data The data object.
+ * @returns {LBPhysics.RigidBody}   The spar object.
+ */
+LBSailSim.Vessel.prototype._createAndLoadSpar = function(data) {
+    return LBPhysics.RigidBody.createFromData(data);
+};
+
+/**
+ * Loads the array of spar objects from properties of data objects in an
+ * array of data objects.
+ * @protected
+ * @param {Array} data  The array of data objects.
+ * @param {object} [loadCallback]   If defined, a callback object with functions that
+ * get called back after each component is loaded.
+ * @returns {LBSailSim.Vessel}  this.
+ */
+LBSailSim.Vessel.prototype._loadSpars = function(data, loadCallback) {
+    if (!data) {
+        return this;
+    }
+    
+    for (var i = 0; i < data.length; ++i) {
+        var spar = this._createAndLoadSpar(data[i]);
+        if (spar) {
+            if (loadCallback && loadCallback.sparLoaded) {
+                loadCallback.sparLoaded(this, spar, data[i]);
+            }
+            this.addSpar(spar);
+        }
+    }
+    return this;
+};
+
+
 /**
  * Called from {@link LBSailSim.Vessel#_loadBallasts} to create and load a ballast 
  * object from properties in a data object.
@@ -692,6 +748,7 @@ LBSailSim.Vessel.prototype.load = function(data, loadCallback) {
     this._removeParts(this.airfoils);
     this._removeParts(this.hydroFoils);
     this._removeParts(this.propulsors);
+    this._removeParts(this.spars);
     this._removeParts(this.ballasts);
     this.controllers.length = 0;
     
@@ -704,14 +761,22 @@ LBSailSim.Vessel.prototype.load = function(data, loadCallback) {
     this.typeName = data.typeName;
     this.instances = data.instances;
     
-    this._loadFoils(data.hydroFoils, this.hydroFoils, loadCallback);
-    this._loadPropulsors(data.propulsors, loadCallback);
+    this._loadSpars(data.spars, loadCallback);
     this._loadBallasts(data.ballasts, loadCallback);
+    this._loadPropulsors(data.propulsors, loadCallback);
+    this._loadFoils(data.hydroFoils, this.hydroFoils, loadCallback);
     
     // Load airfoils last so they appear above everyone else...
     this._loadFoils(data.airfoils, this.airfoils, loadCallback);
 
     this._loadControllers(data.controllers, loadCallback);
+    
+    this.hydroFoils.forEach(function(foil) {
+        foil.vesselLoaded(this);
+    }, this);
+    this.airfoils.forEach(function(foil) {
+        foil.vesselLoaded(this);
+    }, this);
     
     this.hull = LBSailSim.Hull.createFromData(data.hull, this);
     if (this.hull && loadCallback && loadCallback.hullLoaded) {

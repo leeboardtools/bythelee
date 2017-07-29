@@ -18,15 +18,25 @@ Run:
 
 TODO:
 
-Straighten out tetras:
-    - Get rid of warnings about normal pointing into shape, faces should have
-        vertices ordered CCW
-    - Consolidate tetras into as few convex polygons as can be done. Maybe do this
-        based on the cuboids and prisms?
+- Add spars rigid bodies, handling of tetra volumes for those.
+    Need to track shifting child rigid bodies, but only when they change.
+    - Vessel:
+        - MainMast
+        - MainBoom
+            Change would typically be rotation of boom
+        - Rudder
+            Change would typically be rotation of rudder.
+            Do we need to track this?
+    
+    The way the Cannon body stuff currently works is that we take the volumes
+    of a rigid body and then:
+        - Clone the vertices.
+        - Generate a CANNON.ConvexPolyhedron() for each volume
+        - Update the body center of mass from all the shapes (this is dependent on the individual volumes)
 
-    - Add spars rigid bodies, handling of tetra volumes for those.
-
-Figure out why collisions with buoys isn't working.
+    So, want to be able to update the vertices of the shape associated with a given volume,
+    but only if the volume has moved or changed shape.
+    More than anything, don't want to have to create new shapes.
 
 Lateral hull resistance > longitudinal hull resistance
 Hull windage
@@ -46,8 +56,6 @@ Add alternate plane projection for resultants that are too close to the desired 
 Add wake sprites
 
 Add optional traveled path (i.e. long wake)
-
-Add hull windage.
 
 Add wind puffs on water.
 

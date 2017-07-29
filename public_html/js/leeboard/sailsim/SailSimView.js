@@ -104,6 +104,9 @@ LBSailSim.PhaserView.prototype.onBoatCheckedOut = function(boat, data) {
     // Add the hydrofoils...
     boat.hydroFoils.forEach(this._loadDisplayObjectForHydrofoil, this);
     
+    // Add the spars...
+    boat.spars.forEach(this._loadDisplayObjectForSpar, this);
+    
     // Add the airfoils...
     boat.airfoils.forEach(this._loadDisplayObjectForAirfoil, this);
 
@@ -120,6 +123,15 @@ LBSailSim.PhaserView.prototype.onBoatCheckedOut = function(boat, data) {
  * @returns {undefined}
  */
 LBSailSim.PhaserView.prototype._loadDisplayObjectForHull = function(boat) {
+};
+
+/**
+ * Called by {@link LBSailSim.PhaserView#onBoatCheckedOut} to handle loading the display
+ * objects for a spar.
+ * @param {LBPhysics.RigidBody} rigidBody    The spar to load for.
+ * @returns {undefined}
+ */
+LBSailSim.PhaserView.prototype._loadDisplayObjectForSpar = function(rigidBody) {
 };
 
 /**
@@ -334,6 +346,20 @@ LBSailSim.Phaser3DView.prototype._loadDisplayObjectForHull = function(boat) {
             var sprite = LBPhaser.PhysicsView.createSpriteFromData(game, data.phaser.sprite);
             this.setRigidBodyDisplayObject(boat, sprite);
             this.worldGroup.add(sprite);
+        }
+    }
+};
+
+LBSailSim.Phaser3DView.prototype._loadDisplayObjectForSpar = function(rigidBody) {
+    var data = rigidBody.loadData;
+    if (data && (rigidBody.volumes.length > 0)) {
+        var rigidBodyEntry = this._getRigidBodyEntry(rigidBody);
+        
+        if (data.volumes && data.volumes.panels) {
+            rigidBodyEntry.volumePanels = LBPhaser.Project3D.loadVolumePanels(rigidBody.volumes, data.volumes.panels);
+        }
+        else if (data.volume && data.volume.panels) {
+            rigidBodyEntry.volumePanels = LBPhaser.Project3D.loadVolumePanels(rigidBody.volumes, data.volume.panels);
         }
     }
 };

@@ -305,7 +305,7 @@ LBVolume.Volume.overallInertiaTensor = function(volumes, tensor) {
 
 
 /**
- * Loads an array of volumes from properties in a data object.
+ * Loads an array of arbitrary volumes from properties in a data object.
  * @param {Object} data The data object.
  * @param {LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
  * otherwise data should have a vertices property.
@@ -1239,7 +1239,7 @@ LBVolume.TriPrism._workingVertexArray = [];
  * sides a quadrilateral (having four edges).
  * @param {LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
  * cuboid is set to a unit cube (each side is length 1) centered at 0,0,0.
- * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
+ * @param {Number} [mass=Number.NaN] If defined the mass assigned to the volume.
  * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
  * vertices identifiying two opposing faces of the cuboid. The first set of indices should
  * be ordered CCW (right-hand rule), while the second set of indices is such that v[4] is
@@ -1341,3 +1341,76 @@ LBVolume.Cuboid.prototype.cloneMirrored = function(plane) {
     return new LBVolume.Cuboid(vertices, this.mass);
 };
 LBVolume.Cuboid._workingVertexArray = [];
+
+
+/**
+ * Loads a cylindrical volume from properties in a data object. For now it simply
+ * loads it as a {@link LBVolume.Cuboid}.
+ * @param {Object} data The data object. This should contain the following properties:
+ * <li>base: {"x":x, "y":y, "z":z}  The base of the cylinder, it will be extruded in the
+ * +z direction.
+ * <li>size: {"x":dx, "y": dy, "z": length} The dimensions of the cylinder. dx is the diameter
+ * along the x-axis, dy is the diameter along the y-axis, length is the length of the cylinder,
+ * which is along the +z axis.
+ * @param {Number} [mass=undefined] The mass of the cylinder.
+ * @returns {LBVolume.Cuboid|undefined}
+ */
+LBVolume.loadCylinderFromData = function(data, mass) {
+    if (!data.size) {
+        console.log("LBVolume.createCylinderFromData(): data.size missing!");
+        return undefined;
+    }
+    
+    // For now just generate a cuboid...
+    var base = LBGeometry.loadVector3(data.base);
+    var size = LBGeometry.loadVector3(data.size);
+    var rx = size.x / 2;
+    var ry = size.y / 2;
+    var z = size.z;
+    
+    var vertices = [
+        new LBGeometry.Vector3(base.x - rx, base.y - ry, 0),
+        new LBGeometry.Vector3(base.x - rx, base.y + ry, 0),
+        new LBGeometry.Vector3(base.x + rx, base.y + ry, 0),
+        new LBGeometry.Vector3(base.x + rx, base.y - ry, 0),
+        new LBGeometry.Vector3(base.x - rx, base.y - ry, z),
+        new LBGeometry.Vector3(base.x - rx, base.y + ry, z),
+        new LBGeometry.Vector3(base.x + rx, base.y + ry, z),
+        new LBGeometry.Vector3(base.x + rx, base.y - ry, z)
+    ];
+    
+    if (data.rotation) {
+        var rotation = LBGeometry.loadEuler(data.rotation);
+        var quaternion = new LBGeometry.Quaternion();
+        quaternion.setFromEuler(rotation);
+        vertices.forEach(function(vertex) {
+           vertex.applyQuaternion(quaternion); 
+        });
+    }
+    
+    return new LBVolume.Cuboid(vertices, mass);
+};
+
+
+/**
+ * Loads a standard volume from properties in a data file.
+ * @param {Object} data The data object. This must contain at the absolute mininum
+ * a type property, which indicates the standard volume type.
+ * @param {Number} [mass=undefined] The mass of the cylinder.
+ * @returns {undefined|LBVolume.Volume}
+ */
+LBVolume.loadStandardVolumeFromData = function(data, mass) {
+    if (!data.type) {
+        console.log("LBVolume.loadStandardVolumeFromData(): data.type missing!");
+        return undefined;
+    }
+    
+    switch (data.type) {
+        case 'cylinder' :
+            return LBVolume.loadCylinderFromData(data, mass);
+            
+        default :
+            console.log("LBVolume.loadStandardVolumeFromData(): data.type === " + data.type + " is not supported!");
+            return undefined;
+    }
+};

@@ -717,14 +717,21 @@ LBPhysics.RigidBody.prototype = {
         this.massRadius = data.massRadius || this.massRadius;
         
         this.volumes.length = 0;
-        if (data.volumes) {
+        if (data.volume) {
+            var volume = LBVolume.loadStandardVolumeFromData(data.volume);
+            if (volume) {
+                this.volumes.push(volume);
+            }
+        }
+        else if (data.volumes) {
             var vertices = LBGeometry.loadVector3ArrayFromCoordArray(data.volumes.vertices);
             
-            this.volumes.length = 0;
             LBVolume.Volume.loadVolumesFromData(data.volumes, vertices, this.volumes);
             
-            this.xyOutline = LBVolume.Volume.loadXYOutlineFromData(data.volumes, vertices);
-            
+            this.xyOutline = LBVolume.Volume.loadXYOutlineFromData(data.volumes, vertices);            
+        }
+        
+        if (this.volumes.length > 0) {
             if (data.mass) {
                 LBVolume.Volume.allocateMassToVolumess(this.volumes, data.mass);
             }
@@ -790,6 +797,21 @@ LBPhysics.RigidBody.prototype = {
             part.base = undefined;
             this.physicalPropertiesDirty = true;
         }
+        return this;
+    },
+    
+    /**
+     * Sets both the position and the rotation of the rigid body, using a quaternion for
+     * the rotation.
+     * @param {LBGeometry.Vector3} pos  The position.
+     * @param {LBGeometry.Quaternion} quaternion    The quaternion.
+     * @returns {LBPhysics.RigidBody}   this.
+     */
+    setPositionAndQuaternion: function(pos, quaternion) {
+        this.obj3D.position.copy(pos);
+        this.obj3D.quaternion.copy(quaternion);
+
+        this.obj3D.updateMatrixWorld(true);
         return this;
     },
     
@@ -1095,4 +1117,26 @@ LBPhysics.RigidBody.createFromData = function(data, defCreatorFunc) {
     }
     
     return rigidBody.load(data);
+};
+
+
+/**
+ * Helper that retrieves all the rigid bodies in an array of rigid bodies that have
+ * a given name.
+ * @param {LBPhysics.RigidBody[]} rigidBodies   The array of rigid bodies.
+ * @param {String} name The name of interest.
+ * @param {LBPhysics.RigidBody[]} [store]   If defined the array to store the results into.
+ * @returns {LBPhysics.RigidBody[]} The array containing the found rigid bodies.
+ */
+LBPhysics.RigidBody.getRigidBodiesWithName = function(rigidBodies, name, store) {
+    store = store || [];
+    store.length = 0;
+    
+    rigidBodies.forEach(function(rigidBody) {
+        if (rigidBody.name === name) {
+            store.push(rigidBody);
+        }
+    });
+    
+    return store;
 };

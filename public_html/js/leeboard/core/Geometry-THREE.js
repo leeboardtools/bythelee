@@ -1171,7 +1171,7 @@ LBGeometry.Color.createFromData = function(data, defColor) {
  */
 LBGeometry.Color.colorValueFromData = function(data, defColor) {
     var value = parseInt(data);
-    if (value === Number.NaN) {
+    if (Number.isNaN(value)) {
         return defColor;
     }
     return value;

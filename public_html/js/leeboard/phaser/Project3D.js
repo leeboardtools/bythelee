@@ -132,7 +132,7 @@ LBPhaser.Project3D.prototype = {
         
         var panel = {};
         panel.frameColor = frameColor;
-        panel.lineWidth = lineWidth;
+        panel.lineWidth = (frameColor !== undefined) ? lineWidth : 0;
         panel.fillColor = fillColor;
         panel.alpha = alpha;
         panel.pathVertices = [];
@@ -177,7 +177,7 @@ LBPhaser.Project3D.prototype = {
             pos.applyMatrix4(toWorldXfrm);
         }
         pos.applyMatrix4(this.matrixWorldToProjection);
-        pos.set(pos.x * this.toPixelsX, pos.y * this.toPixelsY);
+        pos.set(pos.x * this.toPixelsX, pos.y * this.toPixelsY, pos.z);
         
         // If we're the third vertex, check if panel is facing the correct direction.
         if (panel.pathVertices.length === 2) {
@@ -198,6 +198,7 @@ LBPhaser.Project3D.prototype = {
     },
     
     _addPanelToZBuffer: function(z, panel) {
+        z = -z; // Use negative z because we want to process the panels from largest z to smallest z (smaller is closer to camera)
         var index = Leeboard.bsearch(this.zValues, z) + 1;
         this.zValues.splice(index, 0, z);
         this.zPanels.splice(index, 0, panel);
@@ -220,6 +221,9 @@ LBPhaser.Project3D.prototype = {
                 if (panel.closeFrame) {
                     graphics.lineTo(panel.frameVertices[0].x, panel.frameVertices[0].y);
                 }
+                
+                // This effectively stops the line drawing...
+                graphics.lineStyle(0);
             }
             
             if (panel.fillColor !== undefined) {
@@ -345,8 +349,16 @@ LBPhaser.Project3D.createPanelsFromVolumesData = function(volumes, data) {
         var faceIndex = volFaces[i + 1];
         
         var volume = volumes[volIndex];
-        var face = volume.faces()[faceIndex];
-        projectPanels.addPanelVertices(volume.vertices, face);
+        if (faceIndex === -1) {
+            // Use all the faces of the volume.
+            volume.faces().forEach(function(face) {
+                projectPanels.addPanelVertices(volume.vertices, face);
+            });
+        }
+        else {
+            var face = volume.faces()[faceIndex];
+            projectPanels.addPanelVertices(volume.vertices, face);
+        }
     }
     
     return projectPanels;

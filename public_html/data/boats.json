@@ -13,8 +13,6 @@
                 }
             },
             "mass": 378,
-            "_momentInertia": { "xx": 10, "yy": 10, "zz": 1000 },
-            "_centerOfMass": { "x": 0, "y": 0, "z": 0 },
             "massRadius": 4,    "_comment": "Used for the force arrows",
             "volumes": {
                 "mirrorPlane": {
@@ -81,19 +79,41 @@
             },
             "spars": [
                 {
-                    "name": "mast",
+                    "name": "mainmast",
                     "mass": 19.09,
-                    "centerOfMass": { "x": 0.8, "y": 0, "z": 4 },
                     "obj3D": {
-                        "position" : { "x": 0, "y": 0, "z": 0 }
+                        "position" : { "x": 1.6, "y": 0, "z": 0.51 }
+                    },
+                    "volume": {
+                        "type": "cylinder",
+                        "base": { "x": 0, "y": 0, "z": 0 },
+                        "size": { "x": 0.101, "y": 0.076, "z": 8 },
+                        "panels": [
+                            {
+                                "fillColor": "0x808080",
+                                "volFaces": [0,-1]
+                            }
+                        ]
                     }
                 },
                 {
-                    "name": "boom",
+                    "name": "mainboom",
                     "mass": 4.55,
-                    "centerOfMass": { "x": 1.6, "y": 0, "z": 1 },
                     "obj3D": {
-                        "position": { "x":0, "y": 0, "z": 0 }
+                        "position": { "x": 1.6, "y": 0, "z": 1.0 }
+                    },
+                    "volume": {
+                        "type": "cylinder",
+                        "base": { "x": 0, "y": 0, "z": 0 },
+                        "size": { "x": 0.076, "y": 0.05, "z": 3.15 },
+                        "rotation": { "exd": 0, "eyd": 90, "ezd": 0 },
+                        "panels": [
+                            {
+                                "_frameColor": 0,
+                                "fillColor": "0x808080",
+                                "volFaces": [0,-1]
+                            }
+                        ]
                     }
                 }
             ],
@@ -101,23 +121,19 @@
                 {
                     "name": "mainsail",
                     "mass": 4.55,
-                    "centerOfMass": { "x": 0.8, "y": 0, "z": 4 },
                     "massRadius": 4,
                     "obj3D": {
-                        "position" : { "x": 1.6, "y": 0, "z": 0 },
+                        "position" : { "x": 1.6, "y": 0, "z": 1.0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                         },
-                    "phaser_sprite": {
+                    "_phaser_sprite": {
                         "key": "tubby_mainsail",
-                        "_lbLocalOffset": {
-                            "x": 0,
-                            "y": 0
-                        },
                         "anchor": {
                             "x": 0,
                             "y": 1
                         }
                     },
+                    "sparName": "mainboom",
                     "sailShape": {
                         "vertices": [
                             0.00, 0.00, 1.00,

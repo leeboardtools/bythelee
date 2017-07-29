@@ -15,7 +15,7 @@
  */
 
 
-/* global LBSailSim, LBFoils, LBControls, LBGeometry, LBMath */
+/* global LBSailSim, LBFoils, LBControls, LBGeometry, LBMath, LBPhysics */
 
 /**
  * Implementation of {@link LBFoils.Foil} for sails, supports reefing and flatness factors.
@@ -67,6 +67,12 @@ LBSailSim.SailInstance = function() {
     this.sheetLength = 0;
     this.minSheetLength = 0;
     this.maxSheetLength = 1;
+    
+    /**
+     * The spars associated with this sail.
+     * @member {LBPhysics.RigidBody[]}
+     */
+    this.spars = [];
 };
 
 
@@ -85,6 +91,10 @@ LBSailSim.SailInstance.prototype.updateFoilForce = function(dt, flow) {
         var deg2 = LBMath.clamp(deg, this.minRotationDeg, this.maxRotationDeg);
         return deg2 - this.rotationOffsetDegs[2];
     });
+    
+    this.spars.forEach(function(spar) {
+        spar.setPositionAndQuaternion(this.obj3D.position, this.obj3D.quaternion);
+    }, this);
     
     return this;
 };
@@ -114,7 +124,12 @@ LBSailSim.SailInstance.prototype._updateRotationLimits = function() {
     var deg2 = LBMath.clamp(deg, this.minRotationDeg, this.maxRotationDeg);
     if (deg !== deg2) {
         deg2 -= this.rotationOffsetDegs[2];
-        this.obj3D.rotateOnAxis(LBGeometry.Z_AXIS, (deg2 - deg) * LBMath.DEG_TO_RAD);
+        var rad = (deg2 - deg) * LBMath.DEG_TO_RAD;
+        this.obj3D.rotateOnAxis(LBGeometry.Z_AXIS, rad);
+        
+        this.spars.forEach(function(spar) {
+            spar.setPositionAndQuaternion(this.obj3D.position, this.obj3D.quaternion);
+        }, this);
     }
 };
 
@@ -124,6 +139,8 @@ LBSailSim.SailInstance.prototype._updateRotationLimits = function() {
 LBSailSim.SailInstance.prototype.load = function(data, sailEnv) {
     LBSailSim.FoilInstance.prototype.load.call(this, data, sailEnv);
     
+    this.sparName = data.sparName;
+
     if (!data.sheetSailAnchor) {
         // If the sheet anchor on the sail was not specified, make it the mid-point
         // of the chord, which we'll presume is the boom.
@@ -147,6 +164,21 @@ LBSailSim.SailInstance.prototype.load = function(data, sailEnv) {
     this.maxSheetLength = data.maxSheetLength || 1;
     
     this._updateRotationLimits();
+    return this;
+};
+
+/**
+ * Called by the vessel after loading and prior to use.
+ * @override
+ * @param {LBSailSim.Vessel} vessel The vessel calling this.
+ * @returns {LBSailSim.FoilInstance}    this.
+ */
+LBSailSim.SailInstance.prototype.vesselLoaded = function(vessel) {
+    LBSailSim.FoilInstance.prototype.vesselLoaded.call(this, vessel);
+    
+    if (this.sparName) {
+        LBPhysics.RigidBody.getRigidBodiesWithName(vessel.spars, this.sparName, this.spars);
+    }
     return this;
 };
 
@@ -234,12 +266,7 @@ LBSailSim.SailController.prototype._loadSails = function() {
         return;
     }
     
-    this.sails.length = 0;
-    for (var i = 0; i < this.vessel.airfoils.length; ++i) {
-        if (this.vessel.airfoils[i].name === this.sailName) {
-            this.sails.push(this.vessel.airfoils[i]);            
-        }
-    }
+    LBPhysics.RigidBody.getRigidBodiesWithName(this.vessel.airfoils, this.sailName, this.sails);
 };
 
 /**
