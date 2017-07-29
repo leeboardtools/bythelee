@@ -33,7 +33,11 @@ LBSailSim.SailFoil.prototype.constructor = LBSailSim.SailFoil;
 
 /**
  * @todo Implement the reefing and flatness factors...
- * @inheritdoc
+ * @param {Number} rho  The fluid density.
+ * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
+ * @param {object} [details]  If defined, an object to receive details about the calculation.
+ * @param {object} [store]  If defined, the object to receive the forces and moment.
+ * @returns {object}    The object containing the forces and moment.
  */
 LBSailSim.SailFoil.prototype.calcLocalLiftDragMoment = function(rho, qInfLocal, store, details) {
     var result = LBFoils.Foil.prototype.calcLocalLiftDragMoment.call(rho, qInfLocal, store, details);
@@ -50,22 +54,65 @@ LBSailSim.SailFoil.prototype.calcLocalLiftDragMoment = function(rho, qInfLocal, 
 /**
  * The {@link LBSailSim.FoilInstance} implementation for sails.
  * @constructor
+ * @extends LBSailSim.FoilInstance
  * @returns {LBSailSim.SailInstance}
  */
 LBSailSim.SailInstance = function() {
     var foil = new LBSailSim.SailFoil(this);
     LBSailSim.FoilInstance.call(this, foil);
     
-    this.flatness = 1;
-    this.twist = 1;
+    /**
+     * The flatness factor, 0 is most flat, 1 is least flat.
+     * @member {Number}
+     */
+    this.flatness = 0.5;
+    
+    /**
+     * The twist factor, 0 is least twist, 1 is most twist.
+     * @member {Number}
+     */
+    this.twist = 0.5;
+    
+    /**
+     * The reefing factor, 0 is most reefed, 1 is not reefed.
+     * @member {Number}
+     */
     this.reef = 1;
+    
+    /**
+     * ??? Forgot what vreef stands for!
+     */
     this.vreef = 1;
     
+    /**
+     * The anchor point of the sheet on the sail in local coordinates.
+     * @member {LBGeometry.Vector3}
+     */
     this.sheetAnchorSail = new LBGeometry.Vector3();
+    
+    /**
+     * The anchor point of the sheet on the boat, in sail local coordinates.
+     * TODO Need a little clarification here, how is this really used?!?
+     * @member {LBGeometry.Vector3}
+     */
     this.sheetAnchorBoat = new LBGeometry.Vector3();
     
+    /**
+     * The length of the sheet.
+     * @member {Number}
+     */
     this.sheetLength = 0;
+    
+    /**
+     * The minimum sheet length.
+     * @member {Number}
+     */
     this.minSheetLength = 0;
+    
+    /**
+     * The maximum sheet length.
+     * @member {Number}
+     */
     this.maxSheetLength = 1;
     
     /**
@@ -73,18 +120,32 @@ LBSailSim.SailInstance = function() {
      * @member {LBPhysics.RigidBody[]}
      */
     this.spars = [];
+    
+    /**
+     * The minimum rotation angle of the sail in degrees, set by {@link LBSailSim.SailInstance#_updateRotationLimits}.
+     * @readonly
+     * @member {Number}
+     */
+    this.minRotationDeg = 0;
+    
+    /**
+     * The maximum rotation angle of the sail in degrees, set by {@link LBSailSim.SailInstance#_updateRotationLimits}.
+     * @readonly
+     * @member {Number}
+     */
+    this.maxRotationDeg = 0;
 };
 
 
 LBSailSim.SailInstance.prototype = Object.create(LBSailSim.FoilInstance.prototype);
 LBSailSim.SailInstance.prototype.constructor = LBSailSim.SailInstance;
 
-/**
- * @inheritdoc
- */
+// @inheritdoc...
 LBSailSim.SailInstance.prototype.updateFoilForce = function(dt, flow) {
     LBSailSim.FoilInstance.prototype.updateFoilForce.call(this, dt, flow);
 
+    // Here we're integrating the force on the sail around the local z-axis and origin to
+    // figure out the position of the sail.
     var currentDeg = this.obj3D.rotation.z * LBMath.RAD_TO_DEG;
     this.integrateForceForRotation(LBGeometry.ORIGIN, LBGeometry.Z_AXIS, currentDeg, function(deg) {
         deg += this.rotationOffsetDegs[2];
@@ -92,6 +153,7 @@ LBSailSim.SailInstance.prototype.updateFoilForce = function(dt, flow) {
         return deg2 - this.rotationOffsetDegs[2];
     });
     
+    // Match the locations of any spars to the sail location.
     this.spars.forEach(function(spar) {
         spar.setPositionAndQuaternion(this.obj3D.position, this.obj3D.quaternion);
     }, this);
@@ -133,9 +195,7 @@ LBSailSim.SailInstance.prototype._updateRotationLimits = function() {
     }
 };
 
-/**
- * @inheritdoc
- */
+// @inheritdoc...
 LBSailSim.SailInstance.prototype.load = function(data, sailEnv) {
     LBSailSim.FoilInstance.prototype.load.call(this, data, sailEnv);
     
@@ -167,12 +227,7 @@ LBSailSim.SailInstance.prototype.load = function(data, sailEnv) {
     return this;
 };
 
-/**
- * Called by the vessel after loading and prior to use.
- * @override
- * @param {LBSailSim.Vessel} vessel The vessel calling this.
- * @returns {LBSailSim.FoilInstance}    this.
- */
+// @inheritdoc
 LBSailSim.SailInstance.prototype.vesselLoaded = function(vessel) {
     LBSailSim.FoilInstance.prototype.vesselLoaded.call(this, vessel);
     

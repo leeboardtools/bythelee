@@ -86,6 +86,14 @@ LBSailSim.Env = function() {
      * @member {Number}
      */
     this.gravity = 9.81;
+    
+    /**
+     * Array of callback objects. These callback objects are examimed for
+     * the appropriate functions, and if present that function is called at the
+     * appropriate time.
+     * @member {Array}
+     */
+    this.boatCallbacks = [];
 };
 
 LBSailSim.Env.prototype = {
@@ -147,6 +155,29 @@ LBSailSim.Env.prototype = {
         return this.clCdCurves[name];
     },
     
+    
+    /**
+     * Adds a boat callback object.
+     * @param {Object} callback The callback object.
+     * @returns {LBSailSim.Env} this.
+     */
+    addBoatCallback: function(callback) {
+        this.boatCallbacks.push(callback);
+        return this;
+    },
+    
+    /**
+     * Removes a boat callback object.
+     * @param {Object} callback The callback object to remove.
+     * @returns {LBSailSim.Env} this.
+     */
+    removeBoatCallback: function(callback) {
+        var index = this.boatCallbacks.indexOf(callback);
+        if (index >= 0) {
+            this.boatCallbacks.splice(index, 1);
+        }
+        return this;
+    },
 
     /**
      * Loads the boat data objects, actual boat instances are not created.
@@ -223,6 +254,13 @@ LBSailSim.Env.prototype = {
 
     /**
      * Creates and loads a new boat instance. The boat is attached to the sailing environment.
+     * &lt;p>
+     * This will call the function:
+     * &lt;p>
+     * onBoatCheckedOut = function(boat, data) {}
+     * &lt;p>
+     * on any callbacks that have it defined.
+     * 
      * @param {object} typeName The boat's type.
      * @param {object} [boatName] The name of the particular boat instance.
      * @param {Number} [centerX=0] The initial x coordinate of the boat.
@@ -268,7 +306,9 @@ LBSailSim.Env.prototype = {
      * @returns {object}    The boat instance.
      */
     _createBoatInstance: function(typeName, boatName, data, loadCallback) {
-        return LBSailSim.Vessel.createFromData(data, this, loadCallback);
+        var boat = LBSailSim.Vessel.createFromData(data, this, loadCallback);
+        boat.boatName = boatName;
+        return boat;
     },
     
     /**
@@ -279,6 +319,13 @@ LBSailSim.Env.prototype = {
      * @param {Object} data The data object that was passed to {@link LBSailSim.Env#checkoutBoat}.
      */
     _boatCheckedOut: function(boat, data) {
+        this.boatCallbacks.forEach(
+            function(callback) {
+                if (callback.onBoatCheckedOut) {
+                    callback.onBoatCheckedOut(boat, data);
+                }
+            },
+            this);
     },
 
     /**
@@ -303,10 +350,31 @@ LBSailSim.Env.prototype = {
     /**
      * Called by {@link LBSailSim.Env.returnBoat} when a boat has been returned, lets derived
      * objects update their state.
+     * &lt;p>
+     * This will call the function:
+     * &lt;p>
+     * onBoatReturned = function(boat) {}
+     * &lt;p>
+     * for any callbacks that define it.
      * @protected
      * @param {object} boat The boat that was returned.
      */
     _boatReturned: function(boat) {
+        this.boatCallbacks.forEach(
+            function(callback) {
+                if (callback.onBoatReturned) {
+                    callback.onBoatReturned(boat);
+                }
+            },
+            this);
+    },
+    
+    /**
+     * Call after physics have been updated to handle any pre-rendering updates.
+     * @returns {object} this.
+     */
+    preRender: function() {
+        
     },
 
     /**
@@ -475,13 +543,13 @@ LBSailSim.getFlowVelocity = function(flow, pos, vel) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:03 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:43 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

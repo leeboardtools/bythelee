@@ -1,0 +1,5085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: PhaserView</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: PhaserView</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+            <span class="ancestors"><a href="LBSailSim.html">LBSailSim</a>.</span>PhaserView</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+
+    <h4 class="name" id="PhaserView"><span class="type-signature"></span>new PhaserView<span class="signature">(sailEnv, worldGroup)</span><span class="type-signature"> &rarr; {<a href="LBSailSim.PhaserView.html">LBSailSim.PhaserView</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Base class for the sailsim Phaser views.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>sailEnv</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBSailSim.Env.html">LBSailSim.Env</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The sailing environment.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>worldGroup</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Phaser.Group</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The parent group for all display objects.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line28">line 28</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBSailSim.PhaserView.html">LBSailSim.PhaserView</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+    
+    </div>
+
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="LBPhaser.html#.PhysicsView">LBPhaser.PhysicsView</a></li>
+    </ul>
+
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="_getRigidBodyEntry"><span class="type-signature">(protected) </span>_getRigidBodyEntry<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Retrieves the object used to hold information specific to this view for a
+given rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body of interest.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#_getRigidBodyEntry">LBPhaser.PhysicsView#_getRigidBodyEntry</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line52">line 52</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The obejct containing the information.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_loadDisplayObjectForAirfoil"><span class="type-signature"></span>_loadDisplayObjectForAirfoil<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBSailSim.PhaserView.html#onBoatCheckedOut">LBSailSim.PhaserView#onBoatCheckedOut</a> to handle loading the display
+objects for an airfoil.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBSailSim.FoilInstance.html">LBSailSim.FoilInstance</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The airfoil to load for.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line154">line 154</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_loadDisplayObjectForHull"><span class="type-signature"></span>_loadDisplayObjectForHull<span class="signature">(boat)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBSailSim.PhaserView.html#onBoatCheckedOut">LBSailSim.PhaserView#onBoatCheckedOut</a> to handle loading the display
+objects for the hull.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>boat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBSailSim.Vessel.html">LBSailSim.Vessel</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The boat to load for.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line127">line 127</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_loadDisplayObjectForHydrofoil"><span class="type-signature"></span>_loadDisplayObjectForHydrofoil<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBSailSim.PhaserView.html#onBoatCheckedOut">LBSailSim.PhaserView#onBoatCheckedOut</a> to handle loading the display
+objects for a hydrofoil.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBSailSim.FoilInstance.html">LBSailSim.FoilInstance</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The hydrofoil to load for.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line145">line 145</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_loadDisplayObjectForSpar"><span class="type-signature"></span>_loadDisplayObjectForSpar<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBSailSim.PhaserView.html#onBoatCheckedOut">LBSailSim.PhaserView#onBoatCheckedOut</a> to handle loading the display
+objects for a spar.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The spar to load for.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line136">line 136</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_loadForceArrowAirfoil"><span class="type-signature"></span>_loadForceArrowAirfoil<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBSailSim.PhaserView.html#onBoatCheckedOut">LBSailSim.PhaserView#onBoatCheckedOut</a> to add the force arrow
+for an airfoil.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBSailSim.FoilInstance.html">LBSailSim.FoilInstance</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The airfoil.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line190">line 190</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_loadForceArrowHull"><span class="type-signature"></span>_loadForceArrowHull<span class="signature">(boat)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBSailSim.PhaserView.html#onBoatCheckedOut">LBSailSim.PhaserView#onBoatCheckedOut</a> to add the force arrow
+for the hull.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>boat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBSailSim.Vessel.html">LBSailSim.Vessel</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The boat.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line163">line 163</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_loadForceArrowHydrofoil"><span class="type-signature"></span>_loadForceArrowHydrofoil<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBSailSim.PhaserView.html#onBoatCheckedOut">LBSailSim.PhaserView#onBoatCheckedOut</a> to add the force arrow
+for a hydrofoil.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBSailSim.FoilInstance.html">LBSailSim.FoilInstance</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The hydrofoil.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line179">line 179</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_updateDisplayObjects"><span class="type-signature"></span>_updateDisplayObjects<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by LBPhaser.PhysicsView#updateRigidbodyDisplayObject and recursively
+from here for each part of a rigid body to handle updating the display objects
+for a rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body whose objects are to be updated.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#_updateDisplayObjects">LBPhaser.PhysicsView#_updateDisplayObjects</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line213">line 213</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="areForceArrowsVisible"><span class="type-signature"></span>areForceArrowsVisible<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line71">line 71</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    True if the force arrows are currently displayed.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="areVelocityArrowsVisible"><span class="type-signature"></span>areVelocityArrowsVisible<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line90">line 90</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    True if the velocity arrows are currently displayed.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="beginDisplayObjectsUpdate"><span class="type-signature"></span>beginDisplayObjectsUpdate<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBPhaser.PhysicsLink.html">LBPhaser.PhysicsLink</a> before it starts calling <a href="LBPhaser.html#.PhysicsView#updateRigidBodyDisplayObjects">LBPhaser.PhysicsView#updateRigidBodyDisplayObjects</a>
+for each rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#beginDisplayObjectsUpdate">LBPhaser.PhysicsView#beginDisplayObjectsUpdate</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line180">line 180</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="destroy"><span class="type-signature"></span>destroy<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Call when done with the view, this removes references to other objects,
+hoping this will eventually get garbage collected.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#destroy">LBPhaser.PhysicsView#destroy</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line269">line 269</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="destroyRigidBodyDisplayObject"><span class="type-signature"></span>destroyRigidBodyDisplayObject<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Destroys the Phaser <a href="https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject">DisplayObject</a> 
+associated with a rigid body, if any.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#destroyRigidBodyDisplayObject">LBPhaser.PhysicsView#destroyRigidBodyDisplayObject</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line89">line 89</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="destroyRigidBodyForceArrow"><span class="type-signature"></span>destroyRigidBodyForceArrow<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Destroys the force arrow associated with a rigid body, if any.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#destroyRigidBodyForceArrow">LBPhaser.PhysicsView#destroyRigidBodyForceArrow</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line122">line 122</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="endDisplayObjectsUpdate"><span class="type-signature"></span>endDisplayObjectsUpdate<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBPhaser.PhysicsLink.html">LBPhaser.PhysicsLink</a> after it has finished calling <a href="LBPhaser.html#.PhysicsView#updateRigidBodyDisplayObjects">LBPhaser.PhysicsView#updateRigidBodyDisplayObjects</a>
+for each rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#endDisplayObjectsUpdate">LBPhaser.PhysicsView#endDisplayObjectsUpdate</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line189">line 189</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getBodyCallback"><span class="type-signature"></span>getBodyCallback<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Retrieves the callback object associated with a rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#getBodyCallback">LBPhaser.PhysicsView#getBodyCallback</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line136">line 136</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The callback object, may be undefined.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getRigidBodyDisplayObject"><span class="type-signature"></span>getRigidBodyDisplayObject<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Phaser.Sprite}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Retrieves the Phaser <a href="https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject">DisplayObject</a> 
+associated with a rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#getRigidBodyDisplayObject">LBPhaser.PhysicsView#getRigidBodyDisplayObject</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line68">line 68</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The display object associated with rigidBody, may be undefined.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Phaser.Sprite</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getRigidBodyForceArrow"><span class="type-signature"></span>getRigidBodyForceArrow<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Retrieves the force arrow associated with a rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#getRigidBodyForceArrow">LBPhaser.PhysicsView#getRigidBodyForceArrow</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line103">line 103</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The force arrow, may be undefined.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="onBoatCheckedOut"><span class="type-signature"></span>onBoatCheckedOut<span class="signature">(boat, data)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called from LBSailSim.SailEnv#checkoutBoat after the boat has been loaded
+and just before it is returned to the caller, this is where we add display objects
+for this view.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>boat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBSailSim.Vessel.html">LBSailSim.Vessel</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The boat that's been checked out.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The data object from which the boat was loaded.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line102">line 102</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="onBoatReturned"><span class="type-signature"></span>onBoatReturned<span class="signature">(boat)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called from LBSailSim.SailEnv#boatReturned, this disposes of any display
+objects that were created for the boat.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>boat</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBSailSim.Vessel.html">LBSailSim.Vessel</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The boat that was returned..</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line201">line 201</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="onDisplayObjectsUpdated"><span class="type-signature"></span>onDisplayObjectsUpdated<span class="signature">(topRigidBody, rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Rigid body callback function assigned using <a href="LBPhaser.html#.PhysicsView#setBodyCallback">LBPhaser.PhysicsView#setBodyCallback</a>
+and called after the rigid body display objects have been updated, this is where we handle
+flipping the sail.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>topRigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The top-level rigid body.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body with the callback assigned to it.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line255">line 255</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="rigidBodyAdded"><span class="type-signature">(protected) </span>rigidBodyAdded<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBPhaser.PhysicsLink.html">LBPhaser.PhysicsLink</a> when a rigid body is added to the physics
+link or when this view is first added to the physics link.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body to process.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#rigidBodyAdded">LBPhaser.PhysicsView#rigidBodyAdded</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line159">line 159</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="rigidBodyRemoved"><span class="type-signature">(protected) </span>rigidBodyRemoved<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBPhaser.PhysicsLink.html">LBPhaser.PhysicsLink</a> when a rigid body is removed from the
+physics link or when this view is removed from the physics link.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body to process.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#rigidBodyRemoved">LBPhaser.PhysicsView#rigidBodyRemoved</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line170">line 170</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setBodyCallback"><span class="type-signature"></span>setBodyCallback<span class="signature">(rigidBody, callback)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Sets the callback object associated with a rigid body. The callback has the
+following optional functions:
+<li>onDisplayObjectsUpdated = function(topRigidBody, rigidBody);
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The callback object.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#setBodyCallback">LBPhaser.PhysicsView#setBodyCallback</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line147">line 147</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setForceArrowsVisible"><span class="type-signature"></span>setForceArrowsVisible<span class="signature">(isVisible)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Changes whether or not the force arrows are displayed.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>isVisible</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If true the force arrows are displayed, otherwise they are hidden.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line60">line 60</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    True if the force arrows were visible prior to this call.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setRigidBodyDisplayObject"><span class="type-signature"></span>setRigidBodyDisplayObject<span class="signature">(rigidBody, drawingObject)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Associates a Phaser <a href="https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject">DisplayObject</a> 
+with a rigid body. A rigid body can only have one display object associated with it.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>drawingObject</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The drawing object to associate.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#setRigidBodyDisplayObject">LBPhaser.PhysicsView#setRigidBodyDisplayObject</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line79">line 79</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setRigidBodyForceArrow"><span class="type-signature"></span>setRigidBodyForceArrow<span class="signature">(rigidBody, forceArrow)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Sets the force arrow associated with a rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>forceArrow</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The force arrow.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#setRigidBodyForceArrow">LBPhaser.PhysicsView#setRigidBodyForceArrow</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line113">line 113</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="setVelocityArrowsVisible"><span class="type-signature"></span>setVelocityArrowsVisible<span class="signature">(isVisible)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Changes whether or not the velocity arrows are displayed.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>isVisible</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If true the velocity arrows are displayed, otherwise they are hidden.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="sailsim_SailSimView.js.html">sailsim/SailSimView.js</a>, <a href="sailsim_SailSimView.js.html#line80">line 80</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    True if the velocity arrows were visible prior to this call.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="updateForceArrowFromRigidBody"><span class="type-signature"></span>updateForceArrowFromRigidBody<span class="signature">(rigidBody, forceArrow)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Updates a force arrow from a rigid body's resultant. If the rigid body has
+a 'getForceArrowResultant' member function defined, that will be called
+to obtain the resultant, otherwise the rigid body's <a href="LBPhysics.RigidBody.html#getResultant">LBPhysics.RigidBody#getResultant</a> method will
+be called.
+<p>
+This is automatically called as a result of calling <a href="LBPhaser.PhysicsLink.html#updateDisplayObjects">LBPhaser.PhysicsLink#updateDisplayObjects</a>.
+<p>
+The getForceArrowResultant function has the same function signature as 
+<a href="LBPhysics.RigidBody.html#getResultant">LBPhysics.RigidBody#getResultant</a> excluding the convertToWrench argument
+(the first argument).
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>forceArrow</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The arrow object.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#updateForceArrowFromRigidBody">LBPhaser.PhysicsView#updateForceArrowFromRigidBody</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line277">line 277</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="updateRigidBodyDisplayObjects"><span class="type-signature">(protected) </span>updateRigidBodyDisplayObjects<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called by <a href="LBPhaser.PhysicsLink.html">LBPhaser.PhysicsLink</a> to have the view update from the current
+state of a rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body to process.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#updateRigidBodyDisplayObjects">LBPhaser.PhysicsView#updateRigidBodyDisplayObjects</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line200">line 200</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="updateSpriteFromRigidBody"><span class="type-signature"></span>updateSpriteFromRigidBody<span class="signature">(rigidBody, sprite)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Updates a sprite from a rigid body.
+<p>
+This is automatically called as a result of calling <a href="LBPhaser.PhysicsLink.html#updateDisplayObjects">LBPhaser.PhysicsLink#updateDisplayObjects</a>.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sprite</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Phaser.Image</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The sprite to be updated.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.html#.PhysicsView#updateSpriteFromRigidBody">LBPhaser.PhysicsView#updateSpriteFromRigidBody</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsView.js.html">phaser/PhysicsView.js</a>, <a href="phaser_PhysicsView.js.html#line240">line 240</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:44 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

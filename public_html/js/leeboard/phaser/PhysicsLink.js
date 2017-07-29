@@ -170,6 +170,21 @@ LBPhaser.PhysicsLink.prototype = {
         return false;
     },
     
+
+    /**
+     * @returns {Number}    The time step for the next update call.
+     */
+    timeStep: function() {
+        return 1/60;
+    },
+
+    /**
+     * Performs an update cycle.
+     * @param {Number} dt The time step, normally what was returned by {@link LBPhaser.P2Link#timeStep}..
+     * @returns {undefined}
+     */
+    update: function(dt) {
+    },
     
     /**
      * Updates any Phaser display object that have been attached to any of the rigid bodies or their

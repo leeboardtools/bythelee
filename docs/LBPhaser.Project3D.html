@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: Project3D</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: Project3D</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+            <span class="ancestors"><a href="LBPhaser.html">LBPhaser</a>.</span>Project3D</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+
+    <h4 class="name" id="Project3D"><span class="type-signature"></span>new Project3D<span class="signature">(env, group<span class="signature-attributes">opt</span>, camera<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.Project3D.html">LBPhaser.Project3D</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    This is a hack projection of 3D objects onto the Phaser 2D surface using
+a Phaser.Graphics object.
+<p>
+This maintains a z-buffer of sorts, with panels defined in 3D space added for
+display. The panels can be filled and/or framed.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>env</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">LBPhaser.PhaserEnv</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The Phaser environment</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>group</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Phaser.Group</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Optional group to which the projection display object
+will be attached.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>camera</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">LBCamera.Camer</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If defined the camera to use, otherwise a camera pointing
+down along the z-axis will be configured.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_Project3D.js.html">phaser/Project3D.js</a>, <a href="phaser_Project3D.js.html#line33">line 33</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBPhaser.Project3D.html">LBPhaser.Project3D</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="matrixWorldToProjection"><span class="type-signature"></span>matrixWorldToProjection<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    This matrix transforms from the world coordinate space to the projected camera space.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_Project3D.js.html">phaser/Project3D.js</a>, <a href="phaser_Project3D.js.html#line57">line 57</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="zPanels"><span class="type-signature"></span>zPanels<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Array containing the information for each panel, there is a 1-to-1 correspondence
+with the z values in LBPhaser.Project3D.zValues.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_Project3D.js.html">phaser/Project3D.js</a>, <a href="phaser_Project3D.js.html#line70">line 70</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="zValues"><span class="type-signature"></span>zValues<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Array containing the z values for each panel in LBPhaser.Project3D.zPanels.
+We do a simple binary search of this array to find the index where a panel should
+be inserted.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_Project3D.js.html">phaser/Project3D.js</a>, <a href="phaser_Project3D.js.html#line64">line 64</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".createPanelsFromVolumesData"><span class="type-signature">(static) </span>createPanelsFromVolumesData<span class="signature">(volumes, data)</span><span class="type-signature"> &rarr; {LBPhaser.Project3D.createPanelsFromVolumesData.projectPanels|<a href="LBPhaser.Project3DPanels.html">LBPhaser.Project3DPanels</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Creates a <a href="LBPhaser.Project3DPanels.html">LBPhaser.Project3DPanels</a> and loads the panels from an object containing
+indices of faces in volumes.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>volumes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="LBVolume.Volume.html">LBVolume.Volume</a>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The array of volumes.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The object containing the load information. The following properties
+are supported:
+ <li>frameColor: Number | Hex String
+ <li>lineWidth: Number
+ <li>closeFrame: Boolean
+ <li>alpha: Number
+ <li>fillColor: Number | Hex String
+ <li>volFaces: Array of number pairs, with the first value of each pair the index of the volume
+ in volumes and the second value the index of the face of the volume as returned
+ by <a href="LBVolume.Volume.html#faces">LBVolume.Volume#faces</a>.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_Project3D.js.html">phaser/Project3D.js</a>, <a href="phaser_Project3D.js.html#line337">line 337</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">LBPhaser.Project3D.createPanelsFromVolumesData.projectPanels</span>
+|
+
+<span class="param-type"><a href="LBPhaser.Project3DPanels.html">LBPhaser.Project3DPanels</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".loadVolumePanels"><span class="type-signature">(static) </span>loadVolumePanels<span class="signature">(volumes, data)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="LBPhaser.Project3DPanels.html">LBPhaser.Project3DPanels</a>>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Creates an array of <a href="LBPhaser.Project3DPanels.html">LBPhaser.Project3DPanels</a> based upon properties in a data
+object and an array of volumes.
+<p>
+The main purpose for supporting an array of <a href="LBPhaser.Project3DPanels.html">LBPhaser.Project3DPanels</a> is to support
+having different drawing properties for different faces of a group of volumes.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>volumes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="LBVolume.Volume.html">LBVolume.Volume</a>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The array of volumes.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An array of objects that can be passed to <a href="LBPhaser.Project3D.html#.createPanelsFromVolumesData">LBPhaser.Project3D.createPanelsFromVolumesData</a>.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_Project3D.js.html">phaser/Project3D.js</a>, <a href="phaser_Project3D.js.html#line377">line 377</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The array of panels.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;<a href="LBPhaser.Project3DPanels.html">LBPhaser.Project3DPanels</a>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".projectVolumePanels"><span class="type-signature">(static) </span>projectVolumePanels<span class="signature">(project3D<span class="signature-attributes">opt</span>, volumePanels<span class="signature-attributes">opt</span>, toWorldXfrm<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Helper that calls <a href="LBPhaser.Project3DPanels.html#project">LBPhaser.Project3DPanels#project</a> for each object in an
+array of objects.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>project3D</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhaser.Project3D.html">LBPhaser.Project3D</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The projection object, if undefined nothing is done.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>volumePanels</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="LBPhaser.Project3DPanels.html">LBPhaser.Project3DPanels</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The array panels objects to be
+project, may be undefined.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>toWorldXfrm</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBGeometry.Matrix4.html">LBGeometry.Matrix4</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Optional transform matrix to transform the
+panel vertex coordinates to world coordinates.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_Project3D.js.html">phaser/Project3D.js</a>, <a href="phaser_Project3D.js.html#line429">line 429</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="addPanel"><span class="type-signature"></span>addPanel<span class="signature">(frameColor<span class="signature-attributes">opt</span>, lineWidth<span class="signature-attributes">opt</span>, closeFrame<span class="signature-attributes">opt</span>, fillColor<span class="signature-attributes">opt</span>, alpha<span class="signature-attributes">opt</span>, vertices, indices<span class="signature-attributes">opt</span>, toWorldXfrm<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.Project3D.html">LBPhaser.Project3D</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Adds a panel for projection. Note that panels are presumed to be flat.
+<p>
+Panel vertices should be ordered counter-clockwise when looking at the panel
+from the outside.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>frameColor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">If defined the color for the frame, otherwise the frame is not drawn.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>lineWidth</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The width of the line for the frame, if undefined then the
+default for Phaser.Graphics#lineStyle will be used.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>closeFrame</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">If true and the frame is being drawn, this ensures that a final
+line from the last vertex to the first vertex is drawn, closing the frame.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fillColor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">If defined the color to fill with, otherwise the panel is not filled.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>alpha</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last">If defined the alpha value for the frame and fill, otherwise
+the defaults for Phaser.Graphics will be used.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vertices</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="LBGeometry.Vector3.html">LBGeometry.Vector3</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The array of vertices.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>indices</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Number></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Optional array of the indices of the points in vertices to use for drawing,
+otherwise vertices is presumed to be in the desired order of the vertices.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>toWorldXfrm</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBGeometry.Matrix4.html">LBGeometry.Matrix4</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">If defined the transform used to convert
+the vertices to world coordiantes.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_Project3D.js.html">phaser/Project3D.js</a>, <a href="phaser_Project3D.js.html#line119">line 119</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBPhaser.Project3D.html">LBPhaser.Project3D</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="destroy"><span class="type-signature"></span>destroy<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Call when done with the object, this releases references to all other objects.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_Project3D.js.html">phaser/Project3D.js</a>, <a href="phaser_Project3D.js.html#line241">line 241</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="end"><span class="type-signature"></span>end<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Call once all the panels have been added to set up the Phaser.Graphics object.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_Project3D.js.html">phaser/Project3D.js</a>, <a href="phaser_Project3D.js.html#line211">line 211</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="start"><span class="type-signature"></span>start<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Call to start adding panels for projection. This clears any previous panels.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_Project3D.js.html">phaser/Project3D.js</a>, <a href="phaser_Project3D.js.html#line79">line 79</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:44 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

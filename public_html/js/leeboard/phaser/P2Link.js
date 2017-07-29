@@ -23,6 +23,7 @@
  * from the rigid body to the P2 body. This also supports displaying an arrow representing
  * the resultant force on rigid bodies.
  * @constructor
+ * @extends LBPhaser.PhysicsLink
  * @param {LBPhaser.Env} phaserEnv The Phaser environment we're running under.
  * @returns {LBPhaser.P2Link}
  */
@@ -40,11 +41,7 @@ LBPhaser.P2Link = function(phaserEnv) {
 LBPhaser.P2Link.prototype = Object.create(LBPhaser.PhysicsLink.prototype);
 LBPhaser.P2Link.prototype.constructor = LBPhaser.P2Link;
 
-/**
- * Adds a fixed object to the physics link.
- * @param {Object} object   A Phaser drawing object.
- * @returns {LBPhaser.P2Link}   this.
- */
+// @inheritdoc..
 LBPhaser.P2Link.prototype.addFixedObject = function(object) {
     this.game.physics.p2.enable(object);
     object.body.allowGravity = false;
@@ -55,12 +52,7 @@ LBPhaser.P2Link.prototype.addFixedObject = function(object) {
     return this;
 };
 
-/**
- * @inheritdoc
- * @param {type} rigidBody
- * @param {type} data
- * @returns {undefined}
- */
+// @inheritdoc..
 LBPhaser.P2Link.prototype.addRigidBody = function(rigidBody, data) {
     LBPhaser.PhysicsLink.prototype.addRigidBody.call(this, rigidBody);
     
@@ -113,6 +105,7 @@ LBPhaser.P2Link.prototype.addRigidBody = function(rigidBody, data) {
     p2Body.rotation = this.phaserEnv.toPixelsRotationRad(rigidBody.obj3D.rotation.z);
  };
 
+// @inheritdoc..
 LBPhaser.P2Link.prototype._rigidBodyRemoved = function(rigidBody) {
     if (rigidBody._lbP2Body) {
         rigidBody._lbP2Body.world.removeBody(rigidBody._lbP2Body);
@@ -120,19 +113,13 @@ LBPhaser.P2Link.prototype._rigidBodyRemoved = function(rigidBody) {
     }
 };
 
-/**
- * @returns {Number}    The time step for the next update call.
- */
+// @inheritdoc..
 LBPhaser.P2Link.prototype.timeStep = function() {
     var p2 = this.game.physics.p2;
     return p2.useElapsedTime ? p2.game.time.physicsElapsed : p2.frameRate;
 };
 
-/**
- * Performs an update cycle.
- * @param {Number} dt The time step, normally what was returned by {@link LBPhaser.P2Link#timeStep}..
- * @returns {undefined}
- */
+// @inheritdoc..
 LBPhaser.P2Link.prototype.update = function(dt) {
     this._updateFromP2();
     this._applyToP2(dt);

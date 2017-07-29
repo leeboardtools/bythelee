@@ -84,7 +84,12 @@ Object.defineProperty(LBCannon.Vec3Proxy.prototype, 'z', {
     }
 });
 
-    
+
+/**
+ * Applies a 4x4 transform matrix to the point.
+ * @param {LBGeometry.Matrix4} xfrm The transform matrix.
+ * @returns {undefined}
+ */
 LBCannon.Vec3Proxy.prototype.transformProxy = function(xfrm) {
     this.vector3.applyMatrix4(xfrm);
     this._cannonOffset.applyMatrix4(xfrm);

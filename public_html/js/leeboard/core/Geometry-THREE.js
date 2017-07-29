@@ -68,6 +68,7 @@ LBGeometry.normalToTangentXY = function(normal, store) {
 /**
  * A 2D vector, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Vector2|THREE.Vector2}.
  * @constructor
+ * @extends THREE.Vector2
  * @param {Number} [x=0]    The x coordinate.
  * @param {Number} [y=0]    The y coordinate.
  * @returns {LBGeometry.Vector2}
@@ -79,7 +80,7 @@ LBGeometry.Vector2.prototype = Object.create(THREE.Vector2.prototype);
 LBGeometry.Vector2.prototype.constructor = LBGeometry.Vector2;
 LBGeometry.Vector2.prototype.clone = function() {
     return new LBGeometry.Vector2(this.x, this.y);
-}
+};
 
 /**
  * Creates a 2D vector from a magnitude and angle in degrees.
@@ -138,7 +139,7 @@ LBGeometry.Vector2.prototype.zero = function() {
 
 /**
  * Normalizes the vector, this version handles the zero length case.
- * @implements {THREE.Vector2#normalize}
+ * @extends THREE.Vector2#normalize
  * @returns {object} this.
  */
 LBGeometry.Vector2.prototype.normalize = function() {
@@ -164,6 +165,7 @@ LBGeometry.Vector2.prototype.isZero = function() {
 /**
  * Our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Vector3|THREE.Vector3}, a 3D vector.
  * @constructor
+ * @extends THREE.Vector3
  * @param {Number} [x=0]    The x coordinate.
  * @param {Number} [y=0]    The y coordinate.
  * @param {Number} [z=0]    The z coordinate.
@@ -202,7 +204,7 @@ LBGeometry.Vector3.prototype.applyMatrix4Rotation = function(m) {
 
 /**
  * Normalizes the vector, this version handles the zero length case.
- * @implements {THREE.Vector3#normalize}
+ * @extends THREE.Vector3#normalize
  * @returns {LBGeometry.Vector3} this.
  */
 LBGeometry.Vector3.prototype.normalize = function() {
@@ -258,7 +260,7 @@ LBGeometry.Vector3.prototype.copyIfMax = function(vec) {
 /**
  * Override of {@link https://threejs.org/docs/index.html#api/math/Vector3|THREE.Vector3#copy}, supports copying a Vector2 by setting the
  * z coordinate to 0 if the object being copied does not have a z.
- * @implements {THREE.Vector3#copy}
+ * @extends THREE.Vector3#copy
  * @param {object} vec  The vector to copy.
  * @returns {LBGeometry.Vector3} this.
  */
@@ -272,7 +274,7 @@ LBGeometry.Vector3.prototype.copy = function(vec) {
 /**
  * Override of {@link https://threejs.org/docs/index.html#api/math/Vector3|THREE.Vector3#add}, supports copying a Vector2 by setting the
  * z coordinate to 0 if the object being copied does not have a z.
- * @implements {THREE.Vector3#copy}
+ * @extends THREE.Vector3#copy
  * @param {object} vec  The vector to copy.
  * @returns {LBGeometry.Vector3} this.
  */
@@ -304,8 +306,9 @@ LBGeometry.Vector3.prototype.isZero = function() {
 
 
 /**
- * Loads a 2D vector from a data object. If appropriate data does not exist
- * for a field that field is set to 0.
+ * Loads a 2D vector from a data object. The supported fields:
+ * <li>[x]  The x coordinate, defaults to 0.
+ * <li>[y]  The y coordinate, defaults to 0.
  * @param {object} data The data to load from.
  * @param {object} [vec]  If defined the 2D vector to load into.
  * @returns {object}    The loaded vector.
@@ -324,8 +327,10 @@ LBGeometry.loadVector2 = function(data, vec) {
 
 
 /**
- * Loads a 3D vector from a data object. If appropriate data does not exist
- * for a field that field is set to 0.
+ * Loads a 3D vector from a data object. The supported fields are:
+ * <li>[x]  The x coordinate, defaults to 0.
+ * <li>[y]  The y coordinate, defaults to 0.
+ * <li>[z]  The z coordinate, defaults to 0.
  * @param {object} data The data to load from.
  * @param {object} [vec]  If defined the 2D vector to load into.
  * @returns {object}    The loaded vector.
@@ -523,6 +528,8 @@ LBGeometry.LINE_SIDE_RIGHT = 1;
 
 /**
  * Our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Quaternion|THREE.Quaternion}.
+ * @extends THREE.Quaternion
+ * @constructor
  * @param {Number} [x=0]    Initial x value.
  * @param {Number} [y=0]    Initial y value.
  * @param {Number} [z=0]    Initial z value.
@@ -539,8 +546,12 @@ LBGeometry.Quaternion.prototype.clone = function() {
 
 
 /**
- * Loads a quaternion from a data object.
- * @param {object} data The data object, the looked for fields are 'qx', 'qy', 'qz', and 'qw'.
+ * Loads a quaternion from a data object. The supported fields are:
+ * <li> [qx]    Defaults to 0.
+ * <li> [qy]    Defaults to 0.
+ * <li> [qz]    Defaults to 0.
+ * <li> [qw]    Defaults to 1.
+ * @param {object} data The data object.
  * @param {object} [quat] If defined the quaternion to be set.
  * @returns {object}    The quaternion.
  */
@@ -577,6 +588,7 @@ LBGeometry.createQuaternionFromEulerRad = function(xRad, yRad, zRad) {
  * An object representing a set of Euler angles, our encapsulation of
  * {@link https://threejs.org/docs/index.html#api/math/Euler|THREE.Euler}.
  * @constructor
+ * @extends THREE.Euler
  * @param {Number} [xRad=0] The rotation about the x axis in radians.
  * @param {Number} [yRad=0] The rotation about the y axis in radians.
  * @param {Number} [zRad=0] The rotation about the z axis in radians.
@@ -617,8 +629,15 @@ LBGeometry.createEulerDeg = function(xDeg, yDeg, zDeg, order) {
 };
 
 /**
- * Loads an Euler object from a data object.
- * @param {object} data The data to load from, the looked for fields are 'ex', 'ey', 'ez', and 'order'.
+ * Loads an Euler object from a data object. If the data object has an 'exd' field,
+ * then it may have an 'eyd' and/or an 'ezd' fields, all of which specify the rotations about
+ * the x, y, and z axes, respectively, in degrees.
+ * <p>
+ * If the data object does not have an 'exd' field, then it may have an 'ex', 'ey', and/or 'ez'
+ * fields, which specify the rotations about the x, y, and z axes, respectively, in radians.
+ * <p>
+ * The data object may have an 'order' field to specify the order of rotation.
+ * @param {object} data The data to load from.
  * @param {object} [euler]    If defined the object to be loaded into.
  * @returns {object}    The euler object.
  */
@@ -707,7 +726,9 @@ LBGeometry.Line2.prototype = {
 };
 
 /**
- * Loads a 2D line from a data object.
+ * Loads a 2D line from a data object. The supported fields are:
+ * <li> [start] The starting point, see {@link LBGeometry.loadVector2} for the format.
+ * <li> [end] The end point, see {@link LBGeometry.loadVector2} for the format.
  * @param {object} data The data to load from.
  * @param {object} [line] If defined the line to be loaded.
  * @returns {object}    The loaded line.
@@ -730,6 +751,7 @@ LBGeometry.loadLine2 = function(data, line) {
 /**
  * A 3D line, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Line3|THREE.Line3}..
  * @constructor
+ * @extends THREE.Line3
  * @param {LBGeometry.Vector3} [start=LBGeometry.ZERO]    The starting point of the line.
  * @param {LBGeometry.Vector3} [end=LBGeometry.ZERO]  The ending point of the line.
  * @returns {LBGeometry.Line3}   The line.
@@ -745,7 +767,9 @@ LBGeometry.Line3.prototype.clone = function() {
 };
 
 /**
- * Loads a 3D line from a data object.
+ * Loads a 3D line from a data object. The data object should have the following fields:
+ * <li>[start]  The start point, see {@link LBGeometry.loadVector3} for the format.
+ * <li>[end]    The end point, see {@link LBGeometry.loadVector3} for the format.
  * @param {object} data The data to load from.
  * @param {object} [line] If defined the line to be loaded.
  * @returns {object}    The loaded line.
@@ -767,6 +791,7 @@ LBGeometry.loadLine3 = function(data, line) {
 /**
  * A plane, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Plane|THREE.Plane}.
  * @constructor
+ * @extends THREE.Plane
  * @param {LBGeometry.Vector3} [normal=LBGeometry.X_AXIS]   A normal to the plane.
  * @param {Number} [constant=LBGeometry.ORIGIN] The negative distance from the origin to the plane along
  * the normal vector.
@@ -780,7 +805,9 @@ LBGeometry.Plane.prototype = Object.create(THREE.Plane.prototype);
 LBGeometry.Plane.prototype.constructor = LBGeometry.Plane;
 
 /**
- * Loads a plane from a data object.
+ * Loads a plane from a data object. The supported fields are:
+ * <li>[normal] The normal, see {@link LBGeometry.loadVector3} for the format.
+ * <li>[constant]   The constant value {@link LBGeometry.Plane#constant}, defaults to 0.
  * @param {object} data The data to load from.
  * @param {LBGeometry.Plane} [plane] If defined the plane to be loaded.
  * @returns {LBGeometry.Plane}    The loaded plane.
@@ -878,6 +905,7 @@ LBGeometry.mirrorPointAboutPlane = function(plane, point, store) {
 /**
  * A sphere, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Sphere|THREE.Sphere}.
  * @constructor
+ * @extends THREE.Sphere
  * @param {LBGeometry.Vector3} [center=LBGeometry.ORIGIN] The center of the sphere.
  * @param {Number} [radius=0]   The radius of the sphere.
  * @returns {THREE.Sphere}
@@ -894,6 +922,8 @@ LBGeometry.Sphere.prototype.clone = function() {
 
 /**
  * A 3x3 matrix, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Matrix3|THREE.Matrix3}.
+ * @constructor
+ * @extends THREE.Matrix3
  * @returns {LBGeometry.Matrix3}
  */
 LBGeometry.Matrix3 = function() {
@@ -919,7 +949,9 @@ LBGeometry.Matrix3.prototype.zero = function() {
 
 
 /**
- * Loads a 3x3 matrix from a data object.
+ * Loads a 3x3 matrix from a data object. The supported fields are:
+ * <li>[elements]   The array of elements of the matrix, loaded into {@link LBGeometry.Matrix3#elements},
+ * missing elements are set to 0.
  * @param {object} data The data to load from.
  * @param {object} [mat]  If defined the matrix to load into.
  * @returns {object}    The loaded matrix.
@@ -952,7 +984,9 @@ LBGeometry.loadMatrix3 = function(data, mat) {
 
 /**
  * A 4x4 matrix, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Matrix4|THREE.Matrix4}.
- * @returns {LBGeometry.Matrix3}
+ * @constructor
+ * @extends THREE.Matrix4
+ * @returns {LBGeometry.Matrix4}
  */
 LBGeometry.Matrix4 = function() {
     THREE.Matrix4.call(this);
@@ -967,7 +1001,12 @@ LBGeometry.Matrix4.prototype.clone = function() {
 
 
 /**
- * Loads a 4x4 matrix from a data object.
+ * Loads a 4x4 matrix from a data object. The supported fields are:
+ * <li>[elements]   The array of elements of the matrix, loaded into {@link LBGeometry.Matrix4#elements},
+ * missing elements are set to 0.
+ * <li>[rotation]   If elements is not specified, this is the rotation of the matrix, which may be
+ * either Euler angles (see {@link LBGeometry.loadEuler}) or a quaternion (see {@link LBGeometry.loadQuaternion}).
+ * <li>[origin] If elements is not specified, this is the position of the matrix, see {@link LBGeometry.Vector3} for the format.
  * @param {object} data The data to load from.
  * @param {object} [mat]  If defined the matrix to load into.
  * @returns {object}    The matrix.
@@ -1078,6 +1117,8 @@ LBGeometry.consoleLogMatrix4 = function(mat, msg) {
 
 /**
  * A 3D object, our encapsulation of {@link https://threejs.org/docs/index.html#api/core/Object3D|THREE.Object3D}.
+ * @constructor
+ * @extends THREE.Object3D
  * @returns {LBGeometry.Object3D}
  */
 LBGeometry.Object3D = function() {
@@ -1088,7 +1129,11 @@ LBGeometry.Object3D.prototype.constructor = LBGeometry.Object3D;
 
 
 /**
- * Loads the basic settings of a 3D object from a data object.
+ * Loads the basic settings of a 3D object from a data object. The following fields are supported:
+ * <li>[position]   The local position, see {@link LBGeometry.loadVector3} for the format.
+ * <li>[rotation]   The local rotation as Euler angles, see {@link LBGeometry.loadEuler} for the format.
+ * <li>[quaternion] The local rotation as a quaternion, only used if rotation is not specfiied,
+ * see {@link LBGeometry.loadQuaternion} for the format.
  * @param {object} data The data containing the settings.
  * @param {object} [obj3D]    If defined the 3D object to be loaded into.
  * @returns {object}    this.
@@ -1145,6 +1190,8 @@ LBGeometry.createObject3DFromData = function(data) {
 
 /**
  * A color object, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Color|THREE.Color}.
+ * @constructor
+ * @extends THREE.Color
  * @param {Number|String|LBGeometry.Color} [r] The red component, a hex triplet, a CSS-style string, or a {LBGeometry.Color} instance.
  * @param {Number} [g] If defined the green component.
  * @param {Number} [b] If defined the blue component.
@@ -1232,6 +1279,8 @@ LBGeometry._workingVector3A = new LBGeometry.Vector3();
 
 /**
  * A geometry object, our encapsulation of {@link https://threejs.org/docs/index.html#api/core/Geometry|THREE.Geometry}.
+ * @constructor
+ * @extends THREE.Geometry
  * @returns {LBGeometry.Geometry}
  */
 LBGeometry.Geometry = function() {
@@ -1244,6 +1293,8 @@ LBGeometry.Geometry.constructor = LBGeometry.Geometry;
 
 /**
  * A face object, our encapsulation of {@link https://threejs.org/docs/index.html#api/core/Face3|THREE.Face3}.
+ * @constructor
+ * @extends THREE.Face3
  * @param {Number} a    The index of vertex A.
  * @param {Number} b The index of vertex B.
  * @param {Number} c The index of vertex C.

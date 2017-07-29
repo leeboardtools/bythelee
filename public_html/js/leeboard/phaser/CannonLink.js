@@ -21,6 +21,7 @@
  * Manages linking a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}
  * with a {@link LBPhysics.RigidBody}, along with updating Phaser drawing objects.
  * @constructor
+ * @extends LBPhaser.PhysicsLink
  * @param {LBPhaser.PhaserEnv} phaserEnv    The Phaser environment we're running under.
  * @returns {LBPhaser.CannonLink}
  */
@@ -41,11 +42,7 @@ LBPhaser.CannonLink.prototype = Object.create(LBPhaser.PhysicsLink.prototype);
 LBPhaser.CannonLink.prototype.constructor = LBPhaser.CannonLink;
 
 
-/**
- * Adds a fixed object to the physics link.
- * @param {Object} object   A Phaser drawing object.
- * @returns {LBPhaser.P2Link}   this.
- */
+// @inheritdoc..
 LBPhaser.CannonLink.prototype.addFixedObject = function(object) {
     var body = new CANNON.Body();
     body.type = CANNON.Body.STATIC;
@@ -63,12 +60,7 @@ LBPhaser.CannonLink.prototype.addFixedObject = function(object) {
     return this;
 };
 
-/**
- * @inheritdoc
- * @param {type} rigidBody
- * @param {type} data
- * @returns {undefined}
- */
+// @inheritdoc...
 LBPhaser.CannonLink.prototype._rigidBodyAdded = function(rigidBody, data) {
     var body = new CANNON.Body();
     body.type = CANNON.Body.DYNAMIC;
@@ -89,11 +81,7 @@ LBPhaser.CannonLink.prototype._rigidBodyAdded = function(rigidBody, data) {
 };
 
 
-/**
- * @inheritdoc
- * @param {type} rigidBody
- * @returns {undefined}
- */
+// @inheritdoc..
 LBPhaser.CannonLink.prototype._rigidBodyRemoved = function(rigidBody) {
     if (rigidBody._lbCannonBody) {
         this.cWorld.removeBody(rigidBody._lbCannonBody);
@@ -101,18 +89,12 @@ LBPhaser.CannonLink.prototype._rigidBodyRemoved = function(rigidBody) {
     }
 };
 
-/**
- * @returns {Number}    The time step for the next update call.
- */
+// @inheritdoc..
 LBPhaser.CannonLink.prototype.timeStep = function() {
     return this.dt;
 };
 
-/**
- * Performs an update cycle.
- * @param {Number} dt The time step, normally what was returned by {@link LBPhaser.P2Link#timeStep}..
- * @returns {undefined}
- */
+// @inheritdoc..
 LBPhaser.CannonLink.prototype.update = function(dt) {
     if (this.updateCount === 0) {
         // Gotta sync up first time through...
@@ -180,6 +162,10 @@ LBPhaser.CannonLink.prototype._updateFromSimStep = function(rigidBody) {
     body.pointToWorldFrame(pos, pos);
     
     rigidBody.setPositionAndQuaternion(pos, body.quaternion);
+    rigidBody.obj3D.position.copy(pos);
+    rigidBody.obj3D.quaternion.copy(body.quaternion);
+    
+    rigidBody.obj3D.updateMatrixWorld(true);
 };
 
 LBPhaser.CannonLink.getCannonBody = function(rigidBody) {

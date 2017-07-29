@@ -203,6 +203,13 @@ LBPhaser.PhysicsView.prototype = {
         this.activeRigidBody = null;
     },
     
+    /**
+     * Called by {@link LBPhaser.PhysicsView#updateRigidbodyDisplayObject} and recursively
+     * from here for each part of a rigid body to handle updating the display objects
+     * for a rigid body.
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body whose objects are to be updated.
+     * @returns {undefined}
+     */
     _updateDisplayObjects: function(rigidBody) {
         var sprite = this.getRigidBodyDisplayObject(rigidBody);
         if (sprite) {

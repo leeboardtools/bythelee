@@ -17,8 +17,18 @@
 
 /* global THREE */
 
+/**
+ * 
+ * @namespace   LBCamera
+ */
 var LBCamera = LBCamera || {};
 
+/**
+ * A camera, our encapsulation of {@link https://threejs.org/docs/index.html#api/cameras/Camera|THREE.Camera}.
+ * @constructor
+ * @extends THREE.Camera
+ * @returns {LBCamera.Camera}
+ */
 LBCamera.Camera = function() {
     THREE.Camera.call(this);
 };
@@ -26,6 +36,18 @@ LBCamera.Camera.prototype = Object.create(THREE.Camera.prototype);
 LBCamera.Camera.prototype.constructor = LBCamera.Camera;
 
 
+/**
+ * An orhtographic camera, our encapsulation of {@link https://threejs.org/docs/index.html#api/cameras/OrthographicCamera|THREE.OrthographicCamera}.
+ * @constructor
+ * @extends THREE.OrthographicCamera
+ * @param {Number} left The left edge of the view.
+ * @param {Number} right The right edge of the view.
+ * @param {Number} top The top edge of the view.
+ * @param {Number} bottom The bottom edge of the view.
+ * @param {Number} near The near plane distance.
+ * @param {Number} far  The far plane distance.
+ * @returns {LBCamera.OrthographicCamera}
+ */
 LBCamera.OrthographicCamera = function(left, right, top, bottom, near, far) {
     THREE.OrthographicCamera.call(this, left, right, top, bottom, near, far);
 };
@@ -33,6 +55,16 @@ LBCamera.OrthographicCamera.prototype = Object.create(THREE.OrthographicCamera.p
 LBCamera.OrthographicCamera.prototype.constructor = LBCamera.OrthographicCamera;
 
 
+/**
+ * An perspective camera, our encapsulation of {@link https://threejs.org/docs/index.html#api/cameras/PerspectiveCamera|THREE.PerspectiveCamera}.
+ * @constructor
+ * @extends THREE.PerspectiveCamera
+ * @param {Number} [fov=50]  The field of view angle in degrees
+ * @param {Number} [aspect=1] The width to height aspect ratio.
+ * @param {Number} [near=0.1] The near plane distance.
+ * @param {Number} [far=2000] The far plane distance.
+ * @returns {LBCamera.PerspectiveCamera}
+ */
 LBCamera.PerspectiveCamera = function(fov, aspect, near, far) {
     THREE.PerspectiveCamera.call(this, fov, aspect, near, far);
 };

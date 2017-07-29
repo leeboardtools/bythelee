@@ -43,17 +43,18 @@
  */
 
 
-/* global LBSailSim, Leeboard, LBMath, LBPhaser */
+/* global LBSailSim, Leeboard, LBMath, LBPhaser, LBGeometry, LBCamera */
 
 
 /**
- * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2}.
+ * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2} or Cannon physics.
+ * This pretty much just ties together the physics link and the sailing environment.
  * @constructor
  * @param {Phaser.Game} game    The Phaser game object.
- * @param {LBSailSim.PhaserEnv.P2_PHYSICS|LBSailSim.PhaserEnv.CANNON_PHYSICS} physicsType  The physics engine to use.
- * @returns {LBSailSim.PhaserEnv}
+ * @param {LBSailSim.PhaserSailEnv.P2_PHYSICS|LBSailSim.PhaserSailEnv.CANNON_PHYSICS} physicsType  The physics engine to use.
+ * @returns {LBSailSim.PhaserSailEnv}
  */
-LBSailSim.PhaserEnv = function(game, physicsType) {
+LBSailSim.PhaserSailEnv = function(game, physicsType) {
     LBSailSim.Env.call(this);
     this.game = game;
     this.phaserEnv = new LBPhaser.Env(game);
@@ -62,213 +63,66 @@ LBSailSim.PhaserEnv = function(game, physicsType) {
     this.phaserEnv.ySign = -1;
     
     switch (physicsType) {
-        case LBSailSim.PhaserEnv.P2_PHYSICS :
+        case LBSailSim.PhaserSailEnv.P2_PHYSICS :
         default :
-            physicsType = LBSailSim.PhaserEnv.P2_PHYSICS;
+            physicsType = LBSailSim.PhaserSailEnv.P2_PHYSICS;
             this.physicsLink = new LBPhaser.P2Link(this.phaserEnv);
             break;
         
-        case LBSailSim.PhaserEnv.CANNON_PHYSICS :
+        case LBSailSim.PhaserSailEnv.CANNON_PHYSICS :
             this.physicsLink = new LBPhaser.CannonLink(this.phaserEnv);
             break;
     }
     this.physicsType = physicsType;
-    
-    
-    var forceArrowScaler = function(length) {
-        return 0.025 * length;
-    };
-    this.sailArrowStyle = new LBPhaser.ArrowStyle(0x00FF00, forceArrowScaler);
-    this.foilArrowStyle = new LBPhaser.ArrowStyle(0x0088FF, forceArrowScaler);
-    this.hullArrowStyle = new LBPhaser.ArrowStyle(0xFF0000, forceArrowScaler);
-    
-    var velocityArrowScaler = function(length) {
-        return length * 1.2;
-    };
-    this.boatVelocityArrowStyle = new LBPhaser.ArrowStyle(0x008888, velocityArrowScaler, 0.5, 6);
-    this.appWindVelocityArrowStyle = new LBPhaser.ArrowStyle(0x008800, velocityArrowScaler, 0.5, 12);
+
 };
 
 /**
- * Value to pass to {@link LBSailSim.PhaserEnv}'s contructor to use the P2 physics engine from Phaser.
+ * Value to pass to {@link LBSailSim.PhaserSailEnv}'s contructor to use the P2 physics engine from Phaser.
  * @constant
  * @type Number
  */
-LBSailSim.PhaserEnv.P2_PHYSICS = 0;
+LBSailSim.PhaserSailEnv.P2_PHYSICS = 0;
 
 /**
- * Value to pass to {@link LBSailSim.PhaserEnv}'s contructor to use the Cannon JS physics engine.
+ * Value to pass to {@link LBSailSim.PhaserSailEnv}'s contructor to use the Cannon JS physics engine.
  * @constant
  * @type Number
  */
-LBSailSim.PhaserEnv.CANNON_PHYSICS = 1;
+LBSailSim.PhaserSailEnv.CANNON_PHYSICS = 1;
 
-LBSailSim.PhaserEnv.prototype = Object.create(LBSailSim.Env.prototype);
-LBSailSim.PhaserEnv.prototype.constructor = LBSailSim.PhaserEnv;
+LBSailSim.PhaserSailEnv.prototype = Object.create(LBSailSim.Env.prototype);
+LBSailSim.PhaserSailEnv.prototype.constructor = LBSailSim.PhaserSailEnv;
 
-/**
- * Sets the world group to which all the sailing environment graphic objects will
- * belong.
- * @param {Phaser.Group} worldGroup The world group.
- * @returns {undefined}
- */
-LBSailSim.PhaserEnv.prototype.setWorldGroup = function(worldGroup) {
-    this.worldGroup = worldGroup;
-    this.physicsLink.worldGroup = worldGroup;
-};
 
-/**
- * Changes whether or not the force arrows are displayed.
- * @param {Boolean} isVisible   If true the force arrows are displayed, otherwise they are hidden.
- * @returns {Boolean}   True if the force arrows were visible prior to this call.
- */
-LBSailSim.PhaserEnv.prototype.setForceArrowsVisible = function(isVisible) {
-    var wasVisible = this.areForceArrowsVisible();
-    this.sailArrowStyle.isVisible = isVisible;
-    this.foilArrowStyle.isVisible = isVisible;
-    this.hullArrowStyle.isVisible = isVisible;
-    return wasVisible;
-};
-
-/**
- * @returns {Boolean}   True if the force arrows are currently displayed.
- */
-LBSailSim.PhaserEnv.prototype.areForceArrowsVisible = function() {
-    return this.sailArrowStyle.isVisible;
-};
-
-/**
- * Changes whether or not the velocity arrows are displayed.
- * @param {Boolean} isVisible   If true the velocity arrows are displayed, otherwise they are hidden.
- * @returns {Boolean}   True if the velocity arrows were visible prior to this call.
- */
-LBSailSim.PhaserEnv.prototype.setVelocityArrowsVisible = function(isVisible) {
-    var wasVisible = this.areVelocityArrowsVisible();
-    this.boatVelocityArrowStyle.isVisible = isVisible;
-    this.appWindVelocityArrowStyle.isVisible = isVisible;
-    return wasVisible;
-};
-
-/**
- * @returns {Boolean}   True if the velocity arrows are currently displayed.
- */
-LBSailSim.PhaserEnv.prototype.areVelocityArrowsVisible = function() {
-    return this.boatVelocityArrowStyle.isVisible;
-};
-
-/**
- * @inheritdoc
- * @param {type} typeName
- * @param {type} boatName
- * @param {type} centerX
- * @param {type} centerY
- * @param {type} rotDeg
- * @returns {LBSailSim.Vessel}
- */
-LBSailSim.PhaserEnv.prototype.checkoutBoat = function(typeName, boatName, centerX, centerY, rotDeg) {
-    var childIndex = this.worldGroup.children.length;
-    
-    var boat = LBSailSim.Env.prototype.checkoutBoat.call(this, typeName, boatName, centerX, centerY, rotDeg);
-    if (!boat) {
-        return boat;
-    }
-
-    var sprite = this.physicsLink.getRigidBodyDisplayObject(boat);
-    if (sprite) {
-        this.worldGroup.addAt(sprite, childIndex);
-    }
-    return boat;
-};
-
-LBSailSim.PhaserEnv.prototype._createBoatInstance = function(typeName, boatName, data) {
-    var boat = LBSailSim.Env.prototype._createBoatInstance.call(this, typeName, boatName, data, this);
-    
-    boat.getForceArrowResultant = function(plane, bounds) {
-        return boat.hullResultant.convertToWrench(plane);
-    };
-    
-    var hullArrow = new LBPhaser.Arrow(this.phaserEnv, this.worldGroup, this.hullArrowStyle);
-    this.physicsLink.setBodyForceArrow(boat, hullArrow);
-    
-    return boat;
-};
-
-/**
- * Called after a foil instance has been loaded by {@link LBSailSim.Vessel#_loadFoils}, this
- * is where we attach the force arrows and graphic objects. 
- * @param {LBSailSim.Vessel} vessel The vessel calling this.
- * @param {LBSailSim.FoilInstance} foilInstance The foil instance that was just loaded.
- * @param {object} data The data object the foil instance was loaded from.
- * @param {Boolean} isSail  True if the foil instance is an airfoil, false if hydrofoil.
- * @returns {undefined}
- */
-LBSailSim.PhaserEnv.prototype.foilInstanceLoaded = function(vessel, foilInstance, data, isSail) {
-    var sprite = this._loadObj3DSprite(vessel, foilInstance, data);
-    
-    var arrowStyle = (isSail) ? this.sailArrowStyle : this.foilArrowStyle;
-    var arrow = new LBPhaser.Arrow(this.phaserEnv, this.worldGroup, arrowStyle);    
-    this.physicsLink.setBodyForceArrow(foilInstance, arrow);
-    
-    if (isSail &amp;&amp; sprite) {
-        // Need a sail flipper...
-        this.physicsLink.setBodyCallback(foilInstance, this);
-    }
-};
-
-LBSailSim.PhaserEnv.prototype.displayObjectsUpdated = function(topRigidBody, rigidBody) {
-    var sprite = this.physicsLink.getRigidBodyDisplayObject(rigidBody);
-    if (sprite) {
-        if (rigidBody.foilDetails) {
-            sprite.scale.y = (rigidBody.foilDetails.angleDeg * this.phaserEnv.ySign &lt; 0) ? 1 : -1;
-        }
-    }
-};
-
-LBSailSim.PhaserEnv.prototype._loadObj3DSprite = function(vessel, object, data) {
-    if (!object || !object.obj3D || !data) {
-        return undefined;
-    }
-    
-    var sprite;
-    var spriteData;
-    if (data.phaser_sprite) {
-        sprite = LBPhaser.PhysicsLink.createSpriteFromData(this.game, data.phaser_sprite);
-        spriteData = data.phaser_sprite;
-    }
-    else if (data.phaser_image) {
-        sprite = LBPhaser.PhysicsLink.createImageFromData(this.game, data.phaser_image);
-        spriteData = data.phaser_image;
-    }
-    if (!sprite) {
-        return undefined;
-    }
-    
-    this.physicsLink.setRigidBodyDisplayObject(object, sprite);
-    if (this.worldGroup) {
-        this.worldGroup.add(sprite);
-    }
-    return sprite;
-};
-
-LBSailSim.PhaserEnv.prototype._boatCheckedOut = function(boat, data) {
+LBSailSim.PhaserSailEnv.prototype._boatCheckedOut = function(boat, data) {
     this.physicsLink.addRigidBody(boat, data);
+    LBSailSim.Env.prototype._boatCheckedOut.call(this, boat, data);
 };
 
-LBSailSim.PhaserEnv.prototype._boatReturned = function(boat) {
+LBSailSim.PhaserSailEnv.prototype._boatReturned = function(boat) {
+    LBSailSim.Env.prototype._boatReturned.call(this, boat);
     this.physicsLink.removeRigidBody(boat);
 };
 
 /**
- * The main simulation update method, call from the {@Phaser.State}'s update() method.
+ * Call after physics have been updated to updated the display objects.
  * @returns {undefined}
  */
-LBSailSim.PhaserEnv.prototype.update = function() {
+LBSailSim.PhaserSailEnv.prototype.preRender = function() {
+    this.physicsLink.updateDisplayObjects();
+};
+
+/**
+ * The main simulation update method, call from the {@link Phaser.State}'s update() method.
+ * @returns {undefined}
+ */
+LBSailSim.PhaserSailEnv.prototype.update = function() {
     var dt = this.physicsLink.timeStep();
     LBSailSim.Env.prototype.update.call(this, dt);
     
     this.physicsLink.update(dt);
 };
-
 </code></pre>
         </article>
     </section>
@@ -279,13 +133,13 @@ LBSailSim.PhaserEnv.prototype.update = function() {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:03 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:43 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

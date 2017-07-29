@@ -59,28 +59,36 @@ LBPhaser.PhysicsLink = function(phaserEnv) {
     this.phaserEnv = phaserEnv;
     this.game = phaserEnv.game;
     
-    // We're overriding the stage's updateTransform() method so we can update the
-    // sprites from the current obj3D positions of the rigid bodies. The postUpdate()
-    // methods all seem to be internal, so I'm hooking into updateTransform() because
-    // that's currently called right after the P2 bodies update the positions of their
-    // sprites (which is done in {Phaser.Physics.P2.Body.postUpdate()}.
-    this.savedUpdateTransform = this.game.stage.updateTransform;
-    this.game.stage._physicsLink = this;
-    this.game.stage.updateTransform = this._stageUpdateTransform;
-    
     this.rigidBodies = [];
+    
+    this.views = [];
     
     this.updateCount = 0;
     this.stageUpdateCount = 0;
+    
+    /**
+     * The next id to be assigned to a rigid body passed to {@link LBPhaser.PhysicsLink#getRigidBodyId}.
+     * @private
+     */
+    this._nextRigidBodyId = 1;
 };
 
-LBPhaser.PhysicsLink._working3DPos = new LBGeometry.Vector3();
-LBPhaser.PhysicsLink._workingEuler;
-LBPhaser.PhysicsLink._workingPlane = new LBGeometry.Plane();
-LBPhaser.PhysicsLink._working3DNormal = new LBGeometry.Vector3();
-LBPhaser.PhysicsLink._workingSphere = new LBGeometry.Sphere();
-
 LBPhaser.PhysicsLink.prototype = {
+    
+    /**
+     * Retrieves an id that can be used to uniquely identify a rigid body within
+     * the Phaser physics stuff.
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body of interest.
+     * @returns {Number}    The id for the rigid body.
+     */
+    getRigidBodyId: function(rigidBody) {
+        var id = rigidBody._lbPhysicsLinkId;
+        if (!id) {
+            id = this._nextRigidBodyId++;
+            rigidBody._lbPhysicsLinkId = id;
+        }
+        return id;
+    },
 
     /**
      * Adds a fixed object to the physics link.
@@ -88,7 +96,7 @@ LBPhaser.PhysicsLink.prototype = {
      * @returns {LBPhaser.P2Link}   this.
      */
     addFixedObject: function(object) {
-        
+        throw 'addFixedObject not implemented';
     },
     
     /**
@@ -101,105 +109,109 @@ LBPhaser.PhysicsLink.prototype = {
      */
     addRigidBody: function(rigidBody, data) {
         this.rigidBodies.push(rigidBody);
+        
+        this._rigidBodyAdded(rigidBody, data);
+
+        this.views.forEach(function(view) {
+            view.rigidBodyAdded(rigidBody);
+        });
+        
         return this;
     },
+    
+    /**
+     * Called from {@link LBPhaser.PhysicsLink#addRigidBody} after the rigid body
+     * has been added but before the views have been notified.
+     * @protected
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @param {Object}  [data]  Optional data containing additional information for
+     * loading other items associated with the rigid body, such as a Phaser display object.
+     * @returns {undefined}
+     */
+    _rigidBodyAdded: function(rigidBody, data) {
+    },
+    
     
     /**
      * Removes a rigid body from the manager.
      * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
-     * @returns {LBPhaser.PhysicsLink}   this.
+     * @returns {Boolean}   true if the rigid body was removed, false if it was not
+     * part of this link.
      */
     removeRigidBody: function(rigidBody) {
         var index = this.rigidBodies.indexOf(rigidBody);
         if (index >= 0) {
+            this.views.forEach(function(view) {
+                view.rigidBodyRemoved(rigidBody);
+            });
+            
+            this._rigidBodyRemoved(rigidBody);
+            
             this.rigidBodies.splice(index, 1);
+            return true;
         }
+        return false;
+    },
+    
+    /**
+     * Called from {@link LBPhaser.PhysicsLink#removeRigidBody} right before the rigid
+     * body is removed from the rigid body list, this does nothing.
+     * @protected
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body being removed.
+     * @returns {undefined}
+     */
+    _rigidBodyRemoved: function(rigidBody) {
+    },
+    
+    
+    /**
+     * Adds a {@link LBPhaser.PhysicsView} to the manager.
+     * @param {LBPhaser.PhysicsView} view The view to add.
+     */
+    addView: function(view) {
+        this.views.push(view);
+        
+        // Tell the view about all the physics objects...
+        this.rigidBodies.forEach(function(rigidBody) {
+            view.rigidBodyAdded(rigidBody);
+        });
+        
         return this;
     },
     
     /**
-     * Called by {@link LBPhaser.PhysicsLink#removeRigidBody} when a rigid body is going to be
-     * removed.
-     * @protected
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
-     * @returns {undefined}
+     * Removes a view from the manager.
+     * @param {LBPhaser.PhysicsView} view   The view to remove.
+     * @return {Boolean}    true if the view was removed, false if it was not part
+     * of this link.
      */
-    _rigidBodyRemoved: function(rigidBody) {
-        
+    removeView: function(view) {
+        var index = this.views.indexOf(view);
+        if (index >= 0) {
+            // Tell the view to remove all the physics objects...
+            this.rigidBodies.forEach(function(rigidBody) {
+                view.rigidBodyRemoved(rigidBody);
+            });
+            this.views.splice(index, 1);
+            return true;
+        }
+        return false;
     },
     
-    /**
-     * Retrieves the Phaser {@link https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject|DisplayObject} 
-     * associated with a rigid body.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
-     * @returns {Phaser.Sprite} The display object associated with rigidBody, may be undefined.
-     */
-    getRigidBodyDisplayObject: function(rigidBody) {
-        return rigidBody._lbDisplayObject;
-    },
-    
-    /**
-     * Associates a Phaser {@link https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject|DisplayObject} 
-     * with a rigid body. A rigid body can only have one display object associated with it.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
-     * @param {Object} drawingObject    The drawing object to associate.
-     * @returns {undefined}
-     */
-    setRigidBodyDisplayObject: function(rigidBody, drawingObject) {
-        rigidBody._lbDisplayObject = drawingObject;
-    },
-
 
     /**
-     * Retrieves the force arrow associated with a rigid body.
-     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
-     * @returns {LBPhaser.Arrow}    The force arrow, may be undefined.
+     * @returns {Number}    The time step for the next update call.
      */
-    getBodyForceArrow: function(rigidBody) {
-        return rigidBody._lbForceArrow;
+    timeStep: function() {
+        return 1/60;
     },
-    
+
     /**
-     * Sets the force arrow associated with a rigid body.
-     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
-     * @param {LBPhaser.Arrow} forceArrow   The force arrow.
+     * Performs an update cycle.
+     * @param {Number} dt The time step, normally what was returned by {@link LBPhaser.P2Link#timeStep}..
      * @returns {undefined}
      */
-    setBodyForceArrow: function(rigidBody, forceArrow) {
-        rigidBody._lbForceArrow = forceArrow;
-    },
-    
-    /**
-     * Retrieves the callback object associated with a rigid body.
-     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
-     * @returns {Object}    The callback object, may be undefined.
-     */
-    getBodyCallback: function(rigidBody) {
-        return rigidBody._lbCallback;
-    },
-    
-    /**
-     * Sets the callback object associated with a rigid body. The callback has the
-     * following optional functions:
-     * &lt;li>displayObjectsUpdated = function(topRigidBody, rigidBody);
-     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
-     * @param {Object}  callback    The callback object.
-     */
-    setBodyCallback: function(rigidBody, callback) {
-        rigidBody._lbCallback = callback;
-    },
-    
-    /**
-     * Our hook into {@link https://photonstorm.github.io/phaser-ce/Phaser.Stage#updateTransform|Phaser.Stage#updateTransform}.
-     * @protected
-     * @returns {undefined}
-     */
-    _stageUpdateTransform: function() {
-        var me = this._physicsLink;
-        me.savedUpdateTransform.call(this);
-        
-        me.updateDisplayObjects();
-        ++this.stageUpdateCount;
+    update: function(dt) {
     },
     
     /**
@@ -210,139 +222,27 @@ LBPhaser.PhysicsLink.prototype = {
      * @returns {undefined}
      */
     updateDisplayObjects: function() {
-        this.rigidBodies.forEach(this._topUpdateDisplayObjects, this);
+        this.views.forEach(function(view) {
+            view.beginDisplayObjectsUpdate();
+        });
+        
+        this.rigidBodies.forEach(this._updateDisplayObjects, this);
+
+        this.views.forEach(function(view) {
+            view.endDisplayObjectsUpdate();
+        });        
     },
 
-    _topUpdateDisplayObjects: function(rigidBody) {
-        this.activeRigidBody = rigidBody;
-        
-        this._updateDisplayObjects(rigidBody);
-    },
-    
     _updateDisplayObjects: function(rigidBody) {
-        var sprite = this.getRigidBodyDisplayObject(rigidBody);
-        if (sprite) {
-            this.updateSpriteFromRigidBody(rigidBody, sprite);
-        }
-        
-        var forceArrow = this.getBodyForceArrow(rigidBody);
-        if (forceArrow) {
-            this.updateForceArrowFromRigidBody(rigidBody, forceArrow);
-        }
-        
-        rigidBody.parts.forEach(this._updateDisplayObjects, this);
-        
-        var callback = this.getBodyCallback(rigidBody);
-        if (callback) {
-            callback.displayObjectsUpdated(this.activeRigidBody, rigidBody);
-        }
-    },
-    
-    /**
-     * Updates a sprite from a rigid body.
-     * &lt;p>
-     * This is automatically called as a result of calling {@link LBPhaser.PhysicsLink#updateDisplayObjects}.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
-     * @param {Phaser.Image} sprite   The sprite to be updated.
-     * @returns {undefined}
-     */
-    updateSpriteFromRigidBody: function(rigidBody, sprite) {
-        var obj3D = rigidBody.obj3D;
-        if (!obj3D) {
-            return;
-        }        
-
-        var pos = LBPhaser.PhysicsLink._working3DPos;
-        if (sprite.lbLocalOffset) {
-            pos.copy(sprite.lbLocalOffset);
-        }
-        else {
-            pos.zero();
-        }
-        obj3D.localToWorld(pos);
-        var euler = Leeboard._workingEuler = obj3D.getWorldRotation(Leeboard._workingEuler);
-        
-        sprite.x = this.phaserEnv.toPixelsX(pos.x);
-        sprite.y = this.phaserEnv.toPixelsY(pos.y);
-        sprite.rotation = this.phaserEnv.ySign * euler.z;
-    },
-
-    /**
-     * Updates a force arrow from a rigid body's resultant. If the rigid body has
-     * a 'getForceArrowResultant' member function defined, that will be called
-     * to obtain the resultant, otherwise the rigid body's {@link LBPhysics.RigidBody#getResultant} method will
-     * be called.
-     * &lt;p>
-     * This is automatically called as a result of calling {@link LBPhaser.PhysicsLink#updateDisplayObjects}.
-     * &lt;p>
-     * The getForceArrowResultant function has the same function signature as 
-     * {@link LBPhysics.RigidBody#getResultant} excluding the convertToWrench argument
-     * (the first argument).
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
-     * @param {LBPhaser.Arrow} forceArrow   The arrow object.
-     * @returns {undefined}
-     */
-    updateForceArrowFromRigidBody: function(rigidBody, forceArrow) {
-        // We want the resultant passing through the vertical (world) plane that is
-        // lined up with the local X-axis and passes through the local origin.
-        var plane = LBPhaser.PhysicsLink._workingPlane;
-        var normal = LBPhaser.PhysicsLink._working3DNormal;
-        var point = rigidBody.obj3D.getWorldPosition(LBPhaser.PhysicsLink._working3DPos);
-        var rotation = rigidBody.obj3D.getWorldRotation(LBPhaser.PhysicsLink._workingEuler);
-        var angle = LBMath.PI_2 + rotation.z;
-        normal.set(Math.cos(angle), Math.sin(angle), 0);
-        plane.setFromNormalAndCoplanarPoint(normal, point);
-        
-        var bounds;
-        if (rigidBody.massRadius) {
-            bounds = LBPhaser.PhysicsLink._workingSphere;
-            bounds.set(rigidBody.centerOfMass, rigidBody.massRadius);
-            bounds.center.z = 0;
-            bounds.applyMatrix4(rigidBody.obj3D.matrixWorld);
-        }
-        
-        var resultant;
-        if (rigidBody.getForceArrowResultant) {
-            resultant = rigidBody.getForceArrowResultant(plane, bounds);
-        }
-        else {
-            resultant = rigidBody.getResultant(true, plane, bounds);
-        }
-        if (resultant) {
-            forceArrow.setFromBaseAndVector(resultant.applPoint, resultant.force);
-        }
+        this.views.forEach(function(view) {
+            view.updateRigidBodyDisplayObjects(rigidBody);
+        });
     },
     
     constructor: LBPhaser.PhysicsLink
 };
 
 
-
-/**
- * Creates and loads a {@link https://photonstorm.github.io/phaser-ce/Phaser.Sprite|Phaser.Sprite} object based on properties in a data object.
- * @param {Phaser.Game} game    The game to which the sprite will belong.
- * @param {object} data The data object.
- * @returns {Phaser.Sprite} Th created/loaded sprite.
- */
-LBPhaser.PhysicsLink.createSpriteFromData = function(game, data) {
-    var sprite = new Phaser.Sprite(game, data.x, data.y, data.key, data.frame);
-    sprite.lbLocalOffset = new LBGeometry.Vector3();    
-    Leeboard.copyCommonProperties(sprite, data);
-    return sprite;
-};
-
-/**
- * Creates and loads a {@link https://photonstorm.github.io/phaser-ce/Phaser.Image|Phaser.Image} object based on properties in a data object.
- * @param {Phaser.Game} game    The game to which the sprite will belong.
- * @param {object} data The data object.
- * @returns {Phaser.Image} Th created/loaded image.
- */
-LBPhaser.PhysicsLink.createImageFromData = function(game, data) {
-    var sprite = new Phaser.Image(game, data.x, data.y, data.key, data.frame);
-    sprite.lbLocalOffset = new LBGeometry.Vector3();    
-    Leeboard.copyCommonProperties(sprite, data);
-    return sprite;
-};
 
 </code></pre>
         </article>
@@ -354,13 +254,13 @@ LBPhaser.PhysicsLink.createImageFromData = function(game, data) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:03 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:43 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

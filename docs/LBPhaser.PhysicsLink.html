@@ -212,14 +212,15 @@ and updating sprites from their associated rigid bodies.
 
     
 
-    <h4 class="name" id=".createImageFromData"><span class="type-signature">(static) </span>createImageFromData<span class="signature">(game, data)</span><span class="type-signature"> &rarr; {Phaser.Image}</span></h4>
+    <h4 class="name" id="_rigidBodyAdded"><span class="type-signature">(protected) </span>_rigidBodyAdded<span class="signature">(rigidBody, data<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
 
     
 
 
 
 <div class="description">
-    Creates and loads a <a href="https://photonstorm.github.io/phaser-ce/Phaser.Image">Phaser.Image</a> object based on properties in a data object.
+    Called from <a href="LBPhaser.PhysicsLink.html#addRigidBody">LBPhaser.PhysicsLink#addRigidBody</a> after the rigid body
+has been added but before the views have been notified.
 </div>
 
 
@@ -243,6 +244,8 @@ and updating sprites from their associated rigid bodies.
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -255,23 +258,31 @@ and updating sprites from their associated rigid bodies.
 
         <tr>
             
-                <td class="name"><code>game</code></td>
+                <td class="name"><code>rigidBody</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Phaser.Game</span>
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">The game to which the sprite will belong.</td>
+            <td class="description last">The rigid body.</td>
         </tr>
 
     
@@ -284,17 +295,28 @@ and updating sprites from their associated rigid bodies.
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">Object</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">The data object.</td>
+            <td class="description last">Optional data containing additional information for
+loading other items associated with the rigid body, such as a Phaser display object.</td>
         </tr>
 
     
@@ -335,7 +357,7 @@ and updating sprites from their associated rigid bodies.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line312">line 312</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line103">line 103</a>
     </li></ul></dd>
     
 
@@ -361,10 +383,6 @@ and updating sprites from their associated rigid bodies.
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    Th created/loaded image.
-</div>
-
 
 
 <dl>
@@ -373,183 +391,7 @@ and updating sprites from their associated rigid bodies.
     </dt>
     <dd>
         
-<span class="param-type">Phaser.Image</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".createSpriteFromData"><span class="type-signature">(static) </span>createSpriteFromData<span class="signature">(game, data)</span><span class="type-signature"> &rarr; {Phaser.Sprite}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Creates and loads a <a href="https://photonstorm.github.io/phaser-ce/Phaser.Sprite">Phaser.Sprite</a> object based on properties in a data object.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>game</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Phaser.Game</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The game to which the sprite will belong.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The data object.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line299">line 299</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Th created/loaded sprite.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Phaser.Sprite</span>
+<span class="param-type">undefined</span>
 
 
     </dd>
@@ -571,8 +413,8 @@ and updating sprites from their associated rigid bodies.
 
 
 <div class="description">
-    Called by <a href="LBPhaser.PhysicsLink.html#removeRigidBody">LBPhaser.PhysicsLink#removeRigidBody</a> when a rigid body is going to be
-removed.
+    Called from <a href="LBPhaser.PhysicsLink.html#removeRigidBody">LBPhaser.PhysicsLink#removeRigidBody</a> right before the rigid
+body is removed from the rigid body list, this does nothing.
 </div>
 
 
@@ -624,7 +466,7 @@ removed.
 
             
 
-            <td class="description last">The rigid body.</td>
+            <td class="description last">The rigid body being removed.</td>
         </tr>
 
     
@@ -665,107 +507,7 @@ removed.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line99">line 99</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">undefined</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="_stageUpdateTransform"><span class="type-signature">(protected) </span>_stageUpdateTransform<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Our hook into <a href="https://photonstorm.github.io/phaser-ce/Phaser.Stage#updateTransform">Phaser.Stage#updateTransform</a>.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line169">line 169</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line135">line 135</a>
     </li></ul></dd>
     
 
@@ -914,7 +656,7 @@ removed.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line62">line 62</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line70">line 70</a>
     </li></ul></dd>
     
 
@@ -1112,7 +854,7 @@ loading other items associated with the rigid body, such as a Phaser display obj
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line74">line 74</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line82">line 82</a>
     </li></ul></dd>
     
 
@@ -1165,14 +907,146 @@ loading other items associated with the rigid body, such as a Phaser display obj
 
     
 
-    <h4 class="name" id="getBodyCallback"><span class="type-signature"></span>getBodyCallback<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="addView"><span class="type-signature"></span>addView<span class="signature">(view)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Retrieves the callback object associated with a rigid body.
+    Adds a <a href="LBPhaser.html#.PhysicsView">LBPhaser.PhysicsView</a> to the manager.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>view</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhaser.html#.PhysicsView">LBPhaser.PhysicsView</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The view to add.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line143">line 143</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getRigidBodyId"><span class="type-signature"></span>getRigidBodyId<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Retrieves an id that can be used to uniquely identify a rigid body within
+the Phaser physics stuff.
 </div>
 
 
@@ -1224,7 +1098,7 @@ loading other items associated with the rigid body, such as a Phaser display obj
 
             
 
-            <td class="description last">The rigid body.</td>
+            <td class="description last">The rigid body of interest.</td>
         </tr>
 
     
@@ -1265,7 +1139,7 @@ loading other items associated with the rigid body, such as a Phaser display obj
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line149">line 149</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line56">line 56</a>
     </li></ul></dd>
     
 
@@ -1292,7 +1166,7 @@ loading other items associated with the rigid body, such as a Phaser display obj
 
         
 <div class="param-desc">
-    The callback object, may be undefined.
+    The id for the rigid body.
 </div>
 
 
@@ -1303,7 +1177,7 @@ loading other items associated with the rigid body, such as a Phaser display obj
     </dt>
     <dd>
         
-<span class="param-type">Object</span>
+<span class="param-type">Number</span>
 
 
     </dd>
@@ -1318,314 +1192,7 @@ loading other items associated with the rigid body, such as a Phaser display obj
 
     
 
-    <h4 class="name" id="getBodyForceArrow"><span class="type-signature"></span>getBodyForceArrow<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Retrieves the force arrow associated with a rigid body.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>rigidBody</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The rigid body.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line130">line 130</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The force arrow, may be undefined.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="getRigidBodyDisplayObject"><span class="type-signature"></span>getRigidBodyDisplayObject<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Phaser.Sprite}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Retrieves the Phaser <a href="https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject">DisplayObject</a> 
-associated with a rigid body.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>rigidBody</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The rigid body.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line109">line 109</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The display object associated with rigidBody, may be undefined.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Phaser.Sprite</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="removeRigidBody"><span class="type-signature"></span>removeRigidBody<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.PhysicsLink.html">LBPhaser.PhysicsLink</a>}</span></h4>
+    <h4 class="name" id="removeRigidBody"><span class="type-signature"></span>removeRigidBody<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
 
     
 
@@ -1725,7 +1292,7 @@ associated with a rigid body.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line84">line 84</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line113">line 113</a>
     </li></ul></dd>
     
 
@@ -1752,7 +1319,8 @@ associated with a rigid body.
 
         
 <div class="param-desc">
-    this.
+    true if the rigid body was removed, false if it was not
+part of this link.
 </div>
 
 
@@ -1763,7 +1331,7 @@ associated with a rigid body.
     </dt>
     <dd>
         
-<span class="param-type"><a href="LBPhaser.PhysicsLink.html">LBPhaser.PhysicsLink</a></span>
+<span class="param-type">Boolean</span>
 
 
     </dd>
@@ -1778,16 +1346,14 @@ associated with a rigid body.
 
     
 
-    <h4 class="name" id="setBodyCallback"><span class="type-signature"></span>setBodyCallback<span class="signature">(rigidBody, callback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="removeView"><span class="type-signature"></span>removeView<span class="signature">(view)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
 
     
 
 
 
 <div class="description">
-    Sets the callback object associated with a rigid body. The callback has the
-following optional functions:
-<li>displayObjectsUpdated = function(topRigidBody, rigidBody);
+    Removes a view from the manager.
 </div>
 
 
@@ -1823,13 +1389,13 @@ following optional functions:
 
         <tr>
             
-                <td class="name"><code>rigidBody</code></td>
+                <td class="name"><code>view</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+<span class="param-type"><a href="LBPhaser.html#.PhysicsView">LBPhaser.PhysicsView</a></span>
 
 
             
@@ -1839,30 +1405,7 @@ following optional functions:
 
             
 
-            <td class="description last">The rigid body.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The callback object.</td>
+            <td class="description last">The view to remove.</td>
         </tr>
 
     
@@ -1926,102 +1469,49 @@ following optional functions:
 
 
 
-
-
+<h5>Returns:</h5>
 
         
-            
-
-    
-
-    <h4 class="name" id="setBodyForceArrow"><span class="type-signature"></span>setBodyForceArrow<span class="signature">(rigidBody, forceArrow)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Sets the force arrow associated with a rigid body.
+<div class="param-desc">
+    true if the view was removed, false if it was not part
+of this link.
 </div>
 
 
 
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
         
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>rigidBody</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+<span class="param-type">Boolean</span>
 
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The rigid body.</td>
-        </tr>
+    </dd>
+</dl>
 
     
 
-        <tr>
-            
-                <td class="name"><code>forceArrow</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a></span>
 
 
+        
             
-            </td>
-
-            
-
-            
-
-            <td class="description last">The force arrow.</td>
-        </tr>
 
     
-    </tbody>
-</table>
+
+    <h4 class="name" id="timeStep"><span class="type-signature"></span>timeStep<span class="signature">()</span><span class="type-signature"> &rarr; {Number}</span></h4>
+
+    
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2057,7 +1547,7 @@ following optional functions:
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line140">line 140</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line177">line 177</a>
     </li></ul></dd>
     
 
@@ -2083,6 +1573,10 @@ following optional functions:
 <h5>Returns:</h5>
 
         
+<div class="param-desc">
+    The time step for the next update call.
+</div>
+
 
 
 <dl>
@@ -2091,7 +1585,7 @@ following optional functions:
     </dt>
     <dd>
         
-<span class="param-type">undefined</span>
+<span class="param-type">Number</span>
 
 
     </dd>
@@ -2106,15 +1600,14 @@ following optional functions:
 
     
 
-    <h4 class="name" id="setRigidBodyDisplayObject"><span class="type-signature"></span>setRigidBodyDisplayObject<span class="signature">(rigidBody, drawingObject)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(dt)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
 
     
 
 
 
 <div class="description">
-    Associates a Phaser <a href="https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject">DisplayObject</a> 
-with a rigid body. A rigid body can only have one display object associated with it.
+    Performs an update cycle.
 </div>
 
 
@@ -2150,13 +1643,13 @@ with a rigid body. A rigid body can only have one display object associated with
 
         <tr>
             
-                <td class="name"><code>rigidBody</code></td>
+                <td class="name"><code>dt</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+<span class="param-type">Number</span>
 
 
             
@@ -2166,30 +1659,7 @@ with a rigid body. A rigid body can only have one display object associated with
 
             
 
-            <td class="description last">The rigid body.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>drawingObject</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The drawing object to associate.</td>
+            <td class="description last">The time step, normally what was returned by <a href="LBPhaser.P2Link.html#timeStep">LBPhaser.P2Link#timeStep</a>..</td>
         </tr>
 
     
@@ -2230,7 +1700,7 @@ with a rigid body. A rigid body can only have one display object associated with
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line120">line 120</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line186">line 186</a>
     </li></ul></dd>
     
 
@@ -2289,7 +1759,7 @@ with a rigid body. A rigid body can only have one display object associated with
     Updates any Phaser display object that have been attached to any of the rigid bodies or their
 parts.
 <p>
-This is automatically called from <a href="LBPhaser.PhysicsLink.html#_stageUpdateTransform">LBPhaser.PhysicsLink#_stageUpdateTransform</a>.
+This is automatically called from LBPhaser.PhysicsLink#_stageUpdateTransform.
 </div>
 
 
@@ -2333,362 +1803,7 @@ This is automatically called from <a href="LBPhaser.PhysicsLink.html#_stageUpdat
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line184">line 184</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">undefined</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="updateForceArrowFromRigidBody"><span class="type-signature"></span>updateForceArrowFromRigidBody<span class="signature">(rigidBody, forceArrow)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Updates a force arrow from a rigid body's resultant. If the rigid body has
-a 'getForceArrowResultant' member function defined, that will be called
-to obtain the resultant, otherwise the rigid body's <a href="LBPhysics.RigidBody.html#getResultant">LBPhysics.RigidBody#getResultant</a> method will
-be called.
-<p>
-This is automatically called as a result of calling <a href="LBPhaser.PhysicsLink.html#updateDisplayObjects">LBPhaser.PhysicsLink#updateDisplayObjects</a>.
-<p>
-The getForceArrowResultant function has the same function signature as 
-<a href="LBPhysics.RigidBody.html#getResultant">LBPhysics.RigidBody#getResultant</a> excluding the convertToWrench argument
-(the first argument).
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>rigidBody</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The rigid body.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>forceArrow</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="LBPhaser.Arrow.html">LBPhaser.Arrow</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The arrow object.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line257">line 257</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">undefined</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="updateSpriteFromRigidBody"><span class="type-signature"></span>updateSpriteFromRigidBody<span class="signature">(rigidBody, sprite)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Updates a sprite from a rigid body.
-<p>
-This is automatically called as a result of calling <a href="LBPhaser.PhysicsLink.html#updateDisplayObjects">LBPhaser.PhysicsLink#updateDisplayObjects</a>.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>rigidBody</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The rigid body.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>sprite</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Phaser.Image</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The sprite to be updated.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line221">line 221</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line196">line 196</a>
     </li></ul></dd>
     
 
@@ -2748,13 +1863,13 @@ This is automatically called as a result of calling <a href="LBPhaser.PhysicsLin
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:04 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:44 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

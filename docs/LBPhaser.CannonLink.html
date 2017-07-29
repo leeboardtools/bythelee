@@ -142,7 +142,7 @@ with a <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a>, along with up
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_CannonLink.js.html">phaser/CannonLink.js</a>, <a href="phaser_CannonLink.js.html#line27">line 27</a>
+        <a href="phaser_CannonLink.js.html">phaser/CannonLink.js</a>, <a href="phaser_CannonLink.js.html#line28">line 28</a>
     </li></ul></dd>
     
 
@@ -188,6 +188,17 @@ with a <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a>, along with up
 
     
     </div>
+
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="LBPhaser.PhysicsLink.html">LBPhaser.PhysicsLink</a></li>
+    </ul>
+
 
     
 
@@ -310,7 +321,7 @@ update the forces applied to it and then assign them to the Cannon body.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_CannonLink.js.html">phaser/CannonLink.js</a>, <a href="phaser_CannonLink.js.html#line144">line 144</a>
+        <a href="phaser_CannonLink.js.html">phaser/CannonLink.js</a>, <a href="phaser_CannonLink.js.html#line125">line 125</a>
     </li></ul></dd>
     
 
@@ -359,11 +370,215 @@ update the forces applied to it and then assign them to the Cannon body.
 
     
 
-    <h4 class="name" id="_rigidBodyRemoved"><span class="type-signature"></span>_rigidBodyRemoved<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <h4 class="name" id="_rigidBodyAdded"><span class="type-signature">(protected) </span>_rigidBodyAdded<span class="signature">(rigidBody, data<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
 
     
 
 
+
+<div class="description">
+    Called from <a href="LBPhaser.PhysicsLink.html#addRigidBody">LBPhaser.PhysicsLink#addRigidBody</a> after the rigid body
+has been added but before the views have been notified.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Optional data containing additional information for
+loading other items associated with the rigid body, such as a Phaser display object.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LBPhaser.PhysicsLink.html#_rigidBodyAdded">LBPhaser.PhysicsLink#_rigidBodyAdded</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line103">line 103</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_rigidBodyRemoved"><span class="type-signature">(protected) </span>_rigidBodyRemoved<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Called from <a href="LBPhaser.PhysicsLink.html#removeRigidBody">LBPhaser.PhysicsLink#removeRigidBody</a> right before the rigid
+body is removed from the rigid body list, this does nothing.
+</div>
 
 
 
@@ -404,7 +619,7 @@ update the forces applied to it and then assign them to the Cannon body.
             <td class="type">
             
                 
-<span class="param-type">type</span>
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
 
 
             
@@ -414,7 +629,7 @@ update the forces applied to it and then assign them to the Cannon body.
 
             
 
-            <td class="description last"></td>
+            <td class="description last">The rigid body being removed.</td>
         </tr>
 
     
@@ -434,6 +649,11 @@ update the forces applied to it and then assign them to the Cannon body.
 
     
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LBPhaser.PhysicsLink.html#_rigidBodyRemoved">LBPhaser.PhysicsLink#_rigidBodyRemoved</a>
+    </li></ul></dd>
     
 
     
@@ -455,7 +675,7 @@ update the forces applied to it and then assign them to the Cannon body.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_CannonLink.js.html">phaser/CannonLink.js</a>, <a href="phaser_CannonLink.js.html#line109">line 109</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line135">line 135</a>
     </li></ul></dd>
     
 
@@ -606,7 +826,7 @@ and also updates the Phaser drawing object associated with the rigid body, if an
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_CannonLink.js.html">phaser/CannonLink.js</a>, <a href="phaser_CannonLink.js.html#line170">line 170</a>
+        <a href="phaser_CannonLink.js.html">phaser/CannonLink.js</a>, <a href="phaser_CannonLink.js.html#line154">line 154</a>
     </li></ul></dd>
     
 
@@ -735,6 +955,11 @@ and also updates the Phaser drawing object associated with the rigid body, if an
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LBPhaser.PhysicsLink.html#addFixedObject">LBPhaser.PhysicsLink#addFixedObject</a>
+    </li></ul></dd>
+    
 
     
 
@@ -755,7 +980,7 @@ and also updates the Phaser drawing object associated with the rigid body, if an
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_CannonLink.js.html">phaser/CannonLink.js</a>, <a href="phaser_CannonLink.js.html#line54">line 54</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line70">line 70</a>
     </li></ul></dd>
     
 
@@ -808,11 +1033,355 @@ and also updates the Phaser drawing object associated with the rigid body, if an
 
     
 
-    <h4 class="name" id="addRigidBody"><span class="type-signature"></span>addRigidBody<span class="signature">(rigidBody, data)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <h4 class="name" id="addRigidBody"><span class="type-signature"></span>addRigidBody<span class="signature">(rigidBody, data<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="LBPhaser.PhysicsLink.html">LBPhaser.PhysicsLink</a>}</span></h4>
 
     
 
 
+
+<div class="description">
+    Adds a top-level <a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a> to the manager. This rigid body
+should not be a part of any other rigid body.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Optional data containing additional information for
+loading other items associated with the rigid body, such as a Phaser display object.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.PhysicsLink.html#addRigidBody">LBPhaser.PhysicsLink#addRigidBody</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line82">line 82</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="LBPhaser.PhysicsLink.html">LBPhaser.PhysicsLink</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="addView"><span class="type-signature"></span>addView<span class="signature">(view)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Adds a <a href="LBPhaser.html#.PhysicsView">LBPhaser.PhysicsView</a> to the manager.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>view</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhaser.html#.PhysicsView">LBPhaser.PhysicsView</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The view to add.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.PhysicsLink.html#addView">LBPhaser.PhysicsLink#addView</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line143">line 143</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getRigidBodyId"><span class="type-signature"></span>getRigidBodyId<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Retrieves an id that can be used to uniquely identify a rigid body within
+the Phaser physics stuff.
+</div>
 
 
 
@@ -853,7 +1422,7 @@ and also updates the Phaser drawing object associated with the rigid body, if an
             <td class="type">
             
                 
-<span class="param-type">type</span>
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
 
 
             
@@ -863,30 +1432,7 @@ and also updates the Phaser drawing object associated with the rigid body, if an
 
             
 
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">type</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
+            <td class="description last">The rigid body of interest.</td>
         </tr>
 
     
@@ -904,6 +1450,11 @@ and also updates the Phaser drawing object associated with the rigid body, if an
 
     
 
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.PhysicsLink.html#getRigidBodyId">LBPhaser.PhysicsLink#getRigidBodyId</a>
+    </li></ul></dd>
     
 
     
@@ -927,7 +1478,7 @@ and also updates the Phaser drawing object associated with the rigid body, if an
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_CannonLink.js.html">phaser/CannonLink.js</a>, <a href="phaser_CannonLink.js.html#line77">line 77</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line56">line 56</a>
     </li></ul></dd>
     
 
@@ -953,6 +1504,10 @@ and also updates the Phaser drawing object associated with the rigid body, if an
 <h5>Returns:</h5>
 
         
+<div class="param-desc">
+    The id for the rigid body.
+</div>
+
 
 
 <dl>
@@ -961,7 +1516,325 @@ and also updates the Phaser drawing object associated with the rigid body, if an
     </dt>
     <dd>
         
-<span class="param-type">undefined</span>
+<span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="removeRigidBody"><span class="type-signature"></span>removeRigidBody<span class="signature">(rigidBody)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Removes a rigid body from the manager.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rigidBody</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhysics.RigidBody.html">LBPhysics.RigidBody</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The rigid body.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.PhysicsLink.html#removeRigidBody">LBPhaser.PhysicsLink#removeRigidBody</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line113">line 113</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true if the rigid body was removed, false if it was not
+part of this link.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="removeView"><span class="type-signature"></span>removeView<span class="signature">(view)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Removes a view from the manager.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>view</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="LBPhaser.html#.PhysicsView">LBPhaser.PhysicsView</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The view to remove.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.PhysicsLink.html#removeView">LBPhaser.PhysicsLink#removeView</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line160">line 160</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    true if the view was removed, false if it was not part
+of this link.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
 
 
     </dd>
@@ -1003,6 +1876,11 @@ and also updates the Phaser drawing object associated with the rigid body, if an
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LBPhaser.PhysicsLink.html#timeStep">LBPhaser.PhysicsLink#timeStep</a>
+    </li></ul></dd>
+    
 
     
 
@@ -1023,7 +1901,7 @@ and also updates the Phaser drawing object associated with the rigid body, if an
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_CannonLink.js.html">phaser/CannonLink.js</a>, <a href="phaser_CannonLink.js.html#line119">line 119</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line177">line 177</a>
     </li></ul></dd>
     
 
@@ -1156,6 +2034,11 @@ and also updates the Phaser drawing object associated with the rigid body, if an
     
 
     
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="LBPhaser.PhysicsLink.html#update">LBPhaser.PhysicsLink#update</a>
+    </li></ul></dd>
+    
 
     
 
@@ -1176,7 +2059,115 @@ and also updates the Phaser drawing object associated with the rigid body, if an
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="phaser_CannonLink.js.html">phaser/CannonLink.js</a>, <a href="phaser_CannonLink.js.html#line128">line 128</a>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line186">line 186</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="updateDisplayObjects"><span class="type-signature"></span>updateDisplayObjects<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Updates any Phaser display object that have been attached to any of the rigid bodies or their
+parts.
+<p>
+This is automatically called from LBPhaser.PhysicsLink#_stageUpdateTransform.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="LBPhaser.PhysicsLink.html#updateDisplayObjects">LBPhaser.PhysicsLink#updateDisplayObjects</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="phaser_PhysicsLink.js.html">phaser/PhysicsLink.js</a>, <a href="phaser_PhysicsLink.js.html#line196">line 196</a>
     </li></ul></dd>
     
 
@@ -1236,13 +2227,13 @@ and also updates the Phaser drawing object associated with the rigid body, if an
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:04 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:44 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

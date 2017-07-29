@@ -43,7 +43,7 @@
  */
 
 
-/* global Leeboard, Phaser, LBPhysics, LBGeometry, LBMath, LBPhaser */
+/* global Leeboard, Phaser, LBPhysics, LBGeometry, LBMath, LBPhaser, p2 */
 
 /**
  * Manages linking a {@link https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body|Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody}, updating
@@ -51,6 +51,7 @@
  * from the rigid body to the P2 body. This also supports displaying an arrow representing
  * the resultant force on rigid bodies.
  * @constructor
+ * @extends LBPhaser.PhysicsLink
  * @param {LBPhaser.Env} phaserEnv The Phaser environment we're running under.
  * @returns {LBPhaser.P2Link}
  */
@@ -68,11 +69,7 @@ LBPhaser.P2Link = function(phaserEnv) {
 LBPhaser.P2Link.prototype = Object.create(LBPhaser.PhysicsLink.prototype);
 LBPhaser.P2Link.prototype.constructor = LBPhaser.P2Link;
 
-/**
- * Adds a fixed object to the physics link.
- * @param {Object} object   A Phaser drawing object.
- * @returns {LBPhaser.P2Link}   this.
- */
+// @inheritdoc..
 LBPhaser.P2Link.prototype.addFixedObject = function(object) {
     this.game.physics.p2.enable(object);
     object.body.allowGravity = false;
@@ -83,12 +80,7 @@ LBPhaser.P2Link.prototype.addFixedObject = function(object) {
     return this;
 };
 
-/**
- * @inheritdoc
- * @param {type} rigidBody
- * @param {type} data
- * @returns {undefined}
- */
+// @inheritdoc..
 LBPhaser.P2Link.prototype.addRigidBody = function(rigidBody, data) {
     LBPhaser.PhysicsLink.prototype.addRigidBody.call(this, rigidBody);
     
@@ -96,39 +88,70 @@ LBPhaser.P2Link.prototype.addRigidBody = function(rigidBody, data) {
     rigidBody._lbP2Body = p2Body;
     p2Body.damping = 0;
     
+    if (rigidBody.xyOutline &amp;&amp; (rigidBody.xyOutline.length > 2)) {        
+        var xy = [];
+        var env = this.phaserEnv;
+        
+        var iBegin;
+        var iEnd;
+        var iDelta;
+        // We're presuming the outline is convex...
+        if (LBGeometry.whichSideOfLine(rigidBody.xyOutline[0], rigidBody.xyOutline[1], rigidBody.xyOutline[2]) === LBGeometry.LINE_SIDE_RIGHT) {
+            // Going clockwise...
+            iBegin = rigidBody.xyOutline.length - 1;
+            iEnd = -1;
+            iDelta = -1;
+        }
+        else {
+            iBegin = 0;
+            iEnd = rigidBody.xyOutline.length;
+            iDelta = 1;
+        }
+        
+        for (var i = iBegin; i !== iEnd; i += iDelta) {
+            xy.push([rigidBody.xyOutline[i].x, rigidBody.xyOutline[i].y]);
+        }
+        
+        var convex = new p2.Convex({ vertices: xy });
+        p2Body.clearShapes();
+        
+        var offsetX = env.toPixelsX(convex.centerOfMass[0]);
+        var offsetY = env.toPixelsY(convex.centerOfMass[1]);
+        var sprite = p2Body.sprite;
+        if (sprite) {
+            offsetX += (0.5 - sprite.anchor.x) * sprite.width;
+            offsetY += (0.5 - sprite.anchor.y) * sprite.height;
+        }
+        p2Body.addShape(convex, offsetX, offsetY);
+    }
+    
     p2Body.setCollisionGroup(this.dynamicObjectCollisionGroup);
     p2Body.collides(this.fixedObjectCollisionGroup);
 
     p2Body.x = this.phaserEnv.toPixelsX(rigidBody.obj3D.position.x);
     p2Body.y = this.phaserEnv.toPixelsY(rigidBody.obj3D.position.y);
     p2Body.rotation = this.phaserEnv.toPixelsRotationRad(rigidBody.obj3D.rotation.z);
-    this.setRigidBodyDisplayObject(rigidBody, p2Body.sprite);
-};
+ };
 
+// @inheritdoc..
 LBPhaser.P2Link.prototype._rigidBodyRemoved = function(rigidBody) {
     if (rigidBody._lbP2Body) {
         rigidBody._lbP2Body.world.removeBody(rigidBody._lbP2Body);
-        this.setRigidBodyDisplayObject(undefined);
         rigidBody._lbP2Body = undefined;
     }
 };
 
-/**
- * @returns {Number}    The time step for the next update call.
- */
+// @inheritdoc..
 LBPhaser.P2Link.prototype.timeStep = function() {
     var p2 = this.game.physics.p2;
     return p2.useElapsedTime ? p2.game.time.physicsElapsed : p2.frameRate;
 };
 
-/**
- * Performs an update cycle.
- * @param {Number} dt The time step, normally what was returned by {@link LBPhaser.P2Link#timeStep}..
- * @returns {undefined}
- */
+// @inheritdoc..
 LBPhaser.P2Link.prototype.update = function(dt) {
     this._updateFromP2();
     this._applyToP2(dt);
+    ++this.updateCount;
 };
 
 /**
@@ -148,7 +171,7 @@ LBPhaser.P2Link.prototype._updateRigidBodyFromPhaser = function(rigidBody) {
         // Phaser negates the coordinate system between P2 and {@link PHaser.Physics.P2}.
         rigidBody.setXYZ(this.phaserEnv.fromPixelsX(p2Body.x), this.phaserEnv.fromPixelsY(p2Body.y), 
             rigidBody.obj3D.position.z);
-        rigidBody.setZRotationRad(this.phaserEnv.ySign * p2Body.rotation);
+        rigidBody.setZRotationRad(this.phaserEnv.ySign * p2Body.rotation, true);
         rigidBody.obj3D.updateMatrixWorld();
     }
 };
@@ -161,7 +184,6 @@ LBPhaser.P2Link.prototype._updateRigidBodyFromPhaser = function(rigidBody) {
  */
 LBPhaser.P2Link.prototype._applyToP2 = function(dt) {
     this.rigidBodies.forEach(this._updateP2BodyFromLB3, { 'p2link': this, 'dt': dt });
-    ++this.updateCount;
     return this;
 };
 
@@ -175,8 +197,22 @@ LBPhaser.P2Link.prototype._updateP2BodyFromLB3 = function(rigidBody) {
 
     var resultant = rigidBody.getResultant(true);
 
-    p2Body.mass = rigidBody.getTotalMass();
-    p2Body.inertia = LBPhysics.getInertiaZZ(rigidBody.momentInertia);
+    var mass = rigidBody.getTotalMass();
+    if ((mass > 0) &amp;&amp; (mass !== p2Body.mass)) {
+        p2Body.mass = mass;
+        p2Body.invMass = 1./mass;
+        p2Body.data.mass = mass;
+        p2Body.data.invMass = p2Body.invMass;
+    }
+
+    var inertia = LBPhysics.getInertiaZZ(rigidBody.momentInertia);
+    if ((inertia > 0) &amp;&amp; (inertia !== p2Body.inertia)) {
+        p2Body.inertia = inertia;
+        p2Body.invInertia = 1./inertia;
+        p2Body.data.inertia = p2Body.inertia;
+        p2Body.data.invInertia = p2Body.invInertia;
+        p2Body.data.updateSolveMassProperties();
+    }
 
     var x = resultant.applPoint.x - rigidBody.obj3D.position.x;
     var y = resultant.applPoint.y - rigidBody.obj3D.position.y;
@@ -197,7 +233,7 @@ LBPhaser.P2Link.prototype._updateP2BodyFromLB3 = function(rigidBody) {
  * @returns {Phaser.Physics.P2.Body}    The created/loaded body.
  */
 LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
-    var sprite = LBPhaser.PhysicsLink.createSpriteFromData(game, data.sprite);
+    var sprite = LBPhaser.PhysicsView.createSpriteFromData(game, data.sprite);
     
     // Enabling P2 physics resets the anchor to 0.5, 0.5
     var anchorX = sprite.anchor.x;
@@ -210,6 +246,8 @@ LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
 
     var p2Body = sprite.body;
     p2Body.mass = data.mass || p2Body.mass;
+    p2Body.clearShapes();
+    p2Body.addRectangle(sprite.width, sprite.height, (0.5 - anchorX) * sprite.width, (0.5 - anchorY) * sprite.height);
 
     Leeboard.copyCommonProperties(p2Body, data.p2Body, function(val) {
         return val !== 'sprite';
@@ -218,7 +256,14 @@ LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
     return p2Body;
 };
 
-</code></pre>
+/**
+ * Helper that retrieves the P2 body associated with a rigid body object.
+ * @param {LBPhysics.RigidBody} object  The rigid body object.
+ * @returns {Phaser.Physics.P2.Body}    The P2 body, undefined if none assigned.
+ */
+LBPhaser.P2Link.getP2Body = function(object) {
+    return object._lbP2Body;
+};</code></pre>
         </article>
     </section>
 
@@ -228,13 +273,13 @@ LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:03 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:43 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

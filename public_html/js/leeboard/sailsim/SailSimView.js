@@ -19,6 +19,8 @@
 
 /**
  * Base class for the sailsim Phaser views.
+ * @constructor
+ * @extends LBPhaser.PhysicsView
  * @param {LBSailSim.Env} sailEnv   The sailing environment.
  * @param {Phaser.Group} worldGroup The parent group for all display objects.
  * @returns {LBSailSim.PhaserView}
@@ -278,6 +280,8 @@ LBSailSim.PhaserView.prototype.destroy = function() {
 
 /**
  * Sailing simulator 2D Phaser view, uses sprites.
+ * @constructor
+ * @extends LBSailSim.PhaserView
  * @param {LBSailSim.Env} sailEnv   The sailing environment.
  * @param {Phaser.Group} worldGroup The parent group for all display objects.
  * @returns {LBSailSim.Phaser2DView}
@@ -317,6 +321,8 @@ LBSailSim.Phaser2DView.prototype._loadDisplayObjectForAirfoil = function(rigidBo
 /**
  * Sailing simulator 3D Phaser view, uses a {@link LBPhaser.Project3D} to handle the
  * projection into 2D.
+ * @constructor
+ * @extends LBSailSim.PhaserView
  * @param {LBSailSim.Env} sailEnv   The sailing environment.
  * @param {Phaser.Group} worldGroup The parent group for all display objects.
  * @param {LBCamera.Camera} [camera]    If defined the camera for the 3D projection.
@@ -369,18 +375,23 @@ LBSailSim.Phaser3DView.prototype._loadDisplayObjectForHydrofoil = function(rigid
 };
 
 LBSailSim.Phaser3DView.prototype._loadDisplayObjectForAirfoil = function(rigidBody) {
-    var sprite = this._loadObj3DSprite(rigidBody, rigidBody.loadData);
+    var data = rigidBody.loadData;
+    if (data) {
+        var sprite = this._loadObj3DSprite(rigidBody, rigidBody.loadData);
     
-    if (sprite) {
-        // Need a sail flipper...
-        this.setBodyCallback(rigidBody, this);
+        if (sprite) {
+            // Need a sail flipper...
+            this.setBodyCallback(rigidBody, this);
+        }
     }
 };
 
+// @inheritdoc...
 LBSailSim.Phaser3DView.prototype.beginDisplayObjectsUpdate = function() {
     this.project3D.start();
 };
 
+// @inheritdoc...
 LBSailSim.Phaser3DView.prototype._updateDisplayObjects = function(rigidBody) {    
     var rigidBodyEntry = this._getRigidBodyEntry(rigidBody);
     LBPhaser.Project3D.projectVolumePanels(this.project3D, rigidBodyEntry.volumePanels, 
@@ -389,6 +400,7 @@ LBSailSim.Phaser3DView.prototype._updateDisplayObjects = function(rigidBody) {
     LBSailSim.PhaserView.prototype._updateDisplayObjects.call(this, rigidBody);
 };
 
+// @inheritdoc...
 LBSailSim.Phaser3DView.prototype.endDisplayObjectsUpdate = function() {
     this.project3D.end();
 };

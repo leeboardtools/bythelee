@@ -49,22 +49,18 @@
  * Manages linking a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}
  * with a {@link LBPhysics.RigidBody}, along with updating Phaser drawing objects.
  * @constructor
+ * @extends LBPhaser.PhysicsLink
  * @param {LBPhaser.PhaserEnv} phaserEnv    The Phaser environment we're running under.
  * @returns {LBPhaser.CannonLink}
  */
 LBPhaser.CannonLink = function(phaserEnv) {
     LBPhaser.PhysicsLink.call(this, phaserEnv);
     
-    this.world = new CANNON.World();
-    this.world.broadphase = new CANNON.NaiveBroadphase();
+    this.cWorld = new CANNON.World();
+    this.cWorld.broadphase = new CANNON.NaiveBroadphase();
+    this.cWorld.defaultContactMaterial.restitution = 0;
     
-/*    this.ground = new CANNON.Body();
-    this.ground.type = CANNON.Body.STATIC;
-    this.ground.addShape(new CANNON.Plane());
-    this.ground.position.z = -1;
-    this.world.add(this.ground);
-*/    
-    this.dt = 1/60;
+   this.dt = 1/60;
 };
 
 LBPhaser.CannonLink._workingVec3 = new CANNON.Vec3();
@@ -74,44 +70,32 @@ LBPhaser.CannonLink.prototype = Object.create(LBPhaser.PhysicsLink.prototype);
 LBPhaser.CannonLink.prototype.constructor = LBPhaser.CannonLink;
 
 
-/**
- * Adds a fixed object to the physics link.
- * @param {Object} object   A Phaser drawing object.
- * @returns {LBPhaser.P2Link}   this.
- */
+// @inheritdoc..
 LBPhaser.CannonLink.prototype.addFixedObject = function(object) {
     var body = new CANNON.Body();
     body.type = CANNON.Body.STATIC;
-    var width = this.phaserEnv.fromPixelsX(object.width / 2);
-    var height = this.phaserEnv.fromPixelsY(object.height / 2);
+    var width = Math.abs(this.phaserEnv.fromPixelsX(object.width / 2));
+    var height = Math.abs(this.phaserEnv.fromPixelsY(object.height / 2));
     var box = new CANNON.Box(new CANNON.Vec3(width, height, 0.5));
     body.addShape(box);
     body.position.x = this.phaserEnv.fromPixelsX(object.position.x);
     body.position.y = this.phaserEnv.fromPixelsY(object.position.y);
     
-    this.world.add(body);
+    this.cWorld.add(body);
     
     object._lbCannonBody = body;
     
     return this;
 };
 
-/**
- * @inheritdoc
- * @param {type} rigidBody
- * @param {type} data
- * @returns {undefined}
- */
-LBPhaser.CannonLink.prototype.addRigidBody = function(rigidBody, data) {
-    LBPhaser.PhysicsLink.prototype.addRigidBody.call(this, rigidBody, data);
-    
+// @inheritdoc...
+LBPhaser.CannonLink.prototype._rigidBodyAdded = function(rigidBody, data) {
     var body = new CANNON.Body();
     body.type = CANNON.Body.DYNAMIC;
     
-    // TODO: Need to add volume tetras for the rigid body parts.
-    LBCannon.addTetrasToBody(body, rigidBody.volumeTetras);    
-    LBCannon.updateBodyCenterOfMass(body, rigidBody.centerOfMass, rigidBody.mass);
-    this.world.add(body);
+    LBCannon.addRigidBodyVolumesToBody(body, rigidBody);
+    
+    this.cWorld.add(body);
     
     rigidBody._lbCannonBody = body;
     
@@ -120,47 +104,44 @@ LBPhaser.CannonLink.prototype.addRigidBody = function(rigidBody, data) {
     
     body.position.copy(pos);
     body.quaternion.copy(rigidBody.obj3D.quaternion);
-    
-    if (data &amp;&amp; data.phaser) {
-        var sprite = LBPhaser.PhysicsLink.createSpriteFromData(this.game, data.phaser.sprite);
-        this.setRigidBodyDisplayObject(rigidBody, sprite);
-    }
-    
+
     return this;
 };
 
-/**
- * @inheritdoc
- * @param {type} rigidBody
- * @returns {undefined}
- */
+
+// @inheritdoc..
 LBPhaser.CannonLink.prototype._rigidBodyRemoved = function(rigidBody) {
     if (rigidBody._lbCannonBody) {
-        this.world.removeBody(rigidBody._lbCannonBody);
+        this.cWorld.removeBody(rigidBody._lbCannonBody);
         rigidBody._lbCannonBody = undefined;
     }
 };
 
-/**
- * @returns {Number}    The time step for the next update call.
- */
+// @inheritdoc..
 LBPhaser.CannonLink.prototype.timeStep = function() {
     return this.dt;
 };
 
-/**
- * Performs an update cycle.
- * @param {Number} dt The time step, normally what was returned by {@link LBPhaser.P2Link#timeStep}..
- * @returns {undefined}
- */
+// @inheritdoc..
 LBPhaser.CannonLink.prototype.update = function(dt) {
+    if (this.updateCount === 0) {
+        // Gotta sync up first time through...
+        this.rigidBodies.forEach(this._updateFromSimStep, this);
+        this.dtCurrent = 0;
+    }
+    else {
+        this.dtCurrent = this.dt;
+    }
+    
     // Generate the forces...
     this.rigidBodies.forEach(this._applyRigidBodyForces, this);
     
-    this.world.step(dt);
+    this.cWorld.step(dt);
     
-    // Update the Phaser objects.
+    // Update the rigid body objects.
     this.rigidBodies.forEach(this._updateFromSimStep, this);
+    
+    ++this.updateCount;
 };
 
 /**
@@ -175,14 +156,17 @@ LBPhaser.CannonLink.prototype._applyRigidBodyForces = function(rigidBody) {
         return;
     }
 
-    rigidBody.updateForces(this.dt);
+    LBCannon.updateBodyFromRigidBodyVolumes(body, rigidBody);
+    
+    rigidBody.updateForces(this.dtCurrent);
 
     var resultant = rigidBody.getResultant(true);
     
     // TEST!!!
-    resultant.applPoint.z = body.position.z;
+/*    resultant.applPoint.z = body.position.z;
     resultant.force.z = 0;
     resultant.moment.x = resultant.moment.y = 0;
+  */ 
     
     body.applyForce(resultant.force, LBPhaser.CannonLink._workingVec3.copy(resultant.applPoint));
     body.torque.vadd(resultant.moment, body.torque);
@@ -204,15 +188,17 @@ LBPhaser.CannonLink.prototype._updateFromSimStep = function(rigidBody) {
     var pos = LBPhaser.CannonLink._workingVec3.copy(rigidBody.centerOfMass);
     pos.negate(pos);
     body.pointToWorldFrame(pos, pos);
+    
+    rigidBody.setPositionAndQuaternion(pos, body.quaternion);
     rigidBody.obj3D.position.copy(pos);
     rigidBody.obj3D.quaternion.copy(body.quaternion);
     
-    var sprite = this.getRigidBodyDisplayObject(rigidBody);
-    if (sprite) {
-        this.updateSpriteFromRigidBody(rigidBody, sprite);
-    }
+    rigidBody.obj3D.updateMatrixWorld(true);
 };
 
+LBPhaser.CannonLink.getCannonBody = function(rigidBody) {
+    return rigidBody._lbCannonBody;
+};
 </code></pre>
         </article>
     </section>
@@ -223,13 +209,13 @@ LBPhaser.CannonLink.prototype._updateFromSimStep = function(rigidBody) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.PhaserEnv.html">PhaserEnv</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 20:54:03 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:43 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
