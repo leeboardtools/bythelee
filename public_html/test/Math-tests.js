@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global Leeboard, LBMath, QUnit */
+/* global LBUtil, LBMath, QUnit */
 
 LBMath.CSpline.test = function() {
     console.log("CSpline test:");
@@ -30,7 +30,7 @@ LBMath.CSpline.test = function() {
     console.log("\ninterpolate:");
     for (var i = 5; i <= 30; ++i) {
         var y = this.interpolate(i);
-        //var y = Leeboard.bsearch(this.xs, i);
+        //var y = LBUtil.bsearch(this.xs, i);
         console.log(i + "\t" + y);
     }
     console.log("End");

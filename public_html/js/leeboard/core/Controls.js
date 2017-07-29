@@ -15,7 +15,7 @@
  */
 
 
-/* global LBMath, Leeboard, LBGeometry */
+/* global LBMath, LBUtil, LBGeometry */
 
 /**
  * @namespace LBControls
@@ -68,8 +68,6 @@ LBControls.SmoothController = function(name, minValue, maxValue, initialValue, c
 };
 
 LBControls.SmoothController.prototype = {
-    constructor: LBControls.SmoothController,
-    
     /**
      * Retrieves the current value of the controller.
      * @returns {Number}
@@ -135,11 +133,23 @@ LBControls.SmoothController.prototype = {
         this.currentValue = LBMath.clamp(this.currentValue, this.minValue, this.maxValue);
         
         if (data.offsetValueMapper) {
-            this.offsetValueMapper = Leeboard.newClassInstanceFromData(data.offsetValueMapper);
+            this.offsetValueMapper = LBUtil.newClassInstanceFromData(data.offsetValueMapper);
         }
         
         return this;
-    }
+    },
+
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        this.name = null;
+        this.controllee = null;
+    },
+    
+    constructor: LBControls.SmoothController    
 };
 
 /**
@@ -164,6 +174,17 @@ LBControls.CSplineValueMapper.prototype = {
      */
     mapOffset: function(currentValue, offset) {
         return this.cSpline.interpolate(currentValue) * offset;
+    },
+    
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        if (this.cSpline) {
+            this.cSpline = this.cSpline.destroy();
+        }
     },
     
     constructor: LBControls.CSplineValueMapper
@@ -210,6 +231,15 @@ LBControls.SteppedController = function(name, steps, initialValue, controllee) {
 };
 
 LBControls.SteppedController.prototype = {
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        this.controllee = null;        
+    },
+    
     constructor: LBControls.SteppedController,
     
     /**
@@ -284,7 +314,7 @@ LBControls.createControllerFromData = function(data, owner) {
     
     var controller;
     if (data.className) {
-        controller = Leeboard.newClassInstanceFromData(data);
+        controller = LBUtil.newClassInstanceFromData(data);
     }
     else {
         controller = new LBControls.SmoothController();

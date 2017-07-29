@@ -254,6 +254,17 @@ LBMath.CSpline = function(xs, ys) {
 };
 
 LBMath.CSpline.prototype = {
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        this.xs = null;
+        this.y2s = null;
+        this.ys = null;
+    },
+
     constructor: LBMath.CSpline,
     
     /**
@@ -297,7 +308,7 @@ LBMath.CSpline.prototype = {
      * -1 if x &lt; this.xs[0].
      */
     findLowIndex: function(x) {
-        return Leeboard.bsearch(this.xs, x);
+        return LBUtil.bsearch(this.xs, x);
     },
 
     /**

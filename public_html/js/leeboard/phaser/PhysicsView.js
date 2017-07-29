@@ -15,7 +15,7 @@
  */
 
 
-/* global LBPhaser, Phaser, LBGeometry, Leeboard, LBMath */
+/* global LBPhaser, Phaser, LBGeometry, LBUtil, LBMath */
 
 /**
  * A Phaser view onto physics objects represented via a {@link LBPhaser.PhysicsLink}.
@@ -338,7 +338,7 @@ LBPhaser.PhysicsView.prototype = {
 LBPhaser.PhysicsView.createSpriteFromData = function(game, data) {
     var sprite = new Phaser.Sprite(game, data.x, data.y, data.key, data.frame);
     sprite._lbLocalOffset = new LBGeometry.Vector3();    
-    Leeboard.copyCommonProperties(sprite, data);
+    LBUtil.copyCommonProperties(sprite, data);
     return sprite;
 };
 
@@ -351,7 +351,7 @@ LBPhaser.PhysicsView.createSpriteFromData = function(game, data) {
 LBPhaser.PhysicsView.createImageFromData = function(game, data) {
     var sprite = new Phaser.Image(game, data.x, data.y, data.key, data.frame);
     sprite._lbLocalOffset = new LBGeometry.Vector3();    
-    Leeboard.copyCommonProperties(sprite, data);
+    LBUtil.copyCommonProperties(sprite, data);
     return sprite;
 };
 

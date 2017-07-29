@@ -50,6 +50,33 @@ LBSailSim.SailFoil.prototype.calcLocalLiftDragMoment = function(rho, qInfLocal, 
     return result;
 };
 
+/**
+ * Call when done with the object to have it release any internal references
+ * to other objects to help with garbage collection.
+ * @returns {undefined}
+ */
+LBSailSim.SailFoil.prototype.destroy = function() {
+    this.sailInstance = null;
+    LBFoils.Foil.prototype.destroy.call(this);
+};
+
+LBSailSim.SailSurface = function(sailInstance) {
+    this.sailInstance = sailInstance;
+};
+
+LBSailSim.SailSurface.prototype = {
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        this.sailInstance = null;
+    },
+    
+    constructor: LBSailSim.SailSurface
+};
+
 
 /**
  * The {@link LBSailSim.FoilInstance} implementation for sails.
@@ -139,6 +166,23 @@ LBSailSim.SailInstance = function() {
 
 LBSailSim.SailInstance.prototype = Object.create(LBSailSim.FoilInstance.prototype);
 LBSailSim.SailInstance.prototype.constructor = LBSailSim.SailInstance;
+
+/**
+ * Call when done with the object to have it release any internal references
+ * to other objects to help with garbage collection.
+ * @returns {undefined}
+ */
+LBSailSim.SailInstance.prototype.destroy = function() {
+    if (this.spars) {
+        this.spars.length = 0;
+        this.spars = null;
+        this.sparName = null;
+
+        this.sheetAnchorBoat = null;
+        this.sheetAnchorSail = null;
+        LBSailSim.FoilInstance.prototype.destroy.call(this);
+    }
+};
 
 // @inheritdoc...
 LBSailSim.SailInstance.prototype.updateFoilForce = function(dt, flow) {
@@ -335,3 +379,20 @@ LBSailSim.SailController.prototype.setSheetLength = function(value) {
         this.sails[i].setSheetLengthRatio(ratio);
     }
 };
+
+/**
+ * Call when done with the object to have it release any internal references
+ * to other objects to help with garbage collection.
+ * @returns {undefined}
+ */
+LBSailSim.SailController.prototype.destroy = function() {
+    if (this.sails) {
+        this.sails.length = 0;
+        this.sails = null;
+        this.controllee = null;
+        this.sailName = null;
+        this.vessel = null;
+        
+        LBControls.SmoothController.prototype.destroy.call(this);
+    }
+}

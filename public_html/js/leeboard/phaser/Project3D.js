@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global LBPhaser, LBCamera, LBGeometry, Phaser, Leeboard, LBMath */
+/* global LBPhaser, LBCamera, LBGeometry, Phaser, LBUtil, LBMath */
 
 /**
  * This is a hack projection of 3D objects onto the Phaser 2D surface using
@@ -199,7 +199,7 @@ LBPhaser.Project3D.prototype = {
     
     _addPanelToZBuffer: function(z, panel) {
         z = -z; // Use negative z because we want to process the panels from largest z to smallest z (smaller is closer to camera)
-        var index = Leeboard.bsearch(this.zValues, z) + 1;
+        var index = LBUtil.bsearch(this.zValues, z) + 1;
         this.zValues.splice(index, 0, z);
         this.zPanels.splice(index, 0, panel);
     },
@@ -312,6 +312,18 @@ LBPhaser.Project3DPanels.prototype = {
         }
         
         return this;
+    },
+
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        if (this.panelVertices) {
+            this.panelVertices.length = 0;
+            this.panelVertices = null;
+        }
     },
     
     constructor: LBPhaser.Project3DPanels

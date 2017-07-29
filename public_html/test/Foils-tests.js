@@ -15,7 +15,7 @@
  */
 
 
-/* global Leeboard, QUnit, LBPhysics, LBGeometry, LBMath, LBFoils */
+/* global LBUtil, QUnit, LBPhysics, LBGeometry, LBMath, LBFoils */
 
 
 LBFoils.Foil.prototype.localForceTest = function(rho, qInfSpeed, start, end, delta) {
@@ -87,7 +87,7 @@ function createTestFoil(assert) {
     };
     foil.load(foilData);
     
-    if (Leeboard.isVar(assert)) {
+    if (LBUtil.isVar(assert)) {
         var msg = "TestFoil: ";
         checkVector2(assert, foil.chordLine.start, 3, 0, msg + "chordStart");
         checkVector2(assert, foil.chordLine.end, 13, 0, msg + "chordEnd");

@@ -15,7 +15,7 @@
  */
 
 
-/* global Leeboard, Phaser, LBPhysics, LBGeometry, LBMath, LBPhaser */
+/* global LBUtil, Phaser, LBPhysics, LBGeometry, LBMath, LBPhaser */
 
 /**
  * Base class that manages linking a {@link LBPhysics.RigidBody} to a physics engine

@@ -15,7 +15,7 @@
  */
 
 
-/* global LBSailSim, Leeboard, LBMath, LBPhaser, LBGeometry, LBCamera */
+/* global LBSailSim, LBUtil, LBMath, LBPhaser, LBGeometry, LBCamera */
 
 
 /**

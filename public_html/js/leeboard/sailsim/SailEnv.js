@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global Leeboard, Phaser, LBGeometry, LBFoils, LBSailSim, LBMath */
+/* global LBUtil, Phaser, LBGeometry, LBFoils, LBSailSim, LBMath */
 
 /**
  * 
@@ -213,9 +213,9 @@ LBSailSim.Env.prototype = {
 
         boatName = boatName || typeName;
         var boatInstance = boatsOfType[boatName];
-        // Need to use use Leeboard.isVar(), as boatInstance is a string and an empty
+        // Need to use use LBUtil.isVar(), as boatInstance is a string and an empty
         // string is treated as false.
-        if (!Leeboard.isVar(boatInstance)) {
+        if (!LBUtil.isVar(boatInstance)) {
             // Boat name for boat type is not supported.
             return false;
         }
@@ -312,6 +312,7 @@ LBSailSim.Env.prototype = {
             if (boatsOfType[boat.boatName] === boat) {
                 boatsOfType[boat.boatName] = "";
                 this._boatReturned(boat);
+                boat.destroy();
                 return true;
             }
         }

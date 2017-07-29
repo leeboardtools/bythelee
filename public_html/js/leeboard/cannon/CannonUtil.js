@@ -15,7 +15,7 @@
  */
 
 
-/* global CANNON, LBGeometry, LBMath, Leeboard, LBPhysics */
+/* global CANNON, LBGeometry, LBMath, LBUtil, LBPhysics */
 
 /**
  * @namespace LBCannon
@@ -93,6 +93,16 @@ Object.defineProperty(LBCannon.Vec3Proxy.prototype, 'z', {
 LBCannon.Vec3Proxy.prototype.transformProxy = function(xfrm) {
     this.vector3.applyMatrix4(xfrm);
     this._cannonOffset.applyMatrix4(xfrm);
+};
+
+/**
+ * Call when done with the object to have it release any internal references
+ * to other objects to help with garbage collection.
+ * @returns {undefined}
+ */
+LBCannon.Vec3Proxy.prototype.destroy = function() {
+    this.vector3 = null;
+    this._cannonOffset = null;
 };
 
 
@@ -181,7 +191,7 @@ LBCannon.addVolumesToBody = function(body, volumes, volToBodyXfrm) {
  * @returns {CANNON.Body}   body.
  */
 LBCannon.updateBodyCenterOfMass = function(body, centerOfMass, mass, inertia) {
-    if (Leeboard.isVar(mass)) {
+    if (LBUtil.isVar(mass)) {
         body.mass = mass;
     }
     

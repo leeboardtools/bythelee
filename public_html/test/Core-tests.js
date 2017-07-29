@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global QUnit, Leeboard, LBMath */
+/* global QUnit, LBUtil, LBMath */
 
 QUnit.assert.nearEqual = function(value, expected, msg, tolerance) {
     this.pushResult({
@@ -28,15 +28,15 @@ QUnit.assert.nearEqual = function(value, expected, msg, tolerance) {
 
 QUnit.test( "Core-bsearch", function( assert ) {
     var data = [ -1, 0, 1, 2, 3, 4];
-    assert.equal(-1, Leeboard.bsearch(data, -1.1), "Below first");
-    assert.equal(0, Leeboard.bsearch(data, -1), "At first");
-    assert.equal(0, Leeboard.bsearch(data, -0.9), "At 0.5");
-    assert.equal(1, Leeboard.bsearch(data, 0), "At second");
-    assert.equal(2, Leeboard.bsearch(data, 1.5), "At mid-point");
-    assert.equal(4, Leeboard.bsearch(data, 3), "At last seg");
-    assert.equal(4, Leeboard.bsearch(data, 3.9), "At last seg");
-    assert.equal(5, Leeboard.bsearch(data, 4), "At last");
-    assert.equal(5, Leeboard.bsearch(data, 4.1), "After last");
+    assert.equal(-1, LBUtil.bsearch(data, -1.1), "Below first");
+    assert.equal(0, LBUtil.bsearch(data, -1), "At first");
+    assert.equal(0, LBUtil.bsearch(data, -0.9), "At 0.5");
+    assert.equal(1, LBUtil.bsearch(data, 0), "At second");
+    assert.equal(2, LBUtil.bsearch(data, 1.5), "At mid-point");
+    assert.equal(4, LBUtil.bsearch(data, 3), "At last seg");
+    assert.equal(4, LBUtil.bsearch(data, 3.9), "At last seg");
+    assert.equal(5, LBUtil.bsearch(data, 4), "At last");
+    assert.equal(5, LBUtil.bsearch(data, 4.1), "After last");
     });
     
     
@@ -46,12 +46,12 @@ QUnit.test( "copyCmmonProperties", function( assert ) {
     
     var objTest = {};
     Object.assign(objTest, objA);
-    Leeboard.copyCommonProperties(objTest, objB);
+    LBUtil.copyCommonProperties(objTest, objB);
     assert.deepEqual(objTest, { 'a': 0, 'b': 4, 'c': 5, 'd': 3 }, "default Copy");
     
     objTest = {};
     Object.assign(objTest, objA);
-    Leeboard.copyCommonProperties(objTest, objB, function(propName, a, b) {
+    LBUtil.copyCommonProperties(objTest, objB, function(propName, a, b) {
         return (propName !== 'c');
     });
     assert.deepEqual(objTest, { 'a': 0, 'b': 4, 'c': 2, 'd': 3 }, "default Copy");

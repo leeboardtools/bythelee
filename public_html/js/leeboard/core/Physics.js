@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global Leeboard, LBGeometry, LBMath, LBVolume */
+/* global LBUtil, LBGeometry, LBMath, LBVolume */
 
 /**
  * @namespace   LBPhysics
@@ -29,8 +29,8 @@ var LBPhysics = LBPhysics || {};
  * force being applied at position.
  */
 LBPhysics.calcMoment = function(force, position) {
-    // Need to use Leeboard.isVar() because z is numeric.
-    if (!Leeboard.isVar(force.z)) {
+    // Need to use LBUtil.isVar() because z is numeric.
+    if (!LBUtil.isVar(force.z)) {
         return LBGeometry.crossVectors2(position, force);
     }
     return LBGeometry.crossVectors3(position, force);
@@ -49,19 +49,19 @@ LBPhysics.Resultant3D = function(force, moment, position) {
      * The force vector.
      * @member {LBGeometry.Vector3}
      */
-    this.force = Leeboard.copyCommonProperties(new LBGeometry.Vector3(), force);
+    this.force = LBUtil.copyCommonProperties(new LBGeometry.Vector3(), force);
 
     /**
      * The moment vector.
      * @member {LBGeometry.Vector3}
      */
-    this.moment = Leeboard.copyCommonProperties(new LBGeometry.Vector3(), moment);
+    this.moment = LBUtil.copyCommonProperties(new LBGeometry.Vector3(), moment);
 
     /**
      * The force application point.
      * @member {LBGeometry.Vector3}
      */
-    this.applPoint = Leeboard.copyCommonProperties(new LBGeometry.Vector3(), position);
+    this.applPoint = LBUtil.copyCommonProperties(new LBGeometry.Vector3(), position);
 };
 
 LBPhysics.Resultant3D._workingLine3 = new LBGeometry.Line3();
@@ -264,6 +264,18 @@ LBPhysics.Resultant3D.prototype = {
         this.moment.zero();
         this.applPoint.zero();
         return this;
+    },
+    
+    
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        this.force = null;
+        this.moment = null;
+        this.applPoint = null;
     }
 };
 
@@ -331,8 +343,8 @@ LBPhysics.CoordSystemState.prototype = {
      * @returns {LBPhysics.CoordSystemState} this.
      */
     setXfrms: function(worldXfrm, dt, localXfrm) {
-        // Need to use Leeboard.isVar() because dt is numeric.
-        if (Leeboard.isVar(dt) && (dt > 0)) {
+        // Need to use LBUtil.isVar() because dt is numeric.
+        if (LBUtil.isVar(dt) && (dt > 0)) {
             // Save the current transforms...
             this.dt = dt;
             this.prevWorldXfrm.copy(this.worldXfrm);
@@ -476,6 +488,21 @@ LBPhysics.CoordSystemState.prototype = {
         }
         
         return angle / this.dt;
+    },
+    
+    
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        this.applPoint = null;
+        this.localXfrm = null;
+        this.moment = null;
+        this.prevLocalXfrm = null;
+        this.prevWorldXfrm = null;
+        this.worldXfrm = null;
     },
     
     constructor: LBPhysics.CoordSystemState
@@ -1079,13 +1106,65 @@ LBPhysics.RigidBody.prototype = {
         }
     },
     
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        if (this.obj3D) {
+            this.obj3D = null;
+
+            this.centerOfMass = null;
+            this.coordSystem = this.coordSystem.destroy();
+            
+            this.coordSystemResults.localVel = null;
+            this.coordSystemResults.worldVel = null;
+            this.coordSystemResults = null;
+            
+            this.invMomentInertia = null;
+            this.loadData = null;
+            this.localLinearVelocity = null;
+            this.momentInertia = null;
+            this.name = null;
+            
+            this.parts.forEach(function(part) {
+                part.destroy();
+            });
+            this.parts.length = 0;
+            this.parts = null;
+            
+            this.resultant = this.resultant.destroy();
+            
+            this.totalCenterOfMass = null;
+            this.totalInvMomentInertia = null;
+            this.totalMomentInertia = null;
+            this.totalResultant = this.totalResultant.destroy();
+            
+            this.worldLinearVelocity = null;
+
+            if (this.volumes) {
+                this.volumes.forEach(function(vol) {
+                    vol.destroy();
+                });
+                this.volumes.length = 0;
+                this.volumes = null;
+            }
+            
+            if (this.xyOutline) {
+                this.xyOutline.length = 0;
+                this.xyOutline = null;
+            }
+        }
+    },
+    
     constructor: LBPhysics.RigidBody
 };
 
 
 /**
  * Helper that creates and loads a rigid body from a data object. If the data object contains
- * a 'className' property, the value of that property is passed directly to Leeboard.stringToNewClassInstance()
+ * a 'className' property, the value of that property is passed directly to LBUtil.stringToNewClassInstance()
  * along with the optional 'constructorArgs' property to create
  * the rigid body object, otherwise if defCreatorFunc is defined it is called to create
  * the rigid body object, otherwise {@link LBPhysics.RigidBody} is used.
@@ -1105,7 +1184,7 @@ LBPhysics.RigidBody.createFromData = function(data, defCreatorFunc) {
     
     var rigidBody;
     if (data.className) {
-        rigidBody = Leeboard.newClassInstanceFromData(data);
+        rigidBody = LBUtil.newClassInstanceFromData(data);
     }
     else {
         if (defCreatorFunc) {

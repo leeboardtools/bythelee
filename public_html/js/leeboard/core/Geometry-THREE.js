@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global Leeboard, THREE, LBMath */
+/* global LBUtil, THREE, LBMath */
 
 
 /**
@@ -647,8 +647,8 @@ LBGeometry.loadEuler = function(data, euler) {
         euler.set(0, 0, 0, THREE.Euler.DefaultOrder);
     }
     else {
-        // Need to use Leeboard.isVar(), data.exd might be 0.
-        if (Leeboard.isVar(data.exd)) {
+        // Need to use LBUtil.isVar(), data.exd might be 0.
+        if (LBUtil.isVar(data.exd)) {
             euler.x = (data.exd || 0) * LBMath.DEG_TO_RAD;
             euler.y = (data.eyd || 0) * LBMath.DEG_TO_RAD;
             euler.z = (data.ezd || 0) * LBMath.DEG_TO_RAD;
@@ -672,8 +672,8 @@ LBGeometry.loadEuler = function(data, euler) {
  * @returns {LBGeometry.Line2}
  */
 LBGeometry.Line2 = function(start, end) {
-    this.start = Leeboard.copyCommonProperties(new LBGeometry.Vector2(), start);
-    this.end = Leeboard.copyCommonProperties(new LBGeometry.Vector2(), end);
+    this.start = LBUtil.copyCommonProperties(new LBGeometry.Vector2(), start);
+    this.end = LBUtil.copyCommonProperties(new LBGeometry.Vector2(), end);
 };
 
 LBGeometry.Line2.prototype = {
@@ -818,7 +818,7 @@ LBGeometry.loadPlane = function(data, plane) {
         if (data.normal) {
             LBGeometry.loadVector3(data.normal, plane.normal).normalize();
         }
-        if (Leeboard.isVar(data.constant)) {
+        if (LBUtil.isVar(data.constant)) {
             plane.constant = data.constant;
         }
     }
@@ -1034,13 +1034,13 @@ LBGeometry.loadMatrix4 = function(data, mat) {
     }
     else {
         if (data.rotation) {
-            // Need to use Leeboard.isVar() here because the values may be 0..
-            if (Leeboard.isVar(data.rotation.ex) || Leeboard.isVar(data.rotation.exd)) {
+            // Need to use LBUtil.isVar() here because the values may be 0..
+            if (LBUtil.isVar(data.rotation.ex) || LBUtil.isVar(data.rotation.exd)) {
                 // Euler angles...
                 var euler = LBGeometry.loadEuler(data.rotation);
                 mat.makeRotationFromEuler(euler);
             }
-            else if (Leeboard.isVar(data.rotation.qx)) {
+            else if (LBUtil.isVar(data.rotation.qx)) {
                 // Quaternion...
                 var quaternion = LBGeometry.loadQuaternion(data.rotation);
                 mat.makeRotationFromQuaternion(quaternion);
@@ -1063,7 +1063,7 @@ LBGeometry.loadMatrix4 = function(data, mat) {
  * @param {Number} x    The x coordinate.
  * @param {Number} y    The y coordinate.
  * @param {Number} z    The z coordinate.
- * @returns {Leeboard.Matrix4}  this.
+ * @returns {LBUtil.Matrix4}  this.
  */
 THREE.Matrix4.prototype.setXYZ = function(x, y, z) {
     var te = this.elements;
@@ -1082,7 +1082,7 @@ THREE.Matrix4.prototype.setXYZ = function(x, y, z) {
  * @param {Number} px    The x coordinate.
  * @param {Number} py    The y coordinate.
  * @param {Number} pz    The z coordinate.
- * @returns {Leeboard.Matrix4}  this.
+ * @returns {LBUtil.Matrix4}  this.
  */
 LBGeometry.Matrix4.prototype.makeFromEulerAndXYZ = function(xRad, yRad, zRad, px, py, pz) {
     this.makeRotationFromEuler(new LBGeometry.Euler(xRad, yRad, zRad));
@@ -1098,7 +1098,7 @@ LBGeometry.Matrix4.prototype.makeFromEulerAndXYZ = function(xRad, yRad, zRad, px
  */
 LBGeometry.consoleLogMatrix4 = function(mat, msg) {
     var text = "";
-    if (Leeboard.isVar(msg)) {
+    if (LBUtil.isVar(msg)) {
         text = "\n" + msg + "\n";
     }
     
@@ -1172,7 +1172,7 @@ LBGeometry.createObject3DFromData = function(data) {
     
     var obj3D;
     if (data.className) {
-        obj3D = Leeboard.newClassInstanceFromData(data);
+        obj3D = LBUtil.newClassInstanceFromData(data);
     }
     else {
         obj3D = new LBGeometry.Object3D();

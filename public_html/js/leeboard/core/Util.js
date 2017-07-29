@@ -15,9 +15,9 @@
  */
 
 /**
- * @namespace Leeboard
+ * @namespace LBUtil
  */
-var Leeboard = Leeboard || {};
+var LBUtil = LBUtil || {};
 
 
 /**
@@ -25,7 +25,7 @@ var Leeboard = Leeboard || {};
  * @param {type} mps    The meters/sec to convert.
  * @returns {Number} The value in knots.
  */
-Leeboard.mps2kt = function(mps) {
+LBUtil.mps2kt = function(mps) {
     return mps * 1.94384;
 };
 
@@ -34,7 +34,7 @@ Leeboard.mps2kt = function(mps) {
  * @param {type} knots  The knots to convert.
  * @returns {Number} The value in meters/sec.
  */
-Leeboard.kt2mps = function(knots) {
+LBUtil.kt2mps = function(knots) {
     return knots / 1.94384;
 };
 
@@ -47,7 +47,7 @@ Leeboard.kt2mps = function(knots) {
  * @returns {Number}    The index of the first element in array that is &le; value, if
  * value is &lt array[0] then -1 is returned.
  */
-Leeboard.bsearch = function(array, value) {
+LBUtil.bsearch = function(array, value) {
     var lastIndex = array.length - 1;
     if (value < array[0]) {
         return -1;
@@ -81,16 +81,16 @@ Leeboard.bsearch = function(array, value) {
  * func(propName, dst, src).
  * @returns {object}    dst.
  */
-Leeboard.copyCommonProperties = function(dst, src, filter) {
-    if (!Leeboard.isVar(src)) {
+LBUtil.copyCommonProperties = function(dst, src, filter) {
+    if (!LBUtil.isVar(src)) {
         return dst;
     }
-    if (Leeboard.isVar(filter)) {
+    if (LBUtil.isVar(filter)) {
         Object.getOwnPropertyNames(dst).forEach(
                 function(val, idx, array) {
                     if (src[val] !== undefined) {
                         if (filter(val, dst, src)) {
-                            dst[val] = Leeboard.copyObject(dst[val], src[val]);
+                            dst[val] = LBUtil.copyObject(dst[val], src[val]);
                         }
                     }
                 }
@@ -100,7 +100,7 @@ Leeboard.copyCommonProperties = function(dst, src, filter) {
         Object.getOwnPropertyNames(dst).forEach(
                 function(val, idx, array) {
                     if (src[val] !== undefined) {
-                        dst[val] = Leeboard.copyObject(dst[val], src[val]);
+                        dst[val] = LBUtil.copyObject(dst[val], src[val]);
                     }
                 }
         );
@@ -108,7 +108,7 @@ Leeboard.copyCommonProperties = function(dst, src, filter) {
     return dst;
 };
 
-Leeboard.copyObject = function(dst, src) {
+LBUtil.copyObject = function(dst, src) {
     if (typeof dst === "object") {
         if (typeof dst.copy === "function") {
             dst.copy(src);
@@ -124,7 +124,7 @@ Leeboard.copyObject = function(dst, src) {
  * @param {type} v  The value to check.
  * @returns {Boolean}   true if v is defined and not null.
  */
-Leeboard.isVar = function(v) {
+LBUtil.isVar = function(v) {
     return (v !== undefined) && (v !== null);
 };
 
@@ -137,7 +137,7 @@ Leeboard.isVar = function(v) {
  * @param {object} [defValue=undefined]   The value to return if an element is not found.
  * @returns {object}    The object, defValue if no element found.
  */
-Leeboard.findArrayElementWithName = function(array, name, defValue) {
+LBUtil.findArrayElementWithName = function(array, name, defValue) {
     for (var i = 0; i < array.length; ++i) {
         if (array[i].name === name) {
             return array[i];
@@ -152,7 +152,7 @@ Leeboard.findArrayElementWithName = function(array, name, defValue) {
  * @param {Array} array    The array to be copied and mirrored.
  * @returns {Array} The new array, undefined/null if array is undefined/null.
  */
-Leeboard.copyAndMirrorArray = function(array) {
+LBUtil.copyAndMirrorArray = function(array) {
     if (!array) {
         return array;
     }
@@ -171,7 +171,7 @@ Leeboard.copyAndMirrorArray = function(array) {
  * @returns {function}  The function object.
  * @throws {Error} An error is throw if str could not be resolved to a function object.
  */
-Leeboard.stringToFunction = function(str) {
+LBUtil.stringToFunction = function(str) {
     var arr = str.split(".");
     var fn = window || this;
     for (var i = 0, len = arr.length; i < len; i++) {
@@ -193,11 +193,11 @@ Leeboard.stringToFunction = function(str) {
  * @returns {object|undefined}  A new instance of the class or undefined if either data
  * or 'className' is undefined.
  */
-Leeboard.newClassInstanceFromData = function(data) {
+LBUtil.newClassInstanceFromData = function(data) {
     if (!data || !data.className) {
         return undefined;
     }
     
-    var fn = Leeboard.stringToFunction(data.className);
+    var fn = LBUtil.stringToFunction(data.className);
     return new fn(data.constructorArgs);
 };

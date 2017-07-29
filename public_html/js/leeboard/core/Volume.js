@@ -15,7 +15,7 @@
  */
 
 
-/* global LBGeometry, Leeboard, LBMath */
+/* global LBGeometry, LBUtil, LBMath */
 
 /**
  * 
@@ -47,7 +47,7 @@ LBVolume.Volume = function(typeName, mass) {
      * Mass associated with the volume, set to {@link Number.NaN} if a mass is not assigned.
      * @type Number
      */
-    this.mass = Leeboard.isVar(mass) ? mass : Number.NaN;
+    this.mass = LBUtil.isVar(mass) ? mass : Number.NaN;
 };
 
 LBVolume.Volume._workingCenterOfMassResult;
@@ -155,12 +155,24 @@ LBVolume.Volume.prototype = {
     },
     
     /**
-     * Removes all references to other objects so this could hopefully be garbage collected.
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
      * @returns {undefined}
      */
-    dispose: function() {
-        this.vertices.length = 0;
-        this.vertices = null;
+    destroy: function() {
+        if (this.vertices) {
+            if (this._equivalentTetrasArray) {
+                if ((this._equivalentTetrasArray.length > 0) && (this._equivalentTetrasArray[0] !== this)) {
+                    this._equivalentTetrasArray.forEach(function(tetra) {
+                        tetra.destroy();
+                    });
+                }
+                this._equivalentTetrasArray.length = 0;
+                this._equivalentTetrasArray = null;
+            }
+            this.vertices.length = 0;
+            this.vertices = null;
+        }
     },
     
     constructor: LBVolume.Volume
@@ -241,7 +253,7 @@ LBVolume.Volume.totalCenterOfMass = function(volume, store) {
  */
 LBVolume.Volume.allocateMassToVolumess = function(volumes, totalMass, startIndex, endIndex) {
     startIndex = startIndex || 0;
-    if (!Leeboard.isVar(endIndex)) {
+    if (!LBUtil.isVar(endIndex)) {
         endIndex = volumes.length;
     }
     
@@ -326,7 +338,7 @@ LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
         var indices;
         var mass;
         if (!Array.isArray(item)) {
-            mass = Leeboard.isVar(item.mass) ? item.mass : Number.NaN;
+            mass = LBUtil.isVar(item.mass) ? item.mass : Number.NaN;
             indices = item.indices;
         }
         else {
@@ -736,10 +748,10 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
         return undefined;
     }
     
-    if (!Leeboard.isVar(positiveDir)) {
+    if (!LBUtil.isVar(positiveDir)) {
         positiveDir = true;
     }
-    if (!Leeboard.isVar(negativeDir)) {
+    if (!LBUtil.isVar(negativeDir)) {
         negativeDir = true;
     }
     
@@ -937,7 +949,7 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
         var indices;
         var mass;
         if (!Array.isArray(item)) {
-            mass = Leeboard.isVar(item.mass) ? item.mass : Number.NaN;
+            mass = LBUtil.isVar(item.mass) ? item.mass : Number.NaN;
             indices = item.indices;
         }
         else {

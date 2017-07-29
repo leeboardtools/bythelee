@@ -16,7 +16,7 @@
 
 
 /* global Phaser */
-/* global Leeboard, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils */
+/* global LBUtil, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils */
 
 
 //
@@ -379,7 +379,7 @@ PlayState._updateHUD = function() {
     var vmg = 0;
     if (!LBMath.isLikeZero(trueWindSpeed)) {
         vmg = -this.myBoat.getVelocityMPS().dot(trueWind) / trueWindSpeed;
-        vmg = Leeboard.mps2kt(vmg);
+        vmg = LBUtil.mps2kt(vmg);
     }
     this.vmgText.text = "VMG: " + vmg.toFixed(2);
     

@@ -15,7 +15,7 @@
  */
 
 
-/* global Leeboard, Phaser, LBPhysics, LBGeometry, LBMath, LBPhaser, p2 */
+/* global LBUtil, Phaser, LBPhysics, LBGeometry, LBMath, LBPhaser, p2 */
 
 /**
  * Manages linking a {@link https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body|Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody}, updating
@@ -221,7 +221,7 @@ LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
     p2Body.clearShapes();
     p2Body.addRectangle(sprite.width, sprite.height, (0.5 - anchorX) * sprite.width, (0.5 - anchorY) * sprite.height);
 
-    Leeboard.copyCommonProperties(p2Body, data.p2Body, function(val) {
+    LBUtil.copyCommonProperties(p2Body, data.p2Body, function(val) {
         return val !== 'sprite';
     });
     

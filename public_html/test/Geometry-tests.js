@@ -15,10 +15,10 @@
  */
 
 
-/* global QUnit, Leeboard, LBGeometry, LBMath */
+/* global QUnit, LBUtil, LBGeometry, LBMath */
 
 function checkVector2(assert, vector, x, y, msg, tolerance) {
-    if (!Leeboard.isVar(msg)) {
+    if (!LBUtil.isVar(msg)) {
         msg = "";
     }
     assert.nearEqual(vector.x, x, msg + " X OK", tolerance);
@@ -26,19 +26,19 @@ function checkVector2(assert, vector, x, y, msg, tolerance) {
 };
 
 function checkVectorMagAngle(assert, vector, mag, angleRad, tolerance, msg) {
-    if (!Leeboard.isVar(msg)) {
+    if (!LBUtil.isVar(msg)) {
         msg = "";
     }
-    if (Leeboard.isVar(mag)) {
+    if (LBUtil.isVar(mag)) {
         assert.nearEqual(vector.length(), mag, msg + " Mag OK", tolerance);
     }
-    if (Leeboard.isVar(angleRad)) {
+    if (LBUtil.isVar(angleRad)) {
         assert.nearEqual(vector.angle(), angleRad, msg + " Angle OK", tolerance);
     }
 }
 
 function checkVector3(assert, vector, x, y, z, msg, tolerance) {
-    if (!Leeboard.isVar(msg)) {
+    if (!LBUtil.isVar(msg)) {
         msg = "";
     }
     assert.nearEqual(vector.x, x, msg + " X OK", tolerance);
@@ -47,7 +47,7 @@ function checkVector3(assert, vector, x, y, z, msg, tolerance) {
 };
 
 function checkQuaternion(assert, quat, x, y, z, w, msg, tolerance) {
-    if (!Leeboard.isVar(msg)) {
+    if (!LBUtil.isVar(msg)) {
         msg = "";
     }
     assert.nearEqual(quat.x, x, msg + " QX OK", tolerance);
@@ -57,7 +57,7 @@ function checkQuaternion(assert, quat, x, y, z, w, msg, tolerance) {
 };
 
 function checkEuler(assert, euler, x, y, z, order, msg, tolerance) {
-    if (!Leeboard.isVar(msg)) {
+    if (!LBUtil.isVar(msg)) {
         msg = "";
     }
     assert.nearEqual(euler.x, x, msg + " EX OK", tolerance);
@@ -67,7 +67,7 @@ function checkEuler(assert, euler, x, y, z, order, msg, tolerance) {
 };
 
 function checkLine2(assert, line, startX, startY, endX, endY, msg, tolerance) {
-    if (!Leeboard.isVar(msg)) {
+    if (!LBUtil.isVar(msg)) {
         msg = "";
     }
     checkVector2(assert, line.start, startX, startY, msg + "Start", tolerance);
@@ -75,7 +75,7 @@ function checkLine2(assert, line, startX, startY, endX, endY, msg, tolerance) {
 }
 
 function checkMatrix(assert, mat, refMat, msg, tolerance) {
-    if (!Leeboard.isVar(msg)) {
+    if (!LBUtil.isVar(msg)) {
         msg = "";
     }
 
@@ -86,7 +86,7 @@ function checkMatrix(assert, mat, refMat, msg, tolerance) {
 }
 
 function checkOrthogonal(assert, vec, ref, msg) {
-    if (!Leeboard.isVar(msg)) {
+    if (!LBUtil.isVar(msg)) {
         msg = "";
     }
     var dot = vec.dot(ref);

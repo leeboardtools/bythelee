@@ -52,6 +52,7 @@ LBSailSim.PhaserView = function(sailEnv, worldGroup) {
 LBSailSim.PhaserView.prototype = Object.create(LBPhaser.PhysicsView.prototype);
 LBSailSim.PhaserView.prototype.constructor = LBSailSim.PhaserView;
 
+
 /**
  * Changes whether or not the force arrows are displayed.
  * @param {Boolean} isVisible   If true the force arrows are displayed, otherwise they are hidden.
@@ -262,8 +263,8 @@ LBSailSim.PhaserView.prototype.onDisplayObjectsUpdated = function(topRigidBody, 
 };
 
 /**
- * Call when done with the view, this removes references to other objects,
- * hoping this will eventually get garbage collected.
+ * Call when done with the object to have it release any internal references
+ * to other objects to help with garbage collection.
  * @returns {undefined}
  */
 LBSailSim.PhaserView.prototype.destroy = function() {
@@ -271,6 +272,7 @@ LBSailSim.PhaserView.prototype.destroy = function() {
         this.worldGroup = null;
 
         this.sailEnv.removeBoatCallback(this);
+        this.sailEnv.physicsLink.removeView(this);
         this.sailEnv = null;
     }
     
@@ -337,6 +339,12 @@ LBSailSim.Phaser3DView = function(sailEnv, worldGroup, camera) {
 LBSailSim.Phaser3DView.prototype = Object.create(LBSailSim.PhaserView.prototype);
 LBSailSim.Phaser3DView.prototype.constructor = LBSailSim.Phaser3DView;
 
+LBSailSim.Phaser3DView.prototype.destroy = function() {
+    if (this.project3D) {
+        this.project3D = this.project3D.destroy();
+        LBSailSim.PhaserView.prototype.destroy.call(this);
+    }
+};
 
 LBSailSim.Phaser3DView.prototype._loadDisplayObjectForHull = function(boat) {
     var data = boat.loadData;

@@ -15,11 +15,11 @@
  */
 
 
-/* global QUnit, Leeboard, LBPhysics, LBGeometry, LBMath */
+/* global QUnit, LBUtil, LBPhysics, LBGeometry, LBMath */
 
 
 function checkResultant3D(assert, resultant, fx, fy, fz, mx, my, mz, px, py, pz, msg, tolerance) {
-    if (!Leeboard.isVar(msg)) {
+    if (!LBUtil.isVar(msg)) {
         msg = "";
     }
 
@@ -97,7 +97,7 @@ function setupMoment7Test() {
 };
 
 function checkMoment7Test(assert, resultant, msg) {
-    if (!Leeboard.isVar(msg)) {
+    if (!LBUtil.isVar(msg)) {
         msg = "";
     }
     

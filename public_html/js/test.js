@@ -23,7 +23,7 @@
 
 
 /* global Phaser */
-/* global Leeboard, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils */
+/* global LBUtil, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils */
 
 
 //

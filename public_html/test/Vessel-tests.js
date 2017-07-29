@@ -15,7 +15,7 @@
  */
 
 
-/* global Leeboard, QUnit, LBSailSim, LBMath, LBGeometry */
+/* global LBUtil, QUnit, LBSailSim, LBMath, LBGeometry */
 
 var clCdCurvesJSON_Test = {
     "clCdCurves": [

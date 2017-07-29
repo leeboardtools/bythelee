@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global Leeboard, LBGeometry, LBPhysics, LBMath */
+/* global LBUtil, LBGeometry, LBPhysics, LBMath */
 
 /**
  * @namespace LBFoils
@@ -234,7 +234,7 @@ LBFoils.ClCdStall.createFromData = function(data) {
     
     var clCdStall;
     if (data.className) {
-        clCdStall = Leeboard.newClassInstanceFromData(data);
+        clCdStall = LBUtil.newClassInstanceFromData(data);
     }
     else {
         clCdStall = new LBFoils.ClCdStall();
@@ -283,9 +283,9 @@ LBFoils.ClCdInterp.prototype = {
                 alphas.push(180 - this.alphas[i]);
             }
             this.alphas = alphas;
-            this.cls = Leeboard.copyAndMirrorArray(this.cls);
-            this.cds = Leeboard.copyAndMirrorArray(this.cds);
-            this.cms = Leeboard.copyAndMirrorArray(this.cms);
+            this.cls = LBUtil.copyAndMirrorArray(this.cls);
+            this.cds = LBUtil.copyAndMirrorArray(this.cds);
+            this.cms = LBUtil.copyAndMirrorArray(this.cms);
         }
         
         this.interpCls.setup(this.alphas, this.cls);
@@ -544,7 +544,6 @@ LBFoils.Foil._workingVel;
 LBFoils.Foil._workingVelResults;
 
 LBFoils.Foil.prototype = {
-    constructor: LBFoils.Foil,
         
     /**
      * The main loading method.
@@ -554,7 +553,7 @@ LBFoils.Foil.prototype = {
      * @return {object} this.
      */
     load: function(data, curveLib) {
-        this.chordLine = Leeboard.copyCommonProperties(this.chordLine, data.chordLine);
+        this.chordLine = LBUtil.copyCommonProperties(this.chordLine, data.chordLine);
         this.sliceZ = data.sliceZ || this.sliceZ;
         this.area = data.area || this.area;
         this.aspectRatio = data.aspectRatio || this.aspectRatio;
@@ -675,8 +674,22 @@ LBFoils.Foil.prototype = {
         resultant.applyMatrix4(coordSystemState.worldXfrm);
         
         return resultant;
-    }
+    },
     
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        if (this.chordLine) {
+            this.chordLine = null;
+            this.clCdCurve = null;
+            
+        }
+    },
+    
+    constructor: LBFoils.Foil
 };
 
 
@@ -703,7 +716,7 @@ LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
     
     var foil;
     if (data.className) {
-        foil = Leeboard.newClassInstanceFromData(data);
+        foil = LBUtil.newClassInstanceFromData(data);
     }
     else if (defCreatorFunc) {
         foil = defCreatorFunc(data);
