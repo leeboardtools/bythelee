@@ -134,7 +134,40 @@
                         }
                     },
                     "sparName": "mainboom",
-                    "sailShape": {
+                    "sailShaper": {
+                        "className": "LBSailSim.TriangleSailShaper",
+                        "luffLength": 7.48,
+                        "footLength": 3.15,
+                        "headLength": 0.00,
+                        "slices": [
+                            {
+                                "slicePosFraction": 0.25,
+                                "surfaceLength": 3.00,
+                                "pointCount": 5
+                            },
+                            {
+                                "slicePosFraction": 0.54,
+                                "surfaceLength": 2.48,
+                                "pointCount": 5
+                            },
+                            {
+                                "slicePosFraction": 0.81,
+                                "surfaceLength": 1.47,
+                                "pointCount": 5
+                            }
+                        ],
+                        "panels": [
+                            {
+                                "frameColor": "0x080808",
+                                "fillColor": "0xFFFFFF",
+                                "closeFrame": true,
+                                "startSlice": 0,
+                                "endSlice": -1
+                            }
+                        ]
+                    },
+                    
+                    "_sailShape": {
                         "vertices": [
                             0.00, 0.00, 1.00,
                             3.15, 0.00, 1.00,
@@ -176,6 +209,7 @@
                             2, 3, 4, 5, 6, 7
                         ]
                     },
+                    
                     "minSheetLength": 0,
                     "maxSheetLength": 1.5,
                     "foil": {

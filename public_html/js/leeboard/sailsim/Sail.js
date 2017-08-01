@@ -15,7 +15,7 @@
  */
 
 
-/* global LBSailSim, LBFoils, LBControls, LBGeometry, LBMath, LBPhysics */
+/* global LBSailSim, LBFoils, LBControls, LBGeometry, LBMath, LBPhysics, LBUtil, LBCurve */
 
 /**
  * Implementation of {@link LBFoils.Foil} for sails, supports reefing and flatness factors.
@@ -60,18 +60,119 @@ LBSailSim.SailFoil.prototype.destroy = function() {
     LBFoils.Foil.prototype.destroy.call(this);
 };
 
-LBSailSim.SailSurface = function(sailInstance) {
-    this.sailInstance = sailInstance;
+
+/**
+ * Represents a single slice through a sail for {@link LBSailSim.SailSurface}.
+ * @constructor
+ * @param {Number} slicePos The local position of the slice along the reference leading edge of the sail.
+ * @param {Number} surfaceLength  The length of the slice.
+ * @param {Number} [pointCount=5] The number of points in the slice.
+ * @returns {LBSailSim.SailSlice}
+ */
+LBSailSim.SailSlice = function(slicePos, surfaceLength, pointCount) {
+    
+    /**
+     * The local position of the slice along the reference leading edge of the sail.
+     * @readonly
+     * @member {Number}
+     */
+    this.slicePos = slicePos;
+    
+    /**
+     * The surface length of the slice.
+     * @readonly
+     * @member {Number}
+     */
+    this.surfaceLength = surfaceLength;
+    
+    pointCount = pointCount || 5;
+    if (pointCount < 2) {
+        pointCount = 2;
+    }
+    
+    /**
+     * The array of 3D points on the slice. The first point is at the reference leading edge.
+     * @member {LBGeometry.Vector3[]}
+     */
+    this.points = [];
+    for (var i = 0; i < pointCount; ++i) {
+        this.points.push(new LBGeometry.Vector3());
+    }
 };
 
-LBSailSim.SailSurface.prototype = {
+LBSailSim.SailSlice.prototype = {
     /**
      * Call when done with the object to have it release any internal references
      * to other objects to help with garbage collection.
      * @returns {undefined}
      */
     destroy: function() {
-        this.sailInstance = null;
+        if (this.points) {
+            this.points.length = 0;
+            this.points = null;
+        }
+    },
+    
+    constructor: LBSailSim.SailSlice
+};
+
+/**
+ * Helper that creates and loads an {@link LBSailSim.SailSlice} from properties in a data object.
+ * @param {Number}  slicePosRange   The full range length of the slice positions, used for
+ * computing the actual position when given a slice position as a fraction.
+ * @param {Object} data The data object.
+ * @returns {LBSailSim.SailSlice}   The loaded sail slice.
+ */
+LBSailSim.SailSlice.createFromData = function(slicePosRange, data) {
+    var slicePos;
+    if (data.slicePosFraction) {
+        slicePos = data.slicePosFraction * slicePosRange;
+    }
+    else {
+        slicePos = data.slicePos;
+    }
+    
+    var surfaceLength = data.surfaceLength;
+    if (!surfaceLength) {
+        console.warn("LBSailSim.SailSlice.createFromData: data.surfaceLength is required!");
+        return undefined;
+    }
+    if (surfaceLength < 0) {
+        console.warn("LBSailSim.SailSlice.createFromData: data.surfaceLength must be >= 0!");
+        return undefined;
+    }
+    
+    return new LBSailSim.SailSlice(slicePos, surfaceLength, data.pointCount);
+};
+
+
+/**
+ * Represents the surface of the sail, primarily for visualization purposes.
+ * @constructor
+ * @returns {LBSailSim.SailSurface}
+ */
+LBSailSim.SailSurface = function() {    
+    /**
+     * The slices representing the surface.
+     * @member {LBSailSim.SailSlice[]}
+     */
+    this.slices = [];
+};
+
+LBSailSim.SailSurface.prototype = {    
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        if (this.slices) {
+            this.slices.forEach(function(slice) {
+                slice.destroy();
+            });
+            this.slices.length = 0;
+            this.slices = null;
+        }
     },
     
     constructor: LBSailSim.SailSurface
@@ -92,19 +193,19 @@ LBSailSim.SailInstance = function() {
      * The flatness factor, 0 is most flat, 1 is least flat.
      * @member {Number}
      */
-    this.flatness = 0.5;
+    this.flatnessFactor = 0.5;
     
     /**
      * The twist factor, 0 is least twist, 1 is most twist.
      * @member {Number}
      */
-    this.twist = 0.5;
+    this.twistFactor = 0.5;
     
     /**
      * The reefing factor, 0 is most reefed, 1 is not reefed.
      * @member {Number}
      */
-    this.reef = 1;
+    this.reefFactor = 1;
     
     /**
      * ??? Forgot what vreef stands for!
@@ -143,6 +244,30 @@ LBSailSim.SailInstance = function() {
     this.maxSheetLength = 1;
     
     /**
+     * The minimum sail twist in degrees.
+     * @member {Number}
+     */
+    this.minTwistDeg = 5;
+    
+    /**
+     * The maximum sail twist in degrees.
+     * @member {Number}
+     */
+    this.maxTwistDeg = 30;
+    
+    /**
+     * The minimum camber as a fraction of the chord length.
+     * @member {Number}
+     */
+    this.minCamberFraction = 1/20;
+    
+    /**
+     * The maximum camber as a fraction of the chord length.
+     * @member {Number}
+     */
+    this.minCamberFraction = 1/7;
+    
+    /**
      * The spars associated with this sail.
      * @member {LBPhysics.RigidBody[]}
      */
@@ -161,6 +286,19 @@ LBSailSim.SailInstance = function() {
      * @member {Number}
      */
     this.maxRotationDeg = 0;
+    
+    /**
+     * The surface representation of the sail.
+     * @member {LBSailSim.SailSurface}
+     */
+    this.sailSurface = new LBSailSim.SailSurface();
+    
+    /**
+     * The implementation of {@link LBSailSim.SailShaper} used to shape the sail surface
+     * {@link LBSailSim.SailInstance#sailSurface}.
+     * @member {LBSailSim.SailShaper}
+     */
+    this.sailShaper = undefined;
 };
 
 
@@ -180,8 +318,39 @@ LBSailSim.SailInstance.prototype.destroy = function() {
 
         this.sheetAnchorBoat = null;
         this.sheetAnchorSail = null;
+        
+        if (this.sailShaper) {
+            this.sailShaper = this.sailShaper.destroy();
+        }
+        this.sailSurface = this.sailSurface.destroy();
+        
         LBSailSim.FoilInstance.prototype.destroy.call(this);
     }
+};
+
+/**
+ * Returns the total twist of the sail between the head and foot, in degrees.
+ * @returns {Number}    The twist in degrees
+ */
+LBSailSim.SailInstance.prototype.getTwistDeg = function() {
+    return this.twistFactor * (this.maxTwistDeg - this.minTwistDeg) + this.minTwistDeg;
+};
+
+/**
+ * Returns the current maximum camber of the sail as a fraction of the chord.
+ * @returns {Number}    The camber as a fraction of the chord.
+ */
+LBSailSim.SailInstance.prototype.getCamberFraction = function() {
+    return this.flatnessFactor * (this.maxChordFraction - this.minChordFraction) + this.minChordFraction;
+};
+
+/**
+ * Returns the current position of the maximum camber of the sail as a fraction of the
+ * chord from the leading edge.
+ * @returns {Number}    The maximum camber position as a fraction of the chord.
+ */
+LBSailSim.SailInstance.prototype.getCamberPosFraction = function() {
+    return 0.45;
 };
 
 // @inheritdoc...
@@ -201,6 +370,10 @@ LBSailSim.SailInstance.prototype.updateFoilForce = function(dt, flow) {
     this.spars.forEach(function(spar) {
         spar.setPositionAndQuaternion(this.obj3D.position, this.obj3D.quaternion);
     }, this);
+    
+    if (this.sailShaper) {
+        this.sailShaper.updateSailSurface(this, this.sailSurface);
+    }
     
     return this;
 };
@@ -232,10 +405,6 @@ LBSailSim.SailInstance.prototype._updateRotationLimits = function() {
         deg2 -= this.rotationOffsetDegs[2];
         var rad = (deg2 - deg) * LBMath.DEG_TO_RAD;
         this.obj3D.rotateOnAxis(LBGeometry.Z_AXIS, rad);
-        
-        this.spars.forEach(function(spar) {
-            spar.setPositionAndQuaternion(this.obj3D.position, this.obj3D.quaternion);
-        }, this);
     }
 };
 
@@ -267,8 +436,47 @@ LBSailSim.SailInstance.prototype.load = function(data, sailEnv) {
     this.minSheetLength = data.minSheetLength || 0;
     this.maxSheetLength = data.maxSheetLength || 1;
     
+    if ((data.minTwistDeg !== undefined) && (data.minTwistDeg >= 0)) {
+        this.minTwistDeg = data.minTwistDeg;
+    }
+    if ((data.maxTwistDeg !== undefined) && (data.maxTwistDeg >= 0)) {
+        this.maxTwistDeg = data.maxTwistDeg;
+    }
+    if (this.minTwistDeg > this.maxTwistDeg) {
+        var tmp = this.minTwistDeg;
+        this.minTwistDeg = this.maxTwistDeg;
+        this.maxTwistDeg = tmp;
+    }
+    
+    if ((data.minChordFraction !== undefined) && (data.minChordFraction >= 0)) {
+        this.minChordFraction = data.minChordFraction;
+    }
+    if ((data.maxChordFraction !== undefined) && (data.maxChordFraction >= 0)) {
+        this.maxChordFraction = data.maxChordFraction;
+    }
+    if (this.minChordFraction > this.maxChordFraction) {
+        var tmp = this.minChordFraction;
+        this.minChordFraction = this.maxChordFraction;
+        this.maxChordFraction = tmp;
+    }
+    
     this._updateRotationLimits();
+    
+    if (data.sailShaper) {
+        this._loadSailShaper(data.sailShaper);
+    }
     return this;
+};
+
+LBSailSim.SailInstance.prototype._loadSailShaper = function(data) {
+    var shaper = LBUtil.newClassInstanceFromData(data);
+    if (!shaper) {
+        return;
+    }
+    
+    shaper.load(this, data);
+    
+    this.sailShaper = shaper;
 };
 
 // @inheritdoc
@@ -395,4 +603,212 @@ LBSailSim.SailController.prototype.destroy = function() {
         
         LBControls.SmoothController.prototype.destroy.call(this);
     }
-}
+};
+
+
+/**
+ * Helper object for calculating points along the cambered sail surface.
+ * @constructor
+ * @returns {LBSailSim.SailCamberCurve}
+ */
+LBSailSim.SailCamberCurve = function() {
+    /**
+     * The maximum camber as a fraction of the chord length.
+     * @member {Number}
+     */
+    this.camberFraction = 0;
+    
+    /**
+     * The position of the maximum camber from the leading edge as a fraction of the
+     * chord length.
+     * @member {Number}
+     */
+    this.camberPosFraction = 0;
+    
+    /**
+     * The curve used to compute the actual points.
+     * @member {LBCurve.QuadraticBezier2}
+     */
+    this.curve = new LBCurve.QuadraticBezier2();
+    
+    this.setCamber(0.1, 0.45);
+};
+
+LBSailSim.SailCamberCurve.prototype = {
+    /**
+     * Sets up the curve for a given camber.
+     * @param {Number} camberFraction   The maximum camber as a fraction of the chord length.
+     * @param {Number} camberPosFraction    The position of the maximum camber from the leading
+     * edge as a fraction of the chord length.
+     * @returns {LBSailSim.SailCamberCurve} this.
+     */
+    setCamber: function(camberFraction, camberPosFraction) {
+        if ((this.camberFraction !== camberFraction) || (this.camberPosFraction !== camberPosFraction)) {
+            this.camberFraction = camberFraction;
+            this.camberPosFraction = camberPosFraction;
+            
+            // We presume a chord length of 1 to keep things simple...
+            var p1x = 2 * (camberPosFraction - 0.5) + 0.5;
+            var p1y = 2 * camberFraction;
+            this.curve.setControlPoints(LBGeometry.ORIGIN, new LBGeometry.Vector2(p1x, p1y), LBGeometry.X_AXIS);
+        }
+        return this;
+    },
+    
+    /**
+     * Calculates a point along the surface of the cambered curve.
+     * @param {Number} surfacePos   The position along the surface to be computed,
+     * as a fraction of the total surface length, should be &ge; 0 and &le; 1.
+     * @param {LBGeometry.Vector2} [store]  If defined the object to store the result in. 
+     * @param {Number} [surfaceLength=1]    If defined the length of the surface of the curve.
+     * @returns {LBGeometry.Vector2}    The point at the desired position.
+     */
+    calcXY: function(surfacePos, store, surfaceLength) {
+        store = this.curve.calcPoint(surfacePos, store);        
+        surfaceLength = surfaceLength || 1;
+        
+        var curveSurfaceLength = this.curve.getCurveLength();
+        if (!LBMath.isLikeZero(curveSurfaceLength)) {
+            store.multiplyScalar(surfaceLength / curveSurfaceLength);
+        }
+        
+        return store;
+    },
+    
+    constructor: LBSailSim.SailCamberCurve
+};
+
+
+/**
+ * Base class for the objects that compute the shape of a sail.
+ * @returns {LBSailSim.SailShaper}
+ */
+LBSailSim.SailShaper = function() {
+    /**
+     * The curve object that can be used to compute points along a camber curve.
+     * @member {LBSailSim.CamberCurve}
+     */
+    this.camberCurve = new LBSailSim.SailCamberCurve();
+};
+
+LBSailSim.SailShaper.prototype = {
+    /**
+     * Loads the sail shaper from properties of a data object.
+     * @param {LBSailSim.SailInstance}  sailInstance    The sail instance calling this.
+     * @param {Object} data The data object.
+     * @returns {LBSailSim.SailShaper}  this.
+     */
+    load: function(sailInstance, data) {
+        return this;
+    },
+    
+    /**
+     * Called by {@link LBSailSim.SailInstance#updateFoilForce} to have the sail surface
+     * updated.
+     * @param {LBSailSim.SailInstance} sailInstance The sail instance this is for.
+     * @param {LBSailSim.SailSurface} surface   The surface to be updated.
+     * @returns {undefined}
+     */
+    updateSailSurface: function(sailInstance, surface) {
+        throw "updateSailSurface not implemented by this!";
+    },
+    
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    dispose: function() {
+        if (this.camberCurve) {
+            this.camberCurve = null;            
+        }
+    },
+    
+    constructor: LBSailSim.SailShaper
+};
+
+/**
+ * Sail shaper for triangular sails.
+ * @constructor
+ * @extends LBSailSim.SailShaper
+ * @returns {LBSailSim.TriangleSailShaper}
+ */
+LBSailSim.TriangleSailShaper = function() {
+    LBSailSim.SailShaper.call(this);
+    
+    /**
+     * The length of the luff of the sail.
+     * @member {Number}
+     */
+    this.luffLength = undefined;
+    
+    /**
+     * The length of the foot of the sail.
+     * @member {Number}
+     */
+    this.footLength = undefined;
+    
+    /**
+     * The length of the head of the sail.
+     * @member {Number}
+     */
+    this.headLength = undefined;
+};
+
+LBSailSim.TriangleSailShaper._workingVector2 = new LBGeometry.Vector2();
+LBSailSim.TriangleSailShaper.prototype = Object.create(LBSailSim.SailShaper.prototype);
+LBSailSim.TriangleSailShaper.prototype.constructor = LBSailSim.TriangleSailShaper;
+
+LBSailSim.TriangleSailShaper.prototype.load = function(sailInstance, data) {
+    this.luffLength = data.luffLength;
+    this.footLength = data.footLength;
+    this.headLength = data.headLength;
+    
+    var surface = sailInstance.sailSurface;
+    surface.slices.length = 0;
+    
+    if (this.footLength) {
+        surface.slices.push(new LBSailSim.SailSlice(0, this.footLength, 2));
+    }
+    if (data.slices) {
+        for (var i = 0; i < data.slices.length; ++i) {
+            var slice = LBSailSim.SailSlice.createFromData(this.luffLength, data.slices[i]);
+            if (slice) {
+                surface.slices.push(slice);
+            }
+        }
+    }
+    surface.slices.push(new LBSailSim.SailSlice(this.luffLength, this.headLength, 2));
+};
+
+LBSailSim.TriangleSailShaper.prototype.updateSailSurface = function(sailInstance, surface) {
+    var totalTwistDeg = sailInstance.getTwistDeg();
+    var totalTwistRad = totalTwistDeg * LBMath.DEG_TO_RAD;
+    
+    // TODO Need to negate totalTwistRad for the appropriate wind direction...
+    
+    var camberFraction = sailInstance.getCamberFraction();
+    var camberPosFraction = sailInstance.getCamberPosFraction();
+    this.camberCurve.setCamber(camberFraction, camberPosFraction);
+    
+    var camberPos = LBSailSim.TriangleSailShaper._workingVector2;
+    
+    for (var i = 0; i < surface.slices.length; ++i) {
+        var slice = surface.slices[i];
+        // First point is the leading edge which is currently always at x = y = 0.
+        slice.points[0].set(0, 0, slice.slicePos);
+        
+        var twistRad = slice.slicePos / this.luffLength * totalTwistRad;
+        var cosTwist = Math.cos(twistRad);
+        var sinTwist = Math.sin(twistRad);
+        var scale = 1 / (slice.points.length - 1);
+        
+        for (var p = 1; p < slice.points.length; ++p) {
+            this.camberCurve.calcXY(i * scale, camberPos, slice.surfaceLength);
+            
+            var x = cosTwist * camberPos.x + sinTwist * camberPos.y;
+            var y = -sinTwist * camberPos.x + cosTwist * camberPos.y;
+            slice.points[p].set(x, y, slice.slicePos);
+        }
+    }
+};

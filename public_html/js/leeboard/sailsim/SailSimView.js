@@ -352,10 +352,10 @@ LBSailSim.Phaser3DView.prototype._loadDisplayObjectForHull = function(boat) {
         var rigidBodyEntry = this._getRigidBodyEntry(boat);
 
         if (data.volumes && data.volumes.panels) {
-            rigidBodyEntry.volumePanels = LBPhaser.Project3D.loadVolumePanels(boat.volumes, data.volumes.panels);
+            rigidBodyEntry.panelsArray = LBPhaser.Project3D.loadVolumePanels(boat.volumes, data.volumes.panels);
         }
 
-        if (!rigidBodyEntry.volumePanels && data.phaser) {
+        if (!rigidBodyEntry.panelsArray && data.phaser) {
             var game = this.sailEnv.phaserEnv.game;
             var sprite = LBPhaser.PhysicsView.createSpriteFromData(game, data.phaser.sprite);
             this.setRigidBodyDisplayObject(boat, sprite);
@@ -370,10 +370,10 @@ LBSailSim.Phaser3DView.prototype._loadDisplayObjectForSpar = function(rigidBody)
         var rigidBodyEntry = this._getRigidBodyEntry(rigidBody);
         
         if (data.volumes && data.volumes.panels) {
-            rigidBodyEntry.volumePanels = LBPhaser.Project3D.loadVolumePanels(rigidBody.volumes, data.volumes.panels);
+            rigidBodyEntry.panelsArray = LBPhaser.Project3D.loadVolumePanels(rigidBody.volumes, data.volumes.panels);
         }
         else if (data.volume && data.volume.panels) {
-            rigidBodyEntry.volumePanels = LBPhaser.Project3D.loadVolumePanels(rigidBody.volumes, data.volume.panels);
+            rigidBodyEntry.panelsArray = LBPhaser.Project3D.loadVolumePanels(rigidBody.volumes, data.volume.panels);
         }
     }
 };
@@ -382,14 +382,18 @@ LBSailSim.Phaser3DView.prototype._loadDisplayObjectForHydrofoil = function(rigid
     this._loadObj3DSprite(rigidBody, rigidBody.loadData);
 };
 
-LBSailSim.Phaser3DView.prototype._loadDisplayObjectForAirfoil = function(rigidBody) {
-    var data = rigidBody.loadData;
+LBSailSim.Phaser3DView.prototype._loadDisplayObjectForAirfoil = function(sail) {
+    var data = sail.loadData;
     if (data) {
-        var sprite = this._loadObj3DSprite(rigidBody, rigidBody.loadData);
-    
-        if (sprite) {
-            // Need a sail flipper...
-            this.setBodyCallback(rigidBody, this);
+        if (data.sailShaper && data.sailShaper.panels) {
+            
+        }
+        else {
+            var sprite = this._loadObj3DSprite(sail, sail.loadData);
+            if (sprite) {
+                // Need a sail flipper...
+                this.setBodyCallback(sail, this);
+            }
         }
     }
 };
@@ -402,7 +406,7 @@ LBSailSim.Phaser3DView.prototype.beginDisplayObjectsUpdate = function() {
 // @inheritdoc...
 LBSailSim.Phaser3DView.prototype._updateDisplayObjects = function(rigidBody) {    
     var rigidBodyEntry = this._getRigidBodyEntry(rigidBody);
-    LBPhaser.Project3D.projectVolumePanels(this.project3D, rigidBodyEntry.volumePanels, 
+    LBPhaser.Project3D.projectPanelsArray(this.project3D, rigidBodyEntry.panelsArray, 
             rigidBody.obj3D.matrixWorld);
     
     LBSailSim.PhaserView.prototype._updateDisplayObjects.call(this, rigidBody);

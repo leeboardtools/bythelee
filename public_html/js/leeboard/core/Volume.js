@@ -54,6 +54,7 @@ LBVolume.Volume._workingCenterOfMassResult;
 LBVolume.Volume._workingVector3A = new LBGeometry.Vector3();
 LBVolume.Volume._workingVector3B = new LBGeometry.Vector3();
 LBVolume.Volume._workingVector3C = new LBGeometry.Vector3();
+LBVolume.Volume._workingMatrix3;
 
 LBVolume.Volume.prototype = {
     /**
@@ -280,32 +281,77 @@ LBVolume.Volume.allocateMassToVolumess = function(volumes, totalMass, startIndex
 
 
 /**
- * Calculates a simplified inertia tensor from the volumes in a array of volumes. The
- * tensor is simplified in that each volume is treated as a point mass at the centroid
- * of the volume.
+ * Calculates the inertia tensor from the volumes in a array of volumes. The tensor
+ * is relative to the overal centroid of the volumes.
  * @param {LBVolume.Volume[]} volumes    The array of volumes.
  * @param {LBGeometry.Matrix3} [tensor] If defined the 3x3 matrix to receive the tensor.
+ * @param {LBGeometry.Vector3} [totalCentroid] If defined this is set to the overall centroid
+ * of all the volumes.
  * @returns {LBGeometry.Matrix3}    The tensor.
  */
-LBVolume.Volume.overallInertiaTensor = function(volumes, tensor) {
+LBVolume.Volume.overallInertiaTensor = function(volumes, tensor, totalCentroid) {
     tensor = tensor || new LBGeometry.Matrix3();
     tensor.zero();
     
-    var centroid;
+    totalCentroid = totalCentroid || LBVolume.Volume._workingVector3A;
+    totalCentroid.zero();
+    
+    var totalMass = 0;
+    
+    var tetraCentroid = LBVolume.Volume._workingVector3B;
+    var tetraInertia = LBVolume.Volume._workingMatrix3;
     
     for (var i = 0; i < volumes.length; ++i) {
-        var tetra = volumes[i];
-        centroid = tetra.centroid(centroid);
-        var xx = centroid.x * centroid.x;
-        var yy = centroid.y * centroid.y;
-        var zz = centroid.z * centroid.z;
-        tensor.elements[0] += tetra.mass * (yy + zz);
-        tensor.elements[4] += tetra.mass * (xx + zz);
-        tensor.elements[8] += tetra.mass * (xx + yy);
+        var vol = volumes[i];
+        var tetras = vol.equivalentTetras();
+        for (var t = 0; t < tetras.length; ++t) {
+            var tetra = tetras[t];
+
+            // The inertia tensor is relative to the tetra's centroid.
+            tetraInertia = tetra.tetraInertiaTensor(tetraInertia);
+
+            // We'll make the tensor relative to the origin so we can sum the tensors,
+            // we'll shift it back to the total centroid after (we could make it relative
+            // to the total centroid now, but we don't yet know the total centroid).
+            // While shifting to 
+            tetraCentroid = tetra.centroid(tetraCentroid);
+            
+            var xx = tetraCentroid.x * tetraCentroid.x;
+            var yy = tetraCentroid.y * tetraCentroid.y;
+            var zz = tetraCentroid.z * tetraCentroid.z;
+            tensor.elements[0] += tetraInertia.elements[0] + tetra.mass * (yy + zz);
+            tensor.elements[4] += tetraInertia.elements[4] + tetra.mass * (xx + zz);
+            tensor.elements[8] += tetraInertia.elements[8] + tetra.mass * (xx + yy);
+
+            tensor.elements[1] += tetraInertia.elements[1] + tetra.mass * tetraCentroid.x * tetraCentroid.y;
+            tensor.elements[2] += tetraInertia.elements[2] + tetra.mass * tetraCentroid.x * tetraCentroid.z;
+            tensor.elements[5] += tetraInertia.elements[5] + tetra.mass * tetraCentroid.y * tetraCentroid.z;
+            
+            totalCentroid.x += tetraCentroid.x * tetra.mass;
+            totalCentroid.y += tetraCentroid.y * tetra.mass;
+            totalCentroid.z += tetraCentroid.z * tetra.mass;
+            
+            totalMass += tetra.mass;
+        }
+    }
+    
+    LBVolume.Volume._workingMatrix3 = tetraInertia;
+    
+    // The inertia tensor is now relative to the origin. If our centroid is not at the
+    // origin we'll need to shift the tensor...
+    totalCentroid.divideScalar(totalMass);
+    if (!LBGeometry.isVectorLikeZero(totalCentroid)) {
+        var xx = totalCentroid.x * totalCentroid.x;
+        var yy = totalCentroid.y * totalCentroid.y;
+        var zz = totalCentroid.z * totalCentroid.z;
         
-        tensor.elements[1] += -tetra.mass * centroid.x * centroid.y;
-        tensor.elements[2] += -tetra.mass * centroid.x * centroid.z;
-        tensor.elements[5] += -tetra.mass * centroid.y * centroid.z;
+        tensor.elements[0] -= totalMass * (yy + zz);
+        tensor.elements[4] -= totalMass * (xx + zz);
+        tensor.elements[8] -= totalMass * (xx + yy);
+        
+        tensor.elements[1] -= totalMass * totalCentroid.x * totalCentroid.y;
+        tensor.elements[2] -= totalMass * totalCentroid.x * totalCentroid.z;
+        tensor.elements[5] -= totalMass * totalCentroid.y * totalCentroid.z;
     }
     
     tensor.elements[3] = tensor.elements[1];
@@ -439,7 +485,7 @@ LBVolume.Volume.loadXYOutlineFromData = function(data, vertices, outlineVertices
  * v[0],v[1],v[2] are CCW about the face (right hand rule), as are v[0],[v2],v[3].
  * @constructor
  * @extends LBVolume.Volume
- * @param {Number[]} [vertices]    If defined an array containing the
+ * @param {LBGeometry.Vector3[]} [vertices]    If defined an array containing the
  * four vertices for the tetrahedron. References to the vertices are used, they are not copied.
  * If not defined the vertices are all set to new instances of {@link LBGeometry.Vector3}.
  * @param {Number} [mass=Number.NaN] If defined the mass assigned to the volume.
@@ -548,6 +594,49 @@ LBVolume.Tetra.prototype.cloneMirrored = function(plane) {
     vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[0]));
     vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[3]));
     return new LBVolume.Tetra(vertices, this.mass);
+};
+
+/**
+ * Calculates the inertia tensor matrix for the tetrahedron using the formulas given in:
+ * {@link http://thescipub.com/PDF/jmssp.2005.8.11.pdf}
+ * @param {LBGeometry.Matrix3} [tensor] If defined the object to store the tensor into.
+ * @returns {LBGeometry.Matrix3}    The inertia tensor.
+ */
+LBVolume.Tetra.prototype.tetraInertiaTensor = function(tensor) {
+    tensor = tensor || new LBGeometry.Matrix3();
+    tensor.zero();
+    
+    // Eq = [ a -b' -c'; -b' b -a'; -c' -a' c ]
+    // Each polynomial term is multiplied by mu * |DET(J)|, and DET(J) = 6 * Vol,
+    // so the scaling term is simply 6 * mass.
+    var cent = this.centroid(LBVolume.Tetra._workingVectorA);
+    var scale = 6 * this.mass;
+    var x1 = this.vertices[0].x - cent.x, x2 = this.vertices[1].x - cent.x, x3 = this.vertices[2].x - cent.x, x4 = this.vertices[3].x - cent.x;
+    var y1 = this.vertices[0].y - cent.y, y2 = this.vertices[1].y - cent.y, y3 = this.vertices[2].y - cent.y, y4 = this.vertices[3].y - cent.y;
+    var z1 = this.vertices[0].z - cent.z, z2 = this.vertices[1].z - cent.z, z3 = this.vertices[2].z - cent.z, z4 = this.vertices[3].z - cent.z;
+    
+    var xTerm = x1*x1 + x1*x2 + x2*x2 + x1*x3 + x2*x3 + x3*x3 + x1*x4 + x2*x4 + x3*x4 + x4*x4;
+    var yTerm = y1*y1 + y1*y2 + y2*y2 + y1*y3 + y2*y3 + y3*y3 + y1*y4 + y2*y4 + y3*y4 + y4*y4;
+    var zTerm = z1*z1 + z1*z2 + z2*z2 + z1*z3 + z2*z3 + z3*z3 + z1*z4 + z2*z4 + z3*z4 + z4*z4;
+    var a = scale * (yTerm + zTerm) / 60;
+    var b = scale * (xTerm + zTerm) / 60;
+    var c = scale * (xTerm + yTerm) / 60;
+    
+    var xSum = x1 + x2 + x3 + x4;
+    var ySum = y1 + y2 + y3 + y4;
+    var zSum = z1 + z2 + z3 + z4;
+    var ap = scale * ((ySum + y1) * z1 + (ySum + y2) * z2 + (ySum + y3) * z3 + (ySum + y4) * z4) / 120;
+    var bp = scale * ((xSum + x1) * z1 + (xSum + x2) * z2 + (xSum + x3) * z3 + (xSum + x4) * z4) / 120;
+    var cp = scale * ((xSum + x1) * y1 + (xSum + x2) * y2 + (xSum + x3) * y3 + (xSum + x4) * y4) / 120;
+    
+    tensor.elements[0] = a;
+    tensor.elements[1] = tensor.elements[3] = -bp;
+    tensor.elements[2] = tensor.elements[6] = -cp;
+    tensor.elements[4] = b;
+    tensor.elements[5] = tensor.elements[7] = -ap;
+    tensor.elements[8] = c;
+    
+    return tensor;
 };
 
 
@@ -665,34 +754,28 @@ LBVolume.Tetra.cuboidToTetras = function(vertexIndices, vertexArray, tetras) {
     vertices[3] = vertexArray[vertexIndices[5]];
     tetras.push(new LBVolume.Tetra(vertices));
     
+    vertices[0] = vertexArray[vertexIndices[5]];
+    vertices[1] = vertexArray[vertexIndices[4]];
+    vertices[2] = vertexArray[vertexIndices[7]];
+    vertices[3] = vertexArray[vertexIndices[0]];
+    tetras.push(new LBVolume.Tetra(vertices));
+    
     vertices[0] = vertexArray[vertexIndices[0]];
     vertices[1] = vertexArray[vertexIndices[2]];
     vertices[2] = vertexArray[vertexIndices[3]];
-    vertices[3] = vertexArray[vertexIndices[5]];
-    tetras.push(new LBVolume.Tetra(vertices));
-    
-    vertices[0] = vertexArray[vertexIndices[2]];
-    vertices[1] = vertexArray[vertexIndices[6]];
-    vertices[2] = vertexArray[vertexIndices[3]];
-    vertices[3] = vertexArray[vertexIndices[5]];
-    tetras.push(new LBVolume.Tetra(vertices));
-    
-    vertices[0] = vertexArray[vertexIndices[6]];
-    vertices[1] = vertexArray[vertexIndices[5]];
-    vertices[2] = vertexArray[vertexIndices[7]];
-    vertices[3] = vertexArray[vertexIndices[3]];
-    tetras.push(new LBVolume.Tetra(vertices));
-    
-    vertices[0] = vertexArray[vertexIndices[7]];
-    vertices[1] = vertexArray[vertexIndices[5]];
-    vertices[2] = vertexArray[vertexIndices[4]];
-    vertices[3] = vertexArray[vertexIndices[3]];
+    vertices[3] = vertexArray[vertexIndices[7]];
     tetras.push(new LBVolume.Tetra(vertices));
     
     vertices[0] = vertexArray[vertexIndices[5]];
-    vertices[1] = vertexArray[vertexIndices[0]];
-    vertices[2] = vertexArray[vertexIndices[4]];
-    vertices[3] = vertexArray[vertexIndices[3]];
+    vertices[1] = vertexArray[vertexIndices[7]];
+    vertices[2] = vertexArray[vertexIndices[6]];
+    vertices[3] = vertexArray[vertexIndices[2]];
+    tetras.push(new LBVolume.Tetra(vertices));
+    
+    vertices[0] = vertexArray[vertexIndices[0]];
+    vertices[1] = vertexArray[vertexIndices[5]];
+    vertices[2] = vertexArray[vertexIndices[2]];
+    vertices[3] = vertexArray[vertexIndices[7]];
     tetras.push(new LBVolume.Tetra(vertices));
 
     return tetras;

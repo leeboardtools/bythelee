@@ -113,10 +113,12 @@ LBPhaser.Project3D.prototype = {
      * @param {Number[]} [indices]  Optional array of the indices of the points in vertices to use for drawing,
      * otherwise vertices is presumed to be in the desired order of the vertices.
      * @param {LBGeometry.Matrix4} [toWorldXfrm]    If defined the transform used to convert
-     * the vertices to world coordiantes.
+     * the vertices to world coordinates.
+     * @param {Boolean} [doubleSided=false] If true the panel is treated as having two
+     * sides.
      * @returns {LBPhaser.Project3D}    this.
      */
-    addPanel: function(frameColor, lineWidth, closeFrame, fillColor, alpha, vertices, indices, toWorldXfrm) {
+    addPanel: function(frameColor, lineWidth, closeFrame, fillColor, alpha, vertices, indices, toWorldXfrm, doubleSided) {
         if (Number.isNaN(frameColor)) {
             frameColor = undefined;
         }
@@ -135,6 +137,7 @@ LBPhaser.Project3D.prototype = {
         panel.lineWidth = (frameColor !== undefined) ? lineWidth : 0;
         panel.fillColor = fillColor;
         panel.alpha = alpha;
+        panel.doubleSided = doubleSided;
         panel.pathVertices = [];
         panel.zSum = 0;
         
@@ -180,7 +183,7 @@ LBPhaser.Project3D.prototype = {
         pos.set(pos.x * this.toPixelsX, pos.y * this.toPixelsY, pos.z);
         
         // If we're the third vertex, check if panel is facing the correct direction.
-        if (panel.pathVertices.length === 2) {
+        if (!panel.doubleSided && (panel.pathVertices.length === 2)) {
             var x0_1 = panel.pathVertices[0].x - panel.pathVertices[1].x;
             var y0_1 = panel.pathVertices[0].y - panel.pathVertices[1].y;
             var x2_1 = pos.x - panel.pathVertices[1].x;
@@ -432,18 +435,18 @@ LBPhaser.Project3D.loadVolumePanels = function(volumes, data) {
  * Helper that calls {@link LBPhaser.Project3DPanels#project} for each object in an
  * array of objects.
  * @param {LBPhaser.Project3D} [project3D]    The projection object, if undefined nothing is done.
- * @param {LBPhaser.Project3DPanels[]} [volumePanels]   The array panels objects to be
+ * @param {LBPhaser.Project3DPanels[]} [panelsArray]   The array panels objects to be
  * project, may be undefined.
  * @param {LBGeometry.Matrix4} [toWorldXfrm]    Optional transform matrix to transform the
  * panel vertex coordinates to world coordinates.
  * @returns {undefined}
  */
-LBPhaser.Project3D.projectVolumePanels = function(project3D, volumePanels, toWorldXfrm) {
-    if (!project3D || !volumePanels) {
+LBPhaser.Project3D.projectPanelsArray = function(project3D, panelsArray, toWorldXfrm) {
+    if (!project3D || !panelsArray) {
         return;
     }
     
-    volumePanels.forEach(function(panels) {
+    panelsArray.forEach(function(panels) {
         panels.project(project3D, toWorldXfrm);
     });
 };

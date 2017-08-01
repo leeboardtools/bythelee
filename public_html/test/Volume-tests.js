@@ -70,6 +70,41 @@ QUnit.test( "Tetra.volume()", function( assert ) {
     assert.nearEqual(tetra.volume(), vol, "Transformed Volume");
     
 });
+
+QUnit.test( "Tetra.tetraInertiaTensor()", function( assert ) {
+    // From the example given in http://thescipub.com/PDF/jmssp.2005.8.11.pdf
+    var vertices = [
+        new LBGeometry.Vector3(8.33220, -11.86875, 0.93355),
+        new LBGeometry.Vector3(0.75523, 5.00000, 16.37072),
+        new LBGeometry.Vector3(52.61236, 5.00000, -5.38580),
+        new LBGeometry.Vector3(2.00000, 5.00000, 3.00000)
+    ];
+    
+    var tetra = new LBVolume.Tetra(vertices);
+    
+    var vol = tetra.volume();
+    assert.nearEqual(vol, 11239.4001852988/6, "Volume", 1e-3);
+    tetra.mass = vol;
+    
+    var centroid = tetra.centroid();
+    checkVector3(assert, centroid, 15.92492, 0.78281, 3.72692, "Centroid", 1e-3);
+    
+    var tensor = tetra.tetraInertiaTensor();
+    var tol = 1e-3;
+    var aRef = 43520.33257;
+    var bRef = 194711.28938;
+    var cRef = 191168.76173;
+    var apRef = 4417.66150;
+    var bpRef = -46343.16662;
+    var cpRef = 11996.20119;
+    assert.nearEqual(tensor.elements[0], aRef, "a", tol);
+    assert.nearEqual(-tensor.elements[1], bpRef, "bp", tol);
+    assert.nearEqual(-tensor.elements[2], cpRef, "cp", tol);
+    assert.nearEqual(tensor.elements[4], bRef, "b", tol);
+    assert.nearEqual(-tensor.elements[5], apRef, "ap", tol);
+    assert.nearEqual(tensor.elements[8], cRef, "c", tol);
+});
+
     
 
 checkTetrasSimilar = function(assert, test, ref, msg) {
@@ -404,4 +439,66 @@ QUnit.test( "Cuboid", function( assert ) {
     checkMirrored(assert, volume, LBGeometry.XY_PLANE, "X-Y");
     checkMirrored(assert, volume, LBGeometry.YZ_PLANE, "Y-Z");
     checkMirrored(assert, volume, LBGeometry.ZX_PLANE, "Z-X");
+});
+
+
+QUnit.test( "Volume.overallInertiaTensor()", function( assert ) {
+    var x = 10;
+    var y = 5;
+    var z = 15;
+    var mass = 5;
+    
+    y = x;
+    z = x;
+    
+    var Ixx = mass / 12 * (y*y + z*z);
+    var Iyy = mass / 12 * (z*z + x*x);
+    var Izz = mass / 12 * (y*y + x*x);
+    
+    var data = {
+        mass: mass,
+        vertices: [
+            0, 0, 0,
+            0, 0, z,
+            0, y, z,
+            0, y, 0,
+            
+            x, 0, 0,
+            x, 0, z,
+            x, y, z,
+            x, y, 0
+        ],
+        indices: [
+            [ 0, 1, 2, 3, 4, 5, 6, 7]
+        ]
+    };
+    
+    var vertices = LBGeometry.loadVector3ArrayFromCoordArray(data.vertices);
+    
+    var offset = new LBGeometry.Vector3(-x/2, -y/2, -z/2);
+    vertices.forEach(function(vertex) {
+        vertex.add(offset);
+    });
+    
+    var volume = new LBVolume.Cuboid(vertices, data.mass);
+    
+    var volumes = [ volume ];
+    
+    var tensor = LBVolume.Volume.overallInertiaTensor(volumes);
+    
+    assert.nearEqual(tensor.elements[0], Ixx, "Ixx");
+    assert.nearEqual(tensor.elements[4], Iyy, "Iyy");
+    assert.nearEqual(tensor.elements[8], Izz, "Izz");
+    
+    var dx = 5;
+    var dy = 6;
+    var dz = 7;
+    volume.vertices.forEach(function(vertex) {
+        vertex.set(vertex.x + dx, vertex.y + dy, vertex.z + dz);
+    });
+    LBVolume.Volume.overallInertiaTensor(volumes, tensor);
+    
+    assert.nearEqual(tensor.elements[0], Ixx, "Ixx Offset");
+    assert.nearEqual(tensor.elements[4], Iyy, "Iyy Offset");
+    assert.nearEqual(tensor.elements[8], Izz, "Izz Offset");
 });
