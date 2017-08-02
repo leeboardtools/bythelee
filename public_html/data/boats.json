@@ -161,6 +161,7 @@
                                 "frameColor": "0x080808",
                                 "fillColor": "0xFFFFFF",
                                 "closeFrame": true,
+                                "doubleSided": true,
                                 "startSlice": 0,
                                 "endSlice": -1
                             }

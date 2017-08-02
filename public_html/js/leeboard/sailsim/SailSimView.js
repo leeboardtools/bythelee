@@ -386,7 +386,8 @@ LBSailSim.Phaser3DView.prototype._loadDisplayObjectForAirfoil = function(sail) {
     var data = sail.loadData;
     if (data) {
         if (data.sailShaper && data.sailShaper.panels) {
-            
+            var rigidBodyEntry = this._getRigidBodyEntry(sail);
+            rigidBodyEntry.panelsArray = LBSailSim.Phaser3DView.loadSailPanels(sail, data.sailShaper);
         }
         else {
             var sprite = this._loadObj3DSprite(sail, sail.loadData);
@@ -397,6 +398,16 @@ LBSailSim.Phaser3DView.prototype._loadDisplayObjectForAirfoil = function(sail) {
         }
     }
 };
+
+LBSailSim.Phaser3DView.prototype.destroyRigidBodyDisplayObject = function(rigidBody) {
+    var rigidBodyEntry = this._getRigidBodyEntry(rigidBody);
+    if (rigidBodyEntry) {
+        rigidBodyEntry.panelsArray = LBPhaser.Project3D.destroyPanelsArray(rigidBodyEntry.panelsArray);
+    }
+    
+    LBSailSim.PhaserView.prototype.destroyRigidBodyDisplayObject.call(this, rigidBody);
+};
+
 
 // @inheritdoc...
 LBSailSim.Phaser3DView.prototype.beginDisplayObjectsUpdate = function() {
@@ -410,6 +421,10 @@ LBSailSim.Phaser3DView.prototype._updateDisplayObjects = function(rigidBody) {
             rigidBody.obj3D.matrixWorld);
     
     LBSailSim.PhaserView.prototype._updateDisplayObjects.call(this, rigidBody);
+    
+    if (rigidBodyEntry.sailDrawer) {
+        rigidBodyEntry.sailDrawer.projectSailSurface(this.project3D, rigidBody.obj3D.matrixWorld);
+    }
 };
 
 // @inheritdoc...
@@ -417,3 +432,48 @@ LBSailSim.Phaser3DView.prototype.endDisplayObjectsUpdate = function() {
     this.project3D.end();
 };
 
+
+LBSailSim.Phaser3DView.loadSailPanels = function(sail, data) {
+    if (!data.panels) {
+        return undefined;
+    }
+    
+    var panelsArray = [];
+    var vertices = [];
+    
+    data.panels.forEach(function(panelData) {
+        var projectPanels = new LBPhaser.Project3DPanels();
+        projectPanels.loadBasic(panelData);
+        
+        if (panelData.startSlice !== undefined) {
+            var slices = sail.sailSurface.slices;
+            var endSlice = panelData.endSlice;
+            if (endSlice < 0) {
+                endSlice = slices.length;
+            }
+            
+            // Each panel consists of the vertices on one slice and the vertices on the
+            // next slice.
+            --endSlice;
+            vertices.length = 0;
+            for (var i = panelData.startSlice; i < endSlice; ++i) {
+                var slice = slices[i];
+                slice.points.forEach(function(pt) {
+                    vertices.push(pt);
+                });
+                slice = slices[i + 1];
+                for (var p = slice.points.length - 1; p >= 0; --p) {
+                    vertices.push(slice.points[p]);
+                }
+                projectPanels.addPanelVertices(vertices);
+            }
+            
+            if (projectPanels.panelsVertices.length > 0) {
+                panelsArray.push(projectPanels);
+            }
+        }
+        
+    });
+    
+    return panelsArray;
+};

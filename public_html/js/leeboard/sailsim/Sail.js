@@ -18,7 +18,7 @@
 /* global LBSailSim, LBFoils, LBControls, LBGeometry, LBMath, LBPhysics, LBUtil, LBCurve */
 
 /**
- * Implementation of {@link LBFoils.Foil} for sails, supports reefing and flatness factors.
+ * Implementation of {@link LBFoils.Foil} for sails, will support reefing and flatness factors.
  * @constructor
  * @param {LBSailSim.SailInstance} sailInstance The sail instance that owns this.
  * @returns {LBSailSim.SailFoil}
@@ -265,7 +265,7 @@ LBSailSim.SailInstance = function() {
      * The maximum camber as a fraction of the chord length.
      * @member {Number}
      */
-    this.minCamberFraction = 1/7;
+    this.maxCamberFraction = 1/7;
     
     /**
      * The spars associated with this sail.
@@ -341,7 +341,7 @@ LBSailSim.SailInstance.prototype.getTwistDeg = function() {
  * @returns {Number}    The camber as a fraction of the chord.
  */
 LBSailSim.SailInstance.prototype.getCamberFraction = function() {
-    return this.flatnessFactor * (this.maxChordFraction - this.minChordFraction) + this.minChordFraction;
+    return this.flatnessFactor * (this.maxCamberFraction - this.minCamberFraction) + this.minCamberFraction;
 };
 
 /**
@@ -665,7 +665,7 @@ LBSailSim.SailCamberCurve.prototype = {
      */
     calcXY: function(surfacePos, store, surfaceLength) {
         store = this.curve.calcPoint(surfacePos, store);        
-        surfaceLength = surfaceLength || 1;
+        surfaceLength = LBUtil.isVar(surfaceLength) ? surfaceLength : 1;
         
         var curveSurfaceLength = this.curve.getCurveLength();
         if (!LBMath.isLikeZero(curveSurfaceLength)) {
@@ -785,12 +785,13 @@ LBSailSim.TriangleSailShaper.prototype.updateSailSurface = function(sailInstance
     var totalTwistDeg = sailInstance.getTwistDeg();
     var totalTwistRad = totalTwistDeg * LBMath.DEG_TO_RAD;
     
-    // TODO Need to negate totalTwistRad for the appropriate wind direction...
-    
     var camberFraction = sailInstance.getCamberFraction();
     var camberPosFraction = sailInstance.getCamberPosFraction();
-    this.camberCurve.setCamber(camberFraction, camberPosFraction);
     
+    // TODO Need to negate totalTwistRad and the camber fraction for the appropriate wind direction...
+    camberFraction = -camberFraction;
+    
+    this.camberCurve.setCamber(camberFraction, camberPosFraction);
     var camberPos = LBSailSim.TriangleSailShaper._workingVector2;
     
     for (var i = 0; i < surface.slices.length; ++i) {
@@ -804,7 +805,7 @@ LBSailSim.TriangleSailShaper.prototype.updateSailSurface = function(sailInstance
         var scale = 1 / (slice.points.length - 1);
         
         for (var p = 1; p < slice.points.length; ++p) {
-            this.camberCurve.calcXY(i * scale, camberPos, slice.surfaceLength);
+            this.camberCurve.calcXY(p * scale, camberPos, slice.surfaceLength);
             
             var x = cosTwist * camberPos.x + sinTwist * camberPos.y;
             var y = -sinTwist * camberPos.x + cosTwist * camberPos.y;

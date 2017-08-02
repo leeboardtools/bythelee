@@ -215,6 +215,12 @@ LBPhaser.Project3D.prototype = {
         // Generate the graphics...
         var graphics = this.graphics;
         this.zPanels.forEach(function(panel) {
+            if (panel.fillColor !== undefined) {
+                graphics.beginFill(panel.fillColor, panel.alpha);
+                graphics.drawPolygon(panel.pathVertices);
+                graphics.endFill();
+            }
+
             if (panel.frameColor !== undefined) {
                 graphics.lineStyle(panel.lineWidth, panel.frameColor, panel.alpha);
                 graphics.moveTo(panel.frameVertices[0].x, panel.frameVertices[0].y);
@@ -227,13 +233,7 @@ LBPhaser.Project3D.prototype = {
                 
                 // This effectively stops the line drawing...
                 graphics.lineStyle(0);
-            }
-            
-            if (panel.fillColor !== undefined) {
-                graphics.beginFill(panel.fillColor, panel.alpha);
-                graphics.drawPolygon(panel.pathVertices);
-                graphics.endFill();
-            }
+            }            
         });
     },
     
@@ -276,6 +276,22 @@ LBPhaser.Project3DPanels = function(vertices, indices) {
 
 LBPhaser.Project3DPanels.prototype = {
     /**
+     * Loads the basic settings (no panel vertices) from properties in a data object.
+     * @param {Object} data The data object to load from.
+     * @returns {LBPhaser.Project3DPanels}  this.
+     */
+    loadBasic: function(data) {
+        this.frameColor = LBGeometry.Color.colorValueFromData(data.frameColor, this.frameColor);
+        this.lineWidth = data.lineWidth || 1;
+        this.closeFrame = data.closeFrame;
+        this.alpha = data.alpha !== undefined ? data.alpha : 1;
+        this.fillColor = LBGeometry.Color.colorValueFromData(data.fillColor, this.fillColor);
+        this.doubleSided = data.doubleSided;
+        
+        return this;
+    },
+    
+    /**
      * Adds a set of vertices defining a pnael.
      * @param {LBGeometry.Vector3[]} vertices   The array of vertices for the panel.
      * @param {Number[]} [indices]  If defined the indices of the points in vertices
@@ -311,7 +327,7 @@ LBPhaser.Project3DPanels.prototype = {
         toWorldXfrm = toWorldXfrm || this.toWorldXfrm;
         for (var i = 0; i < this.panelsVertices.length; ++i) {
             project3D.addPanel(this.frameColor, this.lineWidth, this.closeFrame, this.fillColor, this.alpha, 
-                    this.panelsVertices[i], undefined, toWorldXfrm);
+                    this.panelsVertices[i], undefined, toWorldXfrm, this.doubleSided);
         }
         
         return this;
@@ -351,12 +367,7 @@ LBPhaser.Project3DPanels.prototype = {
  */
 LBPhaser.Project3D.createPanelsFromVolumesData = function(volumes, data) {
     var projectPanels = new LBPhaser.Project3DPanels();
-    
-    projectPanels.frameColor = LBGeometry.Color.colorValueFromData(data.frameColor, projectPanels.frameColor);
-    projectPanels.lineWidth = data.lineWidth || 1;
-    projectPanels.closeFrame = data.closeFrame;
-    projectPanels.alpha = data.alpha !== undefined ? data.alpha : 1;
-    projectPanels.fillColor = LBGeometry.Color.colorValueFromData(data.fillColor, projectPanels.fillColor);
+    projectPanels.loadBasic(data);
     
     var volFaces = data.volFaces;
     for (var i = 0; i < volFaces.length; i += 2) {
@@ -449,4 +460,19 @@ LBPhaser.Project3D.projectPanelsArray = function(project3D, panelsArray, toWorld
     panelsArray.forEach(function(panels) {
         panels.project(project3D, toWorldXfrm);
     });
+};
+
+/**
+ * Helper that calls {@link LBPhaser.Project3DPanels#destroy} for each object in an
+ * array of objects.
+ * @param {LBPhaser.Project3DPanels[]} [panelsArray]   The array panels objects to be destroyed,
+ * may be undefined.
+ * @returns {undefined}
+ */
+LBPhaser.Project3D.destroyPanelsArray = function(panelsArray) {
+    if (panelsArray) {
+        panelsArray.forEach(function(panels) {
+            panels.destroy();
+        });
+    }
 };
