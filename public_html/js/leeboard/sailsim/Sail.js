@@ -788,8 +788,12 @@ LBSailSim.TriangleSailShaper.prototype.updateSailSurface = function(sailInstance
     var camberFraction = sailInstance.getCamberFraction();
     var camberPosFraction = sailInstance.getCamberPosFraction();
     
-    // TODO Need to negate totalTwistRad and the camber fraction for the appropriate wind direction...
-    camberFraction = -camberFraction;
+    if (sailInstance.foilDetails.angleDeg < 0) {
+        camberFraction = -camberFraction;
+    }
+    else {
+        totalTwistRad = -totalTwistRad;
+    }
     
     this.camberCurve.setCamber(camberFraction, camberPosFraction);
     var camberPos = LBSailSim.TriangleSailShaper._workingVector2;
