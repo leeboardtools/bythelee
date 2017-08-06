@@ -132,7 +132,7 @@ PlayState.doTest = function() {
     var centerX = this.sailEnv.phaserEnv.fromPixelsX(100);
     var centerY = this.sailEnv.phaserEnv.fromPixelsY(0);
     var rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(-90);
-    //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
+    this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyB", centerX, centerY, rotation);
 };
 

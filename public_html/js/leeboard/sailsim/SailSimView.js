@@ -379,7 +379,18 @@ LBSailSim.Phaser3DView.prototype._loadDisplayObjectForSpar = function(rigidBody)
 };
 
 LBSailSim.Phaser3DView.prototype._loadDisplayObjectForHydrofoil = function(rigidBody) {
-    this._loadObj3DSprite(rigidBody, rigidBody.loadData);
+    var data = rigidBody.loadData;
+    if (data) {
+        var rigidBodyEntry = this._getRigidBodyEntry(rigidBody);
+
+        if (data.volumes && data.volumes.panels) {
+            rigidBodyEntry.panelsArray = LBPhaser.Project3D.loadVolumePanels(rigidBody.volumes, data.volumes.panels);
+        }
+
+        if (!rigidBodyEntry.panelsArray && data.phaser) {
+            this._loadObj3DSprite(rigidBody, rigidBody.loadData);
+        }
+    }
 };
 
 LBSailSim.Phaser3DView.prototype._loadDisplayObjectForAirfoil = function(sail) {

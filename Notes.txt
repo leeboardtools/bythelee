@@ -18,30 +18,39 @@ Run:
 
 TODO:
 
-- Add spars rigid bodies, handling of tetra volumes for those.
-    Need to track shifting child rigid bodies, but only when they change.
-    - Vessel:
-        - MainMast
-        - MainBoom
-            Change would typically be rotation of boom
-        - Rudder
-            Change would typically be rotation of rudder.
-            Do we need to track this?
-    
-    The way the Cannon body stuff currently works is that we take the volumes
-    of a rigid body and then:
-        - Clone the vertices.
-        - Generate a CANNON.ConvexPolyhedron() for each volume
-        - Update the body center of mass from all the shapes (this is dependent on the individual volumes)
+Add 3D rudder/tiller.
 
-    So, want to be able to update the vertices of the shape associated with a given volume,
-    but only if the volume has moved or changed shape.
-    More than anything, don't want to have to create new shapes.
+Add 3D force arrows.
+
+Figure out buoyancy issues.
+
+Figure out oscillating forces.
+
+Need to track shifting child rigid bodies, but only when they change.
+Maybe we don't really care about the boom and rudder?
+- Vessel:
+    - MainMast
+    - MainBoom
+        Change would typically be rotation of boom
+    - Rudder
+        Change would typically be rotation of rudder.
+        Do we need to track this?
+
+The way the Cannon body stuff currently works is that we take the volumes
+of a rigid body and then:
+    - Clone the vertices.
+    - Generate a CANNON.ConvexPolyhedron() for each volume
+    - Update the body center of mass from all the shapes (this is dependent on the individual volumes)
+
+So, want to be able to update the vertices of the shape associated with a given volume,
+but only if the volume has moved or changed shape.
+More than anything, don't want to have to create new shapes.
+
+
 
 Lateral hull resistance > longitudinal hull resistance
 Hull windage
 
-Add drawing of sail
 
 Rotate world:
     Option to rotate world, rotate boat
@@ -49,9 +58,6 @@ Rotate world:
 
 Draggable controls:
 
-Projected 3D drawing.
-
-Add alternate plane projection for resultants that are too close to the desired plane.
 
 Add wake sprites
 
