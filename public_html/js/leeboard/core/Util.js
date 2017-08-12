@@ -201,3 +201,4 @@ LBUtil.newClassInstanceFromData = function(data) {
     var fn = LBUtil.stringToFunction(data.className);
     return new fn(data.constructorArgs);
 };
+

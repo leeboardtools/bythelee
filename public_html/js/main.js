@@ -16,7 +16,7 @@
 
 
 /* global Phaser */
-/* global LBUtil, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils */
+/* global LBUtil, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils, LBDebug */
 
 
 //
@@ -70,21 +70,49 @@ PlayState.init = function() {
     this.cursorKeys = this.game.input.keyboard.createCursorKeys();
     this.keys = this.game.input.keyboard.addKeys({
         space: Phaser.KeyCode.SPACEBAR,
+        d : Phaser.KeyCode.D,
         f : Phaser.KeyCode.F,
         n : Phaser.KeyCode.N,
         p : Phaser.KeyCode.P,
+        s : Phaser.KeyCode.S,
         t : Phaser.KeyCode.T,
         v : Phaser.KeyCode.V
     });
     
+    this.keys.d.onDown.add(this.toggleDebug, this);
     this.keys.f.onDown.add(this.toggleForceArrows, this);
     this.keys.p.onDown.add(this.togglePause, this);
+    this.keys.s.onDown.add(this.singleStep, this);
     this.keys.t.onDown.add(this.doTest, this);
     this.keys.v.onDown.add(this.toggleVelocityArrows, this);
     
     var physicsEngine = LBSailSim.PhaserSailEnv.P2_PHYSICS;
     physicsEngine = LBSailSim.PhaserSailEnv.CANNON_PHYSICS;
     this.sailEnv = new LBSailSim.PhaserSailEnv(this.game, physicsEngine);
+    
+    // TEST!!!
+    this.isSingleStep = true;
+    
+    LBSailSim.FoilInstance.addDebugFields('rudder');
+    LBDebug.DataLog.addSpacer();
+    LBSailSim.FoilInstance.addDebugFields('keel');    
+    LBDebug.DataLog.addSpacer();
+    LBSailSim.FoilInstance.addDebugFields('mainsail');    
+    LBDebug.DataLog.outputHeading();
+};
+
+//
+//--------------------------------------------------
+PlayState.toggleDebug = function() {
+    LBDebug.DataLog.isEnabled = !LBDebug.DataLog.isEnabled;
+};
+
+
+//
+//--------------------------------------------------
+PlayState.singleStep = function() {
+    this.isSingleStep = true;
+    this.game.paused = false;
 };
 
 //
@@ -172,13 +200,12 @@ PlayState._loadLevel = function (data) {
     
     // The worldGroup effectively lets us scroll the world...
     this.worldGroup = this.game.add.group();
+    
+    this.buoys = this.game.add.group(this.worldGroup);    
+    data.buoys.forEach(this._spawnBuoys, this);
 
     this.sailSimView = new LBSailSim.Phaser3DView(this.sailEnv, this.worldGroup);
     //this.sailSimView = new LBSailSim.Phaser2DView(this.sailEnv, this.worldGroup);
-    
-    this.buoys = this.game.add.group(this.worldGroup);
-    
-    data.buoys.forEach(this._spawnBuoys, this);
     
     this._spawnCharacters({myBoat: data.myBoat });
     
@@ -275,6 +302,10 @@ PlayState._setupHUD = function() {
     this.hud.add(this.ticksText);
     top += this.ticksText.height + vSpacing;
     
+    this.fpsText = this.game.add.text(left, top, "FPS: 0", style);
+    this.hud.add(this.fpsText);
+    top += this.fpsText.height + vSpacing;
+    
     this.rollText = this.game.add.text(left, top, "Roll: 0", style);
     this.hud.add(this.rollText);
     top += this.rollText.height + vSpacing;
@@ -282,6 +313,11 @@ PlayState._setupHUD = function() {
     this.pitchText = this.game.add.text(left, top, "Pitch: 0", style);
     this.hud.add(this.pitchText);
     top += this.pitchText.height + vSpacing;
+    
+    this.zText = this.game.add.text(left, top, "Z: 0", style);
+    this.hud.add(this.zText);
+    top += this.zText.height + vSpacing;
+    
     
     this.hInset = 5;
     this.vInset = 5;
@@ -352,6 +388,11 @@ PlayState.preRender = function() {
     if (!this.game.paused) {
         this.sailEnv.preRender();
     }
+    
+    if (this.isSingleStep) {
+        this.game.paused = true;
+        this.isSingleStep = false;
+    }
 };
 
 //
@@ -361,6 +402,7 @@ PlayState.update = function() {
     this._handleInput();
     
     this.sailEnv.update();
+    LBDebug.DataLog.output();
     
     this._updateHUD();
     this._updateArrows();
@@ -368,54 +410,79 @@ PlayState.update = function() {
 
 //------------------------------ --------------------
 PlayState._updateHUD = function() {
-    var heading = this.myBoat.getHeadingDeg(true);
-    this.headingText.text = "Heading: " + heading.toFixed();
-    
-    var speed = this.myBoat.getKnots();
-    this.speedText.text = "Speed: " + speed.toFixed(2);
-    
-    var trueWind = this.myBoat.getTrueWindVelocityMPS();
-    var trueWindSpeed = trueWind.length();
-    var vmg = 0;
-    if (!LBMath.isLikeZero(trueWindSpeed)) {
-        vmg = -this.myBoat.getVelocityMPS().dot(trueWind) / trueWindSpeed;
-        vmg = LBUtil.mps2kt(vmg);
-    }
-    this.vmgText.text = "VMG: " + vmg.toFixed(2);
-    
-    var leewayAngle = this.myBoat.getLeewayDeg(true);
-    if (leewayAngle < 0) {
-        this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Port";
-    }
-    else if (leewayAngle > 0) {
-        this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Stbd";
-    }
-    else {
-        this.leewayText.text = "Leeway: 0";
+    if (this.headingText) {
+        var heading = this.myBoat.getHeadingDeg(true);
+        this.headingText.text = "Heading: " + heading.toFixed();
     }
     
-    var position = this.myBoat.getPosition();
-    this.positionText.text = "Position: " + LBMath.round(position.x, 1) + " " + LBMath.round(position.y, 1);
+    if (this.speedText) {
+        var speed = this.myBoat.getKnots();
+        this.speedText.text = "Speed: " + speed.toFixed(2);
+    }
+    
+    if (this.vmgText) {
+        var trueWind = this.myBoat.getTrueWindVelocityMPS();
+        var trueWindSpeed = trueWind.length();
+        var vmg = 0;
+        if (!LBMath.isLikeZero(trueWindSpeed)) {
+            vmg = -this.myBoat.getVelocityMPS().dot(trueWind) / trueWindSpeed;
+            vmg = LBUtil.mps2kt(vmg);
+        }
+        this.vmgText.text = "VMG: " + vmg.toFixed(2);
+    }
+    
+    if (this.leewayText) {
+        var leewayAngle = this.myBoat.getLeewayDeg(true);
+        if (leewayAngle < 0) {
+            this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Port";
+        }
+        else if (leewayAngle > 0) {
+            this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Stbd";
+        }
+        else {
+            this.leewayText.text = "Leeway: 0";
+        }
+    }
+    
+    if (this.positionText) {
+        var position = this.myBoat.getPosition();
+        this.positionText.text = "Position: " + LBMath.round(position.x, 1) + " " + LBMath.round(position.y, 1);
+    }
    
-    speed = this.myBoat.getApparentWindKnots();
-    this.appWindSpeedText.text = "App Wind Speed: " + speed.toFixed(2);
+    if (this.appWindSpeedText) {
+        speed = this.myBoat.getApparentWindKnots();
+        this.appWindSpeedText.text = "App Wind Speed: " + speed.toFixed(2);
+    }
     
-    var bearing = this.myBoat.getApparentWindBearingDeg(true);
-    this.appWindBearingText.text = "App Wind Bearing: " + bearing.toFixed();
+    if (this.appWindBearingText) {
+        var bearing = this.myBoat.getApparentWindBearingDeg(true);
+        this.appWindBearingText.text = "App Wind Bearing: " + bearing.toFixed();
+    }
     
-    var rudder = this.myBoat.getRudderDeg();
-    this.rudderText.text = "Rudder Angle: " + LBMath.round(rudder);
+    if (this.rudderText) {
+        var rudder = this.myBoat.getRudderDeg();
+        this.rudderText.text = "Rudder Angle: " + LBMath.round(rudder);
+    }
     
-    var mainsheet = this.myBoat.getMainsheetPos();
-    this.mainsheetText.text = "Mainsheet: " + LBMath.round(mainsheet, 2);
+    if (this.mainsheetText) {
+        var mainsheet = this.myBoat.getMainsheetPos();
+        this.mainsheetText.text = "Mainsheet: " + LBMath.round(mainsheet, 2);
+    }
     
-    var throttle = this.myBoat.getThrottlePos();
-    if (throttle !== undefined) {
-        this.throttleText.text = "Throttle: " + LBMath.round(throttle, 1);
+    if (this.throttleText) {
+        var throttle = this.myBoat.getThrottlePos();
+        if (throttle !== undefined) {
+            this.throttleText.text = "Throttle: " + LBMath.round(throttle, 1);
+        }
     }
     
     if (this.ticksText) {
         this.ticksText.text = "SimTicks: " + this.sailEnv.physicsLink.updateCount;
+    }
+    
+    if (this.fpsText) {
+        this.game.time.advancedTiming = true;
+        this.fpsText.text = "FPS: " + this.game.time.fps;
     }
     
     if (this.rollText) {
@@ -423,6 +490,10 @@ PlayState._updateHUD = function() {
         euler.setFromRotationMatrix(this.myBoat.obj3D.matrixWorld, "ZXY");
         this.rollText.text = "Roll: " + LBMath.round(euler.x * LBMath.RAD_TO_DEG);
         this.pitchText.text = "Pitch: " + LBMath.round(euler.y * LBMath.RAD_TO_DEG);
+    }
+    
+    if (this.zText) {
+        this.zText.text = "Z: " + LBMath.round(this.myBoat.obj3D.matrixWorld.elements[14], 2);
     }
 };
 

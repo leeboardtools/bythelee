@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global LBUtil, LBPhysics, LBGeometry, LBMath, LBFoils, LBSailSim, LBControls */
+/* global LBUtil, LBPhysics, LBGeometry, LBMath, LBFoils, LBSailSim, LBControls, LBDebug */
 
 /**
  * An instance of a foil, a foil is something that generates a force due
@@ -54,6 +54,7 @@ LBSailSim.FoilInstance = function(foil, obj3D, mass, centerOfMass) {
 LBSailSim.FoilInstance._workingPos = new LBGeometry.Vector3();
 LBSailSim.FoilInstance._workingQInf;
 LBSailSim.FoilInstance._workingResultant;
+LBSailSim.FoilInstance._workingEuler;
 
 LBSailSim.FoilInstance.prototype = Object.create(LBPhysics.RigidBody.prototype);
 LBSailSim.FoilInstance.prototype.constructor = LBSailSim.FoilInstance;
@@ -78,11 +79,48 @@ LBSailSim.FoilInstance.prototype.updateFoilForce = function(dt, flow) {
     pos.set(0, 0, this.foil.sliceZ);
     pos.applyMatrix4(this.coordSystem.worldXfrm);
     
-    LBSailSim.FoilInstance._workingQInf = LBSailSim.getFlowVelocity(flow, pos, LBSailSim.FoilInstance._workingQInf);
-    LBSailSim.FoilInstance._workingResultant = this.foil.calcWorldForce(flow.density, LBSailSim.FoilInstance._workingQInf,
+    var qInf = LBSailSim.FoilInstance._workingQInf = LBSailSim.getFlowVelocity(flow, pos, LBSailSim.FoilInstance._workingQInf);
+    var resultant = LBSailSim.FoilInstance._workingResultant = this.foil.calcWorldForce(flow.density, qInf,
             this.coordSystem, this.foilDetails, LBSailSim.FoilInstance._workingResultant);
-    this.addWorldResultant(LBSailSim.FoilInstance._workingResultant);
+    this.addWorldResultant(resultant);
+    
+    if (this.dumpFoilDetails && LBDebug.DataLog.isEnabled) {
+        this.obj3D.getWorldPosition(pos);
+        LBDebug.DataLog.setValue(this.name + '.wPos', pos.clone());
+        
+        var rot = LBSailSim.FoilInstance._workingEuler = this.obj3D.getWorldRotation(LBSailSim.FoilInstance._workingEuler);
+        LBDebug.DataLog.setValue(this.name + '.wRot', rot.clone());
+        
+        var details = this.foilDetails;
+        LBDebug.DataLog.setValue(this.name + '.wQInf', qInf.clone());
+        LBDebug.DataLog.setValue(this.name + '.wVel', details.worldVel);
+        
+        LBDebug.DataLog.setValue(this.name + '.chord', details.chord);
+        LBDebug.DataLog.setValue(this.name + '.angleDeg', details.angleDeg);
+        LBDebug.DataLog.setValue(this.name + '.lQInf', details.qInfLocal);
+        
+        LBDebug.DataLog.setValue(this.name + '.wApplPt', resultant.applPoint.clone());
+        LBDebug.DataLog.setValue(this.name + '.wForce', resultant.force.clone());
+        LBDebug.DataLog.setValue(this.name + '.wMoment', resultant.moment.clone());
+    }
     return this;
+};
+
+LBSailSim.FoilInstance.addDebugFields = function(name) {
+    LBDebug.DataLog.addFieldVector3(name + '.wPos');
+    LBDebug.DataLog.addFieldEuler(name + '.wRot');
+    LBDebug.DataLog.addFieldVector3(name + '.wQInf');
+    LBDebug.DataLog.addFieldVector3(name + '.wVel');
+    LBDebug.DataLog.addSpacer();
+
+    LBDebug.DataLog.addField(name + '.angleDeg');
+    LBDebug.DataLog.addFieldVector2(name + '.chord');
+    LBDebug.DataLog.addFieldVector2(name + '.lQInf');
+    LBDebug.DataLog.addSpacer();
+
+    LBDebug.DataLog.addFieldVector3(name + '.wApplPt');
+    LBDebug.DataLog.addFieldVector3(name + '.wForce');
+    LBDebug.DataLog.addFieldVector3(name + '.wMoment');
 };
 
 /**
@@ -99,6 +137,8 @@ LBSailSim.FoilInstance.prototype.load = function(data, sailEnv) {
     }
     
     this.rotationOffsetDegs = data.rotationOffset || [0, 0, 0];
+    this.dumpFoilDetails = data.dumpFoilDetails;
+    
     return this;
 };
 

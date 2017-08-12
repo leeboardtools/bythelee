@@ -113,6 +113,28 @@ QUnit.test( "createVector2MagDeg", function( assert ) {
     checkVectorMagAngle(assert, vec, 10, 20 * LBMath.DEG_TO_RAD);
 });
 
+QUnit.test( "angleToSigned", function( assert ) {
+    var vecA = new LBGeometry.Vector2(0.3, 0);
+    var vecB = new LBGeometry.Vector2(0.493689568995088, 0.031062650308456);
+    var angle = vecA.angleToSigned(vecB);
+    var refAngle = Math.acos(vecA.dot(vecB) / vecA.length() / vecB.length());
+    assert.nearEqual(angle, refAngle, "Check A");
+    
+    angle = vecB.angleToSigned(vecA);
+    assert.nearEqual(angle, -refAngle, "Check B");
+    
+    vecA.set(0, 10);
+    refAngle = 30 * LBMath.DEG_TO_RAD;
+    vecB.set(-3 * Math.cos(refAngle), -3 * Math.sin(refAngle));
+    refAngle = 90 * LBMath.DEG_TO_RAD + refAngle;
+    
+    angle = vecA.angleToSigned(vecB);
+    assert.nearEqual(angle, refAngle, "Check C");
+    
+    angle = vecB.angleToSigned(vecA);
+    assert.nearEqual(angle, -refAngle, "Check D");
+});
+
     
 QUnit.test( "normalTangent", function( assert ) {
     var refTangent = new LBGeometry.Vector2(10, 0);

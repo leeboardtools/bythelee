@@ -599,7 +599,7 @@ LBFoils.Foil.prototype = {
         
         if (details) {
             details.angleDeg = angleDeg;
-            details.qInfLocal = qInfLocal.clone();
+            details.qInfLocal = LBGeometry.copyOrCloneVector3(details.qInfLocal, qInfLocal);
         }
         return LBFoils.ClCd.calcLiftDragMoment(coefs, rho, this.area, qInfSpeed, chordLength, this.aspectRatio, store);
     },
@@ -665,10 +665,15 @@ LBFoils.Foil.prototype = {
         coordSystemState.calcVectorLocalToWorld(this.chordLine.end, velResults);
         appVel.add(velResults.worldVel).multiplyScalar(0.5);
         
+        if (details) {
+            details.worldVel = LBGeometry.copyOrCloneVector3(details.worldVel, velResults.worldVel);
+        }
+        
         appVel.negate();
         appVel.add(qInfWorld);
         
-        appVel.applyMatrix4Rotation(coordSystemState.localXfrm);
+        appVel.applyMatrix4Rotation(coordSystemState.localXfrm);        
+        appVel.z = 0;
         
         resultant = this.calcLocalForce(rho, appVel, details, resultant);
         resultant.applyMatrix4(coordSystemState.worldXfrm);

@@ -18,8 +18,6 @@ Run:
 
 TODO:
 
-Add 3D rudder/tiller.
-
 Add 3D force arrows.
 
 Figure out buoyancy issues.
@@ -56,6 +54,7 @@ Rotate world:
     Option to rotate world, rotate boat
     Ability to shift center of view, re-center.
 
+
 Draggable controls:
 
 
@@ -74,7 +73,12 @@ Sailing boundaries
 Zoom?
 
 
+Put together THREE.js based main...
+
 
 Much Later:
 Boat designer:
 Lets you change different parameters of the boat.
+
+
+

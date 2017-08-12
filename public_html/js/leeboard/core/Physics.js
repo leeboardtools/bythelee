@@ -648,6 +648,16 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     this.volumes = [];
     
     /**
+     * Dampling to apply to the linear velocity, 0 &le; damping &ge; 1
+     */
+    this.linearDamping = 0.01;
+    
+    /**
+     * Dampling to apply to the angular velocity, 0 &le; damping &ge; 1
+     */
+    this.angularDamping = 0.01;
+    
+    /**
      * The coordinate system state used to track changes in the location of the
      * local coordinate system in the world space. Primarily used to track velocity.
      * @type LBPhysics.CoordSystemState
@@ -777,6 +787,13 @@ LBPhysics.RigidBody.prototype = {
         }
         else {
             this.momentInertia.identity().multiplyScalar(this.mass);
+        }
+        
+        if (typeof(data.linearDamping) === 'number') {
+            this.linearDamping = data.linearDamping;
+        }
+        if (typeof(data.angularDampling) === 'number') {
+            this.angularDamping = data.angularDamping;
         }
         
         this.physicalPropertiesDirty = true;

@@ -246,5 +246,11 @@ LBCannon.addRigidBodyVolumesToBody = function(body, rigidBody) {
 };
 
 LBCannon.updateBodyFromRigidBodyVolumes = function(body, rigidBody) {
+    if (rigidBody.linearDamping !== undefined) {
+        body.linearDamping = rigidBody.linearDamping;
+    }
+    if (rigidBody.angularDamping !== undefined) {
+        body.angularDamping = rigidBody.angularDamping;
+    }
 //    LBCannon.updateBodyCenterOfMass(body, rigidBody.centerOfMass, rigidBody.mass);//, rigidBody.momentInertia);    
 };
