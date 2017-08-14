@@ -15,7 +15,7 @@
  */
 
 
-/* global LBSailSim, LBPhysics, LBGeometry, LBMath, LBUtil, LBVolume */
+/* global LBSailSim, LBPhysics, LBGeometry, LBMath, LBUtil, LBVolume, LBDebug */
 
 /**
  * Spline used for calculating the friction coefficient Cf given the roughness
@@ -44,6 +44,13 @@ LBSailSim.Hull = function(vessel) {
      * @member {LBGeometry.Vector3}
      */
     this.centerOfBuoyancy = new LBGeometry.Vector3();
+    
+    /**
+     * The immersed volume. This is actively updated if
+     * volumes have been specified for the vessel.
+     * @member {Number}
+     */
+    this.immersedVolume = 0;
     
     /**
      * The waterline length LWL.
@@ -147,6 +154,12 @@ LBSailSim.Hull = function(vessel) {
      * @member {Number}
      */
     this.halfRhoVSq = 0;
+    
+    /**
+     * The resistance force in world coordinates.
+     * @member {LBGeometry.Vector3}.
+     */
+    this.resistanceForce = new LBGeometry.Vector3();
 };
 
 LBSailSim.Hull._workingForce = new LBGeometry.Vector3();
@@ -214,9 +227,11 @@ LBSailSim.Hull.prototype = {
         
         if (volSum > 0) {
             this.centerOfBuoyancy.set(xSum / volSum, ySum / volSum, zSum / volSum);
+            this.immersedVolume = volSum;
         }
         else {
             this.centerOfBuoyancy.copy(this.vessel.centerOfMass);
+            this.immersedVolume = 0;
         }
     },
     
@@ -274,14 +289,16 @@ LBSailSim.Hull.prototype = {
         
         resultant.applPoint.copy(this.worldCenterOfResistance);
 
-        var frictionDrag = this.calcFrictionalDrag();
-        var residuaryResistance = this.calcResiduaryResistance();
-        var formDrag = this.calcFormDrag();
-        var waveDrag = this.calcWaveDrag();
+        this.frictionDrag = this.calcFrictionalDrag();
+        this.residuaryResistance = this.calcResiduaryResistance();
+        this.formDrag = this.calcFormDrag();
+        this.waveDrag = this.calcWaveDrag();
         
-        var drag = frictionDrag + residuaryResistance + formDrag + waveDrag;
-        var force = LBSailSim.Hull._workingForce;
+        var drag = this.frictionDrag + this.residuaryResistance + this.formDrag + this.waveDrag;
+        var force = this.resistanceForce;
         force.copy(this.vessel.apparentCurrent).normalize();
+        force.z = 0;
+        
         force.multiplyScalar(drag);
         
         resultant.addForce(force, this.worldCenterOfResistance);
@@ -292,12 +309,11 @@ LBSailSim.Hull.prototype = {
         resultant.addForce(force, this.vessel.getTotalCenterOfMass());
         
         // And buoyancy...
-        if (resultant.force.z < 0) {
-            // For now we'll get rid of any fore-aft moment (about the y axis)
-            force.set(0, 0, -resultant.force.z);
-            resultant.addForce(force, this.worldCenterOfBuoyancy);
-        }
-        
+        var fBuoyancy = this.immersedVolume * this.vessel.sailEnv.water.density * this.vessel.sailEnv.gravity;
+        force.set(0, 0, fBuoyancy);
+        resultant.addForce(force, this.worldCenterOfBuoyancy);
+
+        this.handleDebugFields(resultant);
         return resultant;
     },
 
@@ -321,6 +337,8 @@ LBSailSim.Hull.prototype = {
         
         this.swc = data.swc || LBSailSim.Hull.estimateSW(this);
         this.swcnh = this.swc;
+        
+        this.debugForces = data.debugForces;
         
         LBGeometry.loadVector3(data.centerOfBuoyancy, this.centerOfBuoyancy);
         return this;
@@ -409,4 +427,37 @@ LBSailSim.Hull.calcCP = function(delC, lwl, ax) {
  */
 LBSailSim.Hull.calcCB = function(delC, lwl, bwl, tc) {
     return delC / (lwl * bwl * tc);
+};
+
+/**
+ * Handles recording debug field data if necessary.
+ * @protected
+ * @param {LBPhysics.Resultant} resultant   The force resultant.
+ * @returns {undefined}
+ */
+LBSailSim.Hull.prototype.handleDebugFields = function(resultant) {
+    if (this.debugForces) {
+        var dbgField = LBDebug.DataLog.getField(this.vessel.name);
+        if (dbgField) {
+            dbgField.setSubFieldValue('resultant', resultant);
+            dbgField.setSubFieldValue('rForce', this.resistanceForce);
+            dbgField.setSubFieldValue('formDrag', this.formDrag);
+            dbgField.setSubFieldValue('frictionDrag', this.frictionDrag);
+            dbgField.setSubFieldValue('residuaryResistance', this.residuaryResistance);
+            dbgField.setSubFieldValue('waveDrag', this.waveDrag);
+        }
+    }
+};
+
+/**
+ * Helper that adds fields for a given hull instance name to {@link LBDebug.DataLog}.
+ * @param {String} name The foil instance name to debug.
+ * @returns {undefined}
+ */
+LBSailSim.Hull.addDebugFields = function(name) {
+    LBDebug.DataLog.addFieldResultant([name, 'resultant']);
+    LBDebug.DataLog.addField([name, 'frictionDrag']);
+    LBDebug.DataLog.addField([name, 'residuaryResistance']);
+    LBDebug.DataLog.addField([name, 'formDrag']);
+    LBDebug.DataLog.addField([name, 'waveDrag']);
 };

@@ -12,6 +12,7 @@
                     }
                 }
             },
+            "debugForces": true,
             "mass": 378,
             "massRadius": 4,    "_comment": "Used for the force arrows",
             "linearDamping": 0.1,
@@ -77,7 +78,8 @@
                 "tc": 0.15,
                 "delC": 7.63,
                 "k": 200e-6,
-                "centerOfBuoyancy": { "x": 2.2 }
+                "centerOfBuoyancy": { "x": 2.2 },
+                "debugForces": true
             },
             "spars": [
                 {
@@ -122,7 +124,7 @@
             "airfoils": [
                 {
                     "name": "mainsail",
-                    "_dumpFoilDetails": true,
+                    "dumpFoilDetails": true,
                     "mass": 4.55,
                     "massRadius": 4,
                     "obj3D": {
@@ -189,7 +191,7 @@
                 {
                     "className": "LBSailSim.FoilInstance",
                     "name": "keel",
-                    "_dumpFoilDetails": true,
+                    "dumpFoilDetails": true,
                     "mass": 200,
                     "centerOfMass": { "x": 0.5, "y": 0, "z": -1 },
                     "massRadius": 4,
@@ -210,7 +212,7 @@
                 },
                 {
                     "name": "rudder",
-                    "_dumpFoilDetails": true,
+                    "dumpFoilDetails": true,
                     "mass": 4,
                     "centerOfMass": { "x": 0.15, "y": 0, "z": -0.5 },
                     "massRadius": 4,

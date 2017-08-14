@@ -238,9 +238,11 @@ LBSailSim.Env.prototype = {
      * @param {Number} [centerX=0] The initial x coordinate of the boat.
      * @param {Number} [centerY=0] The initial y coordinate of the boat.
      * @param {Number} [rotDeg=0] The initial rotation of the boat, in degrees.
+     * @param {Number} [rollDeg=0] The initial roll angle of the boat, in degrees.
+     * @param {Number} [pitchDeg=0] The initial pitch angel of the boat, in degrees.
      * @returns {object}    The boat instance, undefined if the boat is not available.
      */
-    checkoutBoat: function(typeName, boatName, centerX, centerY, rotDeg) {
+    checkoutBoat: function(typeName, boatName, centerX, centerY, rotDeg, rollDeg, pitchDeg) {
         if (!this.isBoatAvailable(typeName, boatName)) {
             return undefined;
         }
@@ -256,9 +258,18 @@ LBSailSim.Env.prototype = {
             return undefined;
         }
         
+        boat.name = boatName;
         boat.obj3D.position.x = centerX || 0;
         boat.obj3D.position.y = centerY || 0;
-        boat.obj3D.rotation.z = (rotDeg || 0) * LBMath.DEG_TO_RAD;
+        if (rotDeg) {
+            boat.obj3D.rotateZ(rotDeg * LBMath.DEG_TO_RAD);
+        }
+        if (pitchDeg) {
+            boat.obj3D.rotateY(pitchDeg * LBMath.DEG_TO_RAD);
+        }
+        if (rollDeg) {
+            boat.obj3D.rotateX(rollDeg * LBMath.DEG_TO_RAD);
+        }
         boat.obj3D.updateMatrixWorld(true);
 
         this.boatsByType[typeName][boatName] = boat;
@@ -397,6 +408,7 @@ LBSailSim.Wind.prototype = {
         var vx = 4;
         var vy = 0;
         
+        vx = 4;
         //vx = 0;
         //vy = 2;
 

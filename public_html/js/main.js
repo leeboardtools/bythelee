@@ -93,11 +93,15 @@ PlayState.init = function() {
     // TEST!!!
     this.isSingleStep = true;
     
-    LBSailSim.FoilInstance.addDebugFields('rudder');
+/*    LBSailSim.FoilInstance.addDebugFields('rudder');
     LBDebug.DataLog.addSpacer();
     LBSailSim.FoilInstance.addDebugFields('keel');    
     LBDebug.DataLog.addSpacer();
     LBSailSim.FoilInstance.addDebugFields('mainsail');    
+    LBDebug.DataLog.addSpacer();
+    LBSailSim.Hull.addDebugFields('TubbyA');
+    LBSailSim.Vessel.addDebugFields('TubbyA');
+*/
     LBDebug.DataLog.outputHeading();
 };
 
@@ -160,7 +164,7 @@ PlayState.doTest = function() {
     var centerX = this.sailEnv.phaserEnv.fromPixelsX(100);
     var centerY = this.sailEnv.phaserEnv.fromPixelsY(0);
     var rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(-90);
-    this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
+    //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyB", centerX, centerY, rotation);
 };
 
@@ -236,12 +240,16 @@ PlayState._spawnCharacters = function (data) {
     centerX = this.sailEnv.phaserEnv.fromPixelsX(100);
     centerY = this.sailEnv.phaserEnv.fromPixelsY(0);
     rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(-90);
+    
+    var rollDeg = 0;
+    var pitchDeg = 0;
+    //rollDeg = 30;
     //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
-    this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation);
+    this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation, rollDeg, pitchDeg);
     
 //    this.otherBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyB", centerX, centerY - 10, 0);
     // TEST!!!
-    var roll = 0;
+    var roll = 20;
     var pitch = 0;
     this.myBoat.obj3D.setRotationFromEuler(new LBGeometry.Euler(roll * LBMath.DEG_TO_RAD, pitch * LBMath.DEG_TO_RAD, 0));
     this.myBoat.obj3D.updateMatrixWorld(true);
@@ -254,6 +262,7 @@ PlayState._setupHUD = function() {
     this.hud.position.y = -this.game.height / 2;
 
     var style = { "font": "Arial", "fontSize": "12pt", "fill": "#FFFFFF" };
+    
     var left = 0;
     var top = 0;
     var vSpacing = 0;
