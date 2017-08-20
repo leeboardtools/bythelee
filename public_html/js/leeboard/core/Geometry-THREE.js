@@ -915,6 +915,27 @@ LBGeometry.mirrorPointAboutPlane = function(plane, point, store) {
     return store;
 };
 
+/**
+ * Mirrors the points in an array of points about a plane.
+ * @param {LBGeometry.Plane} plane  The plane to mirror about.
+ * @param {LBGeometry.Vector3[]} points    The array of points to be mirrored.
+ * @param {LBGeometry.Vector3[]} [store]  If defined the object to store the mirroed points in.
+ * @returns {LBGeometry.Vector3[]}
+ */
+LBGeometry.mirrorPointArrayAboutPlane = function(plane, points, store) {
+    if (!store) {
+        store = [];
+    }
+    else {
+        store.length = 0;
+    }
+    
+    for (var i = 0; i < points.length; ++i) {
+        store[i] = LBGeometry.mirrorPointAboutPlane(plane, points[i], store[i]);
+    }
+    return store;
+};
+
 
 /**
  * A sphere, our encapsulation of {@link https://threejs.org/docs/index.html#api/math/Sphere|THREE.Sphere}.

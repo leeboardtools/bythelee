@@ -152,7 +152,7 @@ LBCannon.addVolumesToBody = function(body, volumes, volToBodyXfrm) {
         // {@link http://schteppe.github.io/cannon.js/docs/classes/ConvexPolyhedron.hmtl|CANNON.ConvexPolyhedron}
         // this way they have the origin at their center. Then, when we add the
         // shape to the body, we offset the shape by the centroid location.
-        var centerOffset = volumes[i].centroid();
+        var centerOffset = volumes[i].getCentroid();
         offset.copy(centerOffset);
         centerOffset.negate();
         
@@ -167,7 +167,7 @@ LBCannon.addVolumesToBody = function(body, volumes, volToBodyXfrm) {
             });
         }
         
-        var shape = new CANNON.ConvexPolyhedron(vertices, volumes[i].faces());
+        var shape = new CANNON.ConvexPolyhedron(vertices, volumes[i].getFaces());
         shape._lbVolume = volumes[i];
         shape._lbCenterOffset = centerOffset;
         volumes[i]._lbCannonShape = shape;

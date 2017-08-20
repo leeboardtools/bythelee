@@ -70,14 +70,35 @@ PlayState.init = function() {
     this.cursorKeys = this.game.input.keyboard.createCursorKeys();
     this.keys = this.game.input.keyboard.addKeys({
         space: Phaser.KeyCode.SPACEBAR,
-        d : Phaser.KeyCode.D,
-        f : Phaser.KeyCode.F,
-        n : Phaser.KeyCode.N,
-        p : Phaser.KeyCode.P,
-        s : Phaser.KeyCode.S,
-        t : Phaser.KeyCode.T,
-        v : Phaser.KeyCode.V
+        // a
+        // b
+        // c
+        d : Phaser.KeyCode.D,   // Toggle Debug
+        // e
+        f : Phaser.KeyCode.F,   // Toggle Force Arrows
+        // g
+        // h
+        // i
+        // j
+        // k
+        // l
+        // m
+        n : Phaser.KeyCode.N,   // Throttle Neutral
+        // o
+        p : Phaser.KeyCode.P,   // Toggle Pause
+        // q
+        // r
+        s : Phaser.KeyCode.S,   // Toggle Single Step
+        t : Phaser.KeyCode.T,   // Do Test
+        // u
+        v : Phaser.KeyCode.V    // Toggle Velocity Arrows
+        // w
+        // x
+        // y
+        // z
     });
+    
+    // Could use number keys for wind force, -, = for back/veer
     
     this.keys.d.onDown.add(this.toggleDebug, this);
     this.keys.f.onDown.add(this.toggleForceArrows, this);
@@ -99,9 +120,11 @@ PlayState.init = function() {
     LBDebug.DataLog.addSpacer();
     LBSailSim.FoilInstance.addDebugFields('mainsail');    
     LBDebug.DataLog.addSpacer();
-    LBSailSim.Hull.addDebugFields('TubbyA');
-    LBSailSim.Vessel.addDebugFields('TubbyA');
 */
+    LBSailSim.Hull.addDebugFields('TubbyA');
+    LBDebug.DataLog.addSpacer();
+    LBSailSim.Vessel.addDebugFields('TubbyA');
+
     LBDebug.DataLog.outputHeading();
 };
 
@@ -109,6 +132,9 @@ PlayState.init = function() {
 //--------------------------------------------------
 PlayState.toggleDebug = function() {
     LBDebug.DataLog.isEnabled = !LBDebug.DataLog.isEnabled;
+    if (LBDebug.DataLog.isEnabled) {
+        LBDebug.DataLog.outputHeading();
+    }
 };
 
 
@@ -243,7 +269,8 @@ PlayState._spawnCharacters = function (data) {
     
     var rollDeg = 0;
     var pitchDeg = 0;
-    //rollDeg = 30;
+    rollDeg = 0;
+    pitchDeg = 0;
     //this.myBoat = new Boat(this.game, this.sailEnv, centerX, centerY, data.myBoat);
     this.myBoat = this.sailEnv.checkoutBoat("Tubby", "TubbyA", centerX, centerY, rotation, rollDeg, pitchDeg);
     

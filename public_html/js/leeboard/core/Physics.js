@@ -770,7 +770,7 @@ LBPhysics.RigidBody.prototype = {
         
         if (this.volumes.length > 0) {
             if (data.mass) {
-                LBVolume.Volume.allocateMassToVolumess(this.volumes, data.mass);
+                LBVolume.Volume.allocateMassToVolumes(this.volumes, data.mass);
             }
             
             var comResult = LBVolume.Volume.totalCenterOfMass(this.volumes);

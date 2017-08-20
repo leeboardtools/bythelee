@@ -408,7 +408,7 @@ LBSailSim.Wind.prototype = {
         var vx = 4;
         var vy = 0;
         
-        vx = 4;
+        //vx = 4;
         //vx = 0;
         //vy = 2;
 

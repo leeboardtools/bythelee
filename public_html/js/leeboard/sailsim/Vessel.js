@@ -82,6 +82,11 @@ LBSailSim.FoilInstance.prototype.updateFoilForce = function(dt, flow) {
     var qInf = LBSailSim.FoilInstance._workingQInf = LBSailSim.getFlowVelocity(flow, pos, LBSailSim.FoilInstance._workingQInf);
     var resultant = LBSailSim.FoilInstance._workingResultant = this.foil.calcWorldForce(flow.density, qInf,
             this.coordSystem, this.foilDetails, LBSailSim.FoilInstance._workingResultant);
+            
+    // TEST!!!
+    //resultant.force.z = 0;
+    //resultant.moment.x = resultant.moment.y = 0;
+    
     this.addWorldResultant(resultant);
     
     if (this.dumpFoilDetails) {
@@ -667,6 +672,10 @@ LBSailSim.Vessel.prototype._createAndLoadFoilInstance = function(data, isSail) {
     // sailEnv to {@link LBFoils.Foil#load()}.
     var foilInstance;
     if (data.className) {
+        if (data.className === 'undefined') {
+            return undefined;
+        }
+        
         foilInstance = LBUtil.newClassInstanceFromData(data);
     }
     else {
@@ -985,6 +994,7 @@ LBSailSim.Vessel.prototype.handleDebugFields = function() {
             dbgField.setSubFieldValue('wRot', rot);
             
             dbgField.setSubFieldValue('wResultant', this.resultant);
+            dbgField.setSubFieldValue('wVel', this.apparentCurrent);
         }
     }
 };
@@ -993,6 +1003,7 @@ LBSailSim.Vessel.addDebugFields = function(name) {
     LBDebug.DataLog.addFieldVector3([name, 'wPos']);
     LBDebug.DataLog.addFieldEuler([name, 'wRot']);
     LBDebug.DataLog.addFieldResultant([name, 'wResultant']);
+    LBDebug.DataLog.addFieldVector3([name, 'wVel']);
 };
 
 // @inheritdoc...

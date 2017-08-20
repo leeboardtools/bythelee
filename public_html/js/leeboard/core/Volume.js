@@ -94,7 +94,7 @@ LBVolume.Volume.prototype = {
      * @abstract
      * @returns {Number[][]}    Array of arrays of indices.
      */
-    faces: function() {
+    getFaces: function() {
         throw 'faces() not implemented by ' + this.typeName;
     },
     
@@ -104,8 +104,8 @@ LBVolume.Volume.prototype = {
      * @param {LBGeometry.Vector3} [store]  If defined set to the normal.
      * @returns {LBGeometry.Vector3}    The normal.
      */
-    faceNormal: function(f, store) {
-        var face = this.faces()[f];
+    getFaceNormal: function(f, store) {
+        var face = this.getFaces()[f];
         var v0 = this.vertices[face[0]];
         var v1 = this.vertices[face[1]];
         var v2 = this.vertices[face[2]];
@@ -122,7 +122,7 @@ LBVolume.Volume.prototype = {
      * @param {LBGeometry.Vector3} [store] If defined the object to store the centroid into.
      * @returns {LBGeometry.Vector3}    The centroid.
      */
-    centroid: function(store) {
+    getCentroid: function(store) {
         var tetras = this.equivalentTetras();
         var result = LBVolume.Volume._workingCenterOfMassResult = LBVolume.Volume.totalCenterOfMass(tetras,
             LBVolume.Volume._workingCenterOfMassResult);
@@ -136,7 +136,7 @@ LBVolume.Volume.prototype = {
      * Computes the volume of the volume.
      * @returns {Number}    The volume.
      */
-    volume: function() {
+    getVolume: function() {
         var tetras = this.equivalentTetras();
         return LBVolume.Volume.totalVolume(tetras);
     },
@@ -188,7 +188,7 @@ LBVolume.Volume.prototype = {
 LBVolume.Volume.totalVolume = function(volumes) {
     var vol = 0;
     for (var i = 0; i < volumes.length; ++i) {
-        vol += volumes[i].volume();
+        vol += volumes[i].getVolume();
     }
     return vol;
 };
@@ -211,9 +211,9 @@ LBVolume.Volume.totalCenterOfMass = function(volume, store) {
     var sumX = 0, sumY = 0, sumZ = 0;
     var totalMass = 0;
     for (var i = 0; i < volume.length; ++i) {
-        var mass = !Number.isNaN(volume[i].mass) ? volume[i].mass : volume[i].volume();
+        var mass = !Number.isNaN(volume[i].mass) ? volume[i].mass : volume[i].getVolume();
         totalMass += mass;
-        centroid = volume[i].centroid(centroid);
+        centroid = volume[i].getCentroid(centroid);
         sumX += centroid.x * mass;
         sumY += centroid.y * mass;
         sumZ += centroid.z * mass;
@@ -252,7 +252,7 @@ LBVolume.Volume.totalCenterOfMass = function(volume, store) {
  * in volumes to process.
  * @returns {undefined}
  */
-LBVolume.Volume.allocateMassToVolumess = function(volumes, totalMass, startIndex, endIndex) {
+LBVolume.Volume.allocateMassToVolumes = function(volumes, totalMass, startIndex, endIndex) {
     startIndex = startIndex || 0;
     if (!LBUtil.isVar(endIndex)) {
         endIndex = volumes.length;
@@ -267,7 +267,7 @@ LBVolume.Volume.allocateMassToVolumess = function(volumes, totalMass, startIndex
         var volValues = [];
         var totalVol = 0;
         for (var i = startIndex; i < endIndex; ++i) {
-            var vol = volumes[i].volume();
+            var vol = volumes[i].getVolume();
             volValues.push(vol);
             totalVol += vol;
         }
@@ -314,7 +314,7 @@ LBVolume.Volume.overallInertiaTensor = function(volumes, tensor, totalCentroid) 
             // we'll shift it back to the total centroid after (we could make it relative
             // to the total centroid now, but we don't yet know the total centroid).
             // While shifting to 
-            tetraCentroid = tetra.centroid(tetraCentroid);
+            tetraCentroid = tetra.getCentroid(tetraCentroid);
             
             var xx = tetraCentroid.x * tetraCentroid.x;
             var yy = tetraCentroid.y * tetraCentroid.y;
@@ -403,7 +403,7 @@ LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
                 break;
                 
             case 5 :
-                volumes.push(new LBVolume.TriBipyramid(vertices, mass, indices));
+                volumes.push(new LBVolume.TriBiPyramid(vertices, mass, indices));
                 break;
                 
             case 6 :
@@ -420,7 +420,7 @@ LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
         }
         
         if (!Number.isNaN(mass)) {
-            LBVolume.Volume.allocateMassToVolumess(volumes, mass, startIndex, volumes.length);
+            LBVolume.Volume.allocateMassToVolumes(volumes, mass, startIndex, volumes.length);
         }
     }
     
@@ -481,11 +481,10 @@ LBVolume.Volume.loadXYOutlineFromData = function(data, vertices, outlineVertices
 
 
 /**
- * Represents a tetrahedron. The four vertices of the tetra are ordered such that
- * v[0],v[1],v[2] are CCW about the face (right hand rule), as are v[0],[v2],v[3].
+ * Represents a tetrahedron.
  * @constructor
  * @extends LBVolume.Volume
- * @param {LBGeometry.Vector3[]} [vertices]    If defined an array containing the
+ * @param {LBGeometry.Vector3[]} [vertices]    If defined, an array containing the
  * four vertices for the tetrahedron. References to the vertices are used, they are not copied.
  * If not defined the vertices are all set to new instances of {@link LBGeometry.Vector3}.
  * @param {Number} [mass=Number.NaN] If defined the mass assigned to the volume.
@@ -495,6 +494,8 @@ LBVolume.Volume.loadXYOutlineFromData = function(data, vertices, outlineVertices
  */
 LBVolume.Tetra = function(vertices, mass, indices) {
     LBVolume.Volume.call(this, LBVolume.Tetra.TYPE_NAME, mass);
+    
+    this._faces = LBVolume.Tetra._facesCCW;
     
     if (vertices) {
         if (indices) {
@@ -506,6 +507,14 @@ LBVolume.Tetra = function(vertices, mass, indices) {
             for (var i = 0; i < 4; ++i) {
                 this.vertices.push(vertices[i]);
             }
+        }
+        
+        var a = LBVolume.Tetra._workingVectorA.copy(vertices[1]).sub(vertices[0]);
+        var b = LBVolume.Tetra._workingVectorB.copy(vertices[2]).sub(vertices[0]);
+        var c = LBVolume.Tetra._workingVectorC.copy(vertices[3]).sub(vertices[0]);
+        a.cross(b);
+        if (c.dot(a) > 0) {
+            this._faces = LBVolume.Tetra._facesCW;
         }
     }
     else {
@@ -546,18 +555,33 @@ LBVolume.Tetra.prototype.clone = function() {
 };
 
 // @inheritdoc...
-LBVolume.Tetra.prototype.faces = function() {
-    return LBVolume.Tetra._faces;
+LBVolume.Tetra.prototype.getFaces = function() {
+    return this._faces;
 };
-LBVolume.Tetra._faces = [
+LBVolume.Tetra._facesCCW = [
     [0, 1, 2],
     [0, 2, 3],
     [0, 3, 1],
     [1, 3, 2]
 ];
+LBVolume.Tetra._facesCW = [
+    [0, 2, 1],
+    [0, 3, 2],
+    [0, 1, 3],
+    [1, 2, 3]
+];
+
+/**
+ * Determines if the vertices are such that vertices 0, 1, and 2 are counter-clockwise
+ * about their face.
+ * @returns {Boolean} true if vertices 0, 1, and 2 are counter-clockwise about their face.
+ */
+LBVolume.Tetra.prototype.isCCWFaces = function() {
+    return this._faces === LBVolume.Tetra._facesCCW;
+};
 
 // @inheritdoc...
-LBVolume.Tetra.prototype.centroid = function(store) {
+LBVolume.Tetra.prototype.getCentroid = function(store) {
     store = store || new LBGeometry.Vector3();
 
     store.copy(this.vertices[0]);
@@ -570,7 +594,7 @@ LBVolume.Tetra.prototype.centroid = function(store) {
 };
 
 // @inheritdoc...
-LBVolume.Tetra.prototype.volume = function() {
+LBVolume.Tetra.prototype.getVolume = function() {
     // From https://en.wikipedia.org/wiki/Tetrahedron#Volume
     var a = LBVolume.Tetra._workingVectorA.copy(this.vertices[0]).sub(this.vertices[3]);
     var b = LBVolume.Tetra._workingVectorB.copy(this.vertices[1]).sub(this.vertices[3]);
@@ -589,9 +613,9 @@ LBVolume.Tetra.prototype.equivalentTetras = function() {
 LBVolume.Tetra.prototype.cloneMirrored = function(plane) {
     var vertices = LBVolume.Tetra._workingArrayA;
     vertices.length = 0;
+    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[0]));
     vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[2]));
     vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[1]));
-    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[0]));
     vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[3]));
     return new LBVolume.Tetra(vertices, this.mass);
 };
@@ -609,7 +633,7 @@ LBVolume.Tetra.prototype.tetraInertiaTensor = function(tensor) {
     // Eq = [ a -b' -c'; -b' b -a'; -c' -a' c ]
     // Each polynomial term is multiplied by mu * |DET(J)|, and DET(J) = 6 * Vol,
     // so the scaling term is simply 6 * mass.
-    var cent = this.centroid(LBVolume.Tetra._workingVectorA);
+    var cent = this.getCentroid(LBVolume.Tetra._workingVectorA);
     var scale = 6 * this.mass;
     var x1 = this.vertices[0].x - cent.x, x2 = this.vertices[1].x - cent.x, x3 = this.vertices[2].x - cent.x, x4 = this.vertices[3].x - cent.x;
     var y1 = this.vertices[0].y - cent.y, y2 = this.vertices[1].y - cent.y, y3 = this.vertices[2].y - cent.y, y4 = this.vertices[3].y - cent.y;
@@ -643,143 +667,6 @@ LBVolume.Tetra.prototype.tetraInertiaTensor = function(tensor) {
 //
 //----------
 //
-
-
-/**
- * Converts a set of 5 vertices describing a triangular bipyramid into an array of two tetrahedra
- * representing the volume.
- * <p>
- * This is currently a fairly simple algorithm, it does not check for vertices lying on each
- * other, and expects the vertices in a particular order.
- * <p>
- * The bipyramid must be described such that the first four vertices describe one tetrahedron,
- * and the last four vertices describe the other tetrahedron (the face v[1], v[2], v[3] is
- * internal and does not exist).
- * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
- * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
- * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
- * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
- */
-LBVolume.Tetra.triangularBipyramidToTetras = function(vertexIndices, vertexArray, tetras) {
-    if (!tetras) {
-        tetras = [];
-    }
-
-    var vertices = LBVolume.Tetra._workingVertexArray;
-    vertices[0] = vertexArray[vertexIndices[0]];
-    vertices[1] = vertexArray[vertexIndices[1]];
-    vertices[2] = vertexArray[vertexIndices[2]];
-    vertices[3] = vertexArray[vertexIndices[3]];
-    tetras.push(new LBVolume.Tetra(vertices));
-
-    vertices[0] = vertexArray[vertexIndices[1]];
-    vertices[1] = vertexArray[vertexIndices[2]];
-    vertices[2] = vertexArray[vertexIndices[3]];
-    vertices[3] = vertexArray[vertexIndices[4]];
-    tetras.push(new LBVolume.Tetra(vertices));
-    
-    return tetras;
-};
-
-
-/**
- * Converts a set of 6 vertices describing a triangular prism into an array of three tetrahedra
- * representing the volume.
- * <p>
- * This is currently a fairly simple algorithm, it does not check for vertices lying on each
- * other, and expects the vertices in a particular order.
- * <p>
- * The prism must be described such that the first 3 vertices represent one triangular
- * face and the second 3 vertices the other triangular face, and v[0] is connected to v[3],
- * v[1] is connected to v[4], and v[2] is connected to v[5].
- * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
- * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
- * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
- * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
- */
-LBVolume.Tetra.triangularPrismToTetras = function(vertexIndices, vertexArray, tetras) {
-    if (!tetras) {
-        tetras = [];
-    }
-
-    var vertices = LBVolume.Tetra._workingVertexArray;
-    vertices[0] = vertexArray[vertexIndices[0]];
-    vertices[1] = vertexArray[vertexIndices[1]];
-    vertices[2] = vertexArray[vertexIndices[2]];
-    vertices[3] = vertexArray[vertexIndices[3]];
-    tetras.push(new LBVolume.Tetra(vertices));
-
-    vertices[0] = vertexArray[vertexIndices[3]];
-    vertices[1] = vertexArray[vertexIndices[4]];
-    vertices[2] = vertexArray[vertexIndices[5]];
-    vertices[3] = vertexArray[vertexIndices[2]];
-    tetras.push(new LBVolume.Tetra(vertices));
-
-    vertices[0] = vertexArray[vertexIndices[3]];
-    vertices[1] = vertexArray[vertexIndices[4]];
-    vertices[2] = vertexArray[vertexIndices[1]];
-    vertices[3] = vertexArray[vertexIndices[2]];
-    tetras.push(new LBVolume.Tetra(vertices));
-    
-    return tetras;
-};
-
-
-/**
- * Converts a set of 8 vertices describing a cuboid (a convex polyhedron with 6 quadrilateral faces)
- * into an array of 6 tetrahedra representing the volume.
- * <p>
- * This is currently a fairly simple algorithm, it does not check for vertices lying on each
- * other, and expects the vertices in a particular order.
- * <p>
- * The vertices should be specified such that the first 4 vertices are one face, with
- * the order in the CCW direction (right-hand rule), while the second 4 vertices are the
- * opposite face, with the opposite order so that v[4] is connected to v[0], v[5] to v[1],
- * v[6] to v[2], and v[7] to v[3].
- * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
- * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
- * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
- * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
- */
-LBVolume.Tetra.cuboidToTetras = function(vertexIndices, vertexArray, tetras) {
-    if (!tetras) {
-        tetras = [];
-    }
-
-    var vertices = LBVolume.Tetra._workingVertexArray;
-
-    vertices[0] = vertexArray[vertexIndices[0]];
-    vertices[1] = vertexArray[vertexIndices[1]];
-    vertices[2] = vertexArray[vertexIndices[2]];
-    vertices[3] = vertexArray[vertexIndices[5]];
-    tetras.push(new LBVolume.Tetra(vertices));
-    
-    vertices[0] = vertexArray[vertexIndices[5]];
-    vertices[1] = vertexArray[vertexIndices[4]];
-    vertices[2] = vertexArray[vertexIndices[7]];
-    vertices[3] = vertexArray[vertexIndices[0]];
-    tetras.push(new LBVolume.Tetra(vertices));
-    
-    vertices[0] = vertexArray[vertexIndices[0]];
-    vertices[1] = vertexArray[vertexIndices[2]];
-    vertices[2] = vertexArray[vertexIndices[3]];
-    vertices[3] = vertexArray[vertexIndices[7]];
-    tetras.push(new LBVolume.Tetra(vertices));
-    
-    vertices[0] = vertexArray[vertexIndices[5]];
-    vertices[1] = vertexArray[vertexIndices[7]];
-    vertices[2] = vertexArray[vertexIndices[6]];
-    vertices[3] = vertexArray[vertexIndices[2]];
-    tetras.push(new LBVolume.Tetra(vertices));
-    
-    vertices[0] = vertexArray[vertexIndices[0]];
-    vertices[1] = vertexArray[vertexIndices[5]];
-    vertices[2] = vertexArray[vertexIndices[2]];
-    vertices[3] = vertexArray[vertexIndices[7]];
-    tetras.push(new LBVolume.Tetra(vertices));
-
-    return tetras;
-};
 
 /**
  * Determines where a plane slices a tetra, and if it does slice the tetra this
@@ -895,7 +782,7 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
             // Can't use vertices, since it's LBVolume.Tetra._workingVertexArray and
             // we can't pass it into an LBVolume.Tetra function...
             var myVertices = [vertex0, vertex1, tetra.vertices[onPlane[0]], pointA, pointB];
-            LBVolume.Tetra.triangularBipyramidToTetras(indices, myVertices, otherTetras);
+            LBVolume.TriBiPyramid.toTetras(indices, myVertices, otherTetras);
         }
     }
     else if (onPlane.length === 2) {
@@ -971,7 +858,7 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
             // Can't use vertices, since it's LBVolume.Tetra._workingVertexArray and
             // we can't pass it into an LBVolume.Tetra function...
             var myVertices = [vertex0, vertex1, vertex2, pointA, pointB, pointC ];
-            LBVolume.Tetra.triangularPrismToTetras(indices, myVertices, otherTetras);
+            LBVolume.TriPrism.toTetras(indices, myVertices, otherTetras);
         }
     }
     else {
@@ -996,11 +883,11 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
         
         if (positiveDir) {
             var myVertices = [aboveA, ptAA, ptAB, aboveB, ptBA, ptBB];
-            LBVolume.Tetra.triangularPrismToTetras(indices, myVertices, aboveTetras);
+            LBVolume.TriPrism.toTetras(indices, myVertices, aboveTetras);
         }
         if (negativeDir) {
             var myVertices = [belowA, ptAA, ptAB, belowB, ptBA, ptBB];
-            LBVolume.Tetra.triangularPrismToTetras(indices, myVertices, belowTetras);
+            LBVolume.TriPrism.toTetras(indices, myVertices, belowTetras);
         }
     }
     
@@ -1051,15 +938,15 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
                 break;
                 
             case 5 :
-                LBVolume.Tetra.triangularBipyramidToTetras(indices, vertices, tetras);
+                LBVolume.TriBiPyramid.toTetras(indices, vertices, tetras);
                 break;
                 
             case 6 :
-                LBVolume.Tetra.triangularPrismToTetras(indices, vertices, tetras);
+                LBVolume.TriPrism.toTetras(indices, vertices, tetras);
                 break;
                 
             case 8 :
-                LBVolume.Tetra.cuboidToTetras(indices, vertices, tetras);
+                LBVolume.Cuboid.toTetras(indices, vertices, tetras);
                 break;
                 
             default :
@@ -1068,7 +955,7 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
         }
         
         if (!Number.isNaN(mass)) {
-            LBVolume.Volume.allocateMassToVolumess(tetras, mass, startIndex, tetras.length);
+            LBVolume.Volume.allocateMassToVolumes(tetras, mass, startIndex, tetras.length);
         }
     }
     
@@ -1105,14 +992,15 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
  * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
  * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
  * vertices identifiying the vertices, the ordering must be as described above.
- * @returns {LBVolume.TriBipyramid}
+ * @returns {LBVolume.TriBiPyramid}
  */
-LBVolume.TriBipyramid = function(vertices, mass, indices) {
-    LBVolume.Volume.call(this, LBVolume.TriBipyramid.TYPE_NAME, mass);
+LBVolume.TriBiPyramid = function(vertices, mass, indices) {
+    LBVolume.Volume.call(this, LBVolume.TriBiPyramid.TYPE_NAME, mass);
     
+    this._faces = [];
     if (vertices) {
         if (!indices) {
-            indices = LBVolume.TriBipyramid._defaultIndices;
+            indices = LBVolume.TriBiPyramid._defaultIndices;
         }
         for (var i = 0; i < 5; ++i) {
             this.vertices.push(vertices[indices[i]]);
@@ -1132,56 +1020,107 @@ LBVolume.TriBipyramid = function(vertices, mass, indices) {
  * @constant
  * @type String
  */
-LBVolume.TriBipyramid.TYPE_NAME = "TriBipyramid";
+LBVolume.TriBiPyramid.TYPE_NAME = "TriBiPyramid";
 
-LBVolume.TriBipyramid.prototype = Object.create(LBVolume.Volume.prototype);
-
-// @inheritdoc...
-LBVolume.TriBipyramid.prototype.clone = function() {
-    return new LBVolume.TriBipyramid(this.mass, this.vertices);
-};
-
-LBVolume.TriBipyramid._faces = [
-    [0, 1, 2],
-    [0, 2, 3],
-    [0, 3, 1],
-    [4, 2, 1],
-    [4, 3, 2],
-    [4, 1, 3]
-];
+LBVolume.TriBiPyramid.prototype = Object.create(LBVolume.Volume.prototype);
 
 // @inheritdoc...
-LBVolume.TriBipyramid.prototype.faces = function() {
-    return LBVolume.TriBipyramid._faces;
+LBVolume.TriBiPyramid.prototype.clone = function() {
+    return new LBVolume.TriBiPyramid(this.mass, this.vertices);
 };
-LBVolume.TriBipyramid._defaultIndices = [
+
+// @inheritdoc...
+LBVolume.TriBiPyramid.prototype.getFaces = function() {
+    this.equivalentTetras();
+    return this._faces;
+};
+LBVolume.TriBiPyramid._defaultIndices = [
     0, 1, 2, 3, 4
 ];
 
 // @inheritdoc...
-LBVolume.TriBipyramid.prototype.equivalentTetras = function() {
+LBVolume.TriBiPyramid.prototype.equivalentTetras = function() {
     if (!this._equivalentTetrasArray) {
-        this._equivalentTetrasArray = LBVolume.Tetra.triangularBipyramidToTetras(LBVolume.TriBipyramid._defaultIndices, 
-            this.vertices);
+        this._equivalentTetrasArray = LBVolume.TriBiPyramid.toTetras(LBVolume.TriBiPyramid._defaultIndices, 
+            this.vertices, undefined, this._faces);
         if (this.mass) {
-            LBVolume.Volume.allocateMassToVolumess(this._equivalentTetrasArray, this.mass);
+            LBVolume.Volume.allocateMassToVolumes(this._equivalentTetrasArray, this.mass);
         }
     }
     return this._equivalentTetrasArray;
 };
 
 // @inheritdoc...
-LBVolume.TriBipyramid.prototype.cloneMirrored = function(plane) {
-    var vertices = LBVolume.TriBipyramid._workingVertices;
-    vertices.length = 0;
-    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[0]));
-    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[1]));
-    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[3]));
-    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[2]));
-    vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[4]));
-    return new LBVolume.TriBipyramid(vertices, this.mass);
+LBVolume.TriBiPyramid.prototype.cloneMirrored = function(plane) {
+    var vertices = LBGeometry.mirrorPointArrayAboutPlane(plane, this.vertices, LBVolume.TriBiPyramid._workingVertices);
+    return new LBVolume.TriBiPyramid(vertices, this.mass);
 };
-LBVolume.TriBipyramid._workingVertices = [];
+LBVolume.TriBiPyramid._workingVertices = [];
+
+
+/**
+ * Converts a set of 5 vertices describing a triangular bipyramid into an array of two tetrahedra
+ * representing the volume.
+ * <p>
+ * This is currently a fairly simple algorithm, it does not check for vertices lying on each
+ * other, and expects the vertices in a particular order.
+ * <p>
+ * The bipyramid must be described such that the first four vertices describe one tetrahedron,
+ * and the last four vertices describe the other tetrahedron (the face v[1], v[2], v[3] is
+ * internal and does not exist).
+ * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
+ * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
+ * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
+ * @param {Number[][]} [faces]  If defined an array that is set to the arrays of vertices for each outside face.
+ * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
+ */
+LBVolume.TriBiPyramid.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
+    if (!tetras) {
+        tetras = [];
+    }
+
+    var vertices = LBVolume.Tetra._workingVertexArray;
+    vertices[0] = vertexArray[vertexIndices[0]];
+    vertices[1] = vertexArray[vertexIndices[1]];
+    vertices[2] = vertexArray[vertexIndices[2]];
+    vertices[3] = vertexArray[vertexIndices[3]];
+    var tetraA = new LBVolume.Tetra(vertices); 
+    tetras.push(tetraA);
+
+    vertices[0] = vertexArray[vertexIndices[1]];
+    vertices[1] = vertexArray[vertexIndices[2]];
+    vertices[2] = vertexArray[vertexIndices[3]];
+    vertices[3] = vertexArray[vertexIndices[4]];
+    var tetraB = new LBVolume.Tetra(vertices);
+    tetras.push(tetraB);
+    
+    if (faces !== undefined) {
+        faces.length = 6;
+        
+        if (tetraA.isCCWFaces()) {
+            faces[0] = [0, 1, 2];
+            faces[1] = [0, 2, 3];
+            faces[2] = [0, 3, 1];
+        }
+        else {
+            faces[0] = [0, 2, 1];
+            faces[1] = [0, 3, 2];
+            faces[2] = [0, 1, 3];
+        }
+        if (tetraB.isCCWFaces()) {
+            faces[3] = [4, 2, 1];
+            faces[4] = [4, 3, 2];
+            faces[5] = [4, 1, 3];
+        }
+        else {
+            faces[3] = [4, 1, 2];
+            faces[4] = [4, 2, 3];
+            faces[5] = [4, 3, 1];
+        }
+    }
+    
+    return tetras;
+};
 
 
 /**
@@ -1220,6 +1159,8 @@ LBVolume.TriPrism = function(vertices, mass, indices) {
         this.vertices.push(new LBGeometry.Vector3(0.5, 0.4330127, -0.25));
         this.vertices.push(new LBGeometry.Vector3(0.5, -0.4330127, -0.25));
     }
+    
+    this._faces = [];
 };
 
 /**
@@ -1236,17 +1177,11 @@ LBVolume.TriPrism.prototype.clone = function() {
     return new LBVolume.TriPrism(this.mass, this.vertices);
 };
 
-LBVolume.TriPrism._faces = [
-    [0, 1, 2],
-    [1, 4, 5, 2],
-    [2, 5, 3, 0],
-    [0, 3, 4, 1],
-    [3, 5, 4]
-];
 
 // @inheritdoc...
-LBVolume.TriPrism.prototype.faces = function() {
-    return LBVolume.TriPrism._faces;
+LBVolume.TriPrism.prototype.getFaces = function() {
+    this.equivalentTetras();
+    return this._faces;
 };
 LBVolume.TriPrism._defaultIndices = [
     0, 1, 2, 3, 4, 5
@@ -1255,10 +1190,10 @@ LBVolume.TriPrism._defaultIndices = [
 // @inheritdoc...
 LBVolume.TriPrism.prototype.equivalentTetras = function() {
     if (!this._equivalentTetrasArray) {
-        this._equivalentTetrasArray = LBVolume.Tetra.triangularPrismToTetras(LBVolume.TriPrism._defaultIndices, 
-            this.vertices);
+        this._equivalentTetrasArray = LBVolume.TriPrism.toTetras(LBVolume.TriPrism._defaultIndices, 
+            this.vertices, undefined, this._faces);
         if (this.mass) {
-            LBVolume.Volume.allocateMassToVolumess(this._equivalentTetrasArray, this.mass);
+            LBVolume.Volume.allocateMassToVolumes(this._equivalentTetrasArray, this.mass);
         }
     }
     return this._equivalentTetrasArray;
@@ -1266,15 +1201,93 @@ LBVolume.TriPrism.prototype.equivalentTetras = function() {
 
 // @inheritdoc...
 LBVolume.TriPrism.prototype.cloneMirrored = function(plane) {
-    var vertices = LBVolume.TriPrism._workingVertexArray;
-    vertices.length = 0;
-    for (var i = 0; i < 3; ++i) {
-        vertices[i] = LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i + 3]);
-        vertices[i + 3] = LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i]);
-    }
+    var vertices = LBGeometry.mirrorPointArrayAboutPlane(plane, this.vertices, LBVolume.TriPrism._workingVertexArray);
     return new LBVolume.TriPrism(vertices, this.mass);
 };
 LBVolume.TriPrism._workingVertexArray = [];
+
+
+
+/**
+ * Converts a set of 6 vertices describing a triangular prism into an array of three tetrahedra
+ * representing the volume.
+ * <p>
+ * This is currently a fairly simple algorithm, it does not check for vertices lying on each
+ * other, and expects the vertices in a particular order.
+ * <p>
+ * The prism must be described such that the first 3 vertices represent one triangular
+ * face and the second 3 vertices the other triangular face, and v[0] is connected to v[3],
+ * v[1] is connected to v[4], and v[2] is connected to v[5].
+ * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
+ * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
+ * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
+ * @param {Number[][]} [faces]  If defined an array that is set to the arrays of vertices for each outside face.
+ * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
+ */
+LBVolume.TriPrism.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
+    if (!tetras) {
+        tetras = [];
+    }
+
+    var vertices = LBVolume.Tetra._workingVertexArray;
+    vertices[0] = vertexArray[vertexIndices[0]];
+    vertices[1] = vertexArray[vertexIndices[1]];
+    vertices[2] = vertexArray[vertexIndices[2]];
+    vertices[3] = vertexArray[vertexIndices[3]];
+    var tetraA = new LBVolume.Tetra(vertices);
+    tetras.push(tetraA);
+
+    vertices[0] = vertexArray[vertexIndices[3]];
+    vertices[1] = vertexArray[vertexIndices[5]];
+    vertices[2] = vertexArray[vertexIndices[4]];
+    vertices[3] = vertexArray[vertexIndices[2]];
+    var tetraB = new LBVolume.Tetra(vertices);
+    tetras.push(tetraB);
+
+    vertices[0] = vertexArray[vertexIndices[3]];
+    vertices[1] = vertexArray[vertexIndices[4]];
+    vertices[2] = vertexArray[vertexIndices[1]];
+    vertices[3] = vertexArray[vertexIndices[2]];
+    var tetraC = new LBVolume.Tetra(vertices);
+    tetras.push(tetraC);
+    
+    if (faces !== undefined) {
+        faces.length = 8;
+
+        if (tetraA.isCCWFaces()) {
+            faces[0] = [0, 1, 2];
+            faces[3] = [0, 2, 3];
+            faces[5] = [3, 1, 0];
+        }
+        else {
+            faces[0] = [0, 2, 1];
+            faces[3] = [0, 3, 2];
+            faces[5] = [3, 0, 1];
+        }
+        
+        if (tetraB.isCCWFaces()) {
+            faces[2] = [2, 4, 5];
+            faces[4] = [2, 5, 3];
+            faces[7] = [3, 5, 4];
+        }
+        else {
+            faces[2] = [2, 5, 4];
+            faces[4] = [2, 3, 5];
+            faces[7] = [3, 4, 5];
+        }
+        
+        if (tetraC.isCCWFaces()) {
+            faces[1] = [1, 4, 2];
+            faces[6] = [1, 3, 4];
+        }
+        else {
+            faces[1] = [1, 2, 4];
+            faces[6] = [1, 4, 3];
+        }
+    }
+    
+    return tetras;
+};
 
 
 /**
@@ -1313,6 +1326,8 @@ LBVolume.Cuboid = function(vertices, mass, indices) {
         this.vertices.push(new LBGeometry.Vector3(0.5, 0.5, 0.5));
         this.vertices.push(new LBGeometry.Vector3(-0.5, 0.5, 0.5));
     }
+    
+    this._faces = [];
 };
 
 /**
@@ -1329,18 +1344,10 @@ LBVolume.Cuboid.prototype.clone = function() {
     return new LBVolume.Cuboid(this.mass, this.vertices);
 };
 
-LBVolume.Cuboid._faces = [
-    [0, 1, 2, 3],
-    [1, 5, 6, 2],
-    [5, 4, 7, 6],
-    [4, 0, 3, 7],
-    [0, 4, 5, 1],
-    [2, 6, 7, 3]
-];
-
 // @inheritdoc...
-LBVolume.Cuboid.prototype.faces = function() {
-    return LBVolume.Cuboid._faces;
+LBVolume.Cuboid.prototype.getFaces = function() {
+    this.equivalentTetras();
+    return this._faces;
 };
 LBVolume.Cuboid._defaultIndices = [
     0, 1, 2, 3, 4, 5, 6, 7
@@ -1349,10 +1356,10 @@ LBVolume.Cuboid._defaultIndices = [
 // @inheritdoc...
 LBVolume.Cuboid.prototype.equivalentTetras = function() {
     if (!this._equivalentTetrasArray) {
-        this._equivalentTetrasArray = LBVolume.Tetra.cuboidToTetras(LBVolume.Cuboid._defaultIndices, 
-            this.vertices);
+        this._equivalentTetrasArray = LBVolume.Cuboid.toTetras(LBVolume.Cuboid._defaultIndices, 
+            this.vertices, undefined, this._faces);
         if (this.mass) {
-            LBVolume.Volume.allocateMassToVolumess(this._equivalentTetrasArray, this.mass);
+            LBVolume.Volume.allocateMassToVolumes(this._equivalentTetrasArray, this.mass);
         }
     }
     return this._equivalentTetrasArray;
@@ -1360,15 +1367,123 @@ LBVolume.Cuboid.prototype.equivalentTetras = function() {
 
 // @inheritdoc...
 LBVolume.Cuboid.prototype.cloneMirrored = function(plane) {
-    var vertices = LBVolume.Cuboid._workingVertexArray;
-    vertices.length = 0;
-    for (var i = 0; i < 4; ++i) {
-        vertices[i] = LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i + 4]);
-        vertices[i + 4] = LBGeometry.mirrorPointAboutPlane(plane, this.vertices[i]);
-    }
+    var vertices = LBGeometry.mirrorPointArrayAboutPlane(plane, this.vertices, LBVolume.Cuboid._workingVertexArray);
     return new LBVolume.Cuboid(vertices, this.mass);
 };
 LBVolume.Cuboid._workingVertexArray = [];
+
+
+/**
+ * Converts a set of 8 vertices describing a cuboid (a convex polyhedron with 6 quadrilateral faces)
+ * into an array of 6 tetrahedra representing the volume.
+ * <p>
+ * This is currently a fairly simple algorithm, it does not check for vertices lying on each
+ * other, and expects the vertices in a particular order.
+ * <p>
+ * The vertices should be specified such that the first 4 vertices are one face, with
+ * the order in the CCW direction (right-hand rule), while the second 4 vertices are the
+ * opposite face, with the opposite order so that v[4] is connected to v[0], v[5] to v[1],
+ * v[6] to v[2], and v[7] to v[3].
+ * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
+ * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
+ * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
+ * @param {Number[][]} [faces]  If defined an array that is set to the arrays of vertices for each outside face.
+ * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
+ */
+LBVolume.Cuboid.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
+    if (!tetras) {
+        tetras = [];
+    }
+
+    var vertices = LBVolume.Tetra._workingVertexArray;
+
+    vertices[0] = vertexArray[vertexIndices[0]];
+    vertices[1] = vertexArray[vertexIndices[1]];
+    vertices[2] = vertexArray[vertexIndices[2]];
+    vertices[3] = vertexArray[vertexIndices[5]];
+    var tetra0 = new LBVolume.Tetra(vertices);
+    tetras.push(tetra0);
+    
+    vertices[0] = vertexArray[vertexIndices[0]];
+    vertices[1] = vertexArray[vertexIndices[2]];
+    vertices[2] = vertexArray[vertexIndices[3]];
+    vertices[3] = vertexArray[vertexIndices[7]];
+    var tetra1 = new LBVolume.Tetra(vertices);
+    tetras.push(tetra1);
+    
+    vertices[0] = vertexArray[vertexIndices[0]];
+    vertices[1] = vertexArray[vertexIndices[5]];
+    vertices[2] = vertexArray[vertexIndices[2]];
+    vertices[3] = vertexArray[vertexIndices[7]];
+    var tetra2 = new LBVolume.Tetra(vertices);
+    tetras.push(tetra2);
+    
+    vertices[0] = vertexArray[vertexIndices[0]];
+    vertices[1] = vertexArray[vertexIndices[5]];
+    vertices[2] = vertexArray[vertexIndices[7]];
+    vertices[3] = vertexArray[vertexIndices[4]];
+    var tetra3 = new LBVolume.Tetra(vertices);
+    tetras.push(tetra3);
+    
+    vertices[0] = vertexArray[vertexIndices[2]];
+    vertices[1] = vertexArray[vertexIndices[5]];
+    vertices[2] = vertexArray[vertexIndices[6]];
+    vertices[3] = vertexArray[vertexIndices[7]];
+    var tetra4 = new LBVolume.Tetra(vertices);
+    tetras.push(tetra4);
+    
+    if (faces !== undefined) {
+        faces.length = 12;
+
+        if (tetra0.isCCWFaces()) {
+            faces[0] = [0, 1, 2];
+            faces[2] = [1, 5, 2];
+            faces[8] = [0, 5, 1];
+        }
+        else {
+            faces[0] = [0, 2, 1];
+            faces[2] = [1, 2, 5];
+            faces[8] = [0, 1, 5];
+        }
+        
+        if (tetra1.isCCWFaces()) {
+            faces[1] = [0, 2, 3];
+            faces[4] = [3, 2, 7];
+            faces[6] = [0, 3, 7];
+        }
+        else {
+            faces[1] = [0, 3, 2];
+            faces[4] = [3, 7, 2];
+            faces[6] = [0, 7, 3];
+        }
+        
+        // Tetra2 is the interior tetra...
+        
+        if (tetra3.isCCWFaces()) {
+            faces[7] = [4, 0, 7];
+            faces[9] = [0, 4, 5];
+            faces[11] = [4, 7, 5];
+        }
+        else {
+            faces[7] = [4, 7, 0];
+            faces[9] = [0, 5, 4];
+            faces[11] = [4, 5, 7];            
+        }
+        
+        if (tetra4.isCCWFaces()) {
+            faces[3] = [2, 5, 6];
+            faces[5] = [2, 6, 7];
+            faces[10] = [5, 7, 6];
+        }
+        else {
+            faces[3] = [2, 6, 5];
+            faces[5] = [2, 7, 6];
+            faces[10] = [5, 6, 7];
+        }
+    }
+
+    return tetras;
+};
 
 
 /**

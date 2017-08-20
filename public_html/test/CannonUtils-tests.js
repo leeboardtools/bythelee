@@ -57,7 +57,7 @@ QUnit.test( "addTetrasToBody", function( assert ) {
     };
     
     var tetras = LBVolume.Tetra.loadFromData(data);
-    LBVolume.Volume.allocateMassToVolumess(tetras, 5);
+    LBVolume.Volume.allocateMassToVolumes(tetras, 5);
     
     var centerOfMassResults = LBVolume.Volume.totalCenterOfMass(tetras);
     

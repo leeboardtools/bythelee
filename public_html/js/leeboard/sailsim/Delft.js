@@ -70,7 +70,7 @@ LBSailSim.Delft.calcResiduaryResistance = function(hull) {
         coefs.push(LBSailSim.Delft.residuaryResitanceInterps[i].interpolate(fn));
     }
     
-    var result = LBSailSim.Delft.evalResiduaryResistance(hull, fn, coefs);    
+    var result = LBSailSim.Delft.evalResiduaryResistance(hull, fn, coefs);
     return result * hull.delC * env.water.density * env.gravity;
 };
 
@@ -93,7 +93,7 @@ LBSailSim.Delft.evalResiduaryResistance = function(hull, fn, coefs) {
     val += (coefs[5] * delC_2_3 / hull.swc + coefs[6] * hull.lcb / hull.lcf + coefs[7] * lcb_lwl * lcb_lwl + coefs[8] * hull.cp * hull.cp)
         * delC_1_3_lwl;
     
-    return val;
+    return (val > 0) ? val : 0;
 };
 
 

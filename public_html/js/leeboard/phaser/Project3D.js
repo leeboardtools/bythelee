@@ -377,12 +377,12 @@ LBPhaser.Project3D.createPanelsFromVolumesData = function(volumes, data) {
         var volume = volumes[volIndex];
         if (faceIndex === -1) {
             // Use all the faces of the volume.
-            volume.faces().forEach(function(face) {
+            volume.getFaces().forEach(function(face) {
                 projectPanels.addPanelVertices(volume.vertices, face);
             });
         }
         else {
-            var face = volume.faces()[faceIndex];
+            var face = volume.getFaces()[faceIndex];
             projectPanels.addPanelVertices(volume.vertices, face);
         }
     }

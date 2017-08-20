@@ -215,8 +215,8 @@ LBSailSim.Hull.prototype = {
                 }
 
                 for (var j = 0; j < result[1].length; ++j) {
-                    result[1][j].centroid(centroid);
-                    var vol = result[1][j].volume();
+                    result[1][j].getCentroid(centroid);
+                    var vol = result[1][j].getVolume();
                     xSum += centroid.x * vol;
                     ySum += centroid.y * vol;
                     zSum += centroid.z * vol;
@@ -296,21 +296,24 @@ LBSailSim.Hull.prototype = {
         
         var drag = this.frictionDrag + this.residuaryResistance + this.formDrag + this.waveDrag;
         var force = this.resistanceForce;
-        force.copy(this.vessel.apparentCurrent).normalize();
+        force.copy(this.vessel.apparentCurrent);
+        
+        // Don't bother with z because all our drag models don't do up-down motion...
         force.z = 0;
+        force.normalize();
         
         force.multiplyScalar(drag);
         
         resultant.addForce(force, this.worldCenterOfResistance);
         
         // Add gravity...
-        var fGravity = -this.vessel.getTotalMass() * this.vessel.sailEnv.gravity;
-        force.set(0, 0, fGravity);
+        this.forceGravity = -this.vessel.getTotalMass() * this.vessel.sailEnv.gravity;
+        force.set(0, 0, this.forceGravity);
         resultant.addForce(force, this.vessel.getTotalCenterOfMass());
         
         // And buoyancy...
-        var fBuoyancy = this.immersedVolume * this.vessel.sailEnv.water.density * this.vessel.sailEnv.gravity;
-        force.set(0, 0, fBuoyancy);
+        this.forceBuoyancy = this.immersedVolume * this.vessel.sailEnv.water.density * this.vessel.sailEnv.gravity;
+        force.set(0, 0, this.forceBuoyancy);
         resultant.addForce(force, this.worldCenterOfBuoyancy);
 
         this.handleDebugFields(resultant);
@@ -437,7 +440,7 @@ LBSailSim.Hull.calcCB = function(delC, lwl, bwl, tc) {
  */
 LBSailSim.Hull.prototype.handleDebugFields = function(resultant) {
     if (this.debugForces) {
-        var dbgField = LBDebug.DataLog.getField(this.vessel.name);
+        var dbgField = LBDebug.DataLog.getField(this.vessel.name + '.hull');
         if (dbgField) {
             dbgField.setSubFieldValue('resultant', resultant);
             dbgField.setSubFieldValue('rForce', this.resistanceForce);
@@ -445,6 +448,17 @@ LBSailSim.Hull.prototype.handleDebugFields = function(resultant) {
             dbgField.setSubFieldValue('frictionDrag', this.frictionDrag);
             dbgField.setSubFieldValue('residuaryResistance', this.residuaryResistance);
             dbgField.setSubFieldValue('waveDrag', this.waveDrag);
+            dbgField.setSubFieldValue('gravity', this.forceGravity);
+            dbgField.setSubFieldValue('buoyancy', this.forceBuoyancy);
+            dbgField.setSubFieldValue('wCOM', this.vessel.getTotalCenterOfMass());
+            
+            var pos = this.vessel.getTotalCenterOfMass().clone();
+            pos.applyMatrix4(this.vessel.coordSystem.localXfrm);
+            dbgField.setSubFieldValue('lclCOM', pos);
+
+            pos.copy(this.worldCenterOfBuoyancy);
+            pos.applyMatrix4(this.vessel.coordSystem.localXfrm);
+            dbgField.setSubFieldValue('lclCOB', pos);
         }
     }
 };
@@ -455,9 +469,16 @@ LBSailSim.Hull.prototype.handleDebugFields = function(resultant) {
  * @returns {undefined}
  */
 LBSailSim.Hull.addDebugFields = function(name) {
+    name += '.hull';
     LBDebug.DataLog.addFieldResultant([name, 'resultant']);
     LBDebug.DataLog.addField([name, 'frictionDrag']);
     LBDebug.DataLog.addField([name, 'residuaryResistance']);
     LBDebug.DataLog.addField([name, 'formDrag']);
     LBDebug.DataLog.addField([name, 'waveDrag']);
+    LBDebug.DataLog.addField([name, 'gravity']);
+    LBDebug.DataLog.addField([name, 'buoyancy']);
+    LBDebug.DataLog.addFieldVector3([name, 'wCOM']);
+    LBDebug.DataLog.addFieldVector3([name, 'lclCOM']);
+    LBDebug.DataLog.addFieldVector3([name, 'lclCOB']);
+    
 };
