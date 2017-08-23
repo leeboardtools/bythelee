@@ -468,15 +468,20 @@ PlayState._updateHUD = function() {
     }
     
     if (this.leewayText) {
-        var leewayAngle = this.myBoat.getLeewayDeg(true);
-        if (leewayAngle < 0) {
-            this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Port";
-        }
-        else if (leewayAngle > 0) {
-            this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Stbd";
+        if (LBMath.isLikeZero(this.myBoat.getKnots())) {
+            this.leewayText.text = "Leeway: 0";
         }
         else {
-            this.leewayText.text = "Leeway: 0";
+            var leewayAngle = this.myBoat.getLeewayDeg(true);
+            if (leewayAngle < 0) {
+                this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Port";
+            }
+            else if (leewayAngle > 0) {
+                this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Stbd";
+            }
+            else {
+                this.leewayText.text = "Leeway: 0";
+            }
         }
     }
     
@@ -490,8 +495,8 @@ PlayState._updateHUD = function() {
         this.appWindSpeedText.text = "App Wind Speed: " + speed.toFixed(2);
     }
     
-    if (this.appWindBearingText) {
-        var bearing = this.myBoat.getApparentWindBearingDeg(true);
+    if (this.appWindBearingText) {        
+        var bearing = (LBMath.isLikeZero(this.myBoat.getApparentWindKnots())) ? 0 : this.myBoat.getApparentWindBearingDeg(true);
         this.appWindBearingText.text = "App Wind Bearing: " + bearing.toFixed();
     }
     

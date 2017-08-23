@@ -1151,7 +1151,9 @@ LBSailSim.Vessel.prototype.getHeadingDeg = function(isRound) {
  * @returns {Number}    The speed of the vessel in knots.
  */
 LBSailSim.Vessel.prototype.getKnots = function() {
-    return LBUtil.mps2kt(this.worldLinearVelocity.length());
+    var x = this.worldLinearVelocity.x;
+    var y = this.worldLinearVelocity.y;
+    return LBUtil.mps2kt(Math.sqrt(x * x + y * y));
 };
 
 /**
@@ -1187,7 +1189,9 @@ LBSailSim.Vessel.prototype.getTrueWindVelocityMPS = function() {
  * @returns {Number}    The apparent wind speed in knots.
  */
 LBSailSim.Vessel.prototype.getApparentWindKnots = function() {
-    return LBUtil.mps2kt(this.apparentWind.length());
+    var x = this.apparentWind.x;
+    var y = this.apparentWind.y;
+    return LBUtil.mps2kt(Math.sqrt(x * x + y * y));
 };
 
 /**

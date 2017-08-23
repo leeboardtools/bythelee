@@ -152,3 +152,36 @@ QUnit.test( "Full interp", function( assert ) {
     }
     });
 };
+
+QUnit.test( "finiteDiffBackFirst", function( assert ) {
+    var dt = 0.1;
+    var t = [ 5, 5 - dt, 5 - 2*dt, 5 - 3*dt, 5 - 4*dt, 5 - 5*dt, 5 - 6*dt ];
+    var f0 = t[0] * t[0];
+    var f1 = t[1] * t[1];
+    var f2 = t[2] * t[2];
+    var f3 = t[3] * t[3];
+    var f4 = t[4] * t[4];
+
+    var fp_ideal = 2 * t[0];
+    
+    var fp_2 = (f0 - f1) / dt;
+    assert.equal(LBMath.finiteDiffBackFirst_2(dt, f0, f1), fp_2, "finiteDiffBackFirst_2");
+    assert.equal(LBMath.finiteDiffBackFirst(dt, f0, f1), fp_2, "finiteDiffBackFirst for 2");
+    var fp_2_test = LBMath.finiteDiffBackFirst(dt, f0, f1);
+    var err_2 = Math.abs(fp_2_test - fp_ideal);
+    
+    var fp_3_test = LBMath.finiteDiffBackFirst_3(dt, f0, f1, f2);    
+    var err_3 = Math.abs(fp_3_test - fp_ideal);
+    assert.nearEqual(fp_3_test, fp_ideal, "finiteDiffBackFirst_3", dt * dt * dt);
+    assert.equal(LBMath.finiteDiffBackFirst(dt, f0, f1, f2), fp_3_test, "finiteDiffBackFirst for 3");
+    
+    var fp_4_test = LBMath.finiteDiffBackFirst_4(dt, f0, f1, f2, f3);
+    var err_4 = Math.abs(fp_4_test - fp_ideal);
+    assert.nearEqual(fp_4_test, fp_ideal, "finiteDiffBackFirst_4", dt * dt * dt * dt);
+    assert.equal(LBMath.finiteDiffBackFirst(dt, f0, f1, f2, f3), fp_4_test, "finiteDiffBackFirst for 4");
+    
+    var fp_5_test = LBMath.finiteDiffBackFirst_3(dt, f0, f1, f2, f3, f4);    
+    var err_5 = Math.abs(fp_5_test - fp_ideal);
+    assert.nearEqual(fp_5_test, fp_ideal, "finiteDiffBackFirst_5", dt * dt * dt * dt);
+    assert.equal(LBMath.finiteDiffBackFirst(dt, f0, f1, f2, f3, f4), fp_5_test, "finiteDiffBackFirst for 5");
+});
