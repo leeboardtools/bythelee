@@ -56,3 +56,96 @@ QUnit.test( "copyCmmonProperties", function( assert ) {
     });
     assert.deepEqual(objTest, { 'a': 0, 'b': 4, 'c': 2, 'd': 3 }, "default Copy");
     });
+    
+
+QUnit.test("RollingBuffer", function(assert) {
+    var buffer = new LBUtil.RollingBuffer(4);
+    assert.equal(buffer.getCurrentSize(), 0, "Empty - currentSize");
+    assert.equal(buffer.getMaxSize(), 4, "Max Size");
+    
+    // 1
+    buffer.push(1);
+    assert.equal(buffer.getCurrentSize(), 1, "CurrentSize 1");
+    assert.equal(buffer.get(0), 1, "get(0) = 1");
+    
+    // 1 2 3
+    buffer.push(2);
+    buffer.push(3);
+    assert.equal(buffer.getCurrentSize(), 3, "CurrentSize 3");
+    assert.equal(buffer.get(0), 1, "get(0) = 1");
+    assert.equal(buffer.get(1), 2, "get(1) = 2");
+    assert.equal(buffer.get(2), 3, "get(2) = 3");
+    
+    // 1 2 3 4
+    buffer.push(4);
+    assert.equal(buffer.getCurrentSize(), 4, "CurrentSize 4");
+    assert.equal(buffer.get(3), 4, "get(3) = 4");
+    
+    // 5 2 3 4
+    buffer.push(5);
+    assert.equal(buffer.getCurrentSize(), 4, "Roll over");
+    assert.equal(buffer.get(0), 2, "get(0) = 2");
+    assert.equal(buffer.get(3), 5, "get(3) = 5");
+    
+    // 5 6 3 4
+    buffer.push(6);
+    assert.equal(buffer.getCurrentSize(), 4, "Roll over 2");
+    assert.equal(buffer.get(0), 3, "get(0) = 3");
+    assert.equal(buffer.get(3), 6, "get(3) = 6");
+    
+    // 5 6 _ 4
+    buffer.popOldest();
+    assert.equal(buffer.getCurrentSize(), 3, "Pop Oldest");
+    assert.equal(buffer.get(0), 4, "get(0) = 4");
+    
+    // 5 6 _ _
+    buffer.popOldest();
+    assert.equal(buffer.getCurrentSize(), 2, "Pop Oldest");
+    assert.equal(buffer.get(0), 5, "get(0) = 5");
+    
+    // _ 6 _ _
+    buffer.popOldest();
+    assert.equal(buffer.get(0), 6, "get(0) = 6");
+
+    // _ _ _ _
+    var result = buffer.popOldest();
+    assert.equal(result, 6, "popOldest() last result");
+    
+    result = buffer.popOldest();
+    assert.equal(result, undefined, "popOldest() empty");
+    
+    buffer.clear();
+    assert.equal(buffer.getCurrentSize(), 0, "clear");
+    
+    buffer.push(1);
+    buffer.push(2);
+    buffer.push(3);
+    buffer.push(4);
+    
+    // 5 2 3 4
+    buffer.push(5);
+    
+    // _ 2 3 4
+    result = buffer.popNewest();
+    assert.equal(result, 5, "popNewest() = 5");
+    assert.equal(buffer.getCurrentSize(), 3, "popNewest() current size = 3");
+    
+    // _ 2 3 _
+    result = buffer.popNewest();
+    assert.equal(result, 4, "popNewest() = 4");
+    assert.equal(buffer.getCurrentSize(), 2, "popNewest() current size = 2");
+    
+    // _ 2 _ _
+    result = buffer.popNewest();
+    assert.equal(result, 3, "popNewest() = 3");
+    assert.equal(buffer.getCurrentSize(), 1, "popNewest() current size = 1");
+    
+    // _ _ _ _
+    result = buffer.popNewest();
+    assert.equal(result, 2, "popNewest() = 2");
+    assert.equal(buffer.getCurrentSize(), 0, "popNewest() current size = 0");
+    
+    result = buffer.popNewest();
+    assert.equal(result, undefined, "popNewest() empty");
+    assert.equal(buffer.getCurrentSize(), 0, "popNewest() current size = 0");
+});

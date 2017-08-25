@@ -180,8 +180,9 @@ QUnit.test( "finiteDiffBackFirst", function( assert ) {
     assert.nearEqual(fp_4_test, fp_ideal, "finiteDiffBackFirst_4", dt * dt * dt * dt);
     assert.equal(LBMath.finiteDiffBackFirst(dt, f0, f1, f2, f3), fp_4_test, "finiteDiffBackFirst for 4");
     
-    var fp_5_test = LBMath.finiteDiffBackFirst_3(dt, f0, f1, f2, f3, f4);    
+    var fp_5_test = LBMath.finiteDiffBackFirst_5(dt, f0, f1, f2, f3, f4);    
     var err_5 = Math.abs(fp_5_test - fp_ideal);
-    assert.nearEqual(fp_5_test, fp_ideal, "finiteDiffBackFirst_5", dt * dt * dt * dt);
+    assert.nearEqual(fp_5_test, fp_ideal, "finiteDiffBackFirst_5", dt * dt * dt * dt * dt);
     assert.equal(LBMath.finiteDiffBackFirst(dt, f0, f1, f2, f3, f4), fp_5_test, "finiteDiffBackFirst for 5");
+    assert.equal(LBMath.finiteDiffBackFirst([dt, f0, f1, f2, f3, f4]), fp_5_test, "finiteDiffBackFirst array args");
 });

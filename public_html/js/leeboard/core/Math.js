@@ -396,24 +396,32 @@ LBMath.finiteDiffBackFirst_5 = function(dt, f0, fm1, fm2, fm3, fm4) {
 /**
  * First order backward finite difference that adapts to the number of values
  * passed in.
- * @param {Number} dt   The time step.
- * @param {Number} f0   The latest value.
- * @param {Number} fm1  The value at time -dt
+ * @param {Number|Number[]} dt   The time step if a single value, if an array then the array
+ * contains the arguments described below, including the dt.
+ * @param {Number} [f0]   The latest value.
+ * @param {Number} [fm1]  The value at time -dt
  * @param {Number} [fm2]  The value at time -2*dt
  * @param {Number} [fm3]  The value at time -3*dt
  * @param {Number} [fm4]  The value at time -4*dt
  * @returns {Number}    The finite difference.
  */
 LBMath.finiteDiffBackFirst = function(dt, f0, fm1, fm2, fm3, fm4) {
-    if (arguments.length === 3) {
-        return LBMath.finiteDiffBackFirst_2(dt, f0, fm1);
+    var args = (Array.isArray(dt)) ? dt : arguments;
+    if (args.length === 3) {
+        return LBMath.finiteDiffBackFirst_2(args[0], args[1], args[2]);
     }
-    if (arguments.length === 4) {
-        return LBMath.finiteDiffBackFirst_3(dt, f0, fm1, fm2);
+    if (args.length === 4) {
+        return LBMath.finiteDiffBackFirst_3(args[0], args[1], args[2], args[3]);
     }
-    if (arguments.length === 5) {
-        return LBMath.finiteDiffBackFirst_4(dt, f0, fm1, fm2, fm3);
+    if (args.length === 5) {
+        return LBMath.finiteDiffBackFirst_4(args[0], args[1], args[2], args[3], args[4]);
     }
     
-    return LBMath.finiteDiffBackFirst_5(dt, f0, fm1, fm2, fm3, fm4);
+    return LBMath.finiteDiffBackFirst_5(args[0], args[1], args[2], args[3], args[4], args[5]);
 };
+
+/**
+ * The maximum number of terms supported by {@link LBMath.finiteDiffBackFirst}.
+ * @type Number
+ */
+LBMath.finiteDiffBackFirst.MAX_TERMS = 5;

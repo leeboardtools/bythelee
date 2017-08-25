@@ -17,6 +17,7 @@
             "massRadius": 4,    "_comment": "Used for the force arrows",
             "linearDamping": 0.1,
             "angularDamping": 0.01,
+            "velocityTerms": 3,
             "volumes": {
                 "mirrorPlane": {
                     "normal": { "x": 0, "y": 1, "z": 0},
@@ -127,6 +128,7 @@
                     "dumpFoilDetails": true,
                     "mass": 4.55,
                     "massRadius": 4,
+                    "velocityTerms": 3,
                     "obj3D": {
                         "position" : { "x": 1.6, "y": 0, "z": 1.0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
@@ -195,6 +197,7 @@
                     "mass": 200,
                     "centerOfMass": { "x": 0.5, "y": 0, "z": -1 },
                     "massRadius": 4,
+                    "velocityTerms": 3,
                     "obj3D": {
                         "position" : { "x": 2.2, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
@@ -217,6 +220,7 @@
                     "mass": 4,
                     "centerOfMass": { "x": 0.15, "y": 0, "z": -0.5 },
                     "massRadius": 4,
+                    "velocityTerms": 3,
                     "obj3D": {
                         "position" : { "x": 5.4, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }

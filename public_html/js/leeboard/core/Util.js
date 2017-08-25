@@ -202,3 +202,162 @@ LBUtil.newClassInstanceFromData = function(data) {
     return new fn(data.constructorArgs);
 };
 
+
+/**
+ * A rolling indexable buffer with a maximum size, the oldest element is always
+ * at index 0, the newest at index {@link LBUtil.RollingBuffer#getCurrentSize}.
+ * Elements are added to the end of the buffer via {@link LBUtil.RollingBuffer#push},
+ * removed from the end of the buffer via {@link LBUtil.RollingBuffer#pop_newest},
+ * and removed from the front of the buffer via {@link LBUtil.RollingBuffer#pop_oldest}.
+ * @param {Number} maxSize  The maximum number of elements to hold in the buffer.
+ * @returns {LBUtil.RollingBuffer}
+ */
+LBUtil.RollingBuffer = function(maxSize) {
+    this._buffer = [];
+    this._buffer.length = maxSize;
+    
+    this._frontIndex = 0;
+    this._backIndex = -1;
+    this._currentSize = 0;
+};
+
+LBUtil.RollingBuffer.prototype = {
+    /**
+     * @returns {Number}    The maximum number of elements the buffer can hold.
+     */
+    getMaxSize: function() {
+        return this._buffer.length;
+    },
+
+    /**
+     * @returns {Number}    The current number of elements in the buffer.
+     */
+    getCurrentSize: function() {
+        return this._currentSize;
+    },
+    
+    /**
+     * @returns {Boolean}    True if the buffer is full, that is if the next call to
+     * push will remove the oldest element.
+     */
+    isFull: function() {
+        return this._buffer.length === this._currentSize;
+    },
+    
+    /**
+     * Adds a value to the buffer, the value is added so it is at the highest index.
+     * @param {Object} value    The value to be added.
+     * @returns {Number}    The index the value was added at.
+     */
+    push: function(value) {
+        if (this._currentSize === this._buffer.length) {
+            // Gotta get rid of the front...
+            ++this._frontIndex;
+            if (this._frontIndex >= this._buffer.length) {
+                this._frontIndex = 0;
+            }
+            --this._currentSize;
+        }
+        
+        ++this._backIndex;
+        if (this._backIndex >= this._buffer.length) {
+            this._backIndex = 0;
+        }
+        this._buffer[this._backIndex] = value;
+        
+        return this._currentSize++;
+    },
+    
+    /**
+     * Removes the value that was last pushed.
+     * @returns {undefined|LBUtil.RollingBuffer._buffer}    The value, undefined
+     * if the buffer was empty.
+     */
+    popNewest: function() {
+        if (this._currentSize > 0) {
+            var value = this._buffer[this._backIndex];
+            --this._backIndex;
+            if (this._backIndex < 0) {
+                this._backIndex = this._buffer.length - 1;
+            }
+            --this._currentSize;
+            return value;
+        }
+        return undefined;
+    },
+    
+    /**
+     * Removes the value at index 0.
+     * @returns {undefined|LBUtil.RollingBuffer._buffer}    The value, undefined
+     * if the buffer was empty.
+     */
+    popOldest: function() {
+        if (this._currentSize > 0) {
+            var value = this._buffer[this._frontIndex];
+            ++this._frontIndex;
+            if (this._frontIndex >= this._buffer.length) {
+                this._frontIndex = 0;
+            }
+            --this._currentSize;
+            return value;
+        }
+        return undefined;
+    },
+    
+    /**
+     * Removes all elements from the buffer.
+     */
+    clear: function() {
+        this._frontIndex = 0;
+        this._backIndex = -1;
+        this._currentSize = 0;
+    },
+    
+    /**
+     * Retrieves the oldest object.
+     * @returns {Object}    The oldest object, undefined if the buffer is empty.
+     */
+    getOldest: function() {
+        return (this._currentSize) ? this._buffer[this._frontIndex] : undefined;
+    },
+    
+    /**
+     * Retrieves the oldest object.
+     * @returns {Object}    The newest object, undefined if the buffer is empty.
+     */
+    getNewest: function() {
+        return (this._currentSize) ? this._buffer[this._backIndex] : undefined;
+    },
+    
+    /**
+     * Retrieves the object at a given index. Index values are &ge; 0 and &lt; {@link LBUtil.RollingBuffer#getCurrentSize()},
+     * with the value at index 0 the oldest value in the buffer.
+     * @param {Number} index    The index of interest.
+     * @returns {Object}    The object at the index.
+     */
+    get: function(index) {
+        return this._buffer[this._indexToBufferIndex(index)];
+    },
+    
+    /**
+     * Sets the object at a given index. Index values are &ge; 0 and &lt; {@link LBUtil.RollingBuffer#getCurrentSize()},
+     * with the value at index 0 the oldest value in the buffer.
+     * @param {Number} index    The index of interest.
+     * @param {Object} value    The value to assign to the index.
+     * @returns {Object}    value.
+     */
+    set: function(index, value) {
+        this._buffer[this._indexToBufferIndex(index)] = value;
+        return value;
+    },
+    
+    _indexToBufferIndex: function(index) {
+        index += this._frontIndex;
+        if (index >= this._buffer.length) {
+            index -= this._buffer.length;
+        }
+        return index;
+    },    
+    
+    constructor: LBUtil.RollingBuffer
+};

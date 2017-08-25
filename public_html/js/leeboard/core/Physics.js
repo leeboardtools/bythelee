@@ -280,15 +280,53 @@ LBPhysics.Resultant3D.prototype = {
 };
 
 
+LBPhysics._calcVector3VelocityWorkingArray = [];
 /**
- * This is used to track the transforms for converting between a world coordinate
- * system and a local coordinate system. It can also keep track of the previous transforms
- * so it may calculate the world and local velocities of points in either coordinate
- * system.
- * @constructor
- * @returns {LBPhysics.CoordSystemState}
+ * Given an array of positions, calculates the velocity using backward finite difference.
+ * @param {Number} dt   The time step.
+ * @param {LBGeometry.Vector3[]} positions  The array of positions, positions[0] is the latest,
+ *  positions[1] is at t - dt, positions[2] is at t - 2*dt, etc.
+ * @param {LBGeometry.Vector3} store    If defined the vector to store the velocity into.
+ * @param {Number} [positionCount]  If defined the number of positions in positions to use, otherwise
+ *  all the positions are considered.
+ * @returns {LBGeometry.Vector3}    The velocity vector.
  */
-LBPhysics.CoordSystemState = function() {
+LBPhysics.calcVector3Velocity = function(dt, positions, store, positionCount) {
+    store = store || new LBGeometry.Vector3();    
+    
+    positionCount = positionCount || positions.length;
+    positionCount = Math.min(positionCount, LBMath.finiteDiffBackFirst.MAX_TERMS);
+    
+    var args = LBPhysics._calcVector3VelocityWorkingArray;
+    args[0] = dt;
+    
+    args.length = 1;
+    for (var i = 0; i < positionCount; ++i) {
+        args[i+1] = positions[i].x;
+    }    
+    store.x = LBMath.finiteDiffBackFirst(args);
+        
+    args.length = 1;
+    for (var i = 0; i < positionCount; ++i) {
+        args[i+1] = positions[i].y;
+    }    
+    store.y = LBMath.finiteDiffBackFirst(args);
+        
+    args.length = 1;
+    for (var i = 0; i < positionCount; ++i) {
+        args[i+1] = positions[i].z;
+    }    
+    store.z = LBMath.finiteDiffBackFirst(args);
+    
+    return store;
+};
+
+/**
+ * Holds a pair of transforms for converting between a world coordinate system and a
+ * local coordinate system. Used by [@link LBPhysics.CoordSystemState}.
+ * @returns {LBPhysics.CoordTransforms}
+ */
+LBPhysics.CoordTransforms = function() {
     /**
      * The matrix transforming from local to world coordinates.
      * @member {LBGeometry.Matrix4}
@@ -300,60 +338,18 @@ LBPhysics.CoordSystemState = function() {
      * @member {LBGeometry.Matrix4}
      */
     this.localXfrm = new LBGeometry.Matrix4();
-    
-    /**
-     * The matrix transforming from local to world coordinates from the previous time step.
-     * @member {LBGeometry.Matrix4}
-     */    
-    this.prevWorldXfrm = new LBGeometry.Matrix4();
-    
-    /**
-     * The matrix transforming from world to local coordinates from the previous time step.
-     * @member {LBGeometry.Matrix4}
-     */    
-    this.prevLocalXfrm = new LBGeometry.Matrix4();
-    
-    /**
-     * The last time step.
-     * @member {Number}
-     */
-    this.dt = 0;
-    
-    
-    this.isXfrmsValid = false;
-  
 };
 
-LBPhysics.CoordSystemState._workingPosA = new LBGeometry.Vector3();
-LBPhysics.CoordSystemState._workingPosB = new LBGeometry.Vector3();
-LBPhysics.CoordSystemState._workingPosC = new LBGeometry.Vector3();
-LBPhysics.CoordSystemState._workingPosD = new LBGeometry.Vector3();
-LBPhysics.CoordSystemState._workingPlane = new LBGeometry.Plane();
-
-LBPhysics.CoordSystemState.prototype = {
+LBPhysics.CoordTransforms.prototype = {
     /**
-     * Sets the world and local transforms, saving the previous transforms in the
-     * process. If either Xfrm matrix is not defined it is obtained by inverting the
+     * Sets the world and local transforms. If either Xfrm matrix is not defined it is obtained by inverting the
      * other matrix, if both are not defined then the matrices are set to the identity
      * matrix.
      * @param {object} [worldXfrm]    If defined, the 4x4 matrix for transforming from local to world coordinaes.
-     * @param {Number} [dt]   The simulation time change from the last call to this, used
-     * to compute velocity.
      * @param {object} [localXfrm]    If defined, the 4x4 matrix for transforming from world to local coordinates.
-     * @returns {LBPhysics.CoordSystemState} this.
+     * @returns {LBPhysics.CoordTransforms} this.
      */
-    setXfrms: function(worldXfrm, dt, localXfrm) {
-        // Need to use LBUtil.isVar() because dt is numeric.
-        if (LBUtil.isVar(dt) && (dt > 0)) {
-            // Save the current transforms...
-            this.dt = dt;
-            this.prevWorldXfrm.copy(this.worldXfrm);
-            this.prevLocalXfrm.copy(this.localXfrm);
-        }
-        else {
-            this.dt = 0;
-        }
-        
+    setXfrms: function(worldXfrm, localXfrm) {        
         if (!localXfrm){
             if (!worldXfrm) {
                 // Presume they're both going to be identity...
@@ -374,65 +370,320 @@ LBPhysics.CoordSystemState.prototype = {
             this.worldXfrm.copy(worldXfrm);
         }
         
-        if ((this.dt === 0) || !this.isXfrmsValid) {
-            // No time change, make the previous transforms match the current transforms.
-            this.prevWorldXfrm.copy(this.worldXfrm);
-            this.prevLocalXfrm.copy(this.localXfrm);
-        }
-        this.isXfrmsValid = true;
+        return this;
+    },
+    
+    /**
+     * Sets this to match another.
+     * @param {LBPhysics.CoordTransforms} other The transforms to be copied.
+     * @returns {LBPhysics.CoordTransforms} this.
+     */
+    copy: function(other) {
+        this.worldXfrm.copy(other.worldXfrm);
+        this.localXfrm.copy(other.localxXfrm);
         
         return this;
     },
+    
+    /**
+     * Converts a vector from local to world coordinates.
+     * @param {LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the world coordinates.
+     */
+    vector3ToWorld: function(vector, store) {
+        if (!store) {
+            store = vector.clone();
+        }
+        else if (store !== vector) {
+            store.copy(vector);
+        }
+        
+        store.applyMatrix4(this.worldXfrm);
+        return store;
+    },
+    
+    /**
+     * Converts a vector from world to local coordinates.
+     * @param {LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the local coordinates.
+     */
+    vector3ToLocal: function(vector, store) {
+        if (!store) {
+            store = vector.clone();
+        }
+        else if (store !== vector) {
+            store.copy(vector);
+        }
+        
+        store.applyMatrix4(this.localXfrm);
+        return store;
+    },
+    
+    /**
+     * Applies the local to world rotation to a vector.
+     * @param {LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the world coordinates.
+     */
+    vector3ToWorldRotation: function(vector, store) {
+        if (!store) {
+            store = vector.clone();
+        }
+        else if (store !== vector) {
+            store.copy(vector);
+        }
+        
+        store.applyMatrix4Rotation(this.worldXfrm);
+        return store;
+    },
+    
+    /**
+     * Applies the world to local rotation to a vector.
+     * @param {LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the local coordinates.
+     */
+    vector3ToLocalRotation: function(vector, store) {
+        if (!store) {
+            store = vector.clone();
+        }
+        else if (store !== vector) {
+            store.copy(vector);
+        }
+        
+        store.applyMatrix4Rotation(this.localXfrm);
+        return store;
+    },
+    
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        this.localXfrm = null;
+        this.worldXfrm = null;
+        
+    },
+    
+    constructor: LBPhysics.CoordTransforms
+};
+
+
+/**
+ * This is used to track the transforms for converting between a world coordinate
+ * system and a local coordinate system. It can also keep track of the previous transforms
+ * so it may calculate the world and local velocities of points in either coordinate
+ * system.
+ * @constructor
+ * @param {Number} [velTerms=2]   The number of terms to use for the finite difference
+ * velocity calculation, must be at least 2.
+ * @returns {LBPhysics.CoordSystemState}
+ */
+LBPhysics.CoordSystemState = function(velTerms) {
+    if (velTerms === undefined) {
+        velTerms = 2;
+    }
+    if (velTerms <= 0) {
+        velTerms = 2;
+    }
+    else if (velTerms > LBMath.finiteDiffBackFirst.MAX_TERMS) {
+        velTerms = LBMath.finiteDiffBackFirst.MAX_TERMS;
+    }
+
+    /**
+     * The array of coordinate transforms
+     */
+    this.xfrmsBuffer = new LBUtil.RollingBuffer(velTerms);
+    
+    /**
+     * The time step passed to {@link LBPhysics.CoordSystemState#setXfrms}.
+     * @member {Number}
+     */
+    this.dt = 0;
+  
+};
+
+LBPhysics.CoordSystemState._workingPosA = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPosB = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPosC = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPosD = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPlane = new LBGeometry.Plane();
+LBPhysics.CoordSystemState._workingPositions = [];
+
+LBPhysics.CoordSystemState.prototype = {
+    /**
+     * Sets the world and local transforms, saving the previous transforms in the
+     * process. If either Xfrm matrix is not defined it is obtained by inverting the
+     * other matrix, if both are not defined then the matrices are set to the identity
+     * matrix.
+     * @param {object} [worldXfrm]    If defined, the 4x4 matrix for transforming from local to world coordinaes.
+     * @param {Number} [dt]   The simulation time change from the last call to this, used
+     * to compute velocity.
+     * @param {object} [localXfrm]    If defined, the 4x4 matrix for transforming from world to local coordinates.
+     * @returns {LBPhysics.CoordSystemState} this.
+     */
+    setXfrms: function(worldXfrm, dt, localXfrm) {
+        // Need to use LBUtil.isVar() because dt is numeric.
+        if ((dt === undefined) || dt <= 0) {
+            this.xfrmsBuffer.clear();
+        }
+        this.dt = dt;
+        
+        if (!this.xfrmsBuffer.isFull()) {
+            // If we're not full we need to create a new xfrms object.
+            this.xfrmsBuffer.push(new LBPhysics.CoordTransforms());
+        }
+        else {
+            // We'll just push the oldest xfrms object back to the front...
+            this.xfrmsBuffer.push(this.xfrmsBuffer.getOldest());
+        }
+        this.xfrmsBuffer.getNewest().setXfrms(worldXfrm, localXfrm);
+        
+        this.worldXfrm = this.xfrmsBuffer.getNewest().worldXfrm;
+        this.localXfrm = this.xfrmsBuffer.getNewest().localXfrm;
+        
+        return this;
+    },
+    
+    /**
+     * Retrieves the number of positions used for computing velocity.
+     */
+    getVelocityTerms: function() {
+        return this.xfrmsBuffer.getMaxSize();
+    },
+    
+    /**
+     * Converts a vector from local to world coordinates.
+     * @param {LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the world coordinates.
+     */
+    vector3ToWorld: function(vector, store) {
+        return this.xfrmsBuffer.getNewest().vector3ToWorld(vector, store);
+    },
+    
+    /**
+     * Converts a vector from world to local coordinates.
+     * @param {LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the local coordinates.
+     */
+    vector3ToLocal: function(vector, store) {
+        return this.xfrmsBuffer.getNewest().vector3ToLocal(vector, store);
+    },
+
     
     /**
      * Marks the coordinate transforms as invalid so the initial transforms are not
      * saved for velocity calculations.
      */
     reset: function() {
-        this.isXfrmsValid = false;
+        this.xfrmsBuffer.clear();
     },
     
     
     /**
      * Calculates world position, world velocity, and local velocity for a given local
      * point.
-     * @param {object} localPos The local coordinates of the point of interest.
+     * @param {LBGeometry.Vector3} localPos The local coordinates of the point of interest.
      * @param {object} results  The object to receive the results. Results are stored
      * in keys, and are only computed if the key exists:
      *      <li>worldPos: The world coordinates of localPos.
      *      <li>worldVel:   The velocity of localPos in world coordinates.
-     *      <li>localVel:   The velocity of localPos in local coordinates.
-     * @param {object} [prevLocalPos] If defined, the previous local position, used for velocity calculation,
+     *      <li>localVel:   The velocity of localPos in local coordinates. Note that this is
+     *      the world velocity rotated into local coordinates, it is not the velocity
+     *      of the position relative to the local coordinate system (if that were the case
+     *      then this would always be 0 if prevLocalPos were not defined).
+     * @param {LBGeometry.Vector3} [prevLocalPos] If defined, the previous local position, used for velocity calculation,
      * if not defined then the previous position is presumed to be localPos.
      * @returns {LBPhysics.CoordSystemState} this.
      */
     calcVectorLocalToWorld: function(localPos, results, prevLocalPos) {
         var worldPos = results.worldPos || LBPhysics.CoordSystemState._workingPosA;
-        worldPos.copy(localPos);
-        worldPos.applyMatrix4(this.worldXfrm);
+        if (!this.xfrmsBuffer.getCurrentSize()) {
+            worldPos.copy(localPos);
+            if (results.worldVel) {
+                results.worldVel.zero();
+            }
+            if (results.localVel) {
+                results.localVel.zero();
+            }
+            return this;
+        }
+        
+        this.xfrmsBuffer.getNewest().vector3ToWorld(localPos, worldPos);
 
-        var isWorldVel = results.worldVel;
-        var isLocalVel = results.localVel;
-        if (isWorldVel || isLocalVel) {
-            if (this.dt <= 0) {
+        var worldVel = results.worldVel;
+        var localVel = results.localVel;
+        if (worldVel || localVel) {
+            if (this.xfrmsBuffer.getCurrentSize() <= 1) {
                 // No time change, no velocity.
-                if (isWorldVel) {
-                    results.worldVel.zero();
+                if (worldVel) {
+                    worldVel.zero();
                 }
-                if (isLocalVel) {
-                    results.localVel.zero();
+                if (localVel) {
+                    localVel.zero();
                 }
             }
-            else {
-                prevLocalPos = prevLocalPos || localPos;
-                var prevPos = LBPhysics.CoordSystemState._workingPosB;
-                prevPos.copy(prevLocalPos);
-                prevPos.applyMatrix4(this.prevWorldXfrm);
+            else {                
+                var positionCount;
+                var prevLocalPosArray = undefined;
+                if (prevLocalPos) {
+                    if (Array.isArray(prevLocalPos)) {
+                        prevLocalPosArray = prevLocalPos;
+                        positionCount = prevLocalPosArray.length + 1;
+                    }
+                    else {
+                        positionCount = 2;
+                    }
+                }
+                else {
+                    positionCount = Math.min(this.xfrmsBuffer.getCurrentSize(), LBMath.finiteDiffBackFirst.MAX_TERMS);
+                }
                 
-                var worldVel = (isWorldVel) ? results.worldVel : LBPhysics.CoordSystemState._workingPosC;
-                worldVel.subVectors(worldPos, prevPos).multiplyScalar(1/this.dt);
+                var positions = LBPhysics.CoordSystemState._workingPositions;
+                for (var i = positions.length; i < positionCount; ++i) {
+                    positions[i] = new LBGeometry.Vector3();
+                }
+
+                // We already computed the world position of localPos, which is positions[0],
+                // so don't have to do a transform.
+                positions[0].copy(worldPos);
                 
-                if (isLocalVel) {
+                if (prevLocalPos) {
+                    if (prevLocalPosArray) {
+                        for (var i = 1; i < positionCount; ++i) {
+                            positions[i].copy(prevLocalPosArray[i - 1]);
+                        }
+                    }
+                    else {
+                        positions[1].copy(prevLocalPos);
+                    }
+                }
+                else {
+                    for (var i = 1; i < positionCount; ++i) {
+                        positions[i].copy(localPos);
+                    }
+                }
+
+                var base = positionCount - 1;
+                for (var i = 1; i < positionCount; ++i) {
+                    this.xfrmsBuffer.get(base - i).vector3ToWorld(positions[i], positions[i]);
+                }
+                
+                worldVel = worldVel || LBPhysics.CoordSystemState._workingPosC;
+                LBPhysics.calcVector3Velocity(this.dt, positions, worldVel, positionCount);
+                
+                if (localVel) {
                     results.localVel.copy(worldVel);
                     results.localVel.applyMatrix4Rotation(this.localXfrm);
                 }
@@ -449,13 +700,12 @@ LBPhysics.CoordSystemState.prototype = {
      * @returns {Number}    The angular velocity in radians/sec.
      */
     calcAngularVelocityAboutLocalAxis: function(rotAxis) {
-        if (this.dt === 0) {
+        if (this.xfrmsBuffer.getCurrentSize() <= 1) {
             return 0;
         }
         
         var prevPos = LBPhysics.CoordSystemState._workingPosA;
-        prevPos.copy(rotAxis);
-        prevPos.applyMatrix4Rotation(this.worldXfrm);
+        this.xfrmsBuffer.getNewest().vector3ToWorldRotation(rotAxis, prevPos);
         
         // refPlane is the plane perpendicular to rotAxis in world coordinates.
         var refPlane = LBPhysics.CoordSystemState._workingPlane;        
@@ -468,9 +718,8 @@ LBPhysics.CoordSystemState.prototype = {
         LBGeometry.makeOrthogonal(rotAxis, prevPos);
         var currentPos = LBPhysics.CoordSystemState._workingPosB;
         currentPos.copy(prevPos);
-        
-        prevPos.applyMatrix4Rotation(this.prevWorldXfrm);
-        currentPos.applyMatrix4Rotation(this.worldXfrm);
+        this.xfrmsBuffer.get(this.xfrmsBuffer.getCurrentSize() - 2).vector3ToWorldRotation(prevPos, prevPos);        
+        this.xfrmsBuffer.getNewest().vector3ToWorldRotation(currentPos, currentPos);
         
         var prevProj = LBPhysics.CoordSystemState._workingPosC;
         refPlane.projectPoint(prevPos, prevProj);
@@ -497,12 +746,13 @@ LBPhysics.CoordSystemState.prototype = {
      * @returns {undefined}
      */
     destroy: function() {
-        this.applPoint = null;
-        this.localXfrm = null;
-        this.moment = null;
-        this.prevLocalXfrm = null;
-        this.prevWorldXfrm = null;
+        if (this.xfrmsBuffer) {
+            this.xfrmsBuffer.destroy();
+            this.xfrmsBuffer = null;
+        }
+        
         this.worldXfrm = null;
+        this.localXfrm = null;
     },
     
     constructor: LBPhysics.CoordSystemState
@@ -794,6 +1044,12 @@ LBPhysics.RigidBody.prototype = {
         }
         if (typeof(data.angularDampling) === 'number') {
             this.angularDamping = data.angularDamping;
+        }
+        
+        if (data.velocityTerms) {
+            if (data.velocityTerms !== this.coordSystem.getVelocityTerms()) {
+                this.coordSystem = new LBPhysics.CoordSystemState(data.velocityTerms);
+            }
         }
         
         this.physicalPropertiesDirty = true;
