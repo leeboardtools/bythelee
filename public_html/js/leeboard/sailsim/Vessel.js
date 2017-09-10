@@ -75,6 +75,16 @@ LBSailSim.FoilInstance.prototype.destroy = function() {
  * @returns {LBSailSim.FoilInstance}    this.
  */
 LBSailSim.FoilInstance.prototype.updateFoilForce = function(dt, flow) {
+    var dbgField = undefined;
+    if (this.dumpFoilDetails) {
+        dbgField = LBDebug.DataLog.getField(this.name);
+        if (dbgField) {
+            if (!this.foilDetails.localResultant) {
+                this.foilDetails.localResultant = new LBPhysics.Resultant3D();
+            }
+        }
+    }
+    
     var pos = LBSailSim.FoilInstance._workingPos;
     pos.set(0, 0, this.foil.sliceZ);
     pos.applyMatrix4(this.coordSystem.worldXfrm);
@@ -89,25 +99,23 @@ LBSailSim.FoilInstance.prototype.updateFoilForce = function(dt, flow) {
     
     this.addWorldResultant(resultant);
     
-    if (this.dumpFoilDetails) {
-        var dbgField = LBDebug.DataLog.getField(this.name);
-        if (dbgField) {
-            this.obj3D.getWorldPosition(pos);
-            dbgField.setSubFieldValue('wPos', pos);
+    if (dbgField) {
+        this.obj3D.getWorldPosition(pos);
+        dbgField.setSubFieldValue('wPos', pos);
 
-            var rot = LBSailSim.FoilInstance._workingEuler = this.obj3D.getWorldRotation(LBSailSim.FoilInstance._workingEuler);
-            dbgField.setSubFieldValue('wRot', rot);
+        var rot = LBSailSim.FoilInstance._workingEuler = this.obj3D.getWorldRotation(LBSailSim.FoilInstance._workingEuler);
+        dbgField.setSubFieldValue('wRot', rot);
 
-            var details = this.foilDetails;
-            dbgField.setSubFieldValue('wQInf', qInf);
-            dbgField.setSubFieldValue('wVel', details.worldVel);
+        var details = this.foilDetails;
+        dbgField.setSubFieldValue('wQInf', qInf);
+        dbgField.setSubFieldValue('wVel', details.worldVel);
 
-            dbgField.setSubFieldValue('chord', details.chord);
-            dbgField.setSubFieldValue('angleDeg', details.angleDeg);
-            dbgField.setSubFieldValue('lQInf', details.qInfLocal);
+        dbgField.setSubFieldValue('chord', details.chord);
+        dbgField.setSubFieldValue('angleDeg', details.angleDeg);
+        dbgField.setSubFieldValue('lQInf', details.qInfLocal);
 
-            dbgField.setSubFieldValue('wResultant', resultant);
-        }
+        dbgField.setSubFieldValue('lResultant', details.localResultant);
+        dbgField.setSubFieldValue('wResultant', resultant);
     }
     return this;
 };
@@ -127,6 +135,9 @@ LBSailSim.FoilInstance.addDebugFields = function(name) {
     LBDebug.DataLog.addField([name, 'angleDeg']);
     LBDebug.DataLog.addFieldVector2([name, 'chord']);
     LBDebug.DataLog.addFieldVector2([name, 'lQInf']);
+    LBDebug.DataLog.addSpacer(name);
+
+    LBDebug.DataLog.addFieldResultant([name, 'lResultant']);
     LBDebug.DataLog.addSpacer(name);
 
     LBDebug.DataLog.addFieldResultant([name, 'wResultant']);
@@ -965,6 +976,7 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
     
     this.sailEnv.water.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, 0, this.apparentCurrent);
     this.apparentCurrent.sub(this.worldLinearVelocity);
+    this.apparentCurrent.z = 0;
     
     this._updateFoilForces(dt, this.sailEnv.wind, this.airfoils);
     this._updateFoilForces(dt, this.sailEnv.water, this.hydroFoils);
@@ -1167,13 +1179,14 @@ LBSailSim.Vessel.prototype.getLeewayDeg = function(isRound) {
         return 0;
     }
     
-    var heading = this.obj3D.rotation.z * LBMath.RAD_TO_DEG;
+    var rot = this.obj3D.getWorldRotation(LBSailSim.Vessel._workingEuler);
+    var heading = rot.z * LBMath.RAD_TO_DEG + 180;
     var boatDir = Math.atan2(this.worldLinearVelocity.y, this.worldLinearVelocity.x) * LBMath.RAD_TO_DEG;
-    var leeway = boatDir - heading;
+    var leeway = LBMath.subDegrees(boatDir, heading);
     if (isRound) {
         leeway = Math.round(leeway);
     }
-    return LBMath.wrapDegrees(leeway);
+    return leeway;
 };
 
 /**

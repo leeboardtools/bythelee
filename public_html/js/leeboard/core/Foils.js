@@ -56,29 +56,55 @@ LBFoils.ClCd = function(cl, cd, cm) {
     this.cmIsChordFraction = false;
 };
 
+LBFoils.ClCd._workingVector3A;
+LBFoils.ClCd._workingVector3B;
+LBFoils.ClCd._workingLine3A;
 /**
  * Calculates the lift and drag forces and the moment from the coefficients.
  * @param {object} coefs    The lift/drag coefficients.
  * @param {Number} rho    The density.
  * @param {Number} area   The area.
  * @param {Number} qInfSpeed   The magnitude of the free stream velocity.
+ * @param {object} qInfLocal    The free stream velocity in the local x-y plane, used to determine
+ * the angle of the chord to the lift/drag vector.
  * @param {Number} chordLength The chord length, used for calculating the moment.
  * @param {Number} aspectRatio  Optional aspect ratio, used for calculating the induced drag.
  * @param {object} store  Optional object to store the lift, drag, and moment into.
  * @returns {object}    The object containing the calculated lift, drag, and moment.
  */
-LBFoils.ClCd.calcLiftDragMoment = function(coefs, rho, area, qInfSpeed, chordLength, aspectRatio, store) {
+LBFoils.ClCd.calcLiftDragMoment = function(coefs, rho, area, qInfSpeed, qInfLocal, chordLength, aspectRatio, store) {
     var scale = 0.5 * rho * area * qInfSpeed * qInfSpeed;
     store = store || {};
     store.lift = coefs.cl * scale;
     store.drag = coefs.cd * scale;
     chordLength = chordLength || 1;
 
-    var cm = coefs.cm;
-    if (coefs.cmIsChordFraction) {
-        cm *= Math.sqrt(coefs.cl * coefs.cl + coefs.cd * coefs.cd);
+    if (LBMath.isLikeZero(qInfSpeed)) {
+        store.moment = 0;
     }
-    store.moment = cm * scale * chordLength;
+    else if (coefs.cmIsChordFraction) {
+        var force = LBFoils.ClCd._workingVector3A = LBFoils.ClCd._workingVector3A || new LBGeometry.Vector3();
+        var cosAlpha = qInfLocal.x / qInfSpeed;
+        var sinAlpha = qInfLocal.y / qInfSpeed;
+        force.set(store.drag * cosAlpha - store.lift * sinAlpha, store.drag * sinAlpha + store.lift * cosAlpha, 0);
+
+        var line = LBFoils.ClCd._workingLine3A = LBFoils.ClCd._workingLine3A || new LBGeometry.Line3();
+        
+        // We use |coefs.cm| because the sign is handled by the lift/drag and qInfLocal direction.
+        line.start.set(Math.abs(coefs.cm) * chordLength, 0, 0);
+        line.end.copy(line.start);
+        line.end.add(force);
+
+        var applPoint = LBFoils.ClCd._workingVector3B = LBFoils.ClCd._workingVector3B || new LBGeometry.Vector3();
+        line.closestPointToPoint(LBGeometry.ORIGIN, false, applPoint);        
+        applPoint.z = 0;
+        
+        LBPhysics.calcMoment(force, applPoint, applPoint);
+        store.moment = applPoint.z;
+    }
+    else {
+        store.moment = coefs.cm * scale * chordLength;
+    }
 
     if (aspectRatio) {
         var ci = coefs.cl * coefs.cl / (Math.PI * aspectRatio);
@@ -420,7 +446,7 @@ LBFoils.ClCdCurve.prototype = {
         
         // TODO: To support a non-symmetric clCdStall, we need to add liftStartDeg and stallEndDeg.
         // Also need to support reverse direction stall angles.
-        if (this.clCdStall === null) {
+        if (!this.clCdStall) {
             store = this.clCdLifting.calcCoefsDeg(degrees, store);
             store.stallFraction = 0;
         }
@@ -601,7 +627,7 @@ LBFoils.Foil.prototype = {
             details.angleDeg = angleDeg;
             details.qInfLocal = LBGeometry.copyOrCloneVector3(details.qInfLocal, qInfLocal);
         }
-        return LBFoils.ClCd.calcLiftDragMoment(coefs, rho, this.area, qInfSpeed, chordLength, this.aspectRatio, store);
+        return LBFoils.ClCd.calcLiftDragMoment(coefs, rho, this.area, qInfSpeed, qInfLocal, chordLength, this.aspectRatio, store);
     },
     
     /**
@@ -661,9 +687,26 @@ LBFoils.Foil.prototype = {
 
         coordSystemState.calcVectorLocalToWorld(this.chordLine.start, velResults);
         appVel.copy(velResults.worldVel);
+        var startSpeed = appVel.lengthSq();
         
         coordSystemState.calcVectorLocalToWorld(this.chordLine.end, velResults);
-        appVel.add(velResults.worldVel).multiplyScalar(0.5);
+        var endSpeed = velResults.worldVel.lengthSq();
+        
+        var totalSpeed = startSpeed + endSpeed;
+        if (totalSpeed > 0) {
+            var startWeight;
+            if (startSpeed < endSpeed) {
+                startWeight = 0.85;
+            }
+            else {
+                startWeight = 0.15;
+            }
+            var endWeight = 1 - startWeight;
+            
+            appVel.multiplyScalar(startWeight);
+            velResults.worldVel.multiplyScalar(endWeight);
+            appVel.add(velResults.worldVel);
+        }
         
         if (details) {
             details.worldVel = LBGeometry.copyOrCloneVector3(details.worldVel, velResults.worldVel);
@@ -676,6 +719,11 @@ LBFoils.Foil.prototype = {
         appVel.z = 0;
         
         resultant = this.calcLocalForce(rho, appVel, details, resultant);
+        
+        if (details && details.localResultant) {
+            details.localResultant.copy(resultant);
+        }
+        
         resultant.applyMatrix4(coordSystemState.worldXfrm);
         
         return resultant;

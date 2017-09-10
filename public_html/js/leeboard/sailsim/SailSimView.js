@@ -166,7 +166,16 @@ LBSailSim.PhaserView.prototype._loadForceArrowHull = function(boat) {
     this.setRigidBodyForceArrow(boat, hullArrow);
 
     boat.getForceArrowResultant = function(plane, bounds, secondaryPlane) {
-        return boat.hullResultant ? boat.hullResultant.convertToWrench(plane, bounds, secondaryPlane) : undefined;
+        if (!boat.hullResultant) {
+            return undefined;
+        }
+        var resultant = boat.hullResultant.clone();
+        resultant.applPoint.z = 0;
+        resultant.force.z = 0;
+        resultant.moment.x = 0;
+        resultant.moment.y = 0;
+        return resultant.convertToWrench(plane, bounds, secondaryPlane);
+        //return boat.hullResultant ? boat.hullResultant.convertToWrench(plane, bounds, secondaryPlane) : undefined;
     };
 
 };

@@ -427,21 +427,33 @@ LBGeometry.subVectors3 = function(vecA, vecB) {
 
 /**
  * Returns the cross product of two 2D vectors, which is a 3D vector..
- * @param {object} vecA The first vector.
- * @param {object} vecB The second vectorl
+ * @param {LBGeometry.Vector2} vecA The first vector.
+ * @param {LBGeometry.Vector2} vecB The second vector.
+ * @param {LBGeometry.Vector3} [store]  If defined the 3D vector to receive the cross product.
  * @returns {object}    A new 3D vector representing vecA X vecB
  */
-LBGeometry.crossVectors2 = function(vecA, vecB) {
-    return new LBGeometry.Vector3(0, 0, vecA.x * vecB.y - vecA.y * vecB.x);
+LBGeometry.crossVectors2 = function(vecA, vecB, store) {
+    var z = vecA.x * vecB.y - vecA.y * vecB.x;
+    if (store) {
+        return store.set(0, 0, z);
+    }
+    return new LBGeometry.Vector3(0, 0, z);
 };
 
 /**
  * Returns the cross product of two 3D vectors.
- * @param {object} vecA The first vector.
- * @param {object} vecB The second vectorl
+ * @param {LBGeometry.Vector3} vecA The first vector.
+ * @param {LBGeometry.Vector3} vecB The second vector.
+ * @param {LBGeometry.Vector3} [store]  If defined the 3D vector to receive the cross product.
  * @returns {object}    A new vector representing vecA X vecB
  */
-LBGeometry.crossVectors3 = function(vecA, vecB) {
+LBGeometry.crossVectors3 = function(vecA, vecB, store) {
+    if (store) {
+        store.copy(vecA);
+        store.cross(vecB);
+        return store;
+    }
+    
     var vec = new LBGeometry.Vector3(vecA.x, vecA.y, vecA.z);
     vec.cross(vecB);
     return vec;

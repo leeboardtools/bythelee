@@ -120,6 +120,18 @@ LBMath.wrapDegrees = function(degrees) {
 };
 
 /**
+ * Subtracts b from a in degrees, wrapping the result such that |b - a| &le; 180.
+ * @param {Number} a    The degrees to subtract from.
+ * @param {Number} b    The degress to subtract.
+ * @returns {Number}    The subtraction, wrapped.
+ */
+LBMath.subDegrees = function(a, b) {
+    a = LBMath.wrapDegrees(a);
+    b = LBMath.wrapDegrees(b);
+    return LBMath.wrapDegrees(a - b);
+};
+
+/**
  * Rounds a value to a certain number of decimal places.
  * @param {Number} val  The value to be rounded.
  * @param {Number} [decimalPlaces]  The number of decimal places, less than zero rounds

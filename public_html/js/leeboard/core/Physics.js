@@ -23,17 +23,18 @@ var LBPhysics = LBPhysics || {};
 
 /**
  * Calculates the moment about the origin of a force applied at a position.
- * @param {type} force  The force.
- * @param {type} position   The application point of the force.
+ * @param {LBGeometry.Vector3} force  The force.
+ * @param {LbGeometry.Vector3} position   The application point of the force.
+ * @param {LBGeometry.Vector3} [store]  If defined the 3D vector to receive the cross product.
  * @returns {object} Vector representing the moment about the origin from 
  * force being applied at position.
  */
-LBPhysics.calcMoment = function(force, position) {
+LBPhysics.calcMoment = function(force, position, store) {
     // Need to use LBUtil.isVar() because z is numeric.
     if (!LBUtil.isVar(force.z)) {
-        return LBGeometry.crossVectors2(position, force);
+        return LBGeometry.crossVectors2(position, force, store);
     }
-    return LBGeometry.crossVectors3(position, force);
+    return LBGeometry.crossVectors3(position, force, store);
 };
 
 /**
@@ -1098,6 +1099,48 @@ LBPhysics.RigidBody.prototype = {
             this.physicalPropertiesDirty = true;
         }
         return this;
+    },
+    
+    /**
+     * Retrieves a part or part of a part given the names of the parts of interest.
+     * @param {String|String[]} names   The name of the part if only a part of this
+     * rigid body is desired, or an array of the names of the parts, with the
+     * name of the part of this rigid body at index startIndex, and the name of the part of that
+     * part at startIndex + 1, and so forth.
+     * @param {Number} [startIndex=0]   The index of the first name in names if names is
+     * an array of strings.
+     * @returns {undefined|LBPhysics.RigidBody} The part, undefined if not found.
+     */
+    getPart: function(names, startIndex) {
+        if (!Array.isArray(names)) {
+            return this.getPartWithName(names);
+        }
+        
+        startIndex = startIndex || 0;
+        
+        var name = names[startIndex];
+        var part = this.getPartWithName(names[startIndex]);
+        if (part) {
+            if (startIndex + 1 < names.length) {
+                return part.getPart(names, startIndex + 1);
+            }
+        }
+        
+        return part;
+    },
+    
+    /**
+     * Retrieves a part of this rigid body by name.
+     * @param {String} name The name of the part.
+     * @returns {LBPhysics.RigidBody|undefined} The part, undefined if not found.
+     */
+    getPartWithName: function(name) {
+        for (var i = 0; i < this.parts.length; ++i) {
+            if (this.parts[i].name === name) {
+                return this.parts[i];
+            }
+        }
+        return undefined;
     },
     
     /**

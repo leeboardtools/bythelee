@@ -114,15 +114,15 @@ PlayState.init = function() {
     // TEST!!!
     this.isSingleStep = true;
     
-/*    LBSailSim.FoilInstance.addDebugFields('rudder');
-    LBDebug.DataLog.addSpacer();
-    LBSailSim.FoilInstance.addDebugFields('keel');    
-    LBDebug.DataLog.addSpacer();
+//    LBSailSim.FoilInstance.addDebugFields('rudder');
+//    LBDebug.DataLog.addSpacer();
+//    LBSailSim.FoilInstance.addDebugFields('keel');    
+//    LBDebug.DataLog.addSpacer();
     LBSailSim.FoilInstance.addDebugFields('mainsail');    
     LBDebug.DataLog.addSpacer();
-*/
-    LBSailSim.Hull.addDebugFields('TubbyA');
-    LBDebug.DataLog.addSpacer();
+
+//    LBSailSim.Hull.addDebugFields('TubbyA');
+//    LBDebug.DataLog.addSpacer();
     LBSailSim.Vessel.addDebugFields('TubbyA');
 
     LBDebug.DataLog.outputHeading();
@@ -263,9 +263,9 @@ PlayState._spawnCharacters = function (data) {
     centerY = this.sailEnv.phaserEnv.fromPixelsY(100);
     rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(-60);
 
-    centerX = this.sailEnv.phaserEnv.fromPixelsX(100);
+    centerX = this.sailEnv.phaserEnv.fromPixelsX(400);
     centerY = this.sailEnv.phaserEnv.fromPixelsY(0);
-    rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(-90);
+    rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(0);
     
     var rollDeg = 0;
     var pitchDeg = 0;
@@ -434,11 +434,11 @@ PlayState.preRender = function() {
 //
 //--------------------------------------------------
 PlayState.update = function() {
-    this._updateCamera();
-    this._handleInput();
-    
     this.sailEnv.update();
     LBDebug.DataLog.output();
+    
+    this._updateCamera();
+    this._handleInput();
     
     this._updateHUD();
     this._updateArrows();
@@ -474,10 +474,10 @@ PlayState._updateHUD = function() {
         else {
             var leewayAngle = this.myBoat.getLeewayDeg(true);
             if (leewayAngle < 0) {
-                this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Port";
+                this.leewayText.text = "Leeway: " + -leewayAngle.toFixed() + " to Stbd";
             }
             else if (leewayAngle > 0) {
-                this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Stbd";
+                this.leewayText.text = "Leeway: " + leewayAngle.toFixed() + " to Port";
             }
             else {
                 this.leewayText.text = "Leeway: 0";

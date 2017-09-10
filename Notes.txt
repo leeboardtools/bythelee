@@ -24,6 +24,8 @@ Figure out buoyancy issues.
 
 Figure out oscillating forces.
 
+Need to limit the sail/keel forces when they get near the water surface (probably anything closer than 45 degrees).
+
 Need to track shifting child rigid bodies, but only when they change.
 Maybe we don't really care about the boom and rudder?
 - Vessel:

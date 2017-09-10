@@ -173,6 +173,7 @@ LBSailSim.Hull.prototype = {
      */
     _updatePropertiesFromVessel: function() {
         var vessel = this.vessel;
+        
         this.waterSpeed = vessel.apparentCurrent.length();
         this.halfRhoVSq = 0.5 * vessel.sailEnv.water.density * this.waterSpeed;
 
@@ -294,7 +295,7 @@ LBSailSim.Hull.prototype = {
         this.formDrag = this.calcFormDrag();
         this.waveDrag = this.calcWaveDrag();
         
-        var drag = this.frictionDrag + this.residuaryResistance + this.formDrag + this.waveDrag;
+        var drag = this.frictionDrag + this.residuaryResistance + this.formDrag + this.waveDrag;       
         var force = this.resistanceForce;
         force.copy(this.vessel.apparentCurrent);
         
