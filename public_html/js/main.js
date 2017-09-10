@@ -265,7 +265,7 @@ PlayState._spawnCharacters = function (data) {
 
     centerX = this.sailEnv.phaserEnv.fromPixelsX(400);
     centerY = this.sailEnv.phaserEnv.fromPixelsY(0);
-    rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(0);
+    rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(90);
     
     var rollDeg = 0;
     var pitchDeg = 0;
