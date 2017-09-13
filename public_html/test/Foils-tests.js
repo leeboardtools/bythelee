@@ -55,7 +55,7 @@ QUnit.test( "ClCd.calcLiftDragMoment()", function( assert ) {
     var chordLength = 7;
     var aspectRatio = 3;
     clCd.cm = cm;
-    LBFoils.ClCd.calcLiftDragMoment(clCd, rho, area, qInfSpeed, chordLength, aspectRatio, liftDragMoment);
+    LBFoils.ClCd.calcLiftDragMoment(clCd, rho, area, qInfSpeed, new LBGeometry.Vector3(qInfSpeed), chordLength, aspectRatio, liftDragMoment);
     assert.nearEqual(liftDragMoment.lift, 0.5 * rho * area * qInfSpeed * qInfSpeed * cl, "basic Cl");
     assert.nearEqual(liftDragMoment.drag, 0.5 * rho * area * qInfSpeed * qInfSpeed * cd, "basic Cd");
     assert.nearEqual(liftDragMoment.moment, 0.5 * rho * area * qInfSpeed * qInfSpeed * chordLength * cm, "basic Cm");
@@ -128,10 +128,12 @@ QUnit.test( "Foil.calcLocalForce", function( assert ) {
     checkVector2(assert, localForceResultant.force, refForce.x, refForce.y, "Force: ");    
     checkVector2(assert, localForceResultant.applPoint, 3, 0, "applPoint: ");
     
-    // The force is applied at the 25% chord point...
+    // The force is applied at the 25% chord point, but r is the closest point of the force
+    // line to the start...
     refForce.sub(refInducedDrag);
     var refForceMag = refForce.length();
-    var refR = new LBGeometry.Vector2(2.5 * refForce.y / refForceMag, 2.5 * -refForce.x / refForceMag);
+    var b = 2.5 * sinAlpha;
+    var refR = new LBGeometry.Vector2(2.5 - b * refForce.x / refForceMag, -b * refForce.y / refForceMag);
     var refMoment = LBPhysics.calcMoment(refForce, refR);
     
     checkVector3(assert, localForceResultant.moment, refMoment.x, refMoment.y, refMoment.z, "moment: ");

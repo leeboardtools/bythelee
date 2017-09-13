@@ -15,8 +15,8 @@
             "debugForces": true,
             "mass": 378,
             "massRadius": 4,    "_comment": "Used for the force arrows",
-            "_linearDamping": 0.05,
-            "_angularDamping": 0.05,
+            "linearDamping": 0.1,
+            "angularDamping": 0.05,
             "velocityTerms": 3,
             "volumes": {
                 "mirrorPlane": {
@@ -77,7 +77,6 @@
                 "lwl": 5.41,
                 "bwl": 2.13,
                 "tc": 0.15,
-                "delC": 7.63,
                 "k": 200e-6,
                 "debugForces": true
             },
@@ -188,7 +187,7 @@
                     }
                 }
             ],
-            "hydroFoils": [ 
+            "hydrofoils": [ 
                 {
                     "className": "LBSailSim.FoilInstance",
                     "name": "keel",
@@ -206,7 +205,7 @@
                             "end": { "x": 1, "y": 0 }
                         },
                         "sliceZ": -0.5,
-                        "area": 1.00,
+                        "area": 0.75,
                         "aspectRatio": 3,
                         "libClCdCurve": "FlatPlate"
                     }

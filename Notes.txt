@@ -18,11 +18,15 @@ Run:
 
 TODO:
 
+Figure out a way to dampen the oscillating keel/sail forces.
+
+Fix Cannon body for hull being a little to the stbd of centerline.
+
+Add minimum angle for lift to sail foil.
+
+Add ability to release rudder (space + CTRL? dbl-click rudder control?)
+
 Add 3D force arrows.
-
-Figure out buoyancy issues.
-
-Figure out oscillating forces.
 
 Need to limit the sail/keel forces when they get near the water surface (probably anything closer than 45 degrees).
 

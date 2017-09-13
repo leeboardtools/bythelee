@@ -317,7 +317,7 @@ LBSailSim.RudderController.prototype._loadRudders = function() {
         return;
     }
     
-    LBPhysics.RigidBody.getRigidBodiesWithName(this.vessel.hydroFoils, this.foilName, this.rudders);
+    LBPhysics.RigidBody.getRigidBodiesWithName(this.vessel.hydrofoils, this.foilName, this.rudders);
 };
 
 /**
@@ -442,7 +442,7 @@ LBSailSim.ThrottleController.prototype.setThrottlePosition = function(value) {
 /**
  * Container representing a vessel that floats. Vessels support:
  * <li>airfoils, which are {@link LBSailSim.FoilInstance} based objects that are driven by the atmosphere.
- * <li>Hydrofoils,which are {@link LBSailSim.FoilInstance} based objects that are driven by the water.
+ * <li>hydrofoils,which are {@link LBSailSim.FoilInstance} based objects that are driven by the water.
  * <li>Propulsors, which are {@link LBSailSim.Propulsor} based objects.
  * <li>Ballasts, which are {@link LBPhysics.RigidBody} based objects.
  * <p>
@@ -468,7 +468,7 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
      * The array of hydrofoils {@link LBSaimSim.FoilInstance}.
      * @member {LBSailSim.FoilInstance[]}
      */
-    this.hydroFoils = [];
+    this.hydrofoils = [];
     
     /**
      * The array of airfoils {@link LBSailSim.FoilInstance}.
@@ -535,7 +535,8 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
     this.hull = undefined;
 };
 
-LBSailSim.Vessel._workingVector3 = new LBGeometry.Vector3();
+LBSailSim.Vessel._workingVector3A = new LBGeometry.Vector3();
+LBSailSim.Vessel._workingVector3B = new LBGeometry.Vector3();
 LBSailSim.Vessel._workingEuler = new LBGeometry.Euler();
 
 LBSailSim.Vessel.prototype = Object.create(LBPhysics.RigidBody.prototype);
@@ -556,8 +557,8 @@ LBSailSim.Vessel.prototype.destroy = function() {
         
         // We let all the parts (hydrofoils, airfoils, etc.) be destroyed by the
         // rigid body's destroy()...
-        this.hydroFoils.length = 0;
-        this.hydroFoils = null;
+        this.hydrofoils.length = 0;
+        this.hydrofoils = null;
         
         this.airfoils.length = 0;
         this.airfoils = null;
@@ -604,7 +605,7 @@ LBSailSim.Vessel.prototype.addAirfoil = function(foilInstance) {
  * @returns {LBSailSim.Vessel}  this.
  */
 LBSailSim.Vessel.prototype.addHydroFoil = function(foilInstance) {
-    this.hydroFoils.push(foilInstance);
+    this.hydrofoils.push(foilInstance);
     this.addPart(foilInstance);
     return this;
 };
@@ -897,7 +898,7 @@ LBSailSim.Vessel.prototype._loadControllers = function(data, loadCallback) {
 LBSailSim.Vessel.prototype.load = function(data, loadCallback) {
     // Clear out the existing settings...
     this._removeParts(this.airfoils);
-    this._removeParts(this.hydroFoils);
+    this._removeParts(this.hydrofoils);
     this._removeParts(this.propulsors);
     this._removeParts(this.spars);
     this._removeParts(this.ballasts);
@@ -917,14 +918,14 @@ LBSailSim.Vessel.prototype.load = function(data, loadCallback) {
     this._loadSpars(data.spars, loadCallback);
     this._loadBallasts(data.ballasts, loadCallback);
     this._loadPropulsors(data.propulsors, loadCallback);
-    this._loadFoils(data.hydroFoils, this.hydroFoils, loadCallback);
+    this._loadFoils(data.hydrofoils, this.hydrofoils, loadCallback);
     
     // Load airfoils last so they appear above everyone else...
     this._loadFoils(data.airfoils, this.airfoils, loadCallback);
 
     this._loadControllers(data.controllers, loadCallback);
     
-    this.hydroFoils.forEach(function(foil) {
+    this.hydrofoils.forEach(function(foil) {
         foil.vesselLoaded(this);
     }, this);
     this.airfoils.forEach(function(foil) {
@@ -979,7 +980,7 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
     this.apparentCurrent.z = 0;
     
     this._updateFoilForces(dt, this.sailEnv.wind, this.airfoils);
-    this._updateFoilForces(dt, this.sailEnv.water, this.hydroFoils);
+    this._updateFoilForces(dt, this.sailEnv.water, this.hydrofoils);
     
     for (var i = 0; i < this.propulsors.length; ++i) {
         this.propulsors[i].updateForce(dt);
@@ -999,7 +1000,7 @@ LBSailSim.Vessel.prototype.handleDebugFields = function() {
     if (this.debugForces) {
         var dbgField = LBDebug.DataLog.getField(this.name);
         if (dbgField) {
-            var pos = this.obj3D.getWorldPosition(LBSailSim.Vessel._workingVector3);
+            var pos = this.obj3D.getWorldPosition(LBSailSim.Vessel._workingVector3A);
             dbgField.setSubFieldValue('wPos', pos);
             
             var rot = this.obj3D.getWorldRotation(LBSailSim.Vessel._workingEuler);
@@ -1230,6 +1231,53 @@ LBSailSim.Vessel.prototype.getApparentWindVelocityMPS = function() {
     return this.apparentWind;
 };
 
+LBSailSim.Vessel.prototype._getFoilForceMag = function(foils, localDir) {
+    var dir = LBSailSim.Vessel._workingVector3B.copy(localDir);
+    this.obj3D.localToWorld(dir);
+    
+    var origin = LBSailSim.Vessel._workingVector3A.zero();
+    this.obj3D.localToWorld(origin);
+    
+    dir.sub(origin);
+    dir.z = 0;
+    dir.normalize();
+
+    var force = LBSailSim.Vessel._workingVector3A;
+    force.zero();
+    foils.forEach(function(foil) {
+        force.add(foil.getResultant().force);
+    });
+    
+    return Math.abs(force.dot(dir));
+};
+
+LBSailSim.Vessel.prototype.getDrivingForceMag = function() {
+    return this._getFoilForceMag(this.airfoils, LBGeometry.X_AXIS);
+};
+
+LBSailSim.Vessel.prototype.getHeelingForceMag = function() {
+    return this._getFoilForceMag(this.airfoils, LBGeometry.Y_AXIS);
+};
+
+LBSailSim.Vessel.prototype.getSideForceMag = function() {
+    return this._getFoilForceMag(this.hydrofoils, LBGeometry.Y_AXIS);
+};
+
+LBSailSim.Vessel.prototype.getHydrofoilDrag = function() {
+    return this._getFoilForceMag(this.hydrofoils, LBGeometry.X_AXIS);
+};
+
+LBSailSim.Vessel.prototype.getRudderForceMag = function() {
+    return 0;
+};
+
+LBSailSim.Vessel.prototype.getFrictionalDrag = function() {
+    return this.hull.frictionalDrag;
+};
+
+LBSailSim.Vessel.prototype.getResiduaryDrag = function() {
+    return this.hull.residuaryResistance;
+};
 
 /**
  * Creates a vessel object based upon properties in a data object.

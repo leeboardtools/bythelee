@@ -559,6 +559,14 @@ LBFoils.Foil = function() {
      */
     this.clCdCurve = new LBFoils.ClCdCurve();
     
+    /**
+     * This is used by {@link LBFoils.Foil#calcWorldForce} to control the weighting
+     * of the velocities of the start and end points of the chord when determining
+     * the overall velocity of the foil.
+     * @member {Number}
+     */
+    this.startVelocityWeight = 0.75;
+    
     LBFoils.Foil._workingVel = LBFoils.Foil._workingVel || new LBGeometry.Vector3();
     LBFoils.Foil._workingVelResults = LBFoils.Foil._workingVelResults || {
         'worldPos': new LBGeometry.Vector3(), // For testing...
@@ -583,6 +591,7 @@ LBFoils.Foil.prototype = {
         this.sliceZ = data.sliceZ || this.sliceZ;
         this.area = data.area || this.area;
         this.aspectRatio = data.aspectRatio || this.aspectRatio;
+        this.startVelocityWeight = data.startVelocityWeight || this.startVelocityWeight;
         
         this.clCdCurve = undefined;
         if (data.libClCdCurve) {
@@ -696,10 +705,10 @@ LBFoils.Foil.prototype = {
         if (totalSpeed > 0) {
             var startWeight;
             if (startSpeed < endSpeed) {
-                startWeight = 0.85;
+                startWeight = this.startVelocityWeight;
             }
             else {
-                startWeight = 0.15;
+                startWeight = 1 - this.startVelocityWeight;
             }
             var endWeight = 1 - startWeight;
             

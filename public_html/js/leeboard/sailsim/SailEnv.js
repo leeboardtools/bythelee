@@ -391,10 +391,69 @@ LBSailSim.Wind = function() {
      * @member {Number}
      */
     this.kViscosity = 1.48e-5;
+    
+    /**
+     * The average wind speed in m/s.
+     * @member {Number}
+     */
+    this.averageMPS;
+    
+    /**
+     * The average direction the wind is blowing from in degrees.
+     * @member {Number}
+     */
+    this.averageFromDeg = 0;
+    
+    this.setAverageForce(3);
 };
+
+LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS = [
+    1.5,    // 0
+    3.5,
+    6.5,
+    10.5,   // 3
+    16.5,
+    21.5,
+    27.5,   // 6
+    33.5,
+    40.5,
+    47.5,   // 9
+    55.5,
+    63.5
+];
+
+LBSailSim.Wind.MAX_BEAUFORT_FORCE = 12;
 
 LBSailSim.Wind.prototype = {
     constructor: LBSailSim.Wind,
+    
+    /**
+     * Sets the average speed of the wind using a Beaufort force value.
+     * The average speed is set to the mid-value of the speeds for the force value.
+     * @param {Number} force    The force on the Beaufort wind scale.
+     * @returns {LBSailSim.Wind.prototype}  this.
+     */
+    setAverageForce: function(force) {
+        if (force < 0) {
+            force = 0;
+        }
+        else if (force > LBSailSim.Wind.MAX_BEAUFORT_FORCE) {
+            force = LBSailSim.Wind.MAX_BEAUFORT_FORCE;
+        }
+        
+        var minKts = (force > 0) ? LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS[force - 1] : 0;
+        var maxKts;
+        if (force === LBSailSim.Wind.MAX_BEAUFORT_FORCE) {
+            maxKts = 2 * LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS[force] - LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS[force - 1];
+        }
+        else {
+            maxKts = LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS[force];
+        }
+        
+        this.averageMPS = LBUtil.kt2mps(0.5 * (minKts + maxKts));
+        
+        return this;
+    },
     
     /**
      * Retrieves the wind velocity at a given point
@@ -405,13 +464,11 @@ LBSailSim.Wind.prototype = {
      * @returns {object}    The object containing the velocity.
      */
     getFlowVelocity: function(x, y, z, vel) {
-        var vx = 4;
-        var vy = 0;
+        var speed = this.averageMPS;
+        var headingRad = this.averageFromDeg * LBMath.DEG_TO_RAD;
+        var vx = speed * Math.cos(headingRad);
+        var vy = speed * Math.sin(headingRad);
         
-        vx = 6;
-        //vx = 0;
-        //vy = 2;
-
         if (!vel) {
             return new LBGeometry.Vector3(vx, vy);
         }

@@ -69,7 +69,14 @@ PlayState = {};
 PlayState.init = function() {
     this.cursorKeys = this.game.input.keyboard.createCursorKeys();
     this.keys = this.game.input.keyboard.addKeys({
-        space: Phaser.KeyCode.SPACEBAR,
+        space: Phaser.KeyCode.SPACEBAR, // Center rudder
+        one: Phaser.KeyCode.ONE,    // Force 1
+        two: Phaser.KeyCode.TWO,    // Force 2
+        three: Phaser.KeyCode.THREE,    // Force 3
+        four: Phaser.KeyCode.FOUR,    // Force 4
+        five: Phaser.KeyCode.FIVE,    // Force 5
+        six: Phaser.KeyCode.SIX,    // Force 6
+        seven: Phaser.KeyCode.SEVEN,    // Force 7
         // a
         // b
         // c
@@ -99,6 +106,27 @@ PlayState.init = function() {
     });
     
     // Could use number keys for wind force, -, = for back/veer
+    this.keys.one.onDown.add(function() {
+        this.setWindForce(1);
+    }, this);
+    this.keys.two.onDown.add(function() {
+        this.setWindForce(2);
+    }, this);
+    this.keys.three.onDown.add(function() {
+        this.setWindForce(3);
+    }, this);
+    this.keys.four.onDown.add(function() {
+        this.setWindForce(4);
+    }, this);
+    this.keys.five.onDown.add(function() {
+        this.setWindForce(5);
+    }, this);
+    this.keys.six.onDown.add(function() {
+        this.setWindForce(6);
+    }, this);
+    this.keys.seven.onDown.add(function() {
+        this.setWindForce(7);
+    }, this);
     
     this.keys.d.onDown.add(this.toggleDebug, this);
     this.keys.f.onDown.add(this.toggleForceArrows, this);
@@ -112,20 +140,26 @@ PlayState.init = function() {
     this.sailEnv = new LBSailSim.PhaserSailEnv(this.game, physicsEngine);
     
     // TEST!!!
-    this.isSingleStep = true;
+//    this.isSingleStep = true;
     
 //    LBSailSim.FoilInstance.addDebugFields('rudder');
 //    LBDebug.DataLog.addSpacer();
 //    LBSailSim.FoilInstance.addDebugFields('keel');    
 //    LBDebug.DataLog.addSpacer();
-    LBSailSim.FoilInstance.addDebugFields('mainsail');    
-    LBDebug.DataLog.addSpacer();
+//    LBSailSim.FoilInstance.addDebugFields('mainsail');    
+//    LBDebug.DataLog.addSpacer();
 
 //    LBSailSim.Hull.addDebugFields('TubbyA');
 //    LBDebug.DataLog.addSpacer();
-    LBSailSim.Vessel.addDebugFields('TubbyA');
+//    LBSailSim.Vessel.addDebugFields('TubbyA');
 
-    LBDebug.DataLog.outputHeading();
+//    LBDebug.DataLog.outputHeading();
+};
+
+//
+//--------------------------------------------------
+PlayState.setWindForce = function(force) {
+    this.sailEnv.wind.setAverageForce(force);
 };
 
 //
@@ -265,7 +299,7 @@ PlayState._spawnCharacters = function (data) {
 
     centerX = this.sailEnv.phaserEnv.fromPixelsX(400);
     centerY = this.sailEnv.phaserEnv.fromPixelsY(0);
-    rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(90);
+    rotation = this.sailEnv.phaserEnv.fromPixelsRotationDeg(-90);
     
     var rollDeg = 0;
     var pitchDeg = 0;
@@ -350,11 +384,40 @@ PlayState._setupHUD = function() {
     this.hud.add(this.pitchText);
     top += this.pitchText.height + vSpacing;
     
-    this.zText = this.game.add.text(left, top, "Z: 0", style);
-    this.hud.add(this.zText);
-    top += this.zText.height + vSpacing;
+    top += this.pitchText.height + vSpacing;
     
+    //this.zText = this.game.add.text(left, top, "Z: 0", style);
+    //this.hud.add(this.zText);
+    //top += this.zText.height + vSpacing;
     
+    this.fDriveText = this.game.add.text(left, top, "Driving Force: 0", style);
+    this.hud.add(this.fDriveText);
+    top += this.fDriveText.height + vSpacing;
+    
+    this.fHeelText = this.game.add.text(left, top, "Heeling Force: 0", style);
+    this.hud.add(this.fHeelText);
+    top += this.fHeelText.height + vSpacing;
+    
+    this.fSideText = this.game.add.text(left, top, "Side Force: 0", style);
+    this.hud.add(this.fSideText);
+    top += this.fSideText.height + vSpacing;
+    
+    this.fRudderText = this.game.add.text(left, top, "Rudder Force: 0", style);
+    this.hud.add(this.fRudderText);
+    top += this.fRudderText.height + vSpacing;
+    
+    this.fFoilDragText = this.game.add.text(left, top, "Keel/Rudder Drag: 0", style);
+    this.hud.add(this.fFoilDragText);
+    top += this.fFoilDragText.height + vSpacing;
+    
+    this.fFrictionText = this.game.add.text(left, top, "Friction Force: 0", style);
+    this.hud.add(this.fFrictionText);
+    top += this.fFrictionText.height + vSpacing;
+    
+    this.fResiduaryText = this.game.add.text(left, top, "Residuary Drag Force: 0", style);
+    this.hud.add(this.fResiduaryText);
+    top += this.fResiduaryText.height + vSpacing;
+
     this.hInset = 5;
     this.vInset = 5;
     
@@ -536,6 +599,43 @@ PlayState._updateHUD = function() {
     if (this.zText) {
         this.zText.text = "Z: " + LBMath.round(this.myBoat.obj3D.matrixWorld.elements[14], 2);
     }
+    
+    var force = 0;
+    if (this.fDriveText) {
+        force = this.myBoat.getDrivingForceMag();
+        this.fDriveText.text = "Driving Force: " + LBMath.round(force);
+    }
+    
+    if (this.fHeelText) {
+        force = this.myBoat.getHeelingForceMag();
+        this.fHeelText.text = "Heeling Force: " + LBMath.round(force);
+    }
+    
+    if (this.fSideText) {
+        force = this.myBoat.getSideForceMag();
+        this.fSideText.text = "Side Force: " + LBMath.round(force);
+    }
+    
+    if (this.fRudderText) {
+        force = this.myBoat.getRudderForceMag();
+        this.fRudderText.text = "Rudder Force: " + LBMath.round(force);
+    }
+    
+    if (this.fFoilDragText) {
+        force = this.myBoat.getHydrofoilDrag();
+        this.fFoilDragText.text = "Keel/Rudder Drag: " + LBMath.round(force);
+    }
+    
+    if (this.fFrictionText) {
+        force = this.myBoat.getFrictionalDrag();
+        this.fFrictionText.text = "Friction Force: " + LBMath.round(force);
+    }
+    
+    if (this.fResiduaryText) {
+        force = this.myBoat.getResiduaryDrag();
+        this.fResiduaryText.text = "Residuary Drag Force: " + LBMath.round(force);
+    }
+    
 };
 
 //------------------------------ --------------------

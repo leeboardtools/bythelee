@@ -90,7 +90,7 @@ var boatsJSON_Test = {
             "centerOfMass": { "x": 1, "y": 5, "z": 10 },
             "momentInertia": {},
             "airfoils": [],
-            "hydroFoils": [ {
+            "hydrofoils": [ {
                     "construct": "new LBSailSim.FoilInstance()",
                     "name": "keel",
                     "mass": 20,
@@ -132,9 +132,9 @@ QUnit.test( "Vessel-load", function( assert ) {
     assert.equal(vessel.mass, 100, "mass");
     checkVector3(assert, vessel.centerOfMass, 1, 5, 10, "centerOfMass");
     
-    assert.equal(vessel.hydroFoils.length, 1, "hydroFoils.length");
+    assert.equal(vessel.hydrofoils.length, 1, "hydrofoils.length");
     
-    var hydroFoil = vessel.hydroFoils[0];
+    var hydroFoil = vessel.hydrofoils[0];
     assert.equal(hydroFoil.mass, 20, "hydroFoil[0].mass");
     checkVector3(assert, hydroFoil.centerOfMass, 0, 0, -3, "hydroFoil[0].centerOfMass");
     

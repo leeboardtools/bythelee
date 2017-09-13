@@ -290,12 +290,12 @@ LBSailSim.Hull.prototype = {
         
         resultant.applPoint.copy(this.worldCenterOfResistance);
 
-        this.frictionDrag = this.calcFrictionalDrag();
+        this.frictionalDrag = this.calcFrictionalDrag();
         this.residuaryResistance = this.calcResiduaryResistance();
         this.formDrag = this.calcFormDrag();
         this.waveDrag = this.calcWaveDrag();
         
-        var drag = this.frictionDrag + this.residuaryResistance + this.formDrag + this.waveDrag;       
+        var drag = this.frictionalDrag + this.residuaryResistance + this.formDrag + this.waveDrag;       
         var force = this.resistanceForce;
         force.copy(this.vessel.apparentCurrent);
         
@@ -333,9 +333,24 @@ LBSailSim.Hull.prototype = {
         this.lwl = data.lwl || this.lwl;
         this.bwl = data.bwl || this.bwl;
         this.tc = data.tc || this.tc;
-        this.delC = data.delC || this.delC;
         this.cm = data.cm || this.cm;
         this.cp = data.cp || this.cp;
+        
+        if (data.lcb) {
+            this.lcb = data.lcb;
+        }
+        else {
+            this.lcb = 0.5 * this.lwl + 0.035 * this.lwl;
+        }
+        
+        if (data.lcf) {
+            this.lcf = data.lcf;
+        }
+        else {
+            this.lcf = 0.5 * this.lwl + 0.065 * this.lwl;
+        }
+        
+        this.delC = vessel.mass / vessel.sailEnv.water.density;
          
         this.k = data.k || this.k;
         
@@ -446,7 +461,7 @@ LBSailSim.Hull.prototype.handleDebugFields = function(resultant) {
             dbgField.setSubFieldValue('resultant', resultant);
             dbgField.setSubFieldValue('rForce', this.resistanceForce);
             dbgField.setSubFieldValue('formDrag', this.formDrag);
-            dbgField.setSubFieldValue('frictionDrag', this.frictionDrag);
+            dbgField.setSubFieldValue('frictionalDrag', this.frictionalDrag);
             dbgField.setSubFieldValue('residuaryResistance', this.residuaryResistance);
             dbgField.setSubFieldValue('waveDrag', this.waveDrag);
             dbgField.setSubFieldValue('gravity', this.forceGravity);
@@ -472,7 +487,7 @@ LBSailSim.Hull.prototype.handleDebugFields = function(resultant) {
 LBSailSim.Hull.addDebugFields = function(name) {
     name += '.hull';
     LBDebug.DataLog.addFieldResultant([name, 'resultant']);
-    LBDebug.DataLog.addField([name, 'frictionDrag']);
+    LBDebug.DataLog.addField([name, 'frictionalDrag']);
     LBDebug.DataLog.addField([name, 'residuaryResistance']);
     LBDebug.DataLog.addField([name, 'formDrag']);
     LBDebug.DataLog.addField([name, 'waveDrag']);

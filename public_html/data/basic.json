@@ -4,7 +4,9 @@
     "buoys": [
         { "image": "can", "x": 10, "y": 0 },
         { "image": "can", "x": 10, "y": -20 },
-        { "image": "can", "x": 10, "y": -40 }
+        { "image": "can", "x": 10, "y": -40 },
+        { "image": "can", "x": 25, "y": -20 },
+        { "image": "can", "x": 40, "y": -20 }
     ]
     
 }

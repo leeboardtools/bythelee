@@ -105,7 +105,7 @@ LBSailSim.PhaserView.prototype.onBoatCheckedOut = function(boat, data) {
     this._loadDisplayObjectForHull(boat);
     
     // Add the hydrofoils...
-    boat.hydroFoils.forEach(this._loadDisplayObjectForHydrofoil, this);
+    boat.hydrofoils.forEach(this._loadDisplayObjectForHydrofoil, this);
     
     // Add the spars...
     boat.spars.forEach(this._loadDisplayObjectForSpar, this);
@@ -115,7 +115,7 @@ LBSailSim.PhaserView.prototype.onBoatCheckedOut = function(boat, data) {
 
     // Add the arrows...
     this._loadForceArrowHull(boat);
-    boat.hydroFoils.forEach(this._loadForceArrowHydrofoil, this);
+    boat.hydrofoils.forEach(this._loadForceArrowHydrofoil, this);
     boat.airfoils.forEach(this._loadForceArrowAirfoil, this);
 };
 
@@ -212,10 +212,10 @@ LBSailSim.PhaserView.prototype.onBoatReturned = function(boat) {
     this.destroyRigidBodyDisplayObject(boat);
     this.destroyRigidBodyForceArrow(boat);
     
-    boat.hydroFoils.forEach(this._destroyDisplayObjectForHydrofoil, this);
+    boat.hydrofoils.forEach(this._destroyDisplayObjectForHydrofoil, this);
     boat.airfoils.forEach(this._destroyDisplayObjectForAirfoil, this);
 
-    boat.hydroFoils.forEach(this._destroyForceArrowHydrofoil, this);
+    boat.hydrofoils.forEach(this._destroyForceArrowHydrofoil, this);
     boat.airfoils.forEach(this._destroyForceArrowAirfoil, this);
 };
 
