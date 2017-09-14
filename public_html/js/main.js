@@ -77,6 +77,8 @@ PlayState.init = function() {
         five: Phaser.KeyCode.FIVE,    // Force 5
         six: Phaser.KeyCode.SIX,    // Force 6
         seven: Phaser.KeyCode.SEVEN,    // Force 7
+        plus: 61, //Phaser.KeyCode.PLUS,
+        minus: 173, //Phaser.KeyCode.MINUS,
         // a
         // b
         // c
@@ -128,6 +130,13 @@ PlayState.init = function() {
         this.setWindForce(7);
     }, this);
     
+    this.keys.plus.onDown.add(function() {
+        this.sailEnv.wind.setAverageFromDeg(this.sailEnv.wind.averageFromDeg + 10);
+    }, this);
+    this.keys.minus.onDown.add(function() {
+        this.sailEnv.wind.setAverageFromDeg(this.sailEnv.wind.averageFromDeg - 10);
+    }, this);
+    
     this.keys.d.onDown.add(this.toggleDebug, this);
     this.keys.f.onDown.add(this.toggleForceArrows, this);
     this.keys.p.onDown.add(this.togglePause, this);
@@ -140,7 +149,7 @@ PlayState.init = function() {
     this.sailEnv = new LBSailSim.PhaserSailEnv(this.game, physicsEngine);
     
     // TEST!!!
-//    this.isSingleStep = true;
+    this.isSingleStep = true;
     
 //    LBSailSim.FoilInstance.addDebugFields('rudder');
 //    LBDebug.DataLog.addSpacer();
@@ -417,6 +426,13 @@ PlayState._setupHUD = function() {
     this.fResiduaryText = this.game.add.text(left, top, "Residuary Drag Force: 0", style);
     this.hud.add(this.fResiduaryText);
     top += this.fResiduaryText.height + vSpacing;
+    
+    top += this.fResiduaryText.height + vSpacing;
+    this.keyHelpText = this.game.add.text(left, top, "Keys:\nWind: 1-7 Force; - back; = veer\nSpace center rudder\nP toggle Pause, S single step\n"
+        + "F toggle force arrows\nV toggle velocity arrows\nArrow keys rudder/mainsheet", 
+        style);
+    this.hud.add(this.keyHelpText);
+    top += this.keyHelpText.height + vSpacing;
 
     this.hInset = 5;
     this.vInset = 5;

@@ -56,6 +56,8 @@ LBPhaser.CannonLink.prototype.addFixedObject = function(object) {
     this.cWorld.add(body);
     
     object._lbCannonBody = body;
+    object.anchor.x = 0.5;
+    object.anchor.y = 0.5;
     
     return this;
 };

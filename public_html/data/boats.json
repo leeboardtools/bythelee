@@ -291,8 +291,8 @@
                         "position" : { "x": 1.8, "y": 0, "z": 0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 180 }
                     },
-                    "minForce": -250,
-                    "maxForce": 5000
+                    "minForce": -25,
+                    "maxForce": 200
                 }
             ],
             "ballasts": [],

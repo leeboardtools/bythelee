@@ -18,10 +18,6 @@ Run:
 
 TODO:
 
-Figure out a way to dampen the oscillating keel/sail forces.
-
-Fix Cannon body for hull being a little to the stbd of centerline.
-
 Add minimum angle for lift to sail foil.
 
 Add ability to release rudder (space + CTRL? dbl-click rudder control?)

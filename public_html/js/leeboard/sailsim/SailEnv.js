@@ -456,6 +456,21 @@ LBSailSim.Wind.prototype = {
     },
     
     /**
+     * Sets the average heading angle from which the wind is blowing.
+     * @param {Number} deg  
+     * @returns {LBSailSim.Wind.prototype}  this.
+     */
+    setAverageFromDeg: function(deg) {
+        deg = LBMath.wrapDegrees(deg);
+        if (deg !== this.averageFromDeg) {
+            this.averageFromDeg = deg;
+        }
+        
+        return this;
+    },
+    
+    
+    /**
      * Retrieves the wind velocity at a given point
      * @param {Number} x    The x coordinate.
      * @param {Number} y    The y coordinate.
@@ -465,7 +480,7 @@ LBSailSim.Wind.prototype = {
      */
     getFlowVelocity: function(x, y, z, vel) {
         var speed = this.averageMPS;
-        var headingRad = this.averageFromDeg * LBMath.DEG_TO_RAD;
+        var headingRad = (270 - this.averageFromDeg) * LBMath.DEG_TO_RAD;
         var vx = speed * Math.cos(headingRad);
         var vy = speed * Math.sin(headingRad);
         
