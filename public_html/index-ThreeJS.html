@@ -37,9 +37,14 @@ and open the template in the editor.
         <script src="js/leeboard/sailsim/Sail.js"></script>
         <script src="js/leeboard/sailsim/Delft.js"></script>
         
-        <script>//PlayState.settings.physicsEngine = LBSailSim.PhaserSailEnv.P2_PHYSICS;</script>
+        <script src="js/leeboard/ui3d/Scene3D.js"></script>
+        <script src="js/leeboard/ui3d/View3D.js"></script>
         
         <style type="text/css">
+            html {
+                font-family: sans-serif;
+            }
+            
             body {
                 margin: 0px;
                 padding: 0;
@@ -48,10 +53,107 @@ and open the template in the editor.
             canvas {
                 width: 100%; height:100%;
             }
+            
+            #container {
+                position: absolute;
+                top: 0px;
+                bottom: 0px;
+                left: 0px;
+                right: 0px;
+                
+                margin: 0px;
+            }
+            
+            #hud_display {
+                position: absolute;
+                top: 0px;
+                bottom: 0px;
+                left: 0px;
+                right: 0px;
+
+                padding: 5px;
+                z-index: 100;
+            }
+            
+            .major_display {
+                color: darkblue;
+            }
+            
+            #right_controls {
+                position: absolute;
+                top: 50%;
+                right: 5px;
+                transform: translateY(-50%);
+               
+                z-index: 110;
+
+/*
+                border-style: solid;
+                border-width: 1px;
+                border-color: blue;
+*/
+            }
+            
+            .vertical_slider {
+                width: 200px;
+            }
+
+            .horizontal_slider {
+                width: 200px;
+            }
+            
+            #vsheet_controls {
+                transform-origin: right;
+                transform: rotate(270deg) translateX(50%) translateY(-50%);
+/*
+                border-style: solid;
+                border-width: 1px;
+                border-color: magenta;
+*/
+            }
+            
+            #bottom_controls {
+                position: absolute;
+                left: 50%;
+                bottom: 5px;
+                width: 220px;
+                transform: translateX(-110px);
+                z-index: 120;
+/*
+                border-style: solid;
+                border-width: 1px;
+                border-color: blue;
+*/
+            }
+            
         </style>
     </head>
         <body>
+        <div id="container">
+            <div id="main_view"></div>
+            <div id="hud_display">
+                <div id="heading" class="major_display">Heading</div>
+                <div id="speed" class="major_display">Speed</div>
+                <div id="vmg" class="major_display">VMG</div>
+                <div id="leeway" class="major_display">Leeway</div>
+                <div id="app_wind_speed" class="major_display">App Wind Speed</div>
+                <div id="app_wind_bearing" class="major_display">App Wind Bearing</div>
+            </div>
+            <div id="right_controls">
+                <div id="vsheet_controls">
+                    <div><input id="mainsheet" class="vertical_slider" type="range" value="0" min="-100" max="100"></div>
+                    <div><input id="jibsheet" class="vertical_slider" type="range" value="0" min="-100" max="100"></div>
+                </div>
+            </div>
+            <div id="bottom_controls">
+                <div id="hull_control_container">
+                    <div id="hull_controls">
+                        <div><input id="rudder" class="horizontal_slider" type="range" value="0" min="-100" max="100"></div>
+                        <div><input id="throttle" class="horizontal_slider" type="range" value="0" min="-100" max="100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <script src="js/main-ThreeJS.js"></script>
-        <div id="game"></div>
     </body>
 </html>
