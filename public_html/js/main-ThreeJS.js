@@ -18,6 +18,15 @@
 /* global THREE */
 
 var scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcccccc);
+scene.add(new THREE.AmbientLight(0x888888));
+
+var light = new THREE.DirectionalLight(0xdfebff, 1.75);
+light.position.set(50, 200, 100);
+light.position.multiplyScalar(1.3);
+light.castShadow = true;
+scene.add(light);
+
 var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
 
 var renderer = new THREE.WebGLRenderer();
@@ -36,8 +45,8 @@ camera.position.z = 5;
 function animate() {
     requestAnimationFrame(animate);
     
-    cube.rotation.x += 0.1;
-    cube.rotation.y += 0.1;
+    cube.rotation.x += 0.01;
+    cube.rotation.y += 0.01;
     
     renderer.render(scene, camera);
 }

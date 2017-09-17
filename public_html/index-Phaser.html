@@ -6,16 +6,18 @@ and open the template in the editor.
 -->
 <html>
     <head>
-        <title>By The Lee</title>
+        <title>By The Lee - Phaser Version</title>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
         <script src="js/lib/phaser.min.js"></script>
         <script src="js/lib/three.min.js"></script>
         <script src="js/lib/cannon.min.js"></script>
-
+<!--
         <script src="js/lib/phaser.js"></script>
         <script src="js/lib/three.js"></script>
         <script src="js/lib/cannon.js"></script>
-        
+-->
         <script src="js/leeboard/core/Util.js"></script>
         <script src="js/leeboard/core/Debug.js"></script>
         <script src="js/leeboard/core/Math.js"></script>
@@ -27,6 +29,12 @@ and open the template in the editor.
         <script src="js/leeboard/core/Foils.js"></script>
         <script src="js/leeboard/core/Controls.js"></script>
         <script src="js/leeboard/cannon/CannonUtil.js"></script>
+        <script src="js/leeboard/sailsim/SailSim.js"></script>
+        <script src="js/leeboard/sailsim/SailEnv.js"></script>
+        <script src="js/leeboard/sailsim/Hull.js"></script>
+        <script src="js/leeboard/sailsim/Vessel.js"></script>
+        <script src="js/leeboard/sailsim/Sail.js"></script>
+        <script src="js/leeboard/sailsim/Delft.js"></script>
         <script src="js/leeboard/phaser/PhaserUtil.js"></script>
         <script src="js/leeboard/phaser/PhysicsLink.js"></script>
         <script src="js/leeboard/phaser/Project3D.js"></script>
@@ -34,14 +42,8 @@ and open the template in the editor.
         <script src="js/leeboard/phaser/P2Link.js"></script>
         <script src="js/leeboard/phaser/CannonLink.js"></script>
         <script src="js/leeboard/phaser/PhaserControls.js"></script>
-        <script src="js/leeboard/sailsim/SailSim.js"></script>
-        <script src="js/leeboard/sailsim/SailEnv.js"></script>
-        <script src="js/leeboard/sailsim/Hull.js"></script>
-        <script src="js/leeboard/sailsim/Vessel.js"></script>
-        <script src="js/leeboard/sailsim/Sail.js"></script>
-        <script src="js/leeboard/sailsim/SailSim-Phaser.js"></script>
-        <script src="js/leeboard/sailsim/SailSimPhaserView.js"></script>
-        <script src="js/leeboard/sailsim/Delft.js"></script>
+        <script src="js/leeboard/sailsim-phaser/SailSim-Phaser.js"></script>
+        <script src="js/leeboard/sailsim-phaser/SailSimPhaserView.js"></script>
         <script src="js/main-Phaser.js"></script>
         
         <script>//PlayState.settings.physicsEngine = LBSailSim.PhaserSailEnv.P2_PHYSICS;</script>

@@ -8,9 +8,14 @@ and open the template in the editor.
     <head>
         <title>By The Lee</title>
         <meta charset="UTF-8">
+        <!--
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        -->
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<!--
         <script src="js/lib/three.min.js"></script>
         <script src="js/lib/cannon.min.js"></script>
-
+-->
         <script src="js/lib/three.js"></script>
         <script src="js/lib/cannon.js"></script>
         
@@ -35,8 +40,13 @@ and open the template in the editor.
         <script>//PlayState.settings.physicsEngine = LBSailSim.PhaserSailEnv.P2_PHYSICS;</script>
         
         <style type="text/css">
+            body {
+                margin: 0px;
+                padding: 0;
+                overflow: hidden;   /* Gets rid of the scroll bars */
+            }
             canvas {
-                margin: 0 auto;
+                width: 100%; height:100%;
             }
         </style>
     </head>
