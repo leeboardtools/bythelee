@@ -12,6 +12,9 @@ and open the template in the editor.
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         -->
         <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="css/sliders.css">
+        <link href='https://fonts.googleapis.com/css?family=Sofia' rel='stylesheet'>
+
 <!--
         <script src="js/lib/three.min.js"></script>
         <script src="js/lib/cannon.min.js"></script>
@@ -40,14 +43,16 @@ and open the template in the editor.
         <script src="js/leeboard/ui3d/Scene3D.js"></script>
         <script src="js/leeboard/ui3d/View3D.js"></script>
         
+        
         <style type="text/css">
             html {
                 font-family: sans-serif;
+                font-size: 10px;
             }
             
             body {
-                margin: 0px;
-                padding: 0;
+                margin: 5px;
+                padding: 5px;
                 overflow: hidden;   /* Gets rid of the scroll bars */
             }
             canvas {
@@ -64,6 +69,16 @@ and open the template in the editor.
                 margin: 0px;
             }
             
+            #main_view {
+                position: absolute;
+                top: 0px;
+                bottom: 0px;
+                left: 0px;
+                right: 0px;
+                
+                margin: 0px;
+            }
+
             #hud_display {
                 position: absolute;
                 top: 0px;
@@ -72,58 +87,202 @@ and open the template in the editor.
                 right: 0px;
 
                 padding: 5px;
-                z-index: 100;
-            }
-            
-            .major_display {
-                color: darkblue;
+                z-index: 10;
             }
             
             #right_controls {
                 position: absolute;
                 top: 50%;
-                right: 5px;
+                right: 10px;
                 transform: translateY(-50%);
-               
                 z-index: 110;
-
-/*
-                border-style: solid;
-                border-width: 1px;
-                border-color: blue;
-*/
             }
             
             .vertical_slider {
-                width: 200px;
+                width: 300px;
+                margin: 0px;
+                padding: 0px;
             }
 
             .horizontal_slider {
-                width: 200px;
+                width: 300px;
+                margin: 0px;
+                padding: 0px;
+            }
+            
+            /*
+            Label that appears on the top side of the slider.
+            */
+            .slider_top_label {
+                position: absolute;
+                top: 4px;
+                font-size: 1.2rem;
+            }
+            /*
+            Label that appears on the bottom side of the slider.
+            */
+            .slider_bottom_label {
+                position: absolute;
+                bottom: 4px;
+                font-size: 1.2rem;
             }
             
             #vsheet_controls {
                 transform-origin: right;
                 transform: rotate(270deg) translateX(50%) translateY(-50%);
-/*
-                border-style: solid;
-                border-width: 1px;
-                border-color: magenta;
-*/
             }
             
             #bottom_controls {
                 position: absolute;
                 left: 50%;
-                bottom: 5px;
-                width: 220px;
-                transform: translateX(-110px);
+                bottom: 10px;
+                transform: translateX(-50%);
                 z-index: 120;
-/*
-                border-style: solid;
+            }
+            
+            #hull_controls {
+                width: 200px;
+            }
+            
+            #hud {
+                font-size: 1.2rem;
+            }
+            
+            .hud_display {
+                position: absolute;
+            }
+            
+            .hud_nav_label {
+                
+            }
+            
+            .hud_popup {
+                
+            }
+            
+            .hud_popup_table {
+                table-layout: fixed;
+                border-collapse: collapse;
+                text-align: right;
+                font-family: "Aldrich", monospace;
+                font-size: 1.2rem;
+            }
+            
+            .hud_popup_table td:nth-child(1) {
+                width: 30px;
+            }
+            .hud_popup_table td:nth-child(2) {
+                width: 60px;
+            }
+            .hud_popup_table td:nth-child(3) {
+                width: 20px;
+                text-align: left;
+            }           
+            
+            #hud_boat {
+                top: 130px;
+            }
+            
+            #hud_numeric_wind {
+                top: 220px;
+            }
+            
+            #hud_force {
+                top: 280px;
+            }
+            
+            #app_wind_indicator {
+                position: absolute;
+                left: 5px;
+                top: 5px;
+                width: 100px;
+                z-index: 200;
+            }
+            
+            #app_wind_label {
+                text-align: center;
+            }
+            
+            #app_wind_frame {
+                width: 80px;
+                height: 80px;
+                border-style: dashed;
+                border-radius: 50%;
                 border-width: 1px;
-                border-color: blue;
-*/
+                padding: 5px;
+            }
+            
+            #app_wind_dial {
+            }
+            
+            
+            .pip_checkbox {
+                position: absolute;
+                left: -100px;
+            }
+            .pip_view_bottom {
+                position: absolute;
+                bottom: 0px;
+                width: 50%;
+                height: 40%;
+                z-index: 1;
+                
+                transition: 0.4s all;
+                background-color: rgba(0, 0, 256, 0.3);
+            }
+            .pip_view_left {
+                position: absolute;
+                left: -50%;
+            }
+            .pip_view_right {
+                position: absolute;
+                right: -50%;
+            }
+            
+            .pip_view_map {
+                position: absolute;
+                top: 0px;
+                right: -50%;
+                width: 30%;
+                height: 30%;
+                z-index: 1;
+                
+                transition: 0.4s all;
+                background-color: rgba(0, 0, 256, 0.3);
+            }
+            
+            .pip_label {
+                font-size: 1.5rem;
+                text-shadow: 2px 2px 1px gray;
+                color: darkblue;
+                z-index: 10;
+                cursor: pointer;
+            }
+
+            label[for="pip_lower_left_cb"] {
+                position: absolute;
+                left: 5px;
+                bottom: 5px;
+            }
+            label[for="pip_lower_right_cb"] {
+                position: absolute;
+                right: 5px;
+                bottom: 5px;
+            }
+            label[for="pip_map_cb"] {
+                position: absolute;
+                right: 5px;
+                top: 5px;
+            }
+            
+            input[type=checkbox]:checked + div#pip_lower_left_div {
+                left: 0px;
+            }
+            input[type=checkbox]:checked + div#pip_lower_right_div {
+                right: 0px;
+            }
+            input[type=checkbox]:checked + div#pip_map_div {
+                right: 0px;
             }
             
         </style>
@@ -131,29 +290,141 @@ and open the template in the editor.
         <body>
         <div id="container">
             <div id="main_view"></div>
-            <div id="hud_display">
-                <div id="heading" class="major_display">Heading</div>
-                <div id="speed" class="major_display">Speed</div>
-                <div id="vmg" class="major_display">VMG</div>
-                <div id="leeway" class="major_display">Leeway</div>
-                <div id="app_wind_speed" class="major_display">App Wind Speed</div>
-                <div id="app_wind_bearing" class="major_display">App Wind Bearing</div>
-            </div>
-            <div id="right_controls">
-                <div id="vsheet_controls">
-                    <div><input id="mainsheet" class="vertical_slider" type="range" value="0" min="-100" max="100"></div>
-                    <div><input id="jibsheet" class="vertical_slider" type="range" value="0" min="-100" max="100"></div>
+            <div id="hud">
+                <div id="app_wind_indicator">
+                    <div id="app_wind_label">Apparent Wind</div>
+                    <div id="app_wind_frame">
+                        <svg id="app_wind_dial" xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100">
+                            <path id="arrow" d="M -5,-50 -5,0 -20,0 0,50 20,0 5,0 5,-50 z" fill="blue"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div id="hud_boat" class="hud_display">
+                    <div class="hud_nav_label">B</div>
+                    <table class="hud_popup_table">
+                        <tr>
+                            <td>HDG</td>
+                            <td id="hud_heading">000</td>
+                            <td>&deg;</td>
+                        </tr>
+                        <tr>
+                            <td>SPD</td>
+                            <td id="hud_speed">00.0</td>
+                            <td>kt</td>
+                        </tr>
+                        <tr>
+                            <td>VMG</td>
+                            <td id="hud_vmg">00.0</td>
+                            <td>kt</td>
+                        </tr>
+                        <tr>
+                            <td>LWY</td>
+                            <td id="hud_leeway">0.0</td>
+                            <td>&deg;</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div id="hud_numeric_wind" class="hud_display">
+                    <div class="hud_nav_label">W</div>
+                    <table class="hud_popup_table">
+                        <tr>
+                            <td>DIR</td>
+                            <td id="hud_wind_dir">000</td>
+                            <td>&deg;</td>
+                        </tr>
+                        <tr>
+                            <td>SPD</td>
+                            <td id="hud_wind_speed">000</td>
+                            <td>kt</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div id="hud_force" class="hud_display">
+                    <div class="hud_nav_label">F</div>
+                    <table class="hud_popup_table">
+                        <tr>
+                            <td>DRV</td>
+                            <td id="hud_f_driving">000</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>HLG</td>
+                            <td id="hud_f_heeling">000</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>FRC</td>
+                            <td id="hud_f_friction">000</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>RES</td>
+                            <td id="hud_f_residual">000</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>IKL</td>
+                            <td id="hud_f_induced_keel">000</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>ISL</td>
+                            <td id="hud_f_induced_sail">000</td>
+                            <td></td>
+                        </tr>
+                    </table>
                 </div>
             </div>
+            
+            <div id="right_controls">
+                <div id="vsheet_controls">
+                    <div id="jib_slider">
+                        <div class="slider_top_label">Jib</div>
+                        <div><input id="jibsheet" class="vertical_slider" type="range" value="0" min="-100" max="100"></div>
+                    </div>
+                    <div id="main_slider">
+                        <div class="slider_bottom_label">Main</div>
+                        <div><input id="mainsheet" class="vertical_slider" type="range" value="0" min="-100" max="100"></div>
+                    </div>
+                </div>
+            </div>
+            
             <div id="bottom_controls">
-                <div id="hull_control_container">
-                    <div id="hull_controls">
+                <div id="hull_controls">
+                    <div id="rudder_slider">
+                        <div class="slider_top_label">Rudder</div>
                         <div><input id="rudder" class="horizontal_slider" type="range" value="0" min="-100" max="100"></div>
+                    </div>
+                    <div id="throttle_slider">
+                        <div class="slider_bottom_label">Throttle</div>
                         <div><input id="throttle" class="horizontal_slider" type="range" value="0" min="-100" max="100"></div>
                     </div>
                 </div>
             </div>
+
+            <div id="pip_lower_left">
+                <label for="pip_lower_left_cb" class="pip_label">PIP</label>
+                <input type="checkbox" id="pip_lower_left_cb" class="pip_checkbox">
+                <div id="pip_lower_left_div" class="pip_view_bottom pip_view_left"></div>
+            </div>
+            <div id="pip_lower_right">
+                <label for="pip_lower_right_cb" class="pip_label">PIP</label>
+                <input type="checkbox" id="pip_lower_right_cb" class="pip_checkbox">
+                <div id="pip_lower_right_div" class="pip_view_bottom pip_view_right"></div>
+            </div>
+            <div id="pip_map">
+                <label for="pip_map_cb" class="pip_label">MAP</label>
+                <input type="checkbox" id="pip_map_cb" class="pip_checkbox">
+                <div id="pip_map_div" class="pip_view_map"></div>
+            </div>
         </div>
+
+
         <script src="js/main-ThreeJS.js"></script>
+
+
     </body>
 </html>

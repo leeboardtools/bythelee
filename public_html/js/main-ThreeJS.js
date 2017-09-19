@@ -28,12 +28,20 @@ function init() {
     var scene = mainScene.scene;
     
     var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var material = new THREE.MeshBasicMaterial({color: 0x008800 });
+    var material = new THREE.MeshPhongMaterial({color: 0x008800 });
     var cube = new THREE.Mesh(geometry, material);
+    cube.rotation.x = 0.3;
+    cube.rotation.y = 0.4;
     scene.add(cube);
 
 //    camera.position.z = 5;
 
+    var throttleSlider = document.getElementById('throttle_slider');
+    if (throttleSlider) {
+        throttleSlider.hidden = true;
+    }
+    
+    window.addEventListener('resize', onWindowResize, false);
 }
 
 function animate() {
@@ -42,6 +50,10 @@ function animate() {
     //cube.rotation.x += 0.01;
     //cube.rotation.y += 0.01;
     mainView.render();
+}
+
+function onWindowResize() {
+    mainView.onWindowResize();
 }
 
 init();

@@ -21,13 +21,11 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     this.scene3D = scene3D;
     var scene = scene3D.scene;
     
-    
-    var screenWidth = window.innerWidth;
-    var screenHeight = window.innerHeight;
-    
+    var width = container.clientWidth;
+    var height = container.clientHeight;
     
     if (!camera) {
-        camera = new THREE.PerspectiveCamera(50, screenWidth / screenHeight, 1, 10000);
+        camera = new THREE.PerspectiveCamera(50, width / height, 1, 10000);
         camera.position.z = 5;
     }
     this.camera = camera;
@@ -45,10 +43,12 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     this.renderer = renderer;
     
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(screenWidth, screenHeight);
+    renderer.setSize(width, height);
     
     renderer.domElement.style.position = "relative";
     container.appendChild(renderer.domElement);
+    
+    this.container  = container;
 };
 
 LBUI3d.View3D.prototype = {
@@ -57,4 +57,13 @@ LBUI3d.View3D.prototype = {
 
 LBUI3d.View3D.prototype.render = function() {
     this.renderer.render(this.scene3D.scene, this.camera);
+};
+
+LBUI3d.View3D.prototype.onWindowResize = function() {
+    var width = this.container.clientWidth;
+    var height = this.container.clientHeight;
+    
+    this.renderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
 };
