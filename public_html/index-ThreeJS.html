@@ -14,6 +14,7 @@ and open the template in the editor.
         <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
         <link rel="stylesheet" type="text/css" href="css/sliders.css">
         <link href='https://fonts.googleapis.com/css?family=Sofia' rel='stylesheet'>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <!--
         <script src="js/lib/three.min.js"></script>
@@ -43,6 +44,11 @@ and open the template in the editor.
         <script src="js/leeboard/ui3d/Scene3D.js"></script>
         <script src="js/leeboard/ui3d/View3D.js"></script>
         
+        <script>
+            function toggleFullScreen() {
+                LBUtil.toggleFullScreen(document.getElementById("container"));
+            }
+        </script>
         
         <style type="text/css">
             html {
@@ -51,8 +57,8 @@ and open the template in the editor.
             }
             
             body {
-                margin: 5px;
-                padding: 5px;
+                margin: 0px;
+                padding: 0px;
                 overflow: hidden;   /* Gets rid of the scroll bars */
             }
             canvas {
@@ -77,17 +83,6 @@ and open the template in the editor.
                 right: 0px;
                 
                 margin: 0px;
-            }
-
-            #hud_display {
-                position: absolute;
-                top: 0px;
-                bottom: 0px;
-                left: 0px;
-                right: 0px;
-
-                padding: 5px;
-                z-index: 10;
             }
             
             #right_controls {
@@ -144,6 +139,7 @@ and open the template in the editor.
                 width: 200px;
             }
             
+            
             #hud {
                 font-size: 1.2rem;
             }
@@ -152,14 +148,45 @@ and open the template in the editor.
                 position: absolute;
             }
             
-            .hud_nav_label {
-                
+            /* Button-type element for popping up a HUD info display */
+            .hud_nav_btn {
+                text-align: left;
+                position: absolute;
+                width: 1.5rem;
+
+                text-shadow: 2px 2px 1px gray;
+                color: darkblue;
+                z-index: 10;
+                cursor: pointer;
+                padding: 1px;
+                border-width: 1px;
+                border-style: none;
+                display: inline-block;
+                position: absolute;
+                left: 0px;
+                top: 0px;
+            }
+            
+            /* hud_nav_label is the expanded label displayed above a HUD info display */
+            .hud_nav_btn .hud_nav_label {
+                visibility: hidden;
+                position: absolute;
+                z-index: 11;
+                left: 1px;
+                text-align: left;
+                top: 1px;
+                width: 100px;
+            }
+            
+            .hud_nav_btn:hover .hud_nav_label {
+                visibility: visible;
             }
             
             .hud_popup {
                 
             }
             
+            /* Table for a HUD info display */
             .hud_popup_table {
                 table-layout: fixed;
                 border-collapse: collapse;
@@ -168,58 +195,186 @@ and open the template in the editor.
                 font-size: 1.2rem;
             }
             
+            .hud_popup_table_left {
+                position: absolute;
+                left: -200px;
+                top: 1.7rem;
+            }
+            
             .hud_popup_table td:nth-child(1) {
                 width: 30px;
             }
             .hud_popup_table td:nth-child(2) {
-                width: 60px;
+                width: 40px;
             }
             .hud_popup_table td:nth-child(3) {
                 width: 20px;
                 text-align: left;
-            }           
+            }
             
             #hud_boat {
-                top: 130px;
+                top: 90px;
             }
             
             #hud_numeric_wind {
-                top: 220px;
+                top: 180px;
             }
             
             #hud_force {
-                top: 280px;
+                top: 240px;
             }
             
-            #app_wind_indicator {
+            /* A wind indicator, normally has a speed indicator and a dial */
+            .wind_indicator {
                 position: absolute;
+                width: 5.5rem;
+                height: 5.5rem;
+            }
+            
+            /* An item in a wind indicator */
+            .wind_indicator_item {
+                float: left;
+            }
+            
+            /* The wind arrow direction dial */
+            .wind_dial {
+                margin: auto;
+                width: 5rem;
+                height: 5rem;
+                font-size: 5rem;
+                color: rgba(0,0,0, .7);
+            }
+            
+            
+            /* The wind speed indicator, contains all the LED items */
+            .wind_speed_indicator {
+                width: 0.5rem;
+            }
+            
+            /* A single LED item in the speed bar. */
+            .wind_speed_led {
+                width: 0.5rem;
+                height: 0.4rem;
+
+                border-style: solid;
+                border-width: 1px;
+                border-color: darkslategray;
+            }
+            
+            .wind_speed_led_f0 {
+                background-color: hsla(120, 100%, 34%, .7);
+            }
+            .wind_speed_led_f1 {
+                background-color: hsla(120, 100%, 34%, .7);
+            }
+            .wind_speed_led_f2 {
+                background-color: hsla(95, 65%, 50%, .7);
+            }
+            .wind_speed_led_f3 {
+                background-color: hsla(76, 89%, 63%, .7);
+            }
+            .wind_speed_led_f4 {
+                background-color: hsla(60, 80%, 72%, .7);
+            }
+            .wind_speed_led_f5 {
+                background-color: hsla(29, 100%, 50%, .7);
+            }
+            .wind_speed_led_f6 {
+                background-color: hsla(5, 79%, 55%, .7);
+            }
+            .wind_speed_led_f7 {
+                background-color: hsla(0, 76%, 50%, .7);
+            }
+            .wind_speed_led_f8 {
+                background-color: hsla(0, 71%, 45%, .7);
+            }
+            
+            
+            /* A hover-style drop down */
+            .dropdown {
+                padding-left: 5px;
+                padding-right: 5px;
+                
+                display: inline-block;
+            }
+            
+            /* The button that drops down the contents of a dropdown */
+            .dropdown_btn {
+                cursor: pointer;
+            }
+
+            /* Container of the items dropped down */
+            .dropdown_items {
+                display: none;
+                
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                z-index: 1;
+            }
+            
+            /* Items within .dropdown_items */
+            .dropdown_item {
+                display: block;
+            }
+            
+            .dropdown:hover .dropdown_items {
+                display: block;
+            }
+            
+            .dropdown:hover .dropdown_btn {
+                background-color: darkgray;
+            }
+            
+            
+            /* Outer-most container for app-wind indicator */
+            #app_wind_indicator {
                 left: 5px;
                 top: 5px;
-                width: 100px;
-                z-index: 200;
+                z-index: 2;
             }
             
-            #app_wind_label {
-                text-align: center;
-            }
-            
-            #app_wind_frame {
-                width: 80px;
-                height: 80px;
-                border-style: dashed;
-                border-radius: 50%;
-                border-width: 1px;
+            /* The wind drop down menu */
+            #wind_menu {
+                position: absolute;
+                top: 0px;
+                left: 6rem;
                 padding: 5px;
             }
             
-            #app_wind_dial {
+            /* The wind menu drop down button */
+            .wind_menu_btn {
+                text-align: center;
+                font-size: 1rem;
             }
             
+            /* The wind SVG icon. */
+            .wind_icon {
+                padding: 5px;
+                width: 1.5rem;
+                height: 1.5rem;
+            }
             
-            .pip_checkbox {
+            .menu_button {
+                text-align: center;
+                font-size: 1.5rem;
+                text-shadow: 2px 2px 1px gray;
+                color: darkblue;
+                z-index: 10;
+                cursor: pointer;
+                padding: 1px;
+                border-width: 1px;
+                border-style: none;
+            }
+            
+            .menu_button:hover {
+                background-color: darkgray;
+            }
+            
+            #top_menu_bar {
                 position: absolute;
-                left: -100px;
+                left: 100px;
+                width: 50%;
             }
+
             .pip_view_bottom {
                 position: absolute;
                 bottom: 0px;
@@ -257,52 +412,92 @@ and open the template in the editor.
                 color: darkblue;
                 z-index: 10;
                 cursor: pointer;
+                padding: 1px;
+                border-width: 1px;
+                border-style: none;
             }
-
-            label[for="pip_lower_left_cb"] {
-                position: absolute;
-                left: 5px;
-                bottom: 5px;
+            
+            .pip_label:hover {
+                background-color: darkgray;
             }
-            label[for="pip_lower_right_cb"] {
-                position: absolute;
-                right: 5px;
-                bottom: 5px;
-            }
-            label[for="pip_map_cb"] {
+            
+            #pip_map_btn {
                 position: absolute;
                 right: 5px;
                 top: 5px;
             }
-            
-            input[type=checkbox]:checked + div#pip_lower_left_div {
-                left: 0px;
+
+            #pip_lower_right_btn {
+                position: absolute;
+                right: 5px;
+                bottom: 5px;
             }
-            input[type=checkbox]:checked + div#pip_lower_right_div {
-                right: 0px;
+
+            #pip_lower_left_btn {
+                position: absolute;
+                left: 5px;
+                bottom: 5px;
             }
-            input[type=checkbox]:checked + div#pip_map_div {
-                right: 0px;
-            }
-            
+
         </style>
     </head>
-        <body>
+    <body>
         <div id="container">
             <div id="main_view"></div>
             <div id="hud">
-                <div id="app_wind_indicator">
-                    <div id="app_wind_label">Apparent Wind</div>
-                    <div id="app_wind_frame">
-                        <svg id="app_wind_dial" xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 100 100">
-                            <path id="arrow" d="M -5,-50 -5,0 -20,0 0,50 20,0 5,0 5,-50 z" fill="blue"/>
+                <div id="app_wind_indicator" class="wind_indicator">
+                    <div id="app_wind_speed_indicator" class="wind_indicator_item wind_speed_indicator">
+                        <div id="app_wind_speed_led_f8" class="wind_speed_led wind_speed_led_f8"></div>
+                        <div id="app_wind_speed_led_f7" class="wind_speed_led wind_speed_led_f7"></div>
+                        <div id="app_wind_speed_led_f6" class="wind_speed_led wind_speed_led_f6"></div>
+                        <div id="app_wind_speed_led_f5" class="wind_speed_led wind_speed_led_f5"></div>
+                        <div id="app_wind_speed_led_f4" class="wind_speed_led wind_speed_led_f4"></div>
+                        <div id="app_wind_speed_led_f3" class="wind_speed_led wind_speed_led_f3"></div>
+                        <div id="app_wind_speed_led_f2" class="wind_speed_led wind_speed_led_f2"></div>
+                        <div id="app_wind_speed_led_f1" class="wind_speed_led wind_speed_led_f1"></div>
+                        <div id="app_wind_speed_led_f0" class="wind_speed_led wind_speed_led_f0"></div>
+                    </div>
+                    <div class="wind_indicator_item">
+                        <i id="app_wind_dial" class="material-icons wind_dial">navigation</i>
+                    </div>
+                </div>
+
+                <div id="wind_menu" class="dropdown wind_menu">
+                    <div class="wind_icon dropdown_btn">
+                        <!-- Wind Icon... -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -60 100 120">
+                            <path 
+                                d="M 0,0   70,0   c15,0 15,-30 0,-30 s-15,0 -15,15 
+                                   M 0,-20 25,-20 c15,0 15,-30 0,-30 s-15,0 -15,15 
+                                   M 0, 20 50, 20 c15,0 15,30  0,30  s-15,0  -15,-15" 
+                                fill="none" stroke="black" stroke-width="10px"/>
                         </svg>
+                        <!-- End Wind Icon... -->
+                    </div>
+                    <div class="dropdown_items">
+                        <div id="app_wind_back" class="dropdown_item menu_button" onclick="windBack()">
+                            <i class="material-icons">&#xE419;</i>
+                        </div>
+                        <div id="app_wind_veer" class="dropdown_item menu_button" onclick="windVeer()">
+                            <i class="material-icons">&#xE41A;</i>
+                        </div>
+                        <div id="app_wind_increase" class="dropdown_item menu_button" onclick="windIncrease()">
+                            <i class="material-icons">&#xE5D8;</i>
+                        </div>
+                        <div id="app_wind_decrease" class="dropdown_item menu_button" onclick="windDecrease()">
+                            <i class="material-icons">&#xE5DB;</i>
+                        </div>
                     </div>
                 </div>
                 
+                <div id="top_menu_bar">
+                </div>
+                
                 <div id="hud_boat" class="hud_display">
-                    <div class="hud_nav_label">B</div>
-                    <table class="hud_popup_table">
+                    <div class="hud_nav_btn" onclick="toggleHUDBoat()">B
+                        <span id="hud_label_boat" class="hud_nav_label">Boat HUD</span>
+                    </div>
+                    <table id="hud_popup_boat" class="hud_popup_table hud_popup_table_left">
                         <tr>
                             <td>HDG</td>
                             <td id="hud_heading">000</td>
@@ -315,20 +510,22 @@ and open the template in the editor.
                         </tr>
                         <tr>
                             <td>VMG</td>
-                            <td id="hud_vmg">00.0</td>
+                            <td id="hud_vmg">-00.0</td>
                             <td>kt</td>
                         </tr>
                         <tr>
                             <td>LWY</td>
                             <td id="hud_leeway">0.0</td>
-                            <td>&deg;</td>
+                            <td>&deg;S</td>
                         </tr>
                     </table>
                 </div>
                 
                 <div id="hud_numeric_wind" class="hud_display">
-                    <div class="hud_nav_label">W</div>
-                    <table class="hud_popup_table">
+                    <div class="hud_nav_btn" onclick="toggleHUDWind()">W
+                        <span id="hud_label_wind" class="hud_nav_label">Wind HUD</span>
+                    </div>
+                    <table id="hud_popup_wind" class="hud_popup_table hud_popup_table_left">
                         <tr>
                             <td>DIR</td>
                             <td id="hud_wind_dir">000</td>
@@ -343,8 +540,10 @@ and open the template in the editor.
                 </div>
                 
                 <div id="hud_force" class="hud_display">
-                    <div class="hud_nav_label">F</div>
-                    <table class="hud_popup_table">
+                    <div class="hud_nav_btn" onclick="toggleHUDForce()">F
+                        <span id="hud_label_force" class="hud_nav_label">Forces HUD</span>
+                    </div>
+                    <table id="hud_popup_force" class="hud_popup_table hud_popup_table_left">
                         <tr>
                             <td>DRV</td>
                             <td id="hud_f_driving">000</td>
@@ -383,11 +582,11 @@ and open the template in the editor.
                 <div id="vsheet_controls">
                     <div id="jib_slider">
                         <div class="slider_top_label">Jib</div>
-                        <div><input id="jibsheet" class="vertical_slider" type="range" value="0" min="-100" max="100"></div>
+                        <div><input id="jibsheet" class="vertical_slider" type="range" value="0" min="-100" max="100" oninput="onJibsheetChange(value)"></div>
                     </div>
                     <div id="main_slider">
                         <div class="slider_bottom_label">Main</div>
-                        <div><input id="mainsheet" class="vertical_slider" type="range" value="0" min="-100" max="100"></div>
+                        <div><input id="mainsheet" class="vertical_slider" type="range" value="0" min="-100" max="100" oninput="onMainsheetChange(value)"></div>
                     </div>
                 </div>
             </div>
@@ -396,35 +595,137 @@ and open the template in the editor.
                 <div id="hull_controls">
                     <div id="rudder_slider">
                         <div class="slider_top_label">Rudder</div>
-                        <div><input id="rudder" class="horizontal_slider" type="range" value="0" min="-100" max="100"></div>
+                        <div><input id="rudder" class="horizontal_slider" type="range" value="0" min="-100" max="100" oninput="onRudderChange(value)"></div>
                     </div>
                     <div id="throttle_slider">
                         <div class="slider_bottom_label">Throttle</div>
-                        <div><input id="throttle" class="horizontal_slider" type="range" value="0" min="-100" max="100"></div>
+                        <div><input id="throttle" class="horizontal_slider" type="range" value="0" min="-100" max="100" oninput="onThrottleChange(value)"></div>
                     </div>
                 </div>
             </div>
+            
+            <!--
+            Top menu items:
+            Full Screen
+            Settings
+            Toggle Force Arrows
+            Toggle Velocity Arrows
+            -->
 
-            <div id="pip_lower_left">
-                <label for="pip_lower_left_cb" class="pip_label">PIP</label>
-                <input type="checkbox" id="pip_lower_left_cb" class="pip_checkbox">
-                <div id="pip_lower_left_div" class="pip_view_bottom pip_view_left"></div>
+            <div>
+                <div id="pip_map_btn" class="pip_label" onclick="toggleMap()"><i class="material-icons">&#xE55B;</i></div>
+                <div id="pip_map" class="pip_view_map"></div>
             </div>
-            <div id="pip_lower_right">
-                <label for="pip_lower_right_cb" class="pip_label">PIP</label>
-                <input type="checkbox" id="pip_lower_right_cb" class="pip_checkbox">
-                <div id="pip_lower_right_div" class="pip_view_bottom pip_view_right"></div>
+            <div>
+                <div id="pip_lower_left_btn" class="pip_label" onclick="togglePIPLowerLeft()"><i class="material-icons">&#xE5CC;</i></div>
+                <div id="pip_lower_left" class="pip_view_bottom pip_view_left"></div>
             </div>
-            <div id="pip_map">
-                <label for="pip_map_cb" class="pip_label">MAP</label>
-                <input type="checkbox" id="pip_map_cb" class="pip_checkbox">
-                <div id="pip_map_div" class="pip_view_map"></div>
+            <div>
+                <div id="pip_lower_right_btn" class="pip_label" onclick="togglePIPLowerRight()"><i class="material-icons">&#xE5CB;</i></div>
+                <div id="pip_lower_right" class="pip_view_bottom pip_view_right"></div>
             </div>
+            
         </div>
-
+            <!--
+            <i class="material-icons">map</i>
+            <i class="material-icons">&#xE55B;</i>
+            
+            <i class="material-icons">fullscreen_exit</i>
+            <i class="material-icons">&#xE5D1;</i>
+            
+            <i class="material-icons">chevron_left</i>
+            <i class="material-icons">&#xE5CB;</i>
+            
+            <i class="material-icons">chevron_right</i>
+            <i class="material-icons">&#xE5CC;</i>
+            
+            Chevron up...
+            <i class="material-icons">expand_less</i>
+            <i class="material-icons">&#xE5CE;</i>
+            
+            Chevron down...
+            <i class="material-icons">expand_more</i>
+            <i class="material-icons">&#xE5CF;</i>
+            
+            <i class="material-icons">rotate_left</i>
+            <i class="material-icons">&#xE419;</i>
+            
+            <i class="material-icons">rotate_right</i>
+            <i class="material-icons">&#xE41A;</i>
+            
+            <i class="material-icons">add</i>
+            <i class="material-icons">&#xE145;</i>
+            
+            <i class="material-icons">add_box</i>
+            <i class="material-icons">&#xE146;</i>
+            
+            <i class="material-icons">add_circle</i>
+            <i class="material-icons">&#xE147;</i>
+            
+            <i class="material-icons">add_circle_outline</i>
+            <i class="material-icons">&#xE148;</i>
+            
+            <i class="material-icons">remove</i>
+            <i class="material-icons">&#xE15B;</i>
+            
+            <i class="material-icons">remove_circle</i>
+            <i class="material-icons">&#xE15C;</i>
+            
+            <i class="material-icons">remove_circle_outline</i>
+            <i class="material-icons">&#xE15D;</i>
+            
+            <i class="material-icons">redo</i>
+            <i class="material-icons">&#xE15A;</i>
+            
+            <i class="material-icons">undo</i>
+            <i class="material-icons">&#xE166;</i>
+            
+            <i class="material-icons">directions_boat</i>
+            <i class="material-icons">&#xE532;</i>
+            
+            <i class="material-icons">navigation</i>
+            <i class="material-icons">&#xE55D;</i>
+            
+            <i class="material-icons">arrow_back</i>
+            <i class="material-icons">&#xE5C4;</i>
+            
+            <i class="material-icons">arrow_forward</i>
+            <i class="material-icons">&#xE5C8;</i>
+            
+            <i class="material-icons">arrow_downward</i>
+            <i class="material-icons">&#xE5DB;</i>
+            
+            <i class="material-icons">arrow_upward</i>
+            <i class="material-icons">&#xE5D8;</i>
+            
+            <i class="material-icons">do_not_disturb</i>
+            <i class="material-icons">&#xE612;</i>
+            
+            <i class="material-icons">settings</i>
+            <i class="material-icons">&#xE8B8;</i>
+            
+            <i class="material-icons">power</i>
+            <i class="material-icons">&#xE63C;</i>
+            
+            <i class="material-icons">flash_on</i>
+            <i class="material-icons">&#xE3E7;</i>
+            
+            Propeller...
+            <i class="material-icons">toys</i>
+            <i class="material-icons">&#xE332;</i>
+            
+            Arrows pointing towards each other
+            <i class="material-icons">compare_arrows</i>
+            <i class="material-icons">&#xE915;</i>
+            
+            <i class="material-icons">trending_up</i>
+            <i class="material-icons">&#xE8E5;</i>
+            
+            <i class="material-icons">trending_down</i>
+            <i class="material-icons">&#xE8E3;</i>
+            -->
 
         <script src="js/main-ThreeJS.js"></script>
-
 
     </body>
 </html>

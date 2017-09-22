@@ -18,6 +18,23 @@ Run:
 
 TODO:
 
+Get full screen display working.
+
+Buttons to add:
+HUD display buttons (Boat, Wind, Forces)
+Toggle Velocity Arrows
+Toggle Force Arrows
+
+Wind Menu (click on wind indicator???):
+    Increase
+    Decrease
+    Back
+    Veer
+    Steady
+    Gusty
+
+
+
 Add minimum angle for lift to sail foil.
 
 Add ability to release rudder (space + CTRL? dbl-click rudder control?)

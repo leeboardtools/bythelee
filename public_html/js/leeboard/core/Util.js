@@ -361,3 +361,46 @@ LBUtil.RollingBuffer.prototype = {
     
     constructor: LBUtil.RollingBuffer
 };
+
+LBUtil.toggleFullScreen = function(element) {
+    var fullscreenEnabled;
+    var fullscreenElement;
+    var requestFullscreen;
+    var exitFullscreen;
+    if (element.requestFullScreen) {
+        fullscreenEnabled = document.fullscreenEnabled;
+        fullscreenElement = document.fullscreenElement;
+        requestFullscreen = element.requestFullScreen;
+        exitFullscreen = document.exitFullscreen;
+    }
+    else if (element.webkitRequestFullscreen) {
+        fullscreenEnabled = document.webkitFullscreenEnabled;
+        fullscreenElement = document.webkitFullscreenElement;
+        requestFullscreen = element.webkitRequestFullScreen;
+        exitFullscreen = document.webkitExitFullscreen;
+    }
+    else if (element.mozRequestFullScreen) {
+        fullscreenEnabled = document.mozFullscreenEnabled;
+        fullscreenElement = document.mozFullscreenElement;
+        requestFullscreen = element.mozRequestFullScreen;
+        exitFullscreen = document.mozCancelFullscreen;
+    }
+    else if (element.msRequestFullscreen) {
+        fullscreenEnabled = document.msFullscreenEnabled;
+        fullscreenElement = document.msFullscreenElement;
+        requestFullscreen = element.msRequestFullScreen;
+        exitFullscreen = document.msExitFullscreen;
+    }
+    else {
+        return;
+    }
+    if (!fullscreenEnabled) {
+        return;
+    }
+    if (fullscreenElement) {
+        exitFullscreen.call(document);
+    }
+    else {
+        requestFullscreen.call(element);
+    }
+};
