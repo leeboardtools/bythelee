@@ -21,15 +21,33 @@ var LBUI3d = LBUI3d || {};
 
 LBUI3d.Scene3D = function() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xcccccc);
     this.scene.add(new THREE.AmbientLight(0x222222));
     
     this.mainLight = new THREE.DirectionalLight(0xffffff, 1);
-    this.mainLight.position.set(100, 100, 100);
     this.scene.add(this.mainLight);
+   
 };
 
 LBUI3d.Scene3D.prototype = {
     constructor: LBUI3d.Scene3D
 };
 
+LBUI3d.Scene3D.prototype.getBackgroundColor = function() {
+    return this.scene.background;
+};
+
+LBUI3d.Scene3D.prototype.loadJSONModel = function(url, onLoad, onProgress, onError) {
+    if (!this.loaderJSON) {
+        this.loaderJSON = new THREE.JSONLoader();
+    }
+    
+    var me = this;
+    this.loaderJSON.load(url, function(geometry, materials) {
+        var material = new THREE.MeshFaceMaterial(materials);
+        var mesh = new THREE.Mesh(geometry, material);
+        me.scene.add(mesh);
+        if (onLoad) {
+            onLoad.call(me, mesh);
+        }
+    }, onProgress, onError);
+};

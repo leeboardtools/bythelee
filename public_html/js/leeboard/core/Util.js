@@ -395,12 +395,14 @@ LBUtil.toggleFullScreen = function(element) {
         return;
     }
     if (!fullscreenEnabled) {
-        return;
+        return false;
     }
     if (fullscreenElement) {
         exitFullscreen.call(document);
+        return false;
     }
     else {
         requestFullscreen.call(element);
+        return true;
     }
 };

@@ -43,6 +43,9 @@ and open the template in the editor.
         
         <script src="js/leeboard/ui3d/Scene3D.js"></script>
         <script src="js/leeboard/ui3d/View3D.js"></script>
+        <script src="js/leeboard/three-js-extras/controls/OrbitControls.js"></script>
+        <script src="js/leeboard/three-js-extras/Detector.js"></script>
+        <script src="js/leeboard/ui3d/App3D.js"></script>
         
         <script>
             function toggleFullScreen() {
@@ -83,24 +86,15 @@ and open the template in the editor.
                 right: 0px;
                 
                 margin: 0px;
-            }
-            
-            #right_controls {
-                position: absolute;
-                top: 50%;
-                right: 10px;
-                transform: translateY(-50%);
-                z-index: 110;
+                background-color: whitesmoke;
             }
             
             .vertical_slider {
-                width: 300px;
                 margin: 0px;
                 padding: 0px;
             }
 
             .horizontal_slider {
-                width: 300px;
                 margin: 0px;
                 padding: 0px;
             }
@@ -122,28 +116,51 @@ and open the template in the editor.
                 font-size: 1.2rem;
             }
             
+            #right_controls {
+                position: absolute;
+                top: 50%;
+                right: 10px;
+                width: 30rem;
+                transform: translateY(-50%);
+                z-index: 110;
+            }
+            
+            /* Container for the vertical sheet controls within #right_controls */
             #vsheet_controls {
                 transform-origin: right;
                 transform: rotate(270deg) translateX(50%) translateY(-50%);
+            }
+            
+            /* Individual vertical sheet control. */
+            .vsheet_slider {
+                width: 30rem;
             }
             
             #bottom_controls {
                 position: absolute;
                 left: 50%;
                 bottom: 10px;
+                width: 30rem;
                 transform: translateX(-50%);
                 z-index: 120;
             }
             
+            /* Container for the hull controls within #bottom_controls */
             #hull_controls {
-                width: 200px;
+            }
+            
+            /* Individual hull control */
+            .hull_control_slider {
+                width: 30rem;
             }
             
             
+            /* The HUD container */
             #hud {
                 font-size: 1.2rem;
             }
             
+            /* Outer container for a HUD display that pops up with a button */
             .hud_display {
                 position: absolute;
             }
@@ -182,9 +199,6 @@ and open the template in the editor.
                 visibility: visible;
             }
             
-            .hud_popup {
-                
-            }
             
             /* Table for a HUD info display */
             .hud_popup_table {
@@ -213,15 +227,15 @@ and open the template in the editor.
             }
             
             #hud_boat {
-                top: 90px;
+                top: 7rem;
             }
             
             #hud_numeric_wind {
-                top: 180px;
+                top: 16rem;
             }
             
             #hud_force {
-                top: 240px;
+                top: 22rem;
             }
             
             /* A wind indicator, normally has a speed indicator and a dial */
@@ -332,20 +346,6 @@ and open the template in the editor.
                 z-index: 2;
             }
             
-            /* The wind drop down menu */
-            #wind_menu {
-                position: absolute;
-                top: 0px;
-                left: 6rem;
-                padding: 5px;
-            }
-            
-            /* The wind menu drop down button */
-            .wind_menu_btn {
-                text-align: center;
-                font-size: 1rem;
-            }
-            
             /* The wind SVG icon. */
             .wind_icon {
                 padding: 5px;
@@ -353,14 +353,17 @@ and open the template in the editor.
                 height: 1.5rem;
             }
             
+            /* A menu button */
             .menu_button {
                 text-align: center;
                 font-size: 1.5rem;
+                width: 3rem;
                 text-shadow: 2px 2px 1px gray;
                 color: darkblue;
                 z-index: 10;
                 cursor: pointer;
                 padding: 1px;
+                
                 border-width: 1px;
                 border-style: none;
             }
@@ -369,12 +372,26 @@ and open the template in the editor.
                 background-color: darkgray;
             }
             
-            #top_menu_bar {
+            /* A menu button that's aligned horizontally */
+            .horiz_menu_button {
+                float: left;
+            }
+            
+            #wind_menu {
                 position: absolute;
-                left: 100px;
+                left: 10rem;
+                padding: 5px;
+            }
+            
+            #menu_bar_top {
+                position: absolute;
+                left: 15rem;
                 width: 50%;
+                padding: 5px;
+                
             }
 
+            /* One of the two PIP views along the bottom of the screen */
             .pip_view_bottom {
                 position: absolute;
                 bottom: 0px;
@@ -383,12 +400,14 @@ and open the template in the editor.
                 z-index: 1;
                 
                 transition: 0.4s all;
-                background-color: rgba(0, 0, 256, 0.3);
             }
+            
+            /* A PIP view aligned along the left side of the screen */
             .pip_view_left {
                 position: absolute;
                 left: -50%;
             }
+            /* A PIP view aligned along the right side of the screen */
             .pip_view_right {
                 position: absolute;
                 right: -50%;
@@ -397,16 +416,19 @@ and open the template in the editor.
             .pip_view_map {
                 position: absolute;
                 top: 0px;
-                right: -50%;
-                width: 30%;
-                height: 30%;
+                right: -30rem;
+                width: 30rem;
+                height: 30rem;
+                max-width: 50%;
+                max-height: 50%;
                 z-index: 1;
                 
                 transition: 0.4s all;
                 background-color: rgba(0, 0, 256, 0.3);
             }
             
-            .pip_label {
+            /* The element that toggles a PIP view */
+            .pip_btn {
                 font-size: 1.5rem;
                 text-shadow: 2px 2px 1px gray;
                 color: darkblue;
@@ -417,7 +439,7 @@ and open the template in the editor.
                 border-style: none;
             }
             
-            .pip_label:hover {
+            .pip_btn:hover {
                 background-color: darkgray;
             }
             
@@ -462,7 +484,7 @@ and open the template in the editor.
                     </div>
                 </div>
 
-                <div id="wind_menu" class="dropdown wind_menu">
+                <div id="wind_menu" class="dropdown">
                     <div class="wind_icon dropdown_btn">
                         <!-- Wind Icon... -->
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -60 100 120">
@@ -475,26 +497,32 @@ and open the template in the editor.
                         <!-- End Wind Icon... -->
                     </div>
                     <div class="dropdown_items">
-                        <div id="app_wind_back" class="dropdown_item menu_button" onclick="windBack()">
+                        <div id="app_wind_back" class="dropdown_item menu_button" onclick="myApp.windBack()">
                             <i class="material-icons">&#xE419;</i>
                         </div>
-                        <div id="app_wind_veer" class="dropdown_item menu_button" onclick="windVeer()">
+                        <div id="app_wind_veer" class="dropdown_item menu_button" onclick="myApp.windVeer()">
                             <i class="material-icons">&#xE41A;</i>
                         </div>
-                        <div id="app_wind_increase" class="dropdown_item menu_button" onclick="windIncrease()">
+                        <div id="app_wind_increase" class="dropdown_item menu_button" onclick="myApp.windIncrease()">
                             <i class="material-icons">&#xE5D8;</i>
                         </div>
-                        <div id="app_wind_decrease" class="dropdown_item menu_button" onclick="windDecrease()">
+                        <div id="app_wind_decrease" class="dropdown_item menu_button" onclick="myApp.windDecrease()">
                             <i class="material-icons">&#xE5DB;</i>
                         </div>
                     </div>
                 </div>
-                
-                <div id="top_menu_bar">
+
+                <div id="menu_bar_top">
+                    <div id="menu_full_screen" class="menu_button horiz_menu_button" onclick="myApp.toggleFullScreen(document.getElementById('container'))">
+                        <i class="material-icons">&#xE5D0;</i>
+                    </div>
+                    <div id="menu_mouse_mode" class="menu_button horiz_menu_button" onclick="myApp.nextMouseMode()">
+                        <i class="material-icons">&#xE89F;</i>
+                    </div>
                 </div>
                 
                 <div id="hud_boat" class="hud_display">
-                    <div class="hud_nav_btn" onclick="toggleHUDBoat()">B
+                    <div class="hud_nav_btn" onclick="myApp.toggleHUDBoat()">B
                         <span id="hud_label_boat" class="hud_nav_label">Boat HUD</span>
                     </div>
                     <table id="hud_popup_boat" class="hud_popup_table hud_popup_table_left">
@@ -522,7 +550,7 @@ and open the template in the editor.
                 </div>
                 
                 <div id="hud_numeric_wind" class="hud_display">
-                    <div class="hud_nav_btn" onclick="toggleHUDWind()">W
+                    <div class="hud_nav_btn" onclick="myApp.toggleHUDWind()">W
                         <span id="hud_label_wind" class="hud_nav_label">Wind HUD</span>
                     </div>
                     <table id="hud_popup_wind" class="hud_popup_table hud_popup_table_left">
@@ -540,7 +568,7 @@ and open the template in the editor.
                 </div>
                 
                 <div id="hud_force" class="hud_display">
-                    <div class="hud_nav_btn" onclick="toggleHUDForce()">F
+                    <div class="hud_nav_btn" onclick="myApp.toggleHUDForce()">F
                         <span id="hud_label_force" class="hud_nav_label">Forces HUD</span>
                     </div>
                     <table id="hud_popup_force" class="hud_popup_table hud_popup_table_left">
@@ -574,6 +602,12 @@ and open the template in the editor.
                             <td id="hud_f_induced_sail">000</td>
                             <td></td>
                         </tr>
+                        <tr><td>&nbsp;</td><td></td><td></td></tr>
+                        <tr>
+                            <td>FPS</td>
+                            <td id="hud_fps">0</td>
+                            <td></td>
+                        </tr>
                     </table>
                 </div>
             </div>
@@ -582,11 +616,11 @@ and open the template in the editor.
                 <div id="vsheet_controls">
                     <div id="jib_slider">
                         <div class="slider_top_label">Jib</div>
-                        <div><input id="jibsheet" class="vertical_slider" type="range" value="0" min="-100" max="100" oninput="onJibsheetChange(value)"></div>
+                        <div><input id="jibsheet" class="vertical_slider vsheet_slider" type="range" value="0" min="-100" max="100" oninput="myApp.onJibsheetChange(value)"></div>
                     </div>
                     <div id="main_slider">
                         <div class="slider_bottom_label">Main</div>
-                        <div><input id="mainsheet" class="vertical_slider" type="range" value="0" min="-100" max="100" oninput="onMainsheetChange(value)"></div>
+                        <div><input id="mainsheet" class="vertical_slider vsheet_slider" type="range" value="0" min="-100" max="100" oninput="myApp.onMainsheetChange(value)"></div>
                     </div>
                 </div>
             </div>
@@ -595,11 +629,11 @@ and open the template in the editor.
                 <div id="hull_controls">
                     <div id="rudder_slider">
                         <div class="slider_top_label">Rudder</div>
-                        <div><input id="rudder" class="horizontal_slider" type="range" value="0" min="-100" max="100" oninput="onRudderChange(value)"></div>
+                        <div><input id="rudder" class="horizontal_slider hull_control_slider" type="range" value="0" min="-100" max="100" oninput="myApp.onRudderChange(value)"></div>
                     </div>
                     <div id="throttle_slider">
                         <div class="slider_bottom_label">Throttle</div>
-                        <div><input id="throttle" class="horizontal_slider" type="range" value="0" min="-100" max="100" oninput="onThrottleChange(value)"></div>
+                        <div><input id="throttle" class="horizontal_slider hull_control_slider" type="range" value="0" min="-100" max="100" oninput="myApp.onThrottleChange(value)"></div>
                     </div>
                 </div>
             </div>
@@ -613,15 +647,15 @@ and open the template in the editor.
             -->
 
             <div>
-                <div id="pip_map_btn" class="pip_label" onclick="toggleMap()"><i class="material-icons">&#xE55B;</i></div>
+                <div id="pip_map_btn" class="pip_btn" onclick="myApp.toggleMap()"><i class="material-icons">&#xE55B;</i></div>
                 <div id="pip_map" class="pip_view_map"></div>
             </div>
             <div>
-                <div id="pip_lower_left_btn" class="pip_label" onclick="togglePIPLowerLeft()"><i class="material-icons">&#xE5CC;</i></div>
+                <div id="pip_lower_left_btn" class="pip_btn" onclick="myApp.togglePIPLowerLeft()"><i class="material-icons">&#xE5CC;</i></div>
                 <div id="pip_lower_left" class="pip_view_bottom pip_view_left"></div>
             </div>
             <div>
-                <div id="pip_lower_right_btn" class="pip_label" onclick="togglePIPLowerRight()"><i class="material-icons">&#xE5CB;</i></div>
+                <div id="pip_lower_right_btn" class="pip_btn" onclick="myApp.togglePIPLowerRight()"><i class="material-icons">&#xE5CB;</i></div>
                 <div id="pip_lower_right" class="pip_view_bottom pip_view_right"></div>
             </div>
             
@@ -629,6 +663,9 @@ and open the template in the editor.
             <!--
             <i class="material-icons">map</i>
             <i class="material-icons">&#xE55B;</i>
+            
+            <i class="material-icons">fullscreen</i>
+            <i class="material-icons">&#xE5D0;</i>
             
             <i class="material-icons">fullscreen_exit</i>
             <i class="material-icons">&#xE5D1;</i>
@@ -723,6 +760,16 @@ and open the template in the editor.
             
             <i class="material-icons">trending_down</i>
             <i class="material-icons">&#xE8E3;</i>
+            
+            <i class="material-icons">pan_tool</i>
+            <i class="material-icons">&#xE925;</i>
+            
+            Left-Right-Up-Down arrows
+            <i class="material-icons">open_with</i>
+            <i class="material-icons">&#xE89F;</i>
+            
+            <i class="material-icons">3d_rotation</i>
+            <i class="material-icons">&#xE84D;</i>
             -->
 
         <script src="js/main-ThreeJS.js"></script>

@@ -35,6 +35,7 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     
     if (!renderer) {
         rendererParameters = {
+            alpha: true,
             antialias: true,
             logarithmicDepthBuffer: true
         };
@@ -49,13 +50,40 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     container.appendChild(renderer.domElement);
     
     this.container  = container;
+    
+    this.isEnabled = true;
+    
+    this.mouseMode = -1;
+    this.setRotateMode();
 };
+
+LBUI3d.View3D.MOUSE_ROTATE_MODE = 0;
+LBUI3d.View3D.MOUSE_PAN_MODE = 1;
 
 LBUI3d.View3D.prototype = {
     constructor: LBUI3d.View3D
 };
 
+LBUI3d.View3D.prototype.setMouseMode = function(mode) {
+    if (this.mouseMode === mode) {
+        return this;
+    }
+    return this;
+};
+
+LBUI3d.View3D.prototype.setPanMode = function() {
+    this.setMouseMode(LBUI3d.View3D.MOUSE_PAN_MODE);
+};
+
+LBUI3d.View3D.prototype.setRotateMode = function() {
+    this.setMouseMode(LBUI3d.View3D.MOUSE_ROTATE_MODE);
+};
+
 LBUI3d.View3D.prototype.render = function() {
+    if (!this.isEnabled) {
+        return;
+    }
+    
     this.renderer.render(this.scene3D.scene, this.camera);
 };
 
@@ -66,4 +94,17 @@ LBUI3d.View3D.prototype.onWindowResize = function() {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+};
+
+LBUI3d.View3D.prototype.installOrbitControls = function(minDistance, maxDistance, maxPolarAngle) {
+    this.controls = new THREE.OrbitControls(this.camera, this.container);
+    if (minDistance !== undefined) {
+        this.controls.minDistance = minDistance;
+    }
+    if (maxDistance !== undefined) {
+        this.controls.maxDistance = maxDistance;
+    }
+    if (maxPolarAngle !== undefined) {
+        this.controls.maxPolarAngle = maxPolarAngle;
+    }
 };

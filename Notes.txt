@@ -16,7 +16,22 @@ Run:
     jsdoc public_html/js/leeboard -r -d docs
 
 
+
+Exporting Blender to JSON model:
+Blender plug-in is in three.js/utils/exports/blender
+When exporting, make sure in Apply Modifiers Type is set to Geometry, and then Faces and Face Materials
+are both checked.
+
+
+
 TODO:
+
+Fix sheet controls not being centered vertically.
+
+Implement Orbit/Pan modes.
+
+Redo LED bar indicator into separate class, that has good, marginal, and bad ranges.
+
 
 Get full screen display working.
 
