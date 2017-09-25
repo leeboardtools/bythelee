@@ -18,8 +18,8 @@
 /* global LBPhaser, Phaser, LBGeometry, LBUtil, LBMath */
 
 /**
- * A Phaser view onto physics objects represented via a {@link LBPhaser.PhysicsLink}.
- * @param {LBPhaser.PhysicsLink} physicsLink    The physics link containing the physics objects.
+ * A Phaser view onto physics objects represented via a {@link LBPhysics.PhysicsLink}.
+ * @param {LBPhysics.PhysicsLink} physicsLink    The physics link containing the physics objects.
  * @param {Phaser.Group}    [worldGroup]    If defined, the group to which all display
  * objects loaded by this are added.
  * @returns {LBPhaser.PhysicsView}
@@ -150,7 +150,7 @@ LBPhaser.PhysicsView.prototype = {
     
 
     /**
-     * Called by {@link LBPhaser.PhysicsLink} when a rigid body is added to the physics
+     * Called by {@link LBPhysics.PhysicsLink} when a rigid body is added to the physics
      * link or when this view is first added to the physics link.
      * @protected
      * @param {LBPhysics.RigidBody} rigidBody   The rigid body to process.
@@ -161,7 +161,7 @@ LBPhaser.PhysicsView.prototype = {
     },
     
     /**
-     * Called by {@link LBPhaser.PhysicsLink} when a rigid body is removed from the
+     * Called by {@link LBPhysics.PhysicsLink} when a rigid body is removed from the
      * physics link or when this view is removed from the physics link.
      * @protected
      * @param {LBPhysics.RigidBody} rigidBody   The rigid body to process.
@@ -173,7 +173,7 @@ LBPhaser.PhysicsView.prototype = {
     },
     
     /**
-     * Called by {@link LBPhaser.PhysicsLink} before it starts calling {@link LBPhaser.PhysicsView#updateRigidBodyDisplayObjects}
+     * Called by {@link LBPhysics.PhysicsLink} before it starts calling {@link LBPhaser.PhysicsView#updateRigidBodyDisplayObjects}
      * for each rigid body.
      * @returns {undefined}
      */
@@ -182,7 +182,7 @@ LBPhaser.PhysicsView.prototype = {
     },
     
     /**
-     * Called by {@link LBPhaser.PhysicsLink} after it has finished calling {@link LBPhaser.PhysicsView#updateRigidBodyDisplayObjects}
+     * Called by {@link LBPhysics.PhysicsLink} after it has finished calling {@link LBPhaser.PhysicsView#updateRigidBodyDisplayObjects}
      * for each rigid body.
      * @returns {undefined}
      */
@@ -191,7 +191,7 @@ LBPhaser.PhysicsView.prototype = {
     },
 
     /**
-     * Called by {@link LBPhaser.PhysicsLink} to have the view update from the current
+     * Called by {@link LBPhysics.PhysicsLink} to have the view update from the current
      * state of a rigid body.
      * @protected
      * @param {LBPhysics.RigidBody} rigidBody   The rigid body to process.
@@ -232,7 +232,7 @@ LBPhaser.PhysicsView.prototype = {
     /**
      * Updates a sprite from a rigid body.
      * <p>
-     * This is automatically called as a result of calling {@link LBPhaser.PhysicsLink#updateDisplayObjects}.
+     * This is automatically called as a result of calling {@link LBPhysics.PhysicsLink#updateDisplayObjects}.
      * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
      * @param {Phaser.Image} sprite   The sprite to be updated.
      * @returns {undefined}
@@ -265,7 +265,7 @@ LBPhaser.PhysicsView.prototype = {
      * to obtain the resultant, otherwise the rigid body's {@link LBPhysics.RigidBody#getResultant} method will
      * be called.
      * <p>
-     * This is automatically called as a result of calling {@link LBPhaser.PhysicsLink#updateDisplayObjects}.
+     * This is automatically called as a result of calling {@link LBPhysics.PhysicsLink#updateDisplayObjects}.
      * <p>
      * The getForceArrowResultant function has the same function signature as 
      * {@link LBPhysics.RigidBody#getResultant} excluding the convertToWrench argument

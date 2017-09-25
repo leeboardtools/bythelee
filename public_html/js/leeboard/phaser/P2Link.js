@@ -23,12 +23,14 @@
  * from the rigid body to the P2 body. This also supports displaying an arrow representing
  * the resultant force on rigid bodies.
  * @constructor
- * @extends LBPhaser.PhysicsLink
+ * @extends LBPhysics.PhysicsLink
  * @param {LBPhaser.Env} phaserEnv The Phaser environment we're running under.
  * @returns {LBPhaser.P2Link}
  */
 LBPhaser.P2Link = function(phaserEnv) {
-    LBPhaser.PhysicsLink.call(this, phaserEnv);
+    LBPhysics.PhysicsLink.call(this);
+    this.phaserEnv = phaserEnv;
+    this.game = phaserEnv.game;
     
     this.game.physics.startSystem(Phaser.Physics.P2JS);
     this.game.physics.p2.world.applyGravity = false;
@@ -38,7 +40,7 @@ LBPhaser.P2Link = function(phaserEnv) {
 };
 
 
-LBPhaser.P2Link.prototype = Object.create(LBPhaser.PhysicsLink.prototype);
+LBPhaser.P2Link.prototype = Object.create(LBPhysics.PhysicsLink.prototype);
 LBPhaser.P2Link.prototype.constructor = LBPhaser.P2Link;
 
 // @inheritdoc..
@@ -54,7 +56,7 @@ LBPhaser.P2Link.prototype.addFixedObject = function(object) {
 
 // @inheritdoc..
 LBPhaser.P2Link.prototype.addRigidBody = function(rigidBody, data) {
-    LBPhaser.PhysicsLink.prototype.addRigidBody.call(this, rigidBody);
+    LBPhysics.PhysicsLink.prototype.addRigidBody.call(this, rigidBody);
     
     var p2Body = LBPhaser.P2Link.createP2BodyFromData(this.game, data.phaser);
     rigidBody._lbP2Body = p2Body;

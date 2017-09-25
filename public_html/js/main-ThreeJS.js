@@ -15,9 +15,7 @@
  */
 
 
-/* global THREE, LBSailSim, LBUI3d, LBMath, LBUtil, Detector */
-
-if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+/* global THREE, LBSailSim, LBUI3d, LBMath, LBUtil, Detector, LBGeometry */
 
 
 LBMyApp = function() {
@@ -60,10 +58,25 @@ LBMyApp.prototype.addNormalView = function(view) {
 
 LBMyApp.prototype.init = function(mainContainer) {
     LBUI3d.App3D.prototype.init.call(this, mainContainer);
+    
+    this.initSceneEnv();
+    this.initSailEnv();
 
     if (this.throttleSliderElement) {
         this.throttleSliderElement.hidden = true;
     }
+    
+
+    this.setWindForce(2);
+    
+    this.onWindowResize();
+};
+
+LBMyApp.prototype.initSceneEnv = function() {
+    this.mainView.camera.position.x = 10;
+    this.mainView.camera.position.y = 10;
+    this.mainView.camera.position.z = 10;
+    this.mainView.camera.lookAt(LBGeometry.ORIGIN);
     
 // TEST!!!
     var me = this;
@@ -72,7 +85,7 @@ LBMyApp.prototype.init = function(mainContainer) {
     var geometry = new THREE.PlaneGeometry(10000, 10000);
     var material = new THREE.MeshBasicMaterial({ color: 0x0086b3, side: THREE.DoubleSide });
     var plane = new THREE.Mesh(geometry, material);
-    //plane.rotateX(-LBMath.PI_2);
+    plane.rotateX(-LBMath.PI_2);
     this.mainScene.scene.add(plane);
     
     // Sky
@@ -80,21 +93,23 @@ LBMyApp.prototype.init = function(mainContainer) {
     material = new THREE.MeshPhongMaterial({ color: 0xe5ffff, side: THREE.BackSide });
     var dome = new THREE.Mesh(geometry, material);
     this.mainScene.scene.add(dome);
-    
+   
     var light = new THREE.HemisphereLight(0xe5ffff, 0x0086b3, 1);
     this.mainScene.scene.add(light);
-    
+
+    /*
     this.mainScene.loadJSONModel('models/tubby_hull.json', function(model) {
         me.myModel = model;
+        me.mainScene.scene.add(model);
     });
-    
+    */
     
     this.mainScene.scene.add(new THREE.AxisHelper(3));
-// TEST!!!
+// TEST!!!    
+};
 
-    this.setWindForce(2);
+LBMyApp.prototype.initSailEnv = function() {
     
-    this.onWindowResize();
 };
 
 LBMyApp.prototype.update = function() {
@@ -364,5 +379,23 @@ LBMyApp.prototype.onMainsheetChange = function(value) {
 };
 
 
-var myApp = new LBMyApp();
-myApp.start(document.getElementById('main_view'));
+if ( ! Detector.webgl ) {
+    var mainErrorElement = document.getElementById('fatal_error');
+    var titleElement = document.getElementById('fatal_error_title');
+    var msgElement = document.getElementById('fatal_error_msg');
+    var msg2Element = document.getElementById('fatal_error_msg2');
+    Detector.addGetWebGLMessage({ parent: msgElement, id: 'webGL_error_msg'});
+
+    var webGLErrorElement = document.getElementById('webGL_error_msg');
+    webGLErrorElement.style.fontSize = msgElement.style.fontSize;
+    webGLErrorElement.style.width = msgElement.style.width;
+    
+    titleElement.innerHTML = "Sorry, ByTheLee could not be started. )-:";    
+    msg2Element.innerHTML = "If you are running a modern browser, make sure WebGL is enabled.";
+    mainErrorElement.style.visibility = "visible";
+}
+else {
+    var myApp = new LBMyApp();
+    myApp.start(document.getElementById('main_view'));
+}
+

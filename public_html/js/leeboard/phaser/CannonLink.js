@@ -21,12 +21,14 @@
  * Manages linking a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}
  * with a {@link LBPhysics.RigidBody}, along with updating Phaser drawing objects.
  * @constructor
- * @extends LBPhaser.PhysicsLink
+ * @extends LBPhysics.PhysicsLink
  * @param {LBPhaser.PhaserEnv} phaserEnv    The Phaser environment we're running under.
  * @returns {LBPhaser.CannonLink}
  */
 LBPhaser.CannonLink = function(phaserEnv) {
-    LBPhaser.PhysicsLink.call(this, phaserEnv);
+    LBPhysics.PhysicsLink.call(this);
+    this.phaserEnv = phaserEnv;
+    this.game = phaserEnv.game;
     
     this.cWorld = new CANNON.World();
     this.cWorld.broadphase = new CANNON.NaiveBroadphase();
@@ -38,7 +40,7 @@ LBPhaser.CannonLink = function(phaserEnv) {
 LBPhaser.CannonLink._workingVec3 = new CANNON.Vec3();
 LBPhaser.CannonLink._workingVector3 = new LBGeometry.Vector3();
 
-LBPhaser.CannonLink.prototype = Object.create(LBPhaser.PhysicsLink.prototype);
+LBPhaser.CannonLink.prototype = Object.create(LBPhysics.PhysicsLink.prototype);
 LBPhaser.CannonLink.prototype.constructor = LBPhaser.CannonLink;
 
 

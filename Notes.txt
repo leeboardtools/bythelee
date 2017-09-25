@@ -26,14 +26,12 @@ are both checked.
 
 TODO:
 
-Fix sheet controls not being centered vertically.
+Straighten out orbit/pan mode, need to adjust for y-up in ThreeJS.
 
-Implement Orbit/Pan modes.
+Add drop-down button for toggling force arrows.
 
 Redo LED bar indicator into separate class, that has good, marginal, and bad ranges.
 
-
-Get full screen display working.
 
 Buttons to add:
 HUD display buttons (Boat, Wind, Forces)

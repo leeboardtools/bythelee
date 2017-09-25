@@ -33,6 +33,7 @@ and open the template in the editor.
         <script src="js/leeboard/core/Volume.js"></script>
         <script src="js/leeboard/core/Foils.js"></script>
         <script src="js/leeboard/core/Controls.js"></script>
+        <script src="js/leeboard/core/PhysicsLink.js"></script>
         <script src="js/leeboard/cannon/CannonUtil.js"></script>
         <script src="js/leeboard/sailsim/SailSim.js"></script>
         <script src="js/leeboard/sailsim/SailEnv.js"></script>
@@ -41,6 +42,7 @@ and open the template in the editor.
         <script src="js/leeboard/sailsim/Sail.js"></script>
         <script src="js/leeboard/sailsim/Delft.js"></script>
         
+        <script src="js/leeboard/three-js/ThreeJSUtil.js"></script>
         <script src="js/leeboard/ui3d/Scene3D.js"></script>
         <script src="js/leeboard/ui3d/View3D.js"></script>
         <script src="js/leeboard/three-js-extras/controls/OrbitControls.js"></script>
@@ -67,6 +69,38 @@ and open the template in the editor.
             canvas {
                 width: 100%; height:100%;
             }
+            
+            .fatal_error {
+		font-family: monospace;
+		text-align: center;
+		background-color: white;
+		color: black;
+                padding: 1.5rem;
+            }
+            
+            .fatal_error_msg {
+                font-size: 1.25rem;
+            }
+            
+            /* Used to dipslay a fatal error message */
+            #fatal_error {
+                position: absolute;
+                background-color: gray;
+                width: 100%;
+                height: 100%;
+                z-index: 1000;
+                margin: auto;
+                visibility: hidden;
+            }
+            
+            #fatal_error_frame {
+                margin: 1.5rem;
+            }
+            
+            #fatal_error_title {
+                font-size: 2rem;
+            }
+            
             
             #container {
                 position: absolute;
@@ -282,10 +316,10 @@ and open the template in the editor.
                 background-color: hsla(120, 100%, 34%, .7);
             }
             .wind_speed_led_f2 {
-                background-color: hsla(95, 65%, 50%, .7);
+                background-color: hsla(120, 100%, 34%, .7);
             }
             .wind_speed_led_f3 {
-                background-color: hsla(76, 89%, 63%, .7);
+                background-color: hsla(60, 80%, 72%, .7);
             }
             .wind_speed_led_f4 {
                 background-color: hsla(60, 80%, 72%, .7);
@@ -294,13 +328,13 @@ and open the template in the editor.
                 background-color: hsla(29, 100%, 50%, .7);
             }
             .wind_speed_led_f6 {
-                background-color: hsla(5, 79%, 55%, .7);
+                background-color: hsla(0, 76%, 50%, .7);
             }
             .wind_speed_led_f7 {
                 background-color: hsla(0, 76%, 50%, .7);
             }
             .wind_speed_led_f8 {
-                background-color: hsla(0, 71%, 45%, .7);
+                background-color: hsla(0, 76%, 50%, .7);
             }
             
             
@@ -772,7 +806,14 @@ and open the template in the editor.
             <i class="material-icons">&#xE84D;</i>
             -->
 
-        <script src="js/main-ThreeJS.js"></script>
+        <div id="fatal_error">
+            <div id="fatal_error_frame">
+                <div id="fatal_error_title" class="fatal_error fatal_error_msg"></div>
+                <div id="fatal_error_msg" class="fatal_error fatal_error_msg"></div>
+                <div id="fatal_error_msg2" class="fatal_error fatal_error_msg"></div>
+            </div>
+        </div>
 
+        <script src="js/main-ThreeJS.js"></script>
     </body>
 </html>
