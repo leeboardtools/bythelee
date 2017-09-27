@@ -15,7 +15,7 @@
  */
 
 
-/* global LBMath, LBUtil, LBGeometry */
+/* global LBMath, LBUtil */
 
 /**
  * @namespace LBControls

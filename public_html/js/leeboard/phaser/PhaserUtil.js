@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global LBUtil, LBMath, Phaser, LBGeometry, LBCamera */
+/* global LBMath, Phaser, LBGeometry */
 
 /**
  * @namespace LBPhaser

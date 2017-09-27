@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* global LBUtil, Phaser, LBGeometry, LBFoils, LBSailSim, LBMath */
+/* global LBUtil, LBGeometry, LBFoils, LBSailSim, LBMath */
 
 /**
  * 

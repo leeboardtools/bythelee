@@ -15,7 +15,7 @@
  */
 
 
-/* global CANNON, LBGeometry, LBMath, LBUtil, LBPhysics */
+/* global CANNON, LBGeometry, LBUtil, LBPhysics */
 
 /**
  * @namespace LBCannon

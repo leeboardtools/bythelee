@@ -15,7 +15,7 @@
  */
 
 
-/* global LBUtil, LBPhysics, LBGeometry, LBMath, LBPhaser */
+/* global LBPhysics */
 
 /**
  * Base class that manages linking a {@link LBPhysics.RigidBody} to a physics engine.

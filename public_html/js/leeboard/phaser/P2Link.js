@@ -15,7 +15,7 @@
  */
 
 
-/* global LBUtil, Phaser, LBPhysics, LBGeometry, LBMath, LBPhaser, p2 */
+/* global LBUtil, Phaser, LBPhysics, LBGeometry, LBPhaser, p2 */
 
 /**
  * Manages linking a {@link https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body|Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody}, updating

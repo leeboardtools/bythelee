@@ -14,7 +14,7 @@
  * limitations under the License.
  */
     
-/* global Leeboard, LBUtil */
+/* global LBUtil */
 
 /**
  * 

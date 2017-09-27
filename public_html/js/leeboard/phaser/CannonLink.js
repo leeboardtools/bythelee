@@ -15,7 +15,7 @@
  */
 
 
-/* global LBPhaser, CANNON, LBCannon, LBVolume, LBGeometry */
+/* global LBPhaser, CANNON, LBCannon, LBGeometry, LBPhysics */
 
 /**
  * Manages linking a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}
