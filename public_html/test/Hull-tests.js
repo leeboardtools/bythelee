@@ -16,14 +16,8 @@
 
 
 /* global QUnit, LBSailSim, LBMath */
-define(function (require) {
-
-var LBSailSim = require('lbsailsim');
-require('lbsailenv');
-require('lbdelft');
-require('lbhull');
-require('lbvessel');
-var LBMath = require('lbmath');
+define(['lbsailsim', 'lbsailenv', 'lbdelft', 'lbhull', 'lbvessel', 'lbmath'], function (
+        LBSailSim, LBSailEnv, LBDelft, LBHull, LBVessel, LBMath) {
 
 QUnit.module('Hull-tests');
 

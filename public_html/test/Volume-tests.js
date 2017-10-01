@@ -16,10 +16,8 @@
 
 
 /* global QUnit, LBGeometry, LBVolume */
-define(function (require) {
+define(['lbgeometry', 'lbvolume'], function (LBGeometry, LBVolume) {
 
-var LBGeometry = require('lbgeometry');
-var LBVolume = require('lbvolume');
 var checkVector3 = require('test/Geometry-tests.js').checkVector3;
 
 QUnit.module('Volume-tests');

@@ -18,11 +18,6 @@
 /* global LBUtil, QUnit, LBPhysics, LBGeometry, LBMath, LBFoils */
 define(['lbutil', 'lbphysics', 'lbgeometry', 'lbmath', 'lbfoils'], function (LBUtil, LBPhysics, LBGeometry, LBMath, LBFoils) {
 
-var LBUtil = require('lbutil');
-var LBPhysics = require('lbphysics');
-var LBGeometry = require('lbgeometry');
-var LBMath = require('lbmath');
-var LBFoils = require('lbfoils');
 var checkVector2 = require('test/Geometry-tests.js').checkVector2;
 var checkVector3 = require('test/Geometry-tests.js').checkVector3;
 
