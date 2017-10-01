@@ -397,7 +397,7 @@ if ( ! Detector.webgl ) {
     mainErrorElement.style.visibility = "visible";
 }
 else {
-    var myApp = new LBMyApp();
+    myApp = new LBMyApp();
     myApp.start(document.getElementById('main_view'));
 }
 
