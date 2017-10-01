@@ -16,6 +16,9 @@
 
 
 /* global QUnit, LBUtil, LBGeometry, LBMath */
+define(['lbutil', 'lbgeometry', 'lbmath'], function (LBUtil, LBGeometry, LBMath) {
+
+QUnit.module('Geometry-tests');
 
 function checkVector2(assert, vector, x, y, msg, tolerance) {
     if (!LBUtil.isVar(msg)) {
@@ -236,4 +239,15 @@ QUnit.test( "makeOrthogonal", function( assert ) {
     vecA.set(0, 0, 1);
     LBGeometry.makeOrthogonal(vecA, result);
     checkOrthogonal(assert, result, vecA, "0, 0, 1");
+});
+
+return {
+    checkVector2: checkVector2,
+    checkVector3: checkVector3,
+    checkLine2: checkLine2,
+    checkMatrix: checkMatrix,
+    checkEuler: checkEuler,
+    checkQuaternion: checkQuaternion
+};
+
 });

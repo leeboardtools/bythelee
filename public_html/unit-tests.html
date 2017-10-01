@@ -10,7 +10,7 @@
         <div id="qunit"></div>
         <div id="qunit-fixture"></div>
         <script src="https://code.jquery.com/qunit/qunit-2.3.2.js"></script>
-        
+<!--
         <script src="js/lib/phaser.min.js"></script>
         <script src="js/lib/three.min.js"></script>
         <script src="js/lib/cannon.min.js"></script>
@@ -45,9 +45,30 @@
         <script src="js/leeboard/sailsim/SailSimView.js"></script>
         <script src="js/leeboard/sailsim/Delft.js"></script>
         <script src="js/leeboard/sailsim/Hull.js"></script>
+-->
+        <script src="js/require-js-config.js"></script>
+        <script src="js/lib/require.js"></script>
 
-        <script src="test/Leeboarda-tests.js"></script>
-        <script src="test/Core-tests.js"></script>
+        <script>
+            (function(){
+                QUnit.config.autostart = false;
+
+                require([
+                        'test/CannonUtils-tests.js',
+                        'test/Core-tests.js',
+                        'test/Curve-tests.js',
+                        'test/Foils-tests.js',
+                        'test/Geometry-tests.js',
+                        'test/Hull-tests.js',
+                        'test/Math-tests.js',
+                        'test/Physics-tests.js',
+                        'test/Vessel-tests.js',
+                        'test/Volume-tests.js'
+                    ],
+                    QUnit.start);
+            }());
+        </script>
+<!--        <script src="test/Core-tests.js"></script>
         <script src="test/Math-tests.js"></script>
         <script src="test/Curve-tests.js"></script>
         <script src="test/Geometry-tests.js"></script>
@@ -57,6 +78,7 @@
         <script src="test/Foils-tests.js"></script>
         <script src="test/Hull-tests.js"></script>
         <script src="test/CannonUtils-tests.js"></script>
+<!-- -->
     </body>
 </html>
 

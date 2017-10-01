@@ -16,6 +16,16 @@
 
 
 /* global QUnit, LBSailSim, LBMath */
+define(function (require) {
+
+var LBSailSim = require('lbsailsim');
+require('lbsailenv');
+require('lbdelft');
+require('lbhull');
+require('lbvessel');
+var LBMath = require('lbmath');
+
+QUnit.module('Hull-tests');
 
 QUnit.test( "Hull.calcCM", function( assert ) {
     var hull = new LBSailSim.Hull();
@@ -78,4 +88,4 @@ QUnit.test( "Delft.calcWettedSurfaceHeelCorrection", function( assert ) {
     assert.equal(LBMath.round(hull.swc, 1), 24.7);
 });
 
-    
+});

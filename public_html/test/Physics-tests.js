@@ -16,7 +16,12 @@
 
 
 /* global QUnit, LBUtil, LBPhysics, LBGeometry, LBMath */
+define(['lbutil', 'lbphysics', 'lbgeometry', 'lbmath'], function (LBUtil, LBPhysics, LBGeometry, LBMath) {
 
+var checkVector3 = require('test/Geometry-tests.js').checkVector3;
+var checkMatrix = require('test/Geometry-tests.js').checkMatrix;
+
+QUnit.module('Physics-tests');
 
 function checkResultant3D(assert, resultant, fx, fy, fz, mx, my, mz, px, py, pz, msg, tolerance) {
     if (!LBUtil.isVar(msg)) {
@@ -303,4 +308,6 @@ QUnit.test( "RigidBody()", function( assert ) {
         (10 * 7 + 5 * 10) / 15,
         "Total CenterOfMass A+B");
     
+});
+
 });

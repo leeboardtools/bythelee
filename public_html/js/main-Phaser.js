@@ -17,11 +17,12 @@
 
 /* global Phaser */
 /* global LBUtil, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils, LBDebug */
-
-
+require( ['phaser', 'lbutil', 'lbsailsim', 'lbgeometry', 'lbmath', 'lbphaser', 'lbfoils', 'lbdebug', 'lbsailsimphaserview', 'lbsailsimphaser'],
+    function(Phaser, LBUtil, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils, LBDebug) {
+        
 //
 //--------------------------------------------------
-LoadingState = {};
+var LoadingState = {};
 
 //
 //--------------------------------------------------
@@ -60,7 +61,7 @@ LoadingState.create = function() {
 
 
 //--------------------------------------------------
-PlayState = {};
+var PlayState = {};
 
 PlayState.settings = {
     startSingleStep: false,
@@ -846,7 +847,7 @@ PlayState.pxmi = function (v) {
 };
 
 //--------------------------------------------------
-window.onload = function() {
+//window.onload = function() {
     var config = {
         width: "100",
         height: "100",
@@ -858,9 +859,12 @@ window.onload = function() {
     //config.width = 800;
     //config.height = 800;
     
-    game = new Phaser.Game(config);
+    var game = new Phaser.Game(config);
 
     game.state.add('play', PlayState);
     game.state.add('loading', LoadingState);
     game.state.start('loading');
-};
+//};
+
+});
+

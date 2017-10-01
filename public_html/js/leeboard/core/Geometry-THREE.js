@@ -16,6 +16,7 @@
 
 /* global LBUtil, THREE, LBMath */
 
+var THREE = require('three');
 
 /**
  * The geometry components are primarily based upon the THREE.js

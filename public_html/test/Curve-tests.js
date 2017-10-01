@@ -16,6 +16,11 @@
 
 
 /* global QUnit, LBCurve, LBGeometry */
+define(['lbcurve', 'lbgeometry'], function (LBCurve, LBGeometry) {
+
+var checkVector2 = require('test/Geometry-tests.js').checkVector2;
+
+QUnit.module('Curve-tests');
 
 QUnit.test( "QuadraticBezier2", function( assert ) {
     var curve = new LBCurve.QuadraticBezier2(new LBGeometry.Vector2(1, 10), new LBGeometry.Vector2(2, 17), new LBGeometry.Vector2(1, 20));
@@ -79,4 +84,6 @@ QUnit.test( "QuadraticBezier2", function( assert ) {
     curve.calcTangent(1, pos);
     pos.normalize();
     checkVector2(assert, pos, pt.x, pt.y, "Tangent t=0");
+    });
+    
     });

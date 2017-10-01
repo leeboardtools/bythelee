@@ -16,6 +16,13 @@
 
 
 /* global QUnit, LBGeometry, LBVolume */
+define(function (require) {
+
+var LBGeometry = require('lbgeometry');
+var LBVolume = require('lbvolume');
+var checkVector3 = require('test/Geometry-tests.js').checkVector3;
+
+QUnit.module('Volume-tests');
 
 checkVolume = function(assert, tetras, refVol, msg) {
     var vol = LBVolume.Volume.totalVolume(tetras);
@@ -509,4 +516,7 @@ QUnit.test( "Volume.overallInertiaTensor()", function( assert ) {
     assert.nearEqual(tensor.elements[0], Ixx, "Ixx Offset");
     assert.nearEqual(tensor.elements[4], Iyy, "Iyy Offset");
     assert.nearEqual(tensor.elements[8], Izz, "Izz Offset");
+});
+
+
 });

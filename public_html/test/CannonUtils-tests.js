@@ -17,6 +17,12 @@
 
 /* global QUnit, LBGeometry, LBCannon, LBVolume, CANNON */
 
+define(['lbgeometry', 'lbcannon', 'lbvolume', 'cannon'], function (LBGeometry, LBCannon, LBVolume, CANNON) {
+
+var checkVector3 = require('test/Geometry-tests.js').checkVector3;
+
+QUnit.module('CannonUtils-tests');
+
 checkCannonVec3 = function(assert, vec3, vector3, msg) {
     msg = msg || "";
     assert.equal(vec3.x, vector3.x, msg + " - x");
@@ -83,4 +89,6 @@ QUnit.test( "addTetrasToBody", function( assert ) {
     
     checkVector3(assert, min, -1, -0.5, -1.5, "Min Extent");
     checkVector3(assert, max, 1, 0.5, 1.5, "Max Extent");
+});
+
 });

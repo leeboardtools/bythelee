@@ -16,6 +16,10 @@
 
 /* global QUnit, LBUtil, LBMath */
 
+define(['lbutil', 'lbmath'], function (LBUtil, LBMath) {
+
+QUnit.module('Core-tests');
+
 QUnit.assert.nearEqual = function(value, expected, msg, tolerance) {
     this.pushResult({
         result: LBMath.isNearEqual(value, expected, tolerance),
@@ -148,4 +152,6 @@ QUnit.test("RollingBuffer", function(assert) {
     result = buffer.popNewest();
     assert.equal(result, undefined, "popNewest() empty");
     assert.equal(buffer.getCurrentSize(), 0, "popNewest() current size = 0");
+});
+
 });

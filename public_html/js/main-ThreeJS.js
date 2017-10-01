@@ -17,8 +17,10 @@
 
 /* global THREE, LBSailSim, LBUI3d, LBMath, LBUtil, Detector, LBGeometry */
 
-
-LBMyApp = function() {
+require( ['three', 'lbsailsim', 'lbui3d', 'lbmath', 'lbutil', 'three-detector', 'lbgeometry'],
+    function(THREE, LBSailSim, LBUI3d, LBMath, LBUtil, THREE_Detector, LBGeometry) {
+        
+function LBMyApp() {
     LBUI3d.App3D.call(this);
     
     var mainViewContainer = document.getElementById('main_view');
@@ -399,3 +401,5 @@ else {
     myApp.start(document.getElementById('main_view'));
 }
 
+}
+);

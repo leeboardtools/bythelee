@@ -15,6 +15,9 @@
  */
 
 /* global LBUtil, LBMath, QUnit */
+define(['lbmath', 'lbutil'], function (LBMath, LBUtil) {
+
+QUnit.module('Math-tests');
 
 LBMath.CSpline.test = function() {
     console.log("CSpline test:");
@@ -192,4 +195,7 @@ QUnit.test( "finiteDiffBackFirst", function( assert ) {
     assert.nearEqual(fp_5_test, fp_ideal, "finiteDiffBackFirst_5", dt * dt * dt * dt * dt);
     assert.equal(LBMath.finiteDiffBackFirst(dt, f0, f1, f2, f3, f4), fp_5_test, "finiteDiffBackFirst for 5");
     assert.equal(LBMath.finiteDiffBackFirst([dt, f0, f1, f2, f3, f4]), fp_5_test, "finiteDiffBackFirst array args");
+});
+
+
 });

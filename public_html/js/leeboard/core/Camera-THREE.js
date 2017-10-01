@@ -17,6 +17,8 @@
 
 /* global THREE */
 
+var THREE = require('three');
+
 /**
  * 
  * @namespace   LBCamera

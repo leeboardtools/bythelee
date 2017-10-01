@@ -17,6 +17,8 @@
 
 /* global THREE, LBMath */
 
+var THREE = require('three');
+
 /**
  * 
  * @namespace LBUI3d

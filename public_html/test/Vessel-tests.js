@@ -15,7 +15,14 @@
  */
 
 
-/* global LBUtil, QUnit, LBSailSim, LBMath, LBGeometry */
+/* global QUnit, LBSailSim, LBMath, LBGeometry */
+define(['lbsailsim', 'lbmath', 'lbgeometry'], function (LBSailSim, LBMath, LBGeometry) {
+
+var checkVector3 = require('test/Geometry-tests.js').checkVector3;
+var checkQuaternion = require('test/Geometry-tests.js').checkQuaternion;
+var checkLine2 = require('test/Geometry-tests.js').checkLine2;
+
+QUnit.module('Vessel-tests');
 
 var clCdCurvesJSON_Test = {
     "clCdCurves": [
@@ -151,4 +158,6 @@ QUnit.test( "Vessel-load", function( assert ) {
     assert.equal(foil.clCdCurve, sailEnv.getClCdCurve("FlatPlate"), "hydroFoil[0].foil.clCdCurve");
     
     assert.equal(vessel.ballasts.length, 1, "ballasts.length");
+});
+
 });
