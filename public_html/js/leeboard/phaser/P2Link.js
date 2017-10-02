@@ -15,7 +15,8 @@
  */
 
 
-/* global LBUtil, Phaser, LBPhysics, LBGeometry, LBPhaser, p2 */
+define(['lbphaserutil', 'lbutil', 'lbgeometry', 'lbphysics', 'phaser', 'lbphysicslink'],
+function(LBPhaser, LBUtil, LBGeometry, LBPhysics, Phaser, LBPhysicsLink) {
 
 /**
  * Manages linking a {@link https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body|Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody}, updating
@@ -238,3 +239,6 @@ LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
 LBPhaser.P2Link.getP2Body = function(object) {
     return object._lbP2Body;
 };
+
+return LBPhaser;
+});

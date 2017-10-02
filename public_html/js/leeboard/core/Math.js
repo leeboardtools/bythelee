@@ -14,7 +14,9 @@
  * limitations under the License.
  */
     
-/* global LBUtil */
+define(['lbutil'],
+function(LBUtil) {
+    
 
 /**
  * 
@@ -437,3 +439,6 @@ LBMath.finiteDiffBackFirst = function(dt, f0, fm1, fm2, fm3, fm4) {
  * @type Number
  */
 LBMath.finiteDiffBackFirst.MAX_TERMS = 5;
+
+return LBMath;
+});

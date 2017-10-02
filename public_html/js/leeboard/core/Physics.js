@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-/* global LBUtil, LBGeometry, LBMath, LBVolume */
+define(['lbutil', 'lbmath', 'lbgeometry', 'lbvolume'],
+function(LBUtil, LBMath, LBGeometry, LBVolume) {
+    
 
 /**
  * @namespace   LBPhysics
@@ -1535,3 +1537,6 @@ LBPhysics.RigidBody.getRigidBodiesWithName = function(rigidBodies, name, store) 
     
     return store;
 };
+
+return LBPhysics;
+});

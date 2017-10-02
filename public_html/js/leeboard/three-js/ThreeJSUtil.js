@@ -17,6 +17,8 @@
 
 /* global LBGeometry */
 
+define(['lbgeometry'], function(LBGeometry) {
+    
 /**
  * 
  * @namespace LBThreeJS
@@ -44,3 +46,6 @@ LBThreeJS.toTHREEVector3 = function(vec, store) {
     store = store || new LBGeometry.Vector3();
     return store.set(vec.x, vec.z, -vec.y);
 };
+
+return LBThreeJS;
+});

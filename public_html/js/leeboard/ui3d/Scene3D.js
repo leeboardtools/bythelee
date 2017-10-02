@@ -16,8 +16,7 @@
 
 
 /* global THREE, LBMath */
-
-var THREE = require('three');
+define(['three'], function(THREE) {
 
 /**
  * 
@@ -107,3 +106,6 @@ LBUI3d.Scene3D.prototype.loadJSONModel = function(url, onLoad, onProgress, onErr
         }
     }, onProgress, onError);
 };
+
+return LBUI3d;
+});

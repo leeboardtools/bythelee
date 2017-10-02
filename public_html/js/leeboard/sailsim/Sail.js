@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-
-/* global LBSailSim, LBFoils, LBControls, LBGeometry, LBMath, LBPhysics, LBUtil, LBCurve */
+define(['lbsailsimbase', 'lbutil', 'lbmath', 'lbgeometry', 'lbcurve', 'lbcontrols', 'lbphysics', 'lbfoils', 'lbfoilinstance'], 
+function(LBSailSim, LBUtil, LBMath, LBGeometry, LBCurve, LBControls, LBPhysics, LBFoils) {
+    
 
 /**
  * Implementation of {@link LBFoils.Foil} for sails, will support reefing and flatness factors.
@@ -817,3 +818,6 @@ LBSailSim.TriangleSailShaper.prototype.updateSailSurface = function(sailInstance
         }
     }
 };
+
+return LBSailSim;
+});

@@ -17,8 +17,8 @@
 
 /* global THREE, LBSailSim, LBUI3d, LBMath, LBUtil, Detector, LBGeometry */
 
-require( ['three', 'lbsailsim', 'lbui3d', 'lbmath', 'lbutil', 'three-detector', 'lbgeometry'],
-    function(THREE, LBSailSim, LBUI3d, LBMath, LBUtil, THREE_Detector, LBGeometry) {
+require( ['three', 'lbsailsim', 'lbui3d', 'lbmath', 'lbgeometry'],
+    function(THREE, LBSailSim, LBUI3d, LBMath, LBGeometry) {
         
 function LBMyApp() {
     LBUI3d.App3D.call(this);

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-
+define(function() {
+    
 /**
  * 
  * @namespace LBDebug
@@ -575,3 +576,6 @@ LBDebug.DataLog.addFieldResultant = function(name) {
     var field = LBDebug.DataLog.createFieldResultant();
     return LBDebug.DataLog.addField(name, field);
 };
+
+return LBDebug;
+});

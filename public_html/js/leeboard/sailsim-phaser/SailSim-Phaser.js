@@ -15,8 +15,7 @@
  */
 
 
-/* global LBSailSim, LBPhaser */
-
+define(['lbsailsim', 'lbsailenv', 'lbphaser'], function(LBSailSim, LBSailEnv, LBPhaser) {
 
 /**
  * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2} or Cannon physics.
@@ -95,3 +94,6 @@ LBSailSim.PhaserSailEnv.prototype.update = function() {
     
     this.physicsLink.update(dt);
 };
+
+return LBSailSim;
+});

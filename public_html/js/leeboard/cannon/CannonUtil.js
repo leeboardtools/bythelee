@@ -15,7 +15,8 @@
  */
 
 
-/* global CANNON, LBGeometry, LBUtil, LBPhysics */
+define(['lbutil', 'lbgeometry', 'lbphysics', 'cannon'],
+function(LBUtil, LBGeometry, LBPhysics, CANNON) {
 
 /**
  * @namespace LBCannon
@@ -254,3 +255,6 @@ LBCannon.updateBodyFromRigidBodyVolumes = function(body, rigidBody) {
     }
 //    LBCannon.updateBodyCenterOfMass(body, rigidBody.centerOfMass, rigidBody.mass);//, rigidBody.momentInertia);    
 };
+
+return LBCannon;
+});

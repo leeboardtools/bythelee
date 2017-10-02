@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-/* global LBPhaser, LBCamera, LBGeometry, Phaser, LBUtil, LBMath */
+define(['lbphaserutil', 'lbmath', 'lbutil', 'lbcamera', 'lbgeometry', 'phaser'],
+function(LBPhaser, LBMath, LBUtil, LBCamera, LBGeometry, Phaser) {
 
 /**
  * This is a hack projection of 3D objects onto the Phaser 2D surface using
@@ -476,3 +477,6 @@ LBPhaser.Project3D.destroyPanelsArray = function(panelsArray) {
         });
     }
 };
+
+return LBPhaser;
+});

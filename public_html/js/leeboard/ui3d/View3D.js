@@ -16,6 +16,7 @@
 
 
 /* global THREE, LBUI3d */
+define(['three', 'lbscene3d', 'three-orbit'], function(THREE, LBUI3d) {
 
 LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     this.scene3D = scene3D;
@@ -108,3 +109,7 @@ LBUI3d.View3D.prototype.installOrbitControls = function(minDistance, maxDistance
         this.controls.maxPolarAngle = maxPolarAngle;
     }
 };
+
+return LBUI3d;
+
+});

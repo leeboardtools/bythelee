@@ -15,7 +15,8 @@
  */
 
 
-/* global LBSailSim, LBMath */
+define(['lbsailsimbase', 'lbmath'], 
+function(LBSailSim, LBMath) {
 
 LBSailSim.Delft = {};
 
@@ -150,3 +151,6 @@ LBSailSim.Delft.evalWettedSurfaceHeelCorrection = function(hull, coefs) {
  * Residuary resistance corrections due to heel, Fosatti pg 29, Larsson pg 87.
  * Added resistance in waves, Fossati, pg. 89, Larsson pg. 92. Biiiigggg tables!
  */
+
+return LBSailSim;    
+});

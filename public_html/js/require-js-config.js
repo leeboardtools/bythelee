@@ -47,9 +47,11 @@ var require = {
         'lbdelft': 'leeboard/sailsim/Delft',
         'lbfoilinstance': 'leeboard/sailsim/FoilInstance',
         'lbhull': 'leeboard/sailsim/Hull',
+        'lbpropulsor': 'leeboard/sailsim/Propulsor',
         'lbsail': 'leeboard/sailsim/Sail',
         'lbsailenv': 'leeboard/sailsim/SailEnv',
         'lbsailsim': 'leeboard/sailsim/SailSim',
+        'lbsailsimbase': 'leeboard/sailsim/SailSimBase',
         'lbvessel': 'leeboard/sailsim/Vessel',
         
         'lbsailsimphaser': 'leeboard/sailsim-phaser/SailSim-Phaser',
@@ -65,153 +67,18 @@ var require = {
         'lbview3d': 'leeboard/ui3d/View3D',
         'lbui3d': 'leeboard/ui3d/LBUI3d'
     },
-    shim: {        
-        'lbdelft': {
-            deps: ['lbsailsim', 'lbmath'],
-            exports: 'LBSaiSim'
-        },
-        'lbfoilinstance': {
-            deps: ['lbphysics', 'lbfoils', 'lbgeometry', 'lbdebug'],
-            exports: 'LBSailSim'
-        },
-        'lbhull': {
-            deps: ['lbsailsim', 'lbutil', 'lbmath', 'lbgeometry', 'lbvolume', 'lbphysics', 'lbdelft', 'lbdebug'],
-            exports: 'LBSailSim'
-        },
-        'lbsail': {
-            deps: ['lbsailsim', 'lbutil', 'lbmath', 'lbgeometry', 'lbcurve', 'lbphysics', 'lbcontrols', 'lbfoils', 'lbfoilinstance'],
-            exports: 'LBSailSim'
-        },
-        'lbsailenv': {
-            deps: ['lbsailsim', 'lbutil', 'lbmath', 'lbgeometry', 'lbfoils', 'lbvessel'],
-            exports: 'LBSailSim'
-        },
-        'lbsailsim': {
-            exports: 'LBSailSim'
-        },
-        'lbvessel': {
-            deps: ['lbsailsim', 'lbsail', 'lbhull', 'lbfoils', 'lbutil', 'lbmath', 'lbgeometry', 'lbphysics', 'lbfoils', 'lbcontrols', 'lbdebug'],
-            exports: 'LBSailSim'
-        },
-        
-        'lbutil': {
-            exports: 'LBUtil'
-        },
-        'lbcamera': {
-            deps: ['three'],
-            exports: 'LBCamera'
-        },
-        'lbdebug': {
-            exports: 'LBDebug'
-        },
-        'lbmath': {
-            deps: ['lbutil'],
-            exports: 'LBMath'
-        },
-        'lbgeometry': {
-            deps: ['three', 'lbutil', 'lbmath'],
-            exports: 'LBGeometry'
-        },
-        'lbcontrols': {
-            deps: ['lbutil', 'lbmath'],
-            exports: 'LBControls'
-        },
-        'lbphysics': {
-            deps: ['lbutil', 'lbmath', 'lbgeometry', 'lbvolume'],
-            exports: 'LBPhysics'
-        },
-        'lbphysicslink': {
-            deps: ['lbphysics'],
-            exports: 'LBPhysics'
-        },
-        'lbvolume': {
-            deps: ['lbutil', 'lbmath', 'lbgeometry'],
-            exports: 'LBVolume'
-        },
-        'lbcurve': {
-            deps: ['lbmath', 'lbgeometry'],
-            exports: 'LBCurve'
-        },
-        'lbfoils': {
-            deps: ['lbutil', 'lbmath', 'lbgeometry', 'lbphysics'],
-            exports: 'LBFoils'
-        },
-        
-        'lbthreejs': {
-            deps: ['lbgeometry'],
-            exports: 'LBThreeJS'
-        },
-        
+    shim: {
         'three-orbit': {
             deps: ['three'],
             exports: 'THREE'
         },
         
-        'lbscene3d': {
-            deps: ['three', 'lbmath'],
-            exports: 'LBUI3d'
-        },
-        'lbview3d': {
-            deps: ['three', 'three-orbit', 'lbmath', 'lbscene3d'],
-            exports: 'LBUI3d'
-        },
-        'lbapp3d': {
-            deps: ['lbutil', 'lbscene3d'],
-            exports: 'LBUI3d'
-        },
-        'lbui3d': {
-            deps: ['lbapp3d', 'lbscene3d', 'lbview3d'],
-            exports: 'LBUI3d'
-        },
-        
-        'lbcannon': {
-            deps: ['lbutil', 'lbgeometry', 'lbphysics', 'cannon'],
-            exports: 'LBCannon'
-        },
-        
-        'lbphaserutil': {
-            deps: ['lbmath', 'lbgeometry', 'phaser'],
-            exports: 'LBPhaser'
-        },
-        'lbphaserphysicsview': {
-            deps: ['lbphaserutil', 'lbutil', 'lbmath', 'lbgeometry', 'phaser'],
-            exports: 'LBPhaser'
-        },
-        'lbphasercannonlink': {
-            deps: ['lbphaserutil', 'lbgeometry', 'lbphysics', 'lbcannon', 'cannon', 'lbphysicslink'],
-            exports: 'LBPhaser'
-        },
-        'lbphaserp2link': {
-            deps: ['lbphaserutil', 'lbutil', 'lbgeometry', 'lbphysics', 'phaser', 'lbphysicslink'],
-            exports: 'LBPhaser'
-        },
-        'lbphasercontrols': {
-            deps: ['lbphaserutil', 'lbmath', 'phaser'],
-            exports: 'LBPhaser'
-        },
-        'lbphaserproject3d': {
-            deps: ['lbphaserutil', 'lbmath', 'lbutil', 'lbcamera', 'lbgeometry', 'phaser'],
-            exports: 'LBPhaser'
-        },
-        'lbphaser': {
-            deps: ['lbphaserutil', 'lbphaserphysicsview', 'lbphasercannonlink', 'lbphaserp2link', 'lbphasercontrols', 'lbphaserproject3d'],
-            exports: 'LBPhaser'
-        },
         'phaser': {
             exports: 'Phaser'
         },
         
         'cannon': {
             exports: 'CANNON'
-        },
-        
-        'lbsailsimphaser': {
-            deps: ['lbsailsim', 'lbphaser', 'lbsailenv'],
-            exports: 'LBSailSim'
-        },
-        'lbsailsimphaserview': {
-            deps: ['lbsailsim', 'lbphaser'],
-            exports: 'LBSailSim'
         }
     }
 };

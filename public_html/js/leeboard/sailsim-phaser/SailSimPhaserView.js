@@ -15,7 +15,7 @@
  */
 
 
-/* global LBSailSim, LBPhaser */
+define(['lbsailsim', 'lbphaser'], function(LBSailSim, LBPhaser) {
 
 /**
  * Base class for the sailsim Phaser views.
@@ -497,3 +497,6 @@ LBSailSim.Phaser3DView.loadSailPanels = function(sail, data) {
     
     return panelsArray;
 };
+
+return LBSailSim;
+});

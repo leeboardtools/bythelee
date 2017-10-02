@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-/* global LBUtil, THREE, LBMath */
-
-var THREE = require('three');
+define(['three', 'lbutil', 'lbmath'],
+function(THREE, LBUtil, LBMath) {
+    
 
 /**
  * The geometry components are primarily based upon the THREE.js
@@ -1358,3 +1358,5 @@ LBGeometry.Face3 = function(a, b, c, normal, color, materialIndex) {
 LBGeometry.Face3.prototype = Object.create(THREE.Face3.prototype);
 LBGeometry.Face3.constructor = LBGeometry.Face3;
 
+return LBGeometry;
+});

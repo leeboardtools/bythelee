@@ -16,6 +16,8 @@
 
 
 /* global LBUI3d, LBUtil */
+define(['lbscene3d', 'lbview3d'], 
+function(LBUI3d) {
 
 /**
  * Our 3D application framework.
@@ -161,3 +163,6 @@ LBUI3d.App3D.prototype.start = function(mainContainer) {
     this.init(mainContainer);
     LBUI3dApp3DAnimate((performance || Date).now());
 };
+
+return LBUI3d;
+});

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+define(['lbmath', 'lbgeometry'],
+function(LBMath, LBGeometry) {
 
-/* global LBGeometry, LBMath */
 
 /**
  * 
@@ -144,3 +145,6 @@ LBCurve.QuadraticBezier2.prototype.calcTangent = function(t, store) {
     var y = s1_0 * (this.p1.y - this.p0.y) + s2_1 * (this.p2.y - this.p1.y);
     return (store) ? store.set(x, y) : new LBGeometry.Vector2(x, y);
 };
+
+return LBCurve;
+});

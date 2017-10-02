@@ -15,7 +15,9 @@
  */
 
 
-/* global LBMath, LBUtil */
+define(['lbutil', 'lbmath'],
+function(LBUtil, LBMath) {
+    
 
 /**
  * @namespace LBControls
@@ -323,4 +325,5 @@ LBControls.createControllerFromData = function(data, owner) {
     return controller.load(data, owner);
 };
 
-
+return LBControls;
+});

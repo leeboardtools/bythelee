@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+define(function() {
+    
 /**
  * @namespace LBUtil
  */
@@ -406,3 +408,6 @@ LBUtil.toggleFullScreen = function(element) {
         return true;
     }
 };
+
+return LBUtil;
+});

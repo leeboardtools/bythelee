@@ -15,9 +15,8 @@
  */
 
 
-/* global THREE */
-
-var THREE = require('three');
+define(['three'],
+function(THREE) {
 
 /**
  * 
@@ -72,3 +71,6 @@ LBCamera.PerspectiveCamera = function(fov, aspect, near, far) {
 };
 LBCamera.PerspectiveCamera.prototype = Object.create(THREE.PerspectiveCamera.prototype);
 LBCamera.PerspectiveCamera.prototype.constructor = LBCamera.PerspectiveCamera;
+
+return LBCamera;
+});

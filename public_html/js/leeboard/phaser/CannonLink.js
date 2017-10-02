@@ -15,7 +15,8 @@
  */
 
 
-/* global LBPhaser, CANNON, LBCannon, LBGeometry, LBPhysics */
+define(['lbphaserutil', 'lbgeometry', 'lbphysics', 'lbcannon', 'cannon', 'lbphysicslink'],
+function(LBPhaser, LBGeometry, LBPhysics, LBCannon, CANNON, LBPhysicsLink) {
 
 /**
  * Manages linking a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}
@@ -175,3 +176,6 @@ LBPhaser.CannonLink.prototype._updateFromSimStep = function(rigidBody) {
 LBPhaser.CannonLink.getCannonBody = function(rigidBody) {
     return rigidBody._lbCannonBody;
 };
+
+return LBPhaser;
+});

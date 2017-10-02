@@ -15,7 +15,9 @@
  */
 
 
-/* global LBPhaser, LBMath, Phaser */
+define(['lbphaserutil', 'lbmath', 'phaser'],
+function(LBPhaser, LBMath, Phaser) {
+
 
 /**
  * A Phaser based slider control, the control contains a thumb that moves along either
@@ -484,3 +486,6 @@ LBPhaser.Dial.prototype = {
     
     constructor: LBPhaser.Dial
 };
+
+return LBPhaser;
+});

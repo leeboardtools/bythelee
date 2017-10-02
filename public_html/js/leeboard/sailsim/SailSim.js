@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+
 /**
- * @namespace LBSailSim
+ * This is the catch-all file that loads all the LBSailSim dependencies.
  */
-var LBSailSim = LBSailSim || {};
+
+define(['lbsailsimbase', 'lbdelft', 'lbfoilinstance', 'lbhull', 'lbpropulsor', 'lbsail', 'lbsailenv', 'lbvessel'], function(LBSailSim) {
+    
 
 /**
  * Converts an angle in degrees to a compass format (0 &le; angle &lt; 360).
@@ -45,3 +48,5 @@ LBSailSim.compassDegreesXY = function(degrees) {
     return LBSailSim.compassDegrees(-degrees);
 };
 
+return LBSailSim;
+});

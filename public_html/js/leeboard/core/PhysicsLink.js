@@ -15,7 +15,9 @@
  */
 
 
-/* global LBPhysics */
+define(['lbphysics'],
+function(LBPhysics) {
+    
 
 /**
  * Base class that manages linking a {@link LBPhysics.RigidBody} to a physics engine.
@@ -206,4 +208,5 @@ LBPhysics.PhysicsLink.prototype = {
 };
 
 
-
+return LBPhysics;
+});

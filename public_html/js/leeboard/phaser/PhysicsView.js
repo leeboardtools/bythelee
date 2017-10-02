@@ -15,7 +15,8 @@
  */
 
 
-/* global LBPhaser, Phaser, LBGeometry, LBUtil, LBMath */
+define(['lbphaserutil', 'lbutil', 'lbmath', 'lbgeometry', 'phaser'],
+function(LBPhaser, LBUtil, LBMath, LBGeometry, Phaser) {
 
 /**
  * A Phaser view onto physics objects represented via a {@link LBPhysics.PhysicsLink}.
@@ -355,3 +356,5 @@ LBPhaser.PhysicsView.createImageFromData = function(game, data) {
     return sprite;
 };
 
+return LBPhaser;
+});

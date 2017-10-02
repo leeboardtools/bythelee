@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-
-/* global LBGeometry, LBUtil, LBMath */
+define(['lbutil', 'lbmath', 'lbgeometry'],
+function(LBUtil, LBMath, LBGeometry) {
+    
 
 /**
  * 
@@ -1560,3 +1561,6 @@ LBVolume.loadStandardVolumeFromData = function(data, mass) {
             return undefined;
     }
 };
+
+return LBVolume;
+});

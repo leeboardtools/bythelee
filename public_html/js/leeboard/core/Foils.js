@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-/* global LBUtil, LBGeometry, LBPhysics, LBMath */
+define(['lbutil', 'lbmath', 'lbgeometry', 'lbphysics'],
+function(LBUtil, LBMath, LBGeometry, LBPhysics) {
+    
 
 /**
  * @namespace LBFoils
@@ -789,3 +791,6 @@ LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
     
     return foil.load(data, curveLib);
 };
+
+return LBFoils;
+});

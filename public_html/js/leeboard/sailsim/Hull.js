@@ -15,7 +15,9 @@
  */
 
 
-/* global LBSailSim, LBPhysics, LBGeometry, LBMath, LBUtil, LBVolume, LBDebug */
+define(['lbsailsimbase', 'lbutil', 'lbmath', 'lbgeometry', 'lbvolume', 'lbphysics', 'lbdelft', 'lbdebug'],
+function(LBSailSim, LBUtil, LBMath, LBGeometry, LBVolume, LBPhysics, LBDelft, LBDebug) {
+    
 
 /**
  * Spline used for calculating the friction coefficient Cf given the roughness
@@ -498,3 +500,6 @@ LBSailSim.Hull.addDebugFields = function(name) {
     LBDebug.DataLog.addFieldVector3([name, 'lclCOB']);
     
 };
+
+return LBSailSim;
+});

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-/**
- * This is the catch-all file that loads all the LBPhaser dependencies.
- */
 
-define(['lbphaserutil', 'lbphasercannonlink', 'lbphaserp2link', 'lbphasercontrols', 'lbphaserphysicsview', 'lbphaserproject3d'], 
-function(LBPhaser) {
-    return LBPhaser;
+define(function() {
+
+/**
+ * @namespace LBSailSim
+ */
+var LBSailSim = LBSailSim || {};
+return LBSailSim;
+
 });

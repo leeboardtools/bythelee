@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-/* global LBUtil, LBGeometry, LBFoils, LBSailSim, LBMath */
-
+define(['lbutil', 'lbmath', 'lbgeometry', 'lbfoils', 'lbsailsimbase', 'lbvessel'], 
+function(LBUtil, LBMath, LBGeometry, LBFoils, LBSailSim) {
+    
 /**
  * 
  * @namespace LBSailSim
@@ -590,3 +591,6 @@ LBSailSim.getFlowVelocity = function(flow, pos, vel) {
     var z = pos.z || 0;
     return flow.getFlowVelocity(pos.x, pos.y, z, vel);
 };
+
+return LBSailSim;
+});

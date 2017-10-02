@@ -16,7 +16,9 @@
 
 
 
-/* global LBSailSim, LBPhysics, LBFoils, LBGeometry, LBDebug */
+define(['lbphysics', 'lbfoils', 'lbgeometry', 'lbdebug', 'lbsailsimbase'], 
+function(LBPhysics, LBFoils, LBGeometry, LBDebug, LBSailSim) {
+    
 
 /**
  * An instance of a foil, a foil is something that generates a force due
@@ -172,3 +174,6 @@ LBSailSim.FoilInstance.prototype.load = function(data, sailEnv) {
 LBSailSim.FoilInstance.prototype.vesselLoaded = function(vessel) {
     return this;
 };
+
+return LBSailSim;
+});
