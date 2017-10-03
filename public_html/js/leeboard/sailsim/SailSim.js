@@ -19,8 +19,10 @@
  * This is the catch-all file that loads all the LBSailSim dependencies.
  */
 
-define(['lbsailsimbase', 'lbdelft', 'lbfoilinstance', 'lbhull', 'lbpropulsor', 'lbsail', 'lbsailenv', 'lbvessel'], function(LBSailSim) {
-    
+define(['lbsailsimbase', 'lbutil', 'lbdelft', 'lbfoilinstance', 'lbhull', 'lbpropulsor', 'lbsail', 'lbsailenv', 'lbvessel'], 
+function(LBSailSim, LBUtil) {
+
+LBUtil.registerNamespace('LBSailSim', LBSailSim);
 
 /**
  * Converts an angle in degrees to a compass format (0 &le; angle &lt; 360).

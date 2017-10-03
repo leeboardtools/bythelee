@@ -20,10 +20,6 @@
 require( ['phaser', 'lbutil', 'lbsailsim', 'lbgeometry', 'lbmath', 'lbphaser', 'lbfoils', 'lbdebug', 'lbsailsimphaserview', 'lbsailsimphaser'],
     function(Phaser, LBUtil, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils, LBDebug) {
 
-// So we can dynamically access constructors in LBSailSim, such as LBSailSim.Sail and
-// LBSailSim.FoilInstance.
-window.LBSailSim = LBSailSim;
-window.LBControls = require('lbcontrols');
 
 //
 //--------------------------------------------------

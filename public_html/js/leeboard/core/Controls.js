@@ -23,6 +23,7 @@ function(LBUtil, LBMath) {
  * @namespace LBControls
  */
 var LBControls = LBControls || {};
+LBUtil.registerNamespace('LBControls', LBControls);
 
 /**
  * A controller whose value is any value between a minimum and a maximum value.

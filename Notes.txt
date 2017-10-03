@@ -26,8 +26,6 @@ are both checked.
 
 TODO:
 
-Straighten out orbit/pan mode, need to adjust for y-up in ThreeJS.
-
 Add drop-down button for toggling force arrows.
 
 Redo LED bar indicator into separate class, that has good, marginal, and bad ranges.

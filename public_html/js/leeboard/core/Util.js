@@ -168,6 +168,20 @@ LBUtil.copyAndMirrorArray = function(array) {
 
 
 /**
+ * Registers an object as a namespace with LBUtil so it can be accessed by {@link LBUtil.stringToFunction}
+ * and {@link LBUtil.newClassInstanceFromData}.
+ * @param {String} name The namespace name.
+ * @param {Object} namespace    The object representing the namespace.
+ * @returns {LBUtil}    LBUtil.
+ */
+LBUtil.registerNamespace = function(name, namespace) {
+    LBUtil.registeredNamespaces = LBUtil.registeredNamespaces || {};
+    LBUtil.registeredNamespaces[name] = namespace;
+    return LBUtil;
+};
+
+
+/**
  * Retrieves the function in the global scope with a given name.
  * @param {String} str  The name of the function.
  * @returns {function}  The function object.
@@ -175,8 +189,18 @@ LBUtil.copyAndMirrorArray = function(array) {
  */
 LBUtil.stringToFunction = function(str) {
     var arr = str.split(".");
-    var fn = window || this;
-    for (var i = 0, len = arr.length; i < len; i++) {
+    var fn;
+    var i = 0;
+    if (LBUtil.registeredNamespaces) {
+        fn = LBUtil.registeredNamespaces[arr[0]];
+    }
+    if (!fn) {
+        fn = window || this;
+    }
+    else {
+        ++i;
+    }
+    for (var len = arr.length; i < len; i++) {
         fn = fn[arr[i]];
     }
     if (typeof fn !== 'function') {
