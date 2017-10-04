@@ -15,21 +15,18 @@
  */
 
 
-define(['lbphaserutil', 'lbgeometry', 'lbphysics', 'lbcannon', 'cannon', 'lbphysicslink'],
-function(LBPhaser, LBGeometry, LBPhysics, LBCannon, CANNON, LBPhysicsLink) {
+define(['lbcannonutil', 'lbgeometry', 'lbphysics', 'cannon', 'lbphysicslink'],
+function(LBCannon, LBGeometry, LBPhysics, CANNON, LBPhysicsLink) {
 
 /**
  * Manages linking a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}
- * with a {@link LBPhysics.RigidBody}, along with updating Phaser drawing objects.
+ * with a {@link LBPhysics.RigidBody}.
  * @constructor
  * @extends LBPhysics.PhysicsLink
- * @param {LBPhaser.PhaserEnv} phaserEnv    The Phaser environment we're running under.
- * @returns {LBPhaser.CannonLink}
+ * @returns {LBCannon.CannonPhysicsLink}
  */
-LBPhaser.CannonLink = function(phaserEnv) {
+LBCannon.CannonPhysicsLink = function() {
     LBPhysics.PhysicsLink.call(this);
-    this.phaserEnv = phaserEnv;
-    this.game = phaserEnv.game;
     
     this.cWorld = new CANNON.World();
     this.cWorld.broadphase = new CANNON.NaiveBroadphase();
@@ -38,37 +35,26 @@ LBPhaser.CannonLink = function(phaserEnv) {
    this.dt = 1/60;
 };
 
-LBPhaser.CannonLink._workingVec3 = new CANNON.Vec3();
-LBPhaser.CannonLink._workingVector3 = new LBGeometry.Vector3();
+LBCannon.CannonPhysicsLink._workingVec3 = new CANNON.Vec3();
+LBCannon.CannonPhysicsLink._workingVector3 = new LBGeometry.Vector3();
 
-LBPhaser.CannonLink.prototype = Object.create(LBPhysics.PhysicsLink.prototype);
-LBPhaser.CannonLink.prototype.constructor = LBPhaser.CannonLink;
+LBCannon.CannonPhysicsLink.prototype = Object.create(LBPhysics.PhysicsLink.prototype);
+LBCannon.CannonPhysicsLink.prototype.constructor = LBCannon.CannonPhysicsLink;
 
 
 // @inheritdoc..
-LBPhaser.CannonLink.prototype.addFixedObject = function(object) {
-    var body = new CANNON.Body();
-    body.type = CANNON.Body.STATIC;
-    var width = Math.abs(this.phaserEnv.fromPixelsX(object.width / 2));
-    var height = Math.abs(this.phaserEnv.fromPixelsY(object.height / 2));
-    var box = new CANNON.Box(new CANNON.Vec3(width, height, 0.5));
-    body.addShape(box);
-    body.position.x = this.phaserEnv.fromPixelsX(object.position.x);
-    body.position.y = this.phaserEnv.fromPixelsY(object.position.y);
-    
-    this.cWorld.add(body);
-    
-    object._lbCannonBody = body;
-    object.anchor.x = 0.5;
-    object.anchor.y = 0.5;
-    
-    return this;
+LBCannon.CannonPhysicsLink.prototype.addFixedObject = function(rigidBody) {
+    return this._addCannonRigidBody(rigidBody, CANNON.Body.STATIC);
 };
 
 // @inheritdoc...
-LBPhaser.CannonLink.prototype._rigidBodyAdded = function(rigidBody, data) {
+LBCannon.CannonPhysicsLink.prototype._rigidBodyAdded = function(rigidBody, data) {
+    return this._addCannonRigidBody(rigidBody, CANNON.Body.DYNAMIC);
+};
+
+LBCannon.CannonPhysicsLink.prototype._addCannonRigidBody = function(rigidBody, cannonType) {
     var body = new CANNON.Body();
-    body.type = CANNON.Body.DYNAMIC;
+    body.type = cannonType;
     
     LBCannon.addRigidBodyVolumesToBody(body, rigidBody);
     
@@ -76,7 +62,7 @@ LBPhaser.CannonLink.prototype._rigidBodyAdded = function(rigidBody, data) {
     
     rigidBody._lbCannonBody = body;
     
-    var pos = LBPhaser.CannonLink._workingVector3.copy(rigidBody.centerOfMass);
+    var pos = LBCannon.CannonPhysicsLink._workingVector3.copy(rigidBody.centerOfMass);
     pos.applyMatrix4(rigidBody.obj3D.matrixWorld);
     
     body.position.copy(pos);
@@ -87,7 +73,7 @@ LBPhaser.CannonLink.prototype._rigidBodyAdded = function(rigidBody, data) {
 
 
 // @inheritdoc..
-LBPhaser.CannonLink.prototype._rigidBodyRemoved = function(rigidBody) {
+LBCannon.CannonPhysicsLink.prototype._rigidBodyRemoved = function(rigidBody) {
     if (rigidBody._lbCannonBody) {
         this.cWorld.removeBody(rigidBody._lbCannonBody);
         rigidBody._lbCannonBody = undefined;
@@ -95,12 +81,12 @@ LBPhaser.CannonLink.prototype._rigidBodyRemoved = function(rigidBody) {
 };
 
 // @inheritdoc..
-LBPhaser.CannonLink.prototype.timeStep = function() {
+LBCannon.CannonPhysicsLink.prototype.timeStep = function() {
     return this.dt;
 };
 
 // @inheritdoc..
-LBPhaser.CannonLink.prototype.update = function(dt) {
+LBCannon.CannonPhysicsLink.prototype.update = function(dt) {
     if (this.updateCount === 0) {
         // Gotta sync up first time through...
         this.rigidBodies.forEach(this._updateFromSimStep, this);
@@ -122,12 +108,12 @@ LBPhaser.CannonLink.prototype.update = function(dt) {
 };
 
 /**
- * Called by {@link LBPhaser.CannonLink#update} for each rigid body to let the rigid body
+ * Called by {@link LBCannon.CannonPhysicsLink#update} for each rigid body to let the rigid body
  * update the forces applied to it and then assign them to the Cannon body.
  * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
  * @returns {undefined}
  */
-LBPhaser.CannonLink.prototype._applyRigidBodyForces = function(rigidBody) {
+LBCannon.CannonPhysicsLink.prototype._applyRigidBodyForces = function(rigidBody) {
     var body = rigidBody._lbCannonBody;
     if (!body) {
         return;
@@ -145,24 +131,24 @@ LBPhaser.CannonLink.prototype._applyRigidBodyForces = function(rigidBody) {
     resultant.moment.x = resultant.moment.y = 0;
   */ 
     
-    body.applyForce(resultant.force, LBPhaser.CannonLink._workingVec3.copy(resultant.applPoint));
+    body.applyForce(resultant.force, LBCannon.CannonPhysicsLink._workingVec3.copy(resultant.applPoint));
     body.torque.vadd(resultant.moment, body.torque);
 };
 
 /**
- * Called by {@link LBPhaser.CannonLink#update} for each rigid body after the physics have
+ * Called by {@link LBCannon.CannonPhysicsLink#update} for each rigid body after the physics have
  * been stepped, this updates the rigid body from the Cannon body's position and orientation
  * and also updates the Phaser drawing object associated with the rigid body, if any.
  * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
  * @returns {undefined}
  */
-LBPhaser.CannonLink.prototype._updateFromSimStep = function(rigidBody) {
+LBCannon.CannonPhysicsLink.prototype._updateFromSimStep = function(rigidBody) {
     var body = rigidBody._lbCannonBody;
     if (!body) {
         return;
     }
     
-    var pos = LBPhaser.CannonLink._workingVec3.copy(rigidBody.centerOfMass);
+    var pos = LBCannon.CannonPhysicsLink._workingVec3.copy(rigidBody.centerOfMass);
     pos.negate(pos);
     body.pointToWorldFrame(pos, pos);
     
@@ -173,9 +159,9 @@ LBPhaser.CannonLink.prototype._updateFromSimStep = function(rigidBody) {
     rigidBody.obj3D.updateMatrixWorld(true);
 };
 
-LBPhaser.CannonLink.getCannonBody = function(rigidBody) {
+LBCannon.CannonPhysicsLink.getCannonBody = function(rigidBody) {
     return rigidBody._lbCannonBody;
 };
 
-return LBPhaser;
+return LBCannon;
 });

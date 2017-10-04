@@ -15,10 +15,11 @@
  */
 
 /**
- * This is the catch-all file that loads all the LBPhaser dependencies.
+ * This is the catch-all file that loads all the LBCannon dependencies.
  */
 
-define(['lbphaserutil', 'lbphaserp2link', 'lbphasercontrols', 'lbphaserphysicsview', 'lbphaserproject3d'], 
-function(LBPhaser) {
-    return LBPhaser;
+define(['lbcannonphysicslink', 'lbcannonutil'], 
+function(LBCannon) {
+    
+    return LBCannon;
 });

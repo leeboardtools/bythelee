@@ -15,10 +15,8 @@
  */
 
 
-/* global Phaser */
-/* global LBUtil, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils, LBDebug */
-require( ['phaser', 'lbutil', 'lbsailsim', 'lbgeometry', 'lbmath', 'lbphaser', 'lbfoils', 'lbdebug', 'lbsailsimphaserview', 'lbsailsimphaser'],
-    function(Phaser, LBUtil, LBSailSim, LBGeometry, LBMath, LBPhaser, LBFoils, LBDebug) {
+require( ['phaser', 'lbutil', 'lbsailsim', 'lbgeometry', 'lbvolume', 'lbphysics', 'lbmath', 'lbphaser', 'lbfoils', 'lbdebug', 'lbsailsimphaserview', 'lbsailsimphaser'],
+    function(Phaser, LBUtil, LBSailSim, LBGeometry, LBVolume, LBPhysics, LBMath, LBPhaser, LBFoils, LBDebug) {
 
 
 //
@@ -310,7 +308,25 @@ PlayState._spawnBuoys = function(data) {
     var x = this.sailEnv.phaserEnv.toPixelsX(data.x);
     var y = this.sailEnv.phaserEnv.toPixelsY(data.y);
     var buoy = this.buoys.create(x, y, data.image);
-    this.sailEnv.physicsLink.addFixedObject(buoy);
+    
+    if (this.physicsEngine === LBSailSim.PhaserSailEnv.P2_PHYSICS) {
+        this.sailEnv.physicsLink.addFixedPhaserObject(buoy);
+    }
+    else {
+        var width = Math.abs(this.sailEnv.phaserEnv.fromPixelsX(buoy.width / 2));
+        var height = Math.abs(this.sailEnv.phaserEnv.fromPixelsY(buoy.height / 2));
+        var depth = 0.5;
+
+        var boxVolume = LBVolume.createBox(width, height, depth, 0, 0, 0);
+        var rigidBody = new LBPhysics.RigidBody();
+        rigidBody.volumes.push(boxVolume);
+
+        rigidBody.obj3D.position.set(data.x, data.y, 0);
+        rigidBody.obj3D.updateMatrixWorld(true);
+
+        this.sailEnv.physicsLink.addFixedObject(rigidBody);
+    }
+
 };
 
 //--------------------------------------------------

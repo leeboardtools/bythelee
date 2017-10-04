@@ -22,7 +22,9 @@ var require = {
         'cannon': 'lib/cannon',
         'phaser': 'lib/phaser',
         
-        'lbcannon': 'leeboard/cannon/CannonUtil',
+        'lbcannonutil': 'leeboard/cannon/CannonUtil',
+        'lbcannonphysicslink': 'leeboard/cannon/CannonPhysicsLink',
+        'lbcannon': 'leeboard/cannon/LBCannon',
         
         'lbcamera': 'leeboard/core/Camera-THREE',
         'lbcontrols': 'leeboard/core/Controls',
@@ -36,7 +38,6 @@ var require = {
         'lbutil': 'leeboard/core/Util',
         'lbvolume': 'leeboard/core/Volume',
         
-        'lbphasercannonlink': 'leeboard/phaser/CannonLink',
         'lbphaserp2link': 'leeboard/phaser/P2Link',
         'lbphasercontrols': 'leeboard/phaser/PhaserControls',
         'lbphaserutil': 'leeboard/phaser/PhaserUtil',
@@ -56,6 +57,8 @@ var require = {
         
         'lbsailsimphaser': 'leeboard/sailsim-phaser/SailSim-Phaser',
         'lbsailsimphaserview': 'leeboard/sailsim-phaser/SailSimPhaserView',
+        
+        'lbsailsimthree': 'leeboard/sailsim-three/SailSim-THREE',
         
         'lbthreejs': 'leeboard/three-js/ThreeJSUtil',
         

@@ -51,6 +51,11 @@ LBUI3d.App3D = function() {
     this.frameCount = 0;
     
     /**
+     * The number of milliseconds elapsed between the last frame and the current frame.
+     */
+    this.lastFrameMillisecs = 0;
+    
+    /**
      * The mouse mode currently active in all the views.
      * @member {LBUI3d.View3D.MOUSE_ROTATE_MODE|LBUI3d.View3D.MOUSE_PAN_MODE}
      */
@@ -58,6 +63,7 @@ LBUI3d.App3D = function() {
     
     this._nextSecondTimeStamp = (performance || Date).now() + 1000;
     this._prevSecondFrameCount = 0;
+    this._lastFrameTimeStamp = 0;
 };
 
 LBUI3d.App3D.activeApp = undefined;
@@ -148,9 +154,18 @@ LBUI3d.App3D.prototype._cycle = function(timeStamp) {
         this.fpsUpdated();
     }
     
+    if (this._lastFrameTimeStamp) {
+        this.lastFrameMillisecs = timeStamp - this._lastFrameTimeStamp;
+    }
+    else {
+        this.lastFrameMillisecs = 1/60;
+    }
+    
     this.update();
     this.render();
     ++this.frameCount;
+
+    this._lastFrameTimeStamp = timeStamp;
 };
 
 function LBUI3dApp3DAnimate(timeStamp) {

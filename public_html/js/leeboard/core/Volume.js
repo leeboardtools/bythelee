@@ -1486,6 +1486,34 @@ LBVolume.Cuboid.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
     return tetras;
 };
 
+/**
+ * Helper that creates a box.
+ * @param {Number} dx   The x dimension of the box.
+ * @param {Number} dy   The y dimension of the box.
+ * @param {Number} dz   The z dimension of the box.
+ * @param {Number} cx   The x dimension of the center of the box.
+ * @param {Number} cy   The y dimension of the center of the box.
+ * @param {Number} cz   The z dimension of the center of the box.
+ * @returns {Volume_L18.createBox.box|Volume_L18.LBVolume.Cuboid}
+ */
+LBVolume.createBox = function(dx, dy, dz, cx, cy, cz) {
+    var box = new LBVolume.Cuboid();
+    var xl = cx - dx / 2;
+    var xu = xl + dx;
+    var yl = cy - dy / 2;
+    var yu = yl + dy;
+    var zl = cz - dz / 2;
+    var zu = zl + dz;
+    box.vertices[0].set(xl, yl, zl);
+    box.vertices[1].set(xu, yl, zl);
+    box.vertices[2].set(xu, yu, zl);
+    box.vertices[3].set(xl, yu, zl);
+    box.vertices[4].set(xl, yl, zu);
+    box.vertices[5].set(xu, yl, zu);
+    box.vertices[6].set(xu, yu, zu);
+    box.vertices[7].set(xl, yu, zu);
+    return box;
+};
 
 /**
  * Loads a cylindrical volume from properties in a data object. For now it simply

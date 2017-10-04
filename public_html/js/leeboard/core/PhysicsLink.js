@@ -56,11 +56,12 @@ LBPhysics.PhysicsLink.prototype = {
     },
 
     /**
-     * Adds a fixed object to the physics link.
-     * @param {Object} object   A Phaser drawing object.
+     * Adds a top-level {@link LBPhysics.RigidBody} to the manager as a fixed object.
+     * This rigid body should not be a part of any other rigid body.
+     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
      * @returns {LBPhaser.P2Link}   this.
      */
-    addFixedObject: function(object) {
+    addFixedObject: function(rigidBody) {
         throw 'addFixedObject not implemented';
     },
     
@@ -69,7 +70,7 @@ LBPhysics.PhysicsLink.prototype = {
      * should not be a part of any other rigid body.
      * @param {LBPhysics.RigidBody} rigidBody The rigid body.
      * @param {Object}  [data]  Optional data containing additional information for
-     * loading other items associated with the rigid body, such as a Phaser display object.
+     * loading other items associated with the rigid body.
      * @returns {LBPhysics.PhysicsLink}   this.
      */
     addRigidBody: function(rigidBody, data) {
@@ -180,7 +181,7 @@ LBPhysics.PhysicsLink.prototype = {
     },
     
     /**
-     * Updates any Phaser display object that have been attached to any of the rigid bodies or their
+     * Updates any display objects that have been attached to any of the rigid bodies or their
      * parts.
      * <p>
      * This is automatically called from {@link LBPhysics.PhysicsLink#_stageUpdateTransform}.

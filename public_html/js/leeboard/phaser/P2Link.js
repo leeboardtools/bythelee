@@ -44,8 +44,7 @@ LBPhaser.P2Link = function(phaserEnv) {
 LBPhaser.P2Link.prototype = Object.create(LBPhysics.PhysicsLink.prototype);
 LBPhaser.P2Link.prototype.constructor = LBPhaser.P2Link;
 
-// @inheritdoc..
-LBPhaser.P2Link.prototype.addFixedObject = function(object) {
+LBPhaser.P2Link.prototype.addFixedPhaserObject = function(object) {
     this.game.physics.p2.enable(object);
     object.body.allowGravity = false;
     object.body.static = true;

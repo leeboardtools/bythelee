@@ -15,9 +15,7 @@
  */
 
 
-/* global THREE, LBSailSim, LBUI3d, LBMath, LBUtil, Detector, LBGeometry */
-
-require( ['three', 'lbsailsim', 'lbui3d', 'lbmath', 'lbgeometry'],
+require( ['three', 'lbsailsim', 'lbui3d', 'lbmath', 'lbgeometry', 'lbsailsimthree'],
     function(THREE, LBSailSim, LBUI3d, LBMath, LBGeometry) {
         
 function LBMyApp() {
@@ -47,6 +45,8 @@ function LBMyApp() {
     
     this.windDeg = 0;
     this.windForce = 2;
+    
+    this.physicsEngineType = LBSailSim.SailEnvTHREE.CANNON_PHYSICS;
 
 };
 
@@ -80,8 +80,6 @@ LBMyApp.prototype.initSceneEnv = function() {
     this.mainView.camera.position.z = 10;
     this.mainView.camera.lookAt(LBGeometry.ORIGIN);
     
-// TEST!!!
-    var me = this;
     
     // Water
     var geometry = new THREE.PlaneGeometry(10000, 10000);
@@ -98,24 +96,25 @@ LBMyApp.prototype.initSceneEnv = function() {
    
     var light = new THREE.HemisphereLight(0xe5ffff, 0x0086b3, 1);
     this.mainScene.scene.add(light);
-
-    /*
+/*
+    var me = this;
     this.mainScene.loadJSONModel('models/tubby_hull.json', function(model) {
         me.myModel = model;
         me.mainScene.scene.add(model);
     });
-    */
-    
+*/    
     this.mainScene.scene.add(new THREE.AxisHelper(3));
 // TEST!!!    
 };
 
 LBMyApp.prototype.initSailEnv = function() {
-    
+    this.sailEnv = new LBSailSim.SailEnvTHREE(this, this.physicsEngineType);
 };
 
 LBMyApp.prototype.update = function() {
     LBUI3d.App3D.prototype.update.call(this);
+    
+    this.sailEnv.update();
 };
 
 LBMyApp.prototype.fpsUpdated = function() {

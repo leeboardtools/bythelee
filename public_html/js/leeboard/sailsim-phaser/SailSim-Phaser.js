@@ -15,7 +15,7 @@
  */
 
 
-define(['lbsailsim', 'lbsailenv', 'lbphaser'], function(LBSailSim, LBSailEnv, LBPhaser) {
+define(['lbsailsim', 'lbcannonphysicslink', 'lbphaser'], function(LBSailSim, LBCannon, LBPhaser) {
 
 /**
  * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2} or Cannon physics.
@@ -41,7 +41,7 @@ LBSailSim.PhaserSailEnv = function(game, physicsType) {
             break;
         
         case LBSailSim.PhaserSailEnv.CANNON_PHYSICS :
-            this.physicsLink = new LBPhaser.CannonLink(this.phaserEnv);
+            this.physicsLink = new LBCannon.CannonPhysicsLink();
             break;
     }
     this.physicsType = physicsType;
