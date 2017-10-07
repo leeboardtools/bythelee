@@ -26,6 +26,7 @@ var require = {
         'lbcannonphysicslink': 'leeboard/cannon/CannonPhysicsLink',
         'lbcannon': 'leeboard/cannon/LBCannon',
         
+        'lbassets': 'leeboard/core/Assets',
         'lbcamera': 'leeboard/core/Camera-THREE',
         'lbcontrols': 'leeboard/core/Controls',
         'lbcurve': 'leeboard/core/Curve',

@@ -263,18 +263,6 @@ PlayState.create = function() {
     
     this.camera.focusOnXY(0, 0);
     
-    var clCdCurvesJSON = this.game.cache.getJSON('clCdCurves');
-    this.sailEnv.loadClCdCurves(clCdCurvesJSON);
-    
-    var boatsJSON = this.game.cache.getJSON('boats');
-    this.sailEnv.loadBoatDatas(boatsJSON);
-    
-    var basicJSON = this.game.cache.getJSON('basic');
-    this._loadLevel(basicJSON);
-};
-
-//--------------------------------------------------
-PlayState._loadLevel = function (data) {
     // The background...
     this.bkgdWater = this.game.add.group();
     var maxSize = Math.sqrt(this.game.width * this.game.width + this.game.height * this.game.height);
@@ -285,48 +273,30 @@ PlayState._loadLevel = function (data) {
     this.water.anchor.y = 0.5;
     this.bkgdWater.add(this.water);
  
-    // Need wind ripples...
-    
     // The worldGroup effectively lets us scroll the world...
     this.worldGroup = this.game.add.group();
     
-    this.buoys = this.game.add.group(this.worldGroup);    
-    data.buoys.forEach(this._spawnBuoys, this);
-
+    this.buoys = this.game.add.group(this.worldGroup);
+    this.sailEnv.floatingObjectsGroup = this.buoys;
+    
     this.sailSimView = new PlayState.settings.sailSimViewConstructor(this.sailEnv, this.worldGroup);
     
+    var me = this;
+    this.sailEnv.loadEnv('basin', function() {
+        var basicJSON = me.game.cache.getJSON('basic');
+        me._loadLevel(basicJSON);
+   });
+};
+
+//--------------------------------------------------
+PlayState._loadLevel = function (data) {
+    // Need wind ripples...
     this._spawnCharacters({myBoat: data.myBoat });
     
     this.appWindArrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.sailSimView.appWindVelocityArrowStyle);
     this.boatVelocityArrow = new LBPhaser.Arrow(this.sailEnv.phaserEnv, this.worldGroup, this.sailSimView.boatVelocityArrowStyle);
     
     this._setupHUD();
-};
-
-//--------------------------------------------------
-PlayState._spawnBuoys = function(data) {
-    var x = this.sailEnv.phaserEnv.toPixelsX(data.x);
-    var y = this.sailEnv.phaserEnv.toPixelsY(data.y);
-    var buoy = this.buoys.create(x, y, data.image);
-    
-    if (this.physicsEngine === LBSailSim.PhaserSailEnv.P2_PHYSICS) {
-        this.sailEnv.physicsLink.addFixedPhaserObject(buoy);
-    }
-    else {
-        var width = Math.abs(this.sailEnv.phaserEnv.fromPixelsX(buoy.width / 2));
-        var height = Math.abs(this.sailEnv.phaserEnv.fromPixelsY(buoy.height / 2));
-        var depth = 0.5;
-
-        var boxVolume = LBVolume.createBox(width, height, depth, 0, 0, 0);
-        var rigidBody = new LBPhysics.RigidBody();
-        rigidBody.volumes.push(boxVolume);
-
-        rigidBody.obj3D.position.set(data.x, data.y, 0);
-        rigidBody.obj3D.updateMatrixWorld(true);
-
-        this.sailEnv.physicsLink.addFixedObject(rigidBody);
-    }
-
 };
 
 //--------------------------------------------------
@@ -542,6 +512,10 @@ PlayState.preRender = function() {
 //
 //--------------------------------------------------
 PlayState.update = function() {
+    if (!this.myBoat) {
+        return;
+    }
+    
     this.sailEnv.update();
     LBDebug.DataLog.output();
     

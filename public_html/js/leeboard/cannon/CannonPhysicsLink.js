@@ -121,9 +121,10 @@ LBCannon.CannonPhysicsLink.prototype._applyRigidBodyForces = function(rigidBody)
 
     LBCannon.updateBodyFromRigidBodyVolumes(body, rigidBody);
     
-    rigidBody.updateForces(this.dtCurrent);
+    if (rigidBody.updateForces) {
+        rigidBody.updateForces(this.dtCurrent);
 
-    var resultant = rigidBody.getResultant(true);
+        var resultant = rigidBody.getResultant(true);
     
     // TEST!!!
 /*    resultant.applPoint.z = body.position.z;
@@ -131,8 +132,9 @@ LBCannon.CannonPhysicsLink.prototype._applyRigidBodyForces = function(rigidBody)
     resultant.moment.x = resultant.moment.y = 0;
   */ 
     
-    body.applyForce(resultant.force, LBCannon.CannonPhysicsLink._workingVec3.copy(resultant.applPoint));
-    body.torque.vadd(resultant.moment, body.torque);
+        body.applyForce(resultant.force, LBCannon.CannonPhysicsLink._workingVec3.copy(resultant.applPoint));
+        body.torque.vadd(resultant.moment, body.torque);
+    }
 };
 
 /**

@@ -156,6 +156,44 @@ LBVolume.Volume.prototype = {
         throw 'equivalentTetras() not implemented by ' + this.typeName;
     },
     
+    
+    /**
+     * Applies a rotation defined by Euler angles to all at the vertices.
+     * @param {LBGeometry.Euler}  rotation  The rotation in Euler angles.
+     * @returns {LBVolume.Volume}   this.
+     */
+    applyEuler: function(rotation) {
+        var quaternion = new LBGeometry.Quaternion();
+        quaternion.setFromEuler(rotation);
+        return this.applyQuaternion(quaternion);
+    },
+    
+    /**
+     * Applies a rotation defined by a quaternion to all at the vertices.
+     * @param {LBGeometry.Quaternion}  quaternion  The quaternion to apply
+     * @returns {LBVolume.Volume}   this.
+     */
+    applyQuaternion: function(quaternion) {
+        this.vertices.forEach(function(vertex) {
+           vertex.applyQuaternion(quaternion); 
+        });
+        return this;
+    },
+    
+    /**
+     * Helper that applies a rotation based upon a data object to the vertices of the volume.
+     * @param {Object} data The data object, if it has a rotation property then that is
+     * used to define the rotation.
+     * @returns {LBVolume.Volume}   this.
+     */
+    loadRotation: function(data) {
+        if (data.rotation) {
+            var rotation = LBGeometry.loadEuler(data.rotation);
+            this.applyEuler(rotation);
+        }
+        return this;
+    },
+    
     /**
      * Call when done with the object to have it release any internal references
      * to other objects to help with garbage collection.
@@ -1494,9 +1532,10 @@ LBVolume.Cuboid.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
  * @param {Number} cx   The x dimension of the center of the box.
  * @param {Number} cy   The y dimension of the center of the box.
  * @param {Number} cz   The z dimension of the center of the box.
+ * @param {Number} [mass]   The optional mass for the box.
  * @returns {Volume_L18.createBox.box|Volume_L18.LBVolume.Cuboid}
  */
-LBVolume.createBox = function(dx, dy, dz, cx, cy, cz) {
+LBVolume.createBox = function(dx, dy, dz, cx, cy, cz, mass) {
     var box = new LBVolume.Cuboid();
     var xl = cx - dx / 2;
     var xu = xl + dx;
@@ -1512,6 +1551,26 @@ LBVolume.createBox = function(dx, dy, dz, cx, cy, cz) {
     box.vertices[5].set(xu, yl, zu);
     box.vertices[6].set(xu, yu, zu);
     box.vertices[7].set(xl, yu, zu);
+    return box;
+};
+
+/**
+ * Loads a box volume from properties in a data object.
+ * @param {Object} data The data object. This should contain the following properties:
+ * <li>[center]: {"x":x, "y":y, "z":z}    The center of the box, if missing 0,0,0 will be used.
+ * <li>size: {"x":x, "y":y, "z":z}  The dimensions of the box.
+ * <li>[rotation]: See {@link LBGeometry.loadEuler} If specified, the rotation to apply to the
+ * box.
+ * @param {Number} [mass=undefined] The mass of the box.
+ * @returns {Volume_L18.createBox.box|Volume_L18.LBVolume.Cuboid|Volume_L18.loadBoxFromData.box}
+ */
+LBVolume.loadBoxFromData = function(data, mass) {
+    var center = LBGeometry.loadVector3(data.center);
+    var size = LBGeometry.loadVector3(data.size);
+    
+    var box = LBVolume.createBox(size.x, size.y, size.z, center.x, center.y, center.z);
+    box.mass = mass;
+    box.loadRotation(data);
     return box;
 };
 
@@ -1554,16 +1613,9 @@ LBVolume.loadCylinderFromData = function(data, mass) {
         new LBGeometry.Vector3(base.x + rx, base.y - ry, z)
     ];
     
-    if (data.rotation) {
-        var rotation = LBGeometry.loadEuler(data.rotation);
-        var quaternion = new LBGeometry.Quaternion();
-        quaternion.setFromEuler(rotation);
-        vertices.forEach(function(vertex) {
-           vertex.applyQuaternion(quaternion); 
-        });
-    }
-    
-    return new LBVolume.Cuboid(vertices, mass);
+    var volume = new LBVolume.Cuboid(vertices, mass);
+    volume.loadRotation(data);
+    return volume;
 };
 
 
@@ -1581,6 +1633,9 @@ LBVolume.loadStandardVolumeFromData = function(data, mass) {
     }
     
     switch (data.type) {
+        case 'box' :
+            return LBVolume.loadBoxFromData(data, mass);
+            
         case 'cylinder' :
             return LBVolume.loadCylinderFromData(data, mass);
             

@@ -1,0 +1,79 @@
+{
+    "name": "Basin",
+    "desc": "The Basin",
+    "boatList": "data/boats.json",
+    "clCdCurves": "data/clcdcurves.json",
+    
+    "boundaries": {
+        
+    },
+    
+    "floating": {
+        "objectDefs": [
+            {
+                "name": "can",
+                "_mass": 10,
+                "volume": {
+                    "type": "box",
+                    "size": {"x": 0.4, "y": 0.4, "z": 0.5 }
+                },
+                "phaserImage": "can",
+                "threeModel": "models/can.json"
+            }
+        ],
+        "objects": [
+            {
+                "def": "can",
+                "classification": "buoy",
+                "pos": {"x": 10, "y": 0 },
+                "constraint": "chain",
+                "chain": {
+                    "length": 10
+                },
+                "name": "Green A"
+            },
+            {
+                "def": "can",
+                "classification": "buoy",
+                "pos": {"x": 10, "y": -20 },
+                "constraint": "chain",
+                "chain": {
+                    "length": 10
+                },
+                "name": "Green B"
+            },
+            {
+                "def": "can",
+                "classification": "buoy",
+                "pos": {"x": 10, "y": -40 },
+                "constraint": "chain",
+                "chain": {
+                    "length": 10
+                },
+                "name": "Green C"
+            },
+            {
+                "def": "can",
+                "classification": "buoy",
+                "pos": {"x": 25, "y": -20 },
+                "constraint": "chain",
+                "chain": {
+                    "length": 10
+                },
+                "name": "Green D"
+            },
+            {
+                "def": "can",
+                "classification": "buoy",
+                "pos": {"x": 40, "y": -20 },
+                "constraint": "chain",
+                "chain": {
+                    "length": 10
+                },
+                "name": "Green E"
+            }
+        ]
+    },
+    
+    "end": ""
+}

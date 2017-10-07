@@ -21,6 +21,7 @@ define(function() {
  * @namespace LBSailSim
  */
 var LBSailSim = LBSailSim || {};
+
 return LBSailSim;
 
 });

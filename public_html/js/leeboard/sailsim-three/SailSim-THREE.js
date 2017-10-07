@@ -15,7 +15,7 @@
  */
 
 
-define(['lbsailsim', 'lbcannon'], function(LBSailSim, LBCannon) {
+define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets'], function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets) {
     
 
 /**
@@ -24,10 +24,11 @@ define(['lbsailsim', 'lbcannon'], function(LBSailSim, LBCannon) {
  * @constructor
  * @param {LBSailSim.SailEnvTHREE.CANNON_PHYSICS} physicsType  The physics engine to use.
  * @param {LBApp3D} app3d   The app calling this.
+ * @param {LBAssets.Loader} [assetLoader]   The optional asset loader.
  * @returns {LBSailSim.SailEnvTHREE}
  */
-LBSailSim.SailEnvTHREE = function(app3d, physicsType) {
-    LBSailSim.Env.call(this);
+LBSailSim.SailEnvTHREE = function(app3d, physicsType, assetLoader) {
+    LBSailSim.Env.call(this, assetLoader);
     
     this.app3d = app3d;
     this.physicsType = physicsType;
@@ -38,6 +39,9 @@ LBSailSim.SailEnvTHREE = function(app3d, physicsType) {
             this.physicsLink = new LBCannon.CannonPhysicsLink();
             break;
     }
+    
+    this.envGroup = new THREE.Group();
+    this.app3d.mainScene.scene.add(this.envGroup);
 };
 
 
@@ -51,10 +55,53 @@ LBSailSim.SailEnvTHREE.CANNON_PHYSICS = 0;
 LBSailSim.SailEnvTHREE.prototype = Object.create(LBSailSim.Env.prototype);
 LBSailSim.SailEnvTHREE.prototype.constructor = LBSailSim.SailEnvTHREE;
 
+LBSailSim.SailEnvTHREE.prototype.clearEnv = function() {
+    LBSailSim.Env.prototype.clearEnv.call(this);
+    
+    while (this.envGroup.children.length > 0) {
+        this.envGroup.remove(this.envGroup.children[0]);
+    }
+};
+
+LBSailSim.SailEnvTHREE.prototype.floatingObjectLoaded = function(data, rigidBody, objectDef) {
+    LBSailSim.Env.prototype.floatingObjectLoaded.call(this, data, rigidBody, objectDef);
+    
+    var me = this;
+    if (objectDef && objectDef.threeModel) {
+        this.app3d.mainScene.loadJSONModel(objectDef.threeModel, function(model) {
+            rigidBody._lbThreeModel = model;
+            me.envGroup.add(model);            
+        });
+    }
+    this.physicsLink.addRigidBody(rigidBody, data);
+};
+
 
 LBSailSim.SailEnvTHREE.prototype._boatCheckedOut = function(boat, data) {
     this.physicsLink.addRigidBody(boat, data);
     LBSailSim.Env.prototype._boatCheckedOut.call(this, boat, data);
+    
+    var me = this;
+    if (data.threeModel) {
+        // TODO: Repackage the onload function so it can be called recursively for
+        // parts of a rigid body.
+        this.app3d.mainScene.loadJSONModel(data.threeModel, function(model) {
+            boat._lbThreeModel = model;
+            me.envGroup.add(model);
+            
+            var parentModel = model;
+            
+            boat.parts.forEach(function(rigidBody) {
+                var partData = data[rigidBody.name];
+                if (partData && partData.threeModel) {
+                    me.app3d.mainScene.loadJSONModel(partData, function(model) {
+                        rigidBody._lbThreeModel = model;
+                        parentModel.add(model);
+                    });
+                }
+            });
+        });
+    }
 };
 
 LBSailSim.SailEnvTHREE.prototype._boatReturned = function(boat) {
@@ -72,7 +119,21 @@ LBSailSim.SailEnvTHREE.prototype.update = function() {
     
     this.physicsLink.update(dt);
     
-    this.physicsLink.updateDisplayObjects();
+    // Don't have to call updateDisplayObjects()...
+    //this.physicsLink.updateDisplayObjects();
+    
+    this.physicsLink.rigidBodies.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
+};
+
+
+LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody = function(rigidBody) {
+    var model = rigidBody._lbThreeModel;
+    if (model) {
+        var obj3D = rigidBody.obj3D;
+        model.position.set(obj3D.position.x, obj3D.position.z, -obj3D.position.y);
+        model.rotation.set(obj3D.rotation.x, obj3D.rotation.z, -obj3D.rotation.y, obj3D.rotation.w);
+        model.updateMatrixWorld(true);
+    }
 };
 
 return LBSailSim;

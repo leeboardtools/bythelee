@@ -182,7 +182,8 @@ LBUtil.registerNamespace = function(name, namespace) {
 
 
 /**
- * Retrieves the function in the global scope with a given name.
+ * Retrieves the function that is either in a registered namespace or in the 
+ * global scope with a given name.
  * @param {String} str  The name of the function.
  * @returns {function}  The function object.
  * @throws {Error} An error is throw if str could not be resolved to a function object.
@@ -388,6 +389,11 @@ LBUtil.RollingBuffer.prototype = {
     constructor: LBUtil.RollingBuffer
 };
 
+/**
+ * Helper for toggling full-screen mode.
+ * @param {Object} element  The DOM element to use.
+ * @returns {Boolean}   true if full screen mode is entered.
+ */
 LBUtil.toggleFullScreen = function(element) {
     var fullscreenEnabled;
     var fullscreenElement;

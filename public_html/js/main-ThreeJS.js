@@ -15,8 +15,8 @@
  */
 
 
-require( ['three', 'lbsailsim', 'lbui3d', 'lbmath', 'lbgeometry', 'lbsailsimthree'],
-    function(THREE, LBSailSim, LBUI3d, LBMath, LBGeometry) {
+require( ['three', 'lbsailsim', 'lbui3d', 'lbmath', 'lbgeometry', 'lbassets', 'lbsailsimthree'],
+    function(THREE, LBSailSim, LBUI3d, LBMath, LBGeometry, LBAssets) {
         
 function LBMyApp() {
     LBUI3d.App3D.call(this);
@@ -43,8 +43,13 @@ function LBMyApp() {
     this.mainsheetSliderElement = document.getElementById('main_slider');
     this.jibsheetSliderElement = document.getElementById('jib_slider');
     
+    this.assetLoader = new LBAssets.Loader();
+    
+    
+    // TODO Get rid of windDeg, windForce...
     this.windDeg = 0;
     this.windForce = 2;
+    
     
     this.physicsEngineType = LBSailSim.SailEnvTHREE.CANNON_PHYSICS;
 
@@ -68,7 +73,6 @@ LBMyApp.prototype.init = function(mainContainer) {
         this.throttleSliderElement.hidden = true;
     }
     
-
     this.setWindForce(2);
     
     this.onWindowResize();
@@ -79,7 +83,6 @@ LBMyApp.prototype.initSceneEnv = function() {
     this.mainView.camera.position.y = 10;
     this.mainView.camera.position.z = 10;
     this.mainView.camera.lookAt(LBGeometry.ORIGIN);
-    
     
     // Water
     var geometry = new THREE.PlaneGeometry(10000, 10000);
@@ -108,7 +111,26 @@ LBMyApp.prototype.initSceneEnv = function() {
 };
 
 LBMyApp.prototype.initSailEnv = function() {
-    this.sailEnv = new LBSailSim.SailEnvTHREE(this, this.physicsEngineType);
+    this.sailEnv = new LBSailSim.SailEnvTHREE(this, this.physicsEngineType, this.assetLoader);
+    
+    this.loadEnvironment('basin');
+};
+
+LBMyApp.prototype.loadEnvironment = function(name) {
+    var me = this;
+    this.sailEnv.loadEnv(name, function() {
+        me.loadEnvCompleted();
+    });
+};
+
+LBMyApp.prototype.loadEnvCompleted = function() {
+    // Load a boat...
+    var boatType = Object.keys(this.sailEnv.boatsByType)[0];
+    var boatName = Object.keys(this.sailEnv.boatsByType[boatType])[0];
+    var centerX = 0;
+    var centerY = 0;
+    var rotDeg = 0;
+    this.myBoat = this.sailEnv.checkoutBoat(boatType, boatName, centerX, centerY, rotDeg);
 };
 
 LBMyApp.prototype.update = function() {
@@ -152,6 +174,8 @@ LBMyApp.prototype.setWindForce = function(force) {
         return;
     }
     
+    this.sailEnv.wind.setAverageForce(force);
+    
     this.windForce = force;
     var element = document.getElementsByClassName("wind_speed_indicator")[0];
     for (var i = 0; i <= force; ++i) {
@@ -176,7 +200,9 @@ LBMyApp.prototype.windDecrease = function() {
 };
 
 LBMyApp.prototype.setWindDirDeg = function(dirDeg) {
-    this.windDeg = LBMath.wrapDegrees(dirDeg);
+    this.sailEnv.wind.setAverageFromDeg(dirDeg);
+    
+    this.windDeg = LBMath.wrapDegrees(dirDeg);    
     
     // TEST!!!
     this.updateAppWind(this.windDeg, this.windForce);
