@@ -71,9 +71,11 @@ LBSailSim.SailEnvTHREE.prototype.floatingObjectLoaded = function(data, rigidBody
         this.app3d.mainScene.loadJSONModel(objectDef.threeModel, function(model) {
             rigidBody._lbThreeModel = model;
             me.envGroup.add(model);            
+            LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody(rigidBody);
         });
     }
-    this.physicsLink.addRigidBody(rigidBody, data);
+    //this.physicsLink.addRigidBody(rigidBody, data);
+    this.physicsLink.addFixedObject(rigidBody);
 };
 
 
@@ -121,7 +123,6 @@ LBSailSim.SailEnvTHREE.prototype.update = function() {
     
     // Don't have to call updateDisplayObjects()...
     //this.physicsLink.updateDisplayObjects();
-    
     this.physicsLink.rigidBodies.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
 };
 

@@ -42,7 +42,7 @@ LBPhysics.PhysicsLink.prototype = {
     
     /**
      * Retrieves an id that can be used to uniquely identify a rigid body within
-     * the Phaser physics stuff.
+     * the physics stuff.
      * @param {LBPhysics.RigidBody} rigidBody   The rigid body of interest.
      * @returns {Number}    The id for the rigid body.
      */
@@ -87,7 +87,7 @@ LBPhysics.PhysicsLink.prototype = {
     
     /**
      * Called from {@link LBPhysics.PhysicsLink#addRigidBody} after the rigid body
-     * has been added but before the views have been notified.
+     * has been added.
      * @protected
      * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
      * @param {Object}  [data]  Optional data containing additional information for
@@ -131,8 +131,11 @@ LBPhysics.PhysicsLink.prototype = {
     
     
     /**
-     * Adds a {@link LBPhaser.PhysicsView} to the manager.
-     * @param {LBPhaser.PhysicsView} view The view to add.
+     * Adds a view to the manager. Views should have the following methods:
+     *  beginDisplayObjectsUpdate();
+     *  endDisplayObjectsUpdate();
+     *  updateRigidBodyDisplayObjects();
+     * @param {Object} view The view to add.
      */
     addView: function(view) {
         this.views.push(view);
@@ -147,7 +150,7 @@ LBPhysics.PhysicsLink.prototype = {
     
     /**
      * Removes a view from the manager.
-     * @param {LBPhaser.PhysicsView} view   The view to remove.
+     * @param {Object} view   The view to remove.
      * @return {Boolean}    true if the view was removed, false if it was not part
      * of this link.
      */
@@ -174,17 +177,16 @@ LBPhysics.PhysicsLink.prototype = {
 
     /**
      * Performs an update cycle.
-     * @param {Number} dt The time step, normally what was returned by {@link LBPhaser.P2Link#timeStep}..
+     * @param {Number} dt The time step.
      * @returns {undefined}
      */
     update: function(dt) {
     },
     
     /**
-     * Updates any display objects that have been attached to any of the rigid bodies or their
-     * parts.
+     * Updates any display objects associated with the physics link by calling
+     * the views that were added to the link..
      * <p>
-     * This is automatically called from {@link LBPhysics.PhysicsLink#_stageUpdateTransform}.
      * @returns {undefined}
      */
     updateDisplayObjects: function() {

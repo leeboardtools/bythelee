@@ -130,6 +130,8 @@ LBMyApp.prototype.loadEnvCompleted = function() {
     var centerX = 0;
     var centerY = 0;
     var rotDeg = 0;
+    rotDeg = 180;
+    centerX = 5;
     this.myBoat = this.sailEnv.checkoutBoat(boatType, boatName, centerX, centerY, rotDeg);
 };
 

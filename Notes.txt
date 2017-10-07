@@ -26,6 +26,8 @@ are both checked.
 
 TODO:
 
+Add Pause/Resume button
+
 Add drop-down button for toggling force arrows.
 
 Redo LED bar indicator into separate class, that has good, marginal, and bad ranges.
