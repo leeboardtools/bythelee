@@ -133,12 +133,20 @@ LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody = function(rigidBody) {
     var model = rigidBody._lbThreeModel;
     if (model) {
         var obj3D = rigidBody.obj3D;
-        model.position.set(obj3D.position.x, obj3D.position.z, -obj3D.position.y);
-        model.rotation.set(obj3D.rotation.x, obj3D.rotation.z, -obj3D.rotation.y, obj3D.rotation.w);
+        LBSailSim.SailEnvTHREE.copyVectorToTHREE(obj3D.position, model.position);
+        LBSailSim.SailEnvTHREE.copyQuaternionToTHREE(obj3D.rotation, model.rotation);
         model.updateMatrixWorld(true);
     }
     
     rigidBody.parts.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
+};
+
+LBSailSim.SailEnvTHREE.copyVectorToTHREE = function(vec, vecThree) {
+    vecThree.set(vec.x, vec.z, -vec.y);
+};
+
+LBSailSim.SailEnvTHREE.copyQuaternionToTHREE = function(quat, quatThree) {
+    quatThree.set(quat.x, quat.z, -quat.y, quat.w);
 };
 
 return LBSailSim;

@@ -16,8 +16,8 @@
 
 
 /* global LBUI3d, LBUtil */
-define(['lbscene3d', 'lbview3d'], 
-function(LBUI3d) {
+define(['lbutil', 'lbscene3d', 'lbview3d'], 
+function(LBUtil, LBUI3d) {
 
 /**
  * Our 3D application framework.
@@ -184,9 +184,6 @@ LBUI3d.App3D.prototype.toggleFullScreen = function(container) {
     return LBUtil.toggleFullScreen(container);
 };
 
-LBUI3d.App3D.prototype.isPaused = function() {
-    
-};
 
 LBUI3d.App3D.prototype.update = function() {
     

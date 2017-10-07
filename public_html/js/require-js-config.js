@@ -69,6 +69,7 @@ var require = {
         'lbapp3d': 'leeboard/ui3d/App3D',
         'lbscene3d': 'leeboard/ui3d/Scene3D',
         'lbview3d': 'leeboard/ui3d/View3D',
+        'lbcameracontrollers': 'leeboard/ui3d/CameraControllers',
         'lbui3d': 'leeboard/ui3d/LBUI3d'
     },
     shim: {

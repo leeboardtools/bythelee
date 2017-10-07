@@ -26,11 +26,47 @@ are both checked.
 
 TODO:
 
-Redo Orbit controller to track boat nicely.
+View controllers to have:
+Follow at distance
+First Person (On boat, could choose different boats)
+Overhead
+Fixed (Fixed coordinates)
+Fixed to target (Orbit)
+
+View menu:
+<i class="material-icons">insert_photo</i>  <== Main Icon
+<i class="material-icons">&#xE251;</i>
+
+or
+<i class="material-icons">settings_overscan</i>
+<i class="material-icons">&#xE8C4;</i>
+
+
+4 Views:
+<i class="material-icons">keyboard_arrow_down</i>   <== Forward
+<i class="material-icons">&#xE313;</i>
+
+<i class="material-icons">keyboard_arrow_left</i>   <== Stbd
+<i class="material-icons">&#xE314;</i>
+
+<i class="material-icons">keyboard_arrow_right</i>  <== Port
+<i class="material-icons">&#xE315;</i>
+
+<i class="material-icons">keyboard_arrow_up</i> <== Aft
+<i class="material-icons">&#xE316;</i>
+
+Follow:
+<i class="material-icons">directions_boat</i>
+<i class="material-icons">&#xE532;</i>
+
+
+<i class="material-icons">pan_tool</i>
+<i class="material-icons">&#xE925;</i>
+
+
 
 Add Keel Blender model
-
-Add Pause/Resume button
+Add sail 3D model
 
 Add drop-down button for toggling force arrows.
 
@@ -57,6 +93,8 @@ Add minimum angle for lift to sail foil.
 Add ability to release rudder (space + CTRL? dbl-click rudder control?)
 
 Add 3D force arrows.
+
+Add Map View
 
 Need to limit the sail/keel forces when they get near the water surface (probably anything closer than 45 degrees).
 
@@ -108,8 +146,6 @@ Sailing boundaries
 
 Zoom?
 
-
-Put together THREE.js based main...
 
 
 Much Later:

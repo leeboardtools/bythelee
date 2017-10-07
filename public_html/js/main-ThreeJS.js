@@ -74,6 +74,14 @@ LBMyApp.prototype = Object.create(LBUI3d.App3D.prototype);
 LBMyApp.prototype.constructor = LBMyApp;
 
 LBMyApp.prototype.addNormalView = function(view) {
+    view.firstPersonController = new LBUI3d.FirstPersonCameraController(view.camera);
+    view.addCameraController(view.firstPersonController);
+    
+    view.followController = new LBUI3d.FollowCameraController(view.camera);
+    view.addCameraController(view.followController);
+    
+    view.setActiveCameraController(view.followController);
+    
     view.installOrbitControls(3, 10000, Math.PI * 0.5, false);
     this.addView(view);
 };
@@ -162,6 +170,13 @@ LBMyApp.prototype.loadEnvCompleted = function() {
     if (this.mainsheetSliderElement) {
         this.mainsheetSliderElement.hidden = !this.myBoat.getMainsheetController();
     }
+    
+    var me = this;
+    this.views.forEach(function(view) {
+        view.cameraControllers.forEach(function(controller) {
+            controller.setTarget(me.myBoat);
+        });
+    });
 };
 
 LBMyApp.updateControlFromController = function(controller, control) {
@@ -343,9 +358,10 @@ LBMyApp.prototype.updateHUDWind = function() {
 
 LBMyApp.prototype.updateCameras = function() {
     if (this.mainView.controls && this.mainView.controls.target && this.myBoat) {
-        this.mainView.controls.target.copy(this.myBoat.obj3D.getWorldPosition());
+        LBSailSim.SailEnvTHREE.copyVectorToTHREE(this.myBoat.obj3D.getWorldPosition(), this.mainView.controls.target);
         this.mainView.controls.update();
     }
+
 };
 
 LBMyApp.prototype.fpsUpdated = function() {
@@ -549,6 +565,13 @@ LBMyApp.prototype.toggleFullScreen = function(container) {
     elements[0].innerHTML = (isFullScreen) ? "&#xE5D1;" : "&#xE5D0;";
 };
 
+LBMyApp.prototype.toggleRunPause = function() {
+    this.togglePaused();
+    var element = document.getElementById('menu_run_pause');
+    var elements = element.getElementsByTagName('i');
+    elements[0].innerHTML = (this.isPaused()) ? "&#xE037;" : "&#xE034;";
+};
+
 LBMyApp.prototype.nextMouseMode = function() {
     var mouseMode = LBUI3d.App3D.prototype.nextMouseMode.call(this);
     
@@ -585,6 +608,9 @@ LBMyApp.prototype.onRudderChange = function(value, min, max) {
             rudderController.setMappedValue(value, max, min);
         }
     }
+    if (this.rudderControl) {
+        this.rudderControl.blur();
+    }
 };
 
 LBMyApp.prototype.onThrottleChange = function(value, min, max) {
@@ -593,6 +619,9 @@ LBMyApp.prototype.onThrottleChange = function(value, min, max) {
         if (controller) {
             controller.setMappedValue(value, min, max);
         }
+    }
+    if (this.throttleControl) {
+        this.throttleControl.blur();
     }
 };
 
@@ -603,6 +632,9 @@ LBMyApp.prototype.onJibsheetChange = function(value, min, max) {
             controller.setMappedValue(value, min, max);
         }
     }
+    if (this.jibsheetControl) {
+        this.jibsheetControl.blur();
+    }
 };
 
 LBMyApp.prototype.onMainsheetChange = function(value, min, max) {
@@ -611,6 +643,9 @@ LBMyApp.prototype.onMainsheetChange = function(value, min, max) {
         if (controller) {
             controller.setMappedValue(value, min, max);
         }
+    }
+    if (this.mainsheetControl) {
+        this.mainsheetControl.blur();
     }
 };
 

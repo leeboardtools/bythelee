@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-define(['lbscene3d', 'lbview3d', 'lbapp3d', 'three-detector'], function(LBUI3d) {
+define(['lbscene3d', 'lbview3d', 'lbapp3d', 'lbcameracontrollers', 'three-detector'], function(LBUI3d) {
     return LBUI3d;
 });
