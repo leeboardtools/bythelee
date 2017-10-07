@@ -27,6 +27,11 @@ function(LBUI3d) {
 LBUI3d.App3D = function() {
     
     /**
+     * The current running state.
+     */
+    this._runState = LBUI3d.App3D.RUN_STATE_NOT_STARTED;
+    
+    /**
      * The main scene.
      * @member {Number}
      */
@@ -61,10 +66,15 @@ LBUI3d.App3D = function() {
      */
     this.mouseMode = LBUI3d.View3D.MOUSE_ROTATE_MODE;
     
+    
     this._nextSecondTimeStamp = (performance || Date).now() + 1000;
     this._prevSecondFrameCount = 0;
     this._lastFrameTimeStamp = 0;
 };
+
+LBUI3d.App3D.RUN_STATE_NOT_STARTED = 0;
+LBUI3d.App3D.RUN_STATE_RUNNING = 1;
+LBUI3d.App3D.RUN_STATE_PAUSED = 2;
 
 LBUI3d.App3D.activeApp = undefined;
 LBUI3d.App3D.prototype = {
@@ -75,6 +85,50 @@ LBUI3d.App3D.prototype.init = function(mainContainer) {
     this.mainContainer = mainContainer;
     var me = this;
     window.addEventListener('resize', function() { me.onWindowResize(); }, false);
+};
+
+LBUI3d.App3D.prototype.getRunState = function() {
+    return this._runState;
+};
+
+LBUI3d.App3D.prototype.isRunning = function() {
+    return this._runState === LBUI3d.App3D.RUN_STATE_RUNNING;
+};
+
+LBUI3d.App3D.prototype.isPaused = function() {
+    return this._runState === LBUI3d.App3D.RUN_STATE_PAUSED;
+};
+
+LBUI3d.App3D.prototype.togglePaused = function() {
+    if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
+        this.pause();
+    }
+    else {
+        this.runContinuous();
+    }
+};
+
+LBUI3d.App3D.prototype.pause = function() {
+    if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
+        this._runState = LBUI3d.App3D.RUN_STATE_PAUSED;
+    }
+};
+
+LBUI3d.App3D.prototype.runContinuous = function() {
+    if (this._runState !== LBUI3d.App3D.RUN_STATE_RUNNING) {
+        this._runState = LBUI3d.App3D.RUN_STATE_RUNNING;
+        LBUI3dApp3DAnimate((performance || Date).now());
+    }
+};
+
+LBUI3d.App3D.prototype.runSingleStep = function() {
+    if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
+        this.enterPaused();
+    }
+    else {
+        LBUI3dApp3DAnimate((performance || Date).now());
+        this._runState = LBUI3d.App3D.RUN_STATE_PAUSED;
+    }
 };
 
 LBUI3d.App3D.prototype.addView = function(view) {
@@ -130,6 +184,10 @@ LBUI3d.App3D.prototype.toggleFullScreen = function(container) {
     return LBUtil.toggleFullScreen(container);
 };
 
+LBUI3d.App3D.prototype.isPaused = function() {
+    
+};
+
 LBUI3d.App3D.prototype.update = function() {
     
 };
@@ -145,7 +203,9 @@ LBUI3d.App3D.prototype.fpsUpdated = function() {
 };
 
 LBUI3d.App3D.prototype._cycle = function(timeStamp) {
-    requestAnimationFrame(LBUI3dApp3DAnimate);
+    if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
+        requestAnimationFrame(LBUI3dApp3DAnimate);
+    }
     
     if (timeStamp >= this._nextSecondTimeStamp) {
         this.fps = (this.frameCount - this._lastSecondFrameCount) * 1000 / (timeStamp - this._nextSecondTimeStamp + 1000);
@@ -172,11 +232,18 @@ function LBUI3dApp3DAnimate(timeStamp) {
     LBUI3d.App3D.activeApp._cycle(timeStamp);
 }
 
-LBUI3d.App3D.prototype.start = function(mainContainer) {
+LBUI3d.App3D.prototype.start = function(mainContainer, startPaused) {
     LBUI3d.App3D.activeApp = this;
     
     this.init(mainContainer);
-    LBUI3dApp3DAnimate((performance || Date).now());
+    
+    if (startPaused) {
+        this._runState = LBUI3d.App3D.RUN_STATE_PAUSED;
+    }
+    else {
+        this._runState = LBUI3d.App3D.RUN_STATE_RUNNING;
+        LBUI3dApp3DAnimate((performance || Date).now());
+    }
 };
 
 return LBUI3d;

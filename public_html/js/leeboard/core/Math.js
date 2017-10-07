@@ -105,6 +105,19 @@ LBMath.clamp = function(val, limitA, limitB) {
 };
 
 /**
+ * Maps a value within a range so it has the same relative position to a new range.
+ * @param {Number} val  The value to be mapped.
+ * @param {Number} lowerOld The value in the old range corresponding to lowerNew.
+ * @param {Number} upperOld The value in the old range corresponding to upperNew.
+ * @param {Number} lowerNew One point in the upper range.
+ * @param {Number} upperNew Another point in the upper range.
+ * @returns {Number}    The mapped value.
+ */
+LBMath.mapInRange = function(val, lowerOld, upperOld, lowerNew, upperNew) {
+    return (val - lowerOld) * (upperNew - lowerNew) / (upperOld - lowerOld) + lowerNew;
+};
+
+/**
  * Adjusts an angle in degrees so it satisfies -180 &lt; degrees &ge; 180.
  * @param {Number} degrees  The anngle in degrees to wrap.
  * @returns {Number}    degrees wrapped to -180 &lt; degrees &ge; 180.

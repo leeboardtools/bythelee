@@ -864,6 +864,40 @@ LBSailSim.Vessel.prototype.getMainsheetPos = function() {
 };
 
 /**
+ * Retrieves the jibsheet controller, if any.
+ * @returns {object}    The jibheet controller, undefined if there is none.
+ */
+LBSailSim.Vessel.prototype.getJibsheetController = function() {
+    if (this.jibsheetController === undefined) {
+        this.jibsheetController = LBUtil.findArrayElementWithName(this.controllers, 'Jibsheet', null);        
+    }
+    return (this.jibsheetController && (this.jibsheetController.sails.length > 0)) ? this.jibsheetController : undefined;
+};
+
+/**
+ * Changes the jibsheet's position.
+ * @param {Number} position The jibsheet position.
+ * @param {Boolean} [isOffset=false]    If true position is an offset to be added to the 
+ * jibsheet's current position.
+ * @returns {LBSailSim.Vessel}  this.
+ */
+LBSailSim.Vessel.prototype.moveJibsheet = function(position, isOffset) {
+    var controller = this.getJibsheetController();
+    if (controller) {
+        controller.setValue(position, isOffset);
+    }
+    return this;
+};
+
+/**
+ * Retrieves the current position of the jibsheet controller.
+ * @returns {Number}    The position.
+ */
+LBSailSim.Vessel.prototype.getJibsheetPos = function() {
+    return (this.jibsheetController) ? this.jibsheetController.getValue() : 0;
+};
+
+/**
  * Retrieves the throttle controller, if any.
  * @returns {object}    The throttle controller, undefined if there is none.
  */

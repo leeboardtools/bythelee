@@ -597,6 +597,20 @@ LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS = [
 
 LBSailSim.Wind.MAX_BEAUFORT_FORCE = 12;
 
+/**
+ * Converts a wind speed in knots to Beaufort force.
+ * @param {Number} knots    The speed in knots.
+ * @returns {Number}    The Beaufort force number.
+ */
+LBSailSim.Wind.getForceForKnots = function(knots) {
+    for (var i = 0; i < LBSailSim.Wind.MAX_BEAUFORT_FORCE; ++i) {
+        if (knots < LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS[i]) {
+            return i;
+        }
+    }
+    return i;
+};
+
 LBSailSim.Wind.prototype = {
     constructor: LBSailSim.Wind,
     

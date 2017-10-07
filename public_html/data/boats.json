@@ -319,7 +319,7 @@
                 },
                 {
                     "className": "LBSailSim.ThrottleController",
-                    "name": "Throttle",
+                    "_name": "Throttle",
                     "propulsorName": "engine",
                     "minValue": -5,
                     "maxValue": 10,

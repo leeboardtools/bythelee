@@ -105,6 +105,21 @@ LBControls.SmoothController.prototype = {
     },
     
     /**
+     * Sets the value for the controller based upon a value between a lower
+     * and an upper value that are mapped to the range limits of the controller.
+     * @param {Number} value    The value.
+     * @param {Number} minValue   The value of value mapped to the controller's {@link LBControls.SmoothController#minValue}..
+     * @param {Number} maxValue   The value of value mapped to the controller's {@link LBControls.SmoothController#maxValue}..
+     * @returns {LBControls.SmoothController} this.
+     */
+    setMappedValue: function(value, minValue, maxValue) {
+        if ((minValue !== undefined) && (maxValue !== undefined) && (minValue !== maxValue)) {
+            value = LBMath.mapInRange(value, minValue, maxValue, this.minValue, this.maxValue);
+        }
+        return this.setValue(value);
+    },
+    
+    /**
      * Loads the controller from properties in a data object.
      * @param {object} data The data object.
      * @param {object} owner    An object for use by derived implementations.

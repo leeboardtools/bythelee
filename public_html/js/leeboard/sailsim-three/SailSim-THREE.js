@@ -85,25 +85,27 @@ LBSailSim.SailEnvTHREE.prototype._boatCheckedOut = function(boat, data) {
     
     var me = this;
     if (data.threeModel) {
-        // TODO: Repackage the onload function so it can be called recursively for
-        // parts of a rigid body.
         this.app3d.mainScene.loadJSONModel(data.threeModel, function(model) {
             boat._lbThreeModel = model;
             me.envGroup.add(model);
             
-            var parentModel = model;
-            
-            boat.parts.forEach(function(rigidBody) {
-                var partData = data[rigidBody.name];
-                if (partData && partData.threeModel) {
-                    me.app3d.mainScene.loadJSONModel(partData, function(model) {
-                        rigidBody._lbThreeModel = model;
-                        parentModel.add(model);
-                    });
-                }
-            });
+            loadVesselPartModel(boat.spars, model, me.app3d.mainScene);
+            loadVesselPartModel(boat.hydrofoils, model, me.app3d.mainScene);
+            loadVesselPartModel(boat.airfoils, model, me.app3d.mainScene);
         });
     }
+};
+
+function loadVesselPartModel(parts, parentModel, mainScene) {
+    parts.forEach(function(rigidBody) {
+        var partData = rigidBody.loadData;
+        if (partData && partData.threeModel) {
+            mainScene.loadJSONModel(partData.threeModel, function(model) {
+                rigidBody._lbThreeModel = model;
+                parentModel.add(model);
+            });
+        }
+    });
 };
 
 LBSailSim.SailEnvTHREE.prototype._boatReturned = function(boat) {
@@ -135,6 +137,8 @@ LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody = function(rigidBody) {
         model.rotation.set(obj3D.rotation.x, obj3D.rotation.z, -obj3D.rotation.y, obj3D.rotation.w);
         model.updateMatrixWorld(true);
     }
+    
+    rigidBody.parts.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
 };
 
 return LBSailSim;

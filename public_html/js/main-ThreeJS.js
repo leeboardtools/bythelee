@@ -15,8 +15,8 @@
  */
 
 
-require( ['three', 'lbsailsim', 'lbui3d', 'lbmath', 'lbgeometry', 'lbassets', 'lbsailsimthree'],
-    function(THREE, LBSailSim, LBUI3d, LBMath, LBGeometry, LBAssets) {
+require( ['three', 'lbsailsim', 'lbui3d', 'lbutil', 'lbmath', 'lbgeometry', 'lbassets', 'lbsailsimthree'],
+    function(THREE, LBSailSim, LBUI3d, LBUtil, LBMath, LBGeometry, LBAssets) {
         
 function LBMyApp() {
     LBUI3d.App3D.call(this);
@@ -36,15 +36,31 @@ function LBMyApp() {
     this.isHUDBoatOn = false;
     this.isHUDWindOn = false;
     this.isHUDForceOn = false;
+    
+    this.hudHeadingElement = document.getElementById('hud_heading');
+    this.hudSpeedElement = document.getElementById('hud_speed');
+    this.hudVMGElement = document.getElementById('hud_vmg');
+    this.hudLeewayDegElement = document.getElementById('hud_leeway_deg');
+    this.hudLeewayDirElement = document.getElementById('hud_leeway_dir');
+    
+    this.hudWindDirElement = document.getElementById('hud_wind_dir');
+    this.hudWindSpeedElement = document.getElementById('hud_wind_speed');
+    
 
     this.rudderSliderElement = document.getElementById('rudder_slider');
+    this.rudderControl = document.getElementById('rudder');
     this.throttleSliderElement = document.getElementById('throttle_slider');
+    this.throttleControl = document.getElementById('throttle');
     
     this.mainsheetSliderElement = document.getElementById('main_slider');
+    this.mainsheetControl = document.getElementById('mainsheet');
     this.jibsheetSliderElement = document.getElementById('jib_slider');
+    this.jibsheetControl = document.getElementById('jibsheet');
     
     this.assetLoader = new LBAssets.Loader();
     
+    this.toggleHUDBoat();
+    this.toggleHUDWind();
     
     // TODO Get rid of windDeg, windForce...
     this.windDeg = 0;
@@ -52,27 +68,30 @@ function LBMyApp() {
     
     
     this.physicsEngineType = LBSailSim.SailEnvTHREE.CANNON_PHYSICS;
-
 };
 
 LBMyApp.prototype = Object.create(LBUI3d.App3D.prototype);
 LBMyApp.prototype.constructor = LBMyApp;
 
 LBMyApp.prototype.addNormalView = function(view) {
-    view.installOrbitControls(3, 10000, Math.PI * 0.5);
+    view.installOrbitControls(3, 10000, Math.PI * 0.5, false);
     this.addView(view);
 };
 
 LBMyApp.prototype.init = function(mainContainer) {
     LBUI3d.App3D.prototype.init.call(this, mainContainer);
+
+    var me = this;
+    document.addEventListener('keypress', function(event) {
+        me.onKeyPressEvent(event);
+    }, false);
+    document.addEventListener('keydown', function(event) {
+        me.onKeyDownEvent(event);
+    }, false);
     
     this.initSceneEnv();
     this.initSailEnv();
 
-    if (this.throttleSliderElement) {
-        this.throttleSliderElement.hidden = true;
-    }
-    
     this.setWindForce(2);
     
     this.onWindowResize();
@@ -133,12 +152,200 @@ LBMyApp.prototype.loadEnvCompleted = function() {
     rotDeg = 180;
     centerX = 5;
     this.myBoat = this.sailEnv.checkoutBoat(boatType, boatName, centerX, centerY, rotDeg);
+    
+    if (this.throttleSliderElement) {
+        this.throttleSliderElement.hidden = !this.myBoat.getThrottleController();
+    }
+    if (this.jibsheetSliderElement) {
+        this.jibsheetSliderElement.hidden = !this.myBoat.getJibsheetController();
+    }
+    if (this.mainsheetSliderElement) {
+        this.mainsheetSliderElement.hidden = !this.myBoat.getMainsheetController();
+    }
+};
+
+LBMyApp.updateControlFromController = function(controller, control) {
+    if (!controller || !control) {
+        return;
+    }
+    
+    var value = controller.getValue();
+    value = LBMath.mapInRange(value, controller.minValue, controller.maxValue, parseFloat(control.min), parseFloat(control.max));
+    control.value = value;
+};
+
+//------------------------------ --------------------
+LBMyApp.moveControllerWithKey = function(controller, key, isDecrease, control) {
+    if (!controller) {
+        return;
+    }
+
+    var range = controller.maxValue - controller.minValue;
+    var delta = range / 50;
+    if (key.shiftKey) {
+        delta *= 0.25;
+    }
+    else if (key.altKey) {
+        delta *= 4.0;
+    }
+    if (isDecrease) {
+        delta = -delta;
+    }
+    controller.setValue(delta, true);
+    
+    LBMyApp.updateControlFromController(controller, control);
+};
+
+LBMyApp.prototype.onKeyDownEvent = function(event) {
+    switch (event.key) {
+        case ' ' :
+            if (this.myBoat) {
+                var controller = this.myBoat.getRudderController();
+                if (controller) {
+                    controller.setValue(0);
+                    LBMyApp.updateControlFromController(controller, this.rudderControl);
+                }
+            }
+            break;
+        case 'ArrowLeft' :
+            if (this.myBoat) {
+                LBMyApp.moveControllerWithKey(this.myBoat.getRudderController(), event, true, this.rudderControl);
+            }
+            break;
+            
+        case 'ArrowRight' :
+            if (this.myBoat) {
+                LBMyApp.moveControllerWithKey(this.myBoat.getRudderController(), event, false, this.rudderControl);
+            }
+            break;
+            
+        case 'ArrowUp' :
+            if (this.myBoat) {
+                LBMyApp.moveControllerWithKey(this.myBoat.getMainsheetController(), event, false, this.mainsheetControl);
+            }
+            break;
+            
+        case 'ArrowDown' :
+            if (this.myBoat) {
+                LBMyApp.moveControllerWithKey(this.myBoat.getMainsheetController(), event, true, this.mainsheetControl);
+            }
+            break;
+    }
+};
+
+LBMyApp.prototype.onKeyPressEvent = function(event) {
+    switch (event.code) {
+        case 'KeyP' :
+            this.togglePaused();
+            break;
+            
+        case 'KeyS' :
+            this.runSingleStep();
+            break;
+    }
 };
 
 LBMyApp.prototype.update = function() {
     LBUI3d.App3D.prototype.update.call(this);
     
     this.sailEnv.update();
+    
+    this.updateHUDBoat();
+    this.updateHUDWind();
+    
+    this.updateCameras();
+};
+
+LBMyApp.prototype.updateHUDBoat = function() {
+    if (this.isHUDBoatOn) {
+        if (this.hudHeadingElement) {
+            var heading = (this.myBoat) ? this.myBoat.getHeadingDeg(true) : 0;
+            this.hudHeadingElement.innerText = heading.toFixed(0);
+        }
+        
+        if (this.hudSpeedElement) {
+            var speed = (this.myBoat) ? this.myBoat.getKnots() : 0;
+            this.hudSpeedElement.innerText = speed.toFixed(2);
+        }
+        
+        if (this.hudVMGElement) {
+            var vmg = 0;
+            if (this.myBoat) {
+                var trueWind = this.myBoat.getTrueWindVelocityMPS();
+                var trueWindSpeed = trueWind.length();
+                if (!LBMath.isLikeZero(trueWindSpeed)) {
+                    vmg = -this.myBoat.getVelocityMPS().dot(trueWind) / trueWindSpeed;
+                    vmg = LBUtil.mps2kt(vmg);
+                }
+            }
+            this.hudVMGElement.innerText = vmg.toFixed(2);
+        }
+        
+        if (this.hudLeewayDegElement || this.hudLeewayDirElement) {
+            var leewayAngle = 0;
+            var leewayDir = "";
+            if (this.myBoat) {
+                if (!LBMath.isLikeZero(this.myBoat.getKnots())) {
+                    leewayAngle = this.myBoat.getLeewayDeg(true);
+                    if (leewayAngle < 0) {
+                        leewayDir = "S";
+                    }
+                    else if (leewayAngle > 0) {
+                        leewayDir = "P";
+                    }
+                }
+            }
+            
+            this.hudLeewayDegElement.innerText = leewayAngle.toFixed();
+            this.hudLeewayDirElement.innerHTML = "&deg;" + leewayDir;
+        }
+    }
+};
+
+LBMyApp.prototype.updateHUDWind = function() {
+    var windSpeed = 0;
+    var windDir = 0;
+    if (this.myBoat) {
+        windSpeed = this.myBoat.getApparentWindKnots();
+        windDir = (LBMath.isLikeZero(this.myBoat.getApparentWindKnots())) ? 0 : this.myBoat.getApparentWindBearingDeg(true);
+    }
+    else {
+        // TODO: Grab the true wind information...
+    }
+    
+    if (this.isHUDWindOn) {
+        if (this.hudWindSpeedElement) {
+            this.hudWindSpeedElement.innerText = windSpeed.toFixed(2);
+        }
+        if (this.hudWindDirElement) {
+            this.hudWindDirElement.innerText = windDir;
+        }
+    }
+    
+    if (this.appWindDirElement) {
+        this.appWindDirElement.style.transform = "rotate(" + windDir + "deg)";
+    }
+    
+    var force = LBSailSim.Wind.getForceForKnots(windSpeed);
+    var element = document.getElementsByClassName("wind_speed_indicator")[0];
+    for (var i = 0; i <= force; ++i) {
+        var led = element.getElementsByClassName('wind_speed_led_f' + i)[0];
+        var style = window.getComputedStyle(led, null);
+        led.style.backgroundColor = setColorFunctionAlpha(style.backgroundColor, ' 1.0');
+    }
+    
+    for (var i = force + 1; i <= 8; ++i) {
+        var led = element.getElementsByClassName('wind_speed_led_f' + i)[0];
+        var style = window.getComputedStyle(led, null);
+        led.style.backgroundColor = setColorFunctionAlpha(style.backgroundColor, ' 0.1');
+    }
+};
+
+LBMyApp.prototype.updateCameras = function() {
+    if (this.mainView.controls && this.mainView.controls.target && this.myBoat) {
+        this.mainView.controls.target.copy(this.myBoat.obj3D.getWorldPosition());
+        this.mainView.controls.update();
+    }
 };
 
 LBMyApp.prototype.fpsUpdated = function() {
@@ -179,18 +386,6 @@ LBMyApp.prototype.setWindForce = function(force) {
     this.sailEnv.wind.setAverageForce(force);
     
     this.windForce = force;
-    var element = document.getElementsByClassName("wind_speed_indicator")[0];
-    for (var i = 0; i <= force; ++i) {
-        var led = element.getElementsByClassName('wind_speed_led_f' + i)[0];
-        var style = window.getComputedStyle(led, null);
-        led.style.backgroundColor = setColorFunctionAlpha(style.backgroundColor, ' 1.0');
-    }
-    
-    for (var i = force + 1; i <= 8; ++i) {
-        var led = element.getElementsByClassName('wind_speed_led_f' + i)[0];
-        var style = window.getComputedStyle(led, null);
-        led.style.backgroundColor = setColorFunctionAlpha(style.backgroundColor, ' 0.1');
-    }
 };
 
 LBMyApp.prototype.windIncrease = function() {
@@ -205,16 +400,6 @@ LBMyApp.prototype.setWindDirDeg = function(dirDeg) {
     this.sailEnv.wind.setAverageFromDeg(dirDeg);
     
     this.windDeg = LBMath.wrapDegrees(dirDeg);    
-    
-    // TEST!!!
-    this.updateAppWind(this.windDeg, this.windForce);
-};
-
-LBMyApp.prototype.updateAppWind = function(dirDeg, speed) {
-    if (this.appWindDirElement) {
-        this.appWindDirElement.style.transform = "rotate(" + dirDeg + "deg)";
-    }
-   
 };
 
 LBMyApp.prototype.windBack = function() {
@@ -393,18 +578,40 @@ LBMyApp.prototype.nextMouseMode = function() {
     });
 };
 
-LBMyApp.prototype.onRudderChange = function(value) {
+LBMyApp.prototype.onRudderChange = function(value, min, max) {
+    if (this.myBoat) {
+        var rudderController = this.myBoat.getRudderController();
+        if (rudderController) {
+            rudderController.setMappedValue(value, max, min);
+        }
+    }
 };
 
-LBMyApp.prototype.onThrottleChange = function(value) {
+LBMyApp.prototype.onThrottleChange = function(value, min, max) {
+    if (this.myBoat) {
+        var controller = this.myBoat.getThrottleController();
+        if (controller) {
+            controller.setMappedValue(value, min, max);
+        }
+    }
 };
 
-LBMyApp.prototype.onJibsheetChange = function(value) {
-    
+LBMyApp.prototype.onJibsheetChange = function(value, min, max) {
+    if (this.myBoat) {
+        var controller = this.myBoat.getJibsheetController();
+        if (controller) {
+            controller.setMappedValue(value, min, max);
+        }
+    }
 };
 
-LBMyApp.prototype.onMainsheetChange = function(value) {
-   
+LBMyApp.prototype.onMainsheetChange = function(value, min, max) {
+    if (this.myBoat) {
+        var controller = this.myBoat.getMainsheetController();
+        if (controller) {
+            controller.setMappedValue(value, min, max);
+        }
+    }
 };
 
 

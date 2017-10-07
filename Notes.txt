@@ -26,6 +26,10 @@ are both checked.
 
 TODO:
 
+Redo Orbit controller to track boat nicely.
+
+Add Keel Blender model
+
 Add Pause/Resume button
 
 Add drop-down button for toggling force arrows.
