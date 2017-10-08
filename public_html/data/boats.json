@@ -146,9 +146,14 @@
                     "sailShaper": {
                         "className": "LBSailSim.TriangleSailShaper",
                         "luffLength": 7.48,
-                        "footLength": 3.15,
                         "headLength": 0.00,
                         "slices": [
+                            {
+                                "camberScale": 0,
+                                "slicePosFraction": 0.0,
+                                "surfaceLength": 3.15,
+                                "pointCount": 5
+                            },
                             {
                                 "slicePosFraction": 0.25,
                                 "surfaceLength": 3.00,

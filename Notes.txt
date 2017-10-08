@@ -242,3 +242,44 @@ Lets you change different parameters of the boat.
         )
     )
 );
+
+
+Approach for mapping sail surface to sail model::
+Search the model vertex list for the vertices closest to the points on the sail surface's
+mesh, and match those up.
+
+update the model.geometry.vertices, set model.geometry.verticesNeedUpdate to true when done.
+
+
+mesh, and match those up.
+21 vertices
+    "vertices":[
+0,-1.91069e-15,-4.37114e-08,
+3.15,-1.91069e-15,-4.37114e-08,
+
+0,7.48,-2.8325e-07,             x
+0,6.0588,-2.50268e-07,
+
+0,1.87,-9.63108e-08,
+3,1.87,-9.63108e-08,
+
+1.47,6.0588,-2.50268e-07,
+
+0,4.0392,-1.76559e-07,
+2.48,4.0392,-1.76559e-07,
+
+0.7875,-1.91069e-15,-4.37114e-08,
+1.575,-1.91069e-15,-4.37114e-08,
+2.3625,-1.91069e-15,-4.37114e-08,
+
+2.25,1.87,-9.63108e-08,
+1.5,1.87,-9.63108e-08,
+0.75,1.87,-9.63108e-08,
+
+1.1025,6.0588,-2.50268e-07,
+0.735,6.0588,-2.50268e-07,      x
+0.3675,6.0588,-2.50268e-07,
+
+1.86,4.0392,-1.76559e-07,
+1.24,4.0392,-1.76559e-07,
+0.62,4.0392,-1.76559e-07],

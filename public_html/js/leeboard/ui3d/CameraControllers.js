@@ -51,7 +51,11 @@ LBUI3d.CameraController.prototype.setTarget = function(target) {
  * @returns {undefined}
  */
 LBUI3d.CameraController.prototype.update = function(updateCamera) {
-    
+    // TODO:
+    // We have two parts to this:
+    // 1) The controller determines a desired camera position and orientation.
+    // 2) The camera is slewed towards that position and orientation with appropriate
+    // velocity/acceleration smoothing and limits.
 };
 
 

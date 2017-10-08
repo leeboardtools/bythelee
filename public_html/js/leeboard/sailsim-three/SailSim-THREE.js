@@ -103,9 +103,49 @@ function loadVesselPartModel(parts, parentModel, mainScene) {
             mainScene.loadJSONModel(partData.threeModel, function(model) {
                 rigidBody._lbThreeModel = model;
                 parentModel.add(model);
+                
+                if (rigidBody.sailSurface) {
+                    mapSailSurfaceToModel(rigidBody.sailSurface, model);
+                }
             });
         }
     });
+};
+
+function vector3ToTHREEDistanceSq(vec, vecThree) {
+    var dx = vec.x - vecThree.x;
+    var dy = vec.y - vecThree.z;
+    var dz = vec.z + vecThree.y;
+    return dx * dx + dy * dy + dz * dz;
+};
+
+function mapSailSurfaceToModel(sailSurface, model) {
+    var vertices = model.geometry.vertices;
+    var vertexIndices = [];
+    var vertexCount = vertices.length;
+    for (var i = 0; i < vertexCount; ++i) {
+        vertexIndices.push(i);
+    }
+    
+    sailSurface.slices.forEach(function(slice) {
+        for (var j = 0; j < slice.points.length; ++j) {
+            var minIndex = 0;
+            var minDistanceSq = vector3ToTHREEDistanceSq(slice.points[j], vertices[vertexIndices[minIndex]]);
+            for (var k = 1; k < vertexIndices.length; ++k) {
+                var distanceSq = vector3ToTHREEDistanceSq(slice.points[j], vertices[vertexIndices[k]]);
+                if (distanceSq < minDistanceSq) {
+                    minDistanceSq = distanceSq;
+                    minIndex = k;
+                }
+            }
+            
+            slice.indexMapping[j] = vertexIndices[minIndex];
+            vertexIndices.splice(minIndex, 1);
+        }
+    });
+    
+    // If there are extra vertices, look for the slices that only have two points
+    // and see if they lie on those slices. If they do, we need to add them somehow.
 };
 
 LBSailSim.SailEnvTHREE.prototype._boatReturned = function(boat) {
@@ -128,10 +168,20 @@ LBSailSim.SailEnvTHREE.prototype.update = function() {
     this.physicsLink.rigidBodies.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
 };
 
-
 LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody = function(rigidBody) {
     var model = rigidBody._lbThreeModel;
     if (model) {
+        if (rigidBody.sailSurface) {
+            rigidBody.sailSurface.slices.forEach(function(slice) {
+                var count = slice.indexMapping.length;
+                for (var i = 0; i < count; ++i) {
+                    var index = slice.indexMapping[i];
+                    LBSailSim.SailEnvTHREE.copyVectorToTHREE(slice.points[i], model.geometry.vertices[index]);
+                }
+            });
+            model.geometry.verticesNeedUpdate = true;
+        }
+        
         var obj3D = rigidBody.obj3D;
         LBSailSim.SailEnvTHREE.copyVectorToTHREE(obj3D.position, model.position);
         LBSailSim.SailEnvTHREE.copyQuaternionToTHREE(obj3D.rotation, model.rotation);

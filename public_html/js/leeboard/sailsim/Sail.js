@@ -68,9 +68,10 @@ LBSailSim.SailFoil.prototype.destroy = function() {
  * @param {Number} slicePos The local position of the slice along the reference leading edge of the sail.
  * @param {Number} surfaceLength  The length of the slice.
  * @param {Number} [pointCount=5] The number of points in the slice.
+ * @param {Number} [camberScale=1]  Optional scale to be applied to the assigned camber.
  * @returns {LBSailSim.SailSlice}
  */
-LBSailSim.SailSlice = function(slicePos, surfaceLength, pointCount) {
+LBSailSim.SailSlice = function(slicePos, surfaceLength, pointCount, camberScale) {
     
     /**
      * The local position of the slice along the reference leading edge of the sail.
@@ -99,6 +100,14 @@ LBSailSim.SailSlice = function(slicePos, surfaceLength, pointCount) {
     for (var i = 0; i < pointCount; ++i) {
         this.points.push(new LBGeometry.Vector3());
     }
+    
+    /**
+     * An array of index values corresponding to the points, can be used to refer
+     * to a vertex index to be associated with each point.
+     */
+    this.indexMapping = [];
+    
+    this.camberScale = (camberScale !== undefined) ? camberScale : 1;
 };
 
 LBSailSim.SailSlice.prototype = {
@@ -112,6 +121,7 @@ LBSailSim.SailSlice.prototype = {
             this.points.length = 0;
             this.points = null;
         }
+        this.indexMapping = null;
     },
     
     constructor: LBSailSim.SailSlice
@@ -126,7 +136,7 @@ LBSailSim.SailSlice.prototype = {
  */
 LBSailSim.SailSlice.createFromData = function(slicePosRange, data) {
     var slicePos;
-    if (data.slicePosFraction) {
+    if (data.slicePosFraction !== undefined) {
         slicePos = data.slicePosFraction * slicePosRange;
     }
     else {
@@ -143,7 +153,7 @@ LBSailSim.SailSlice.createFromData = function(slicePosRange, data) {
         return undefined;
     }
     
-    return new LBSailSim.SailSlice(slicePos, surfaceLength, data.pointCount);
+    return new LBSailSim.SailSlice(slicePos, surfaceLength, data.pointCount, data.camberScale);
 };
 
 
@@ -762,13 +772,11 @@ LBSailSim.TriangleSailShaper.prototype.constructor = LBSailSim.TriangleSailShape
 
 LBSailSim.TriangleSailShaper.prototype.load = function(sailInstance, data) {
     this.luffLength = data.luffLength;
-    this.footLength = data.footLength;
-    this.headLength = data.headLength;
     
     var surface = sailInstance.sailSurface;
     surface.slices.length = 0;
     
-    if (this.footLength) {
+    if (data.footLength !== undefined) {
         surface.slices.push(new LBSailSim.SailSlice(0, this.footLength, 2));
     }
     if (data.slices) {
@@ -779,7 +787,12 @@ LBSailSim.TriangleSailShaper.prototype.load = function(sailInstance, data) {
             }
         }
     }
-    surface.slices.push(new LBSailSim.SailSlice(this.luffLength, this.headLength, 2));
+    if (data.headLength !== undefined) {
+        surface.slices.push(new LBSailSim.SailSlice(this.luffLength, data.headLength, 2));
+    }
+
+    this.footLength = surface.slices[0].surfaceLength;
+    this.headLength = surface.slices[surface.slices.length - 1].surfaceLength;
 };
 
 LBSailSim.TriangleSailShaper.prototype.updateSailSurface = function(sailInstance, surface) {
@@ -811,6 +824,7 @@ LBSailSim.TriangleSailShaper.prototype.updateSailSurface = function(sailInstance
         
         for (var p = 1; p < slice.points.length; ++p) {
             this.camberCurve.calcXY(p * scale, camberPos, slice.surfaceLength);
+            camberPos.y *= slice.camberScale;
             
             var x = cosTwist * camberPos.x + sinTwist * camberPos.y;
             var y = -sinTwist * camberPos.x + cosTwist * camberPos.y;
