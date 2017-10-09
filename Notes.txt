@@ -64,9 +64,7 @@ Follow:
 <i class="material-icons">&#xE925;</i>
 
 
-
-Add Keel Blender model
-Add sail 3D model
+Put Wind Indicator on Boat
 
 Add drop-down button for toggling force arrows.
 

@@ -191,7 +191,7 @@ LBUI3d.App3D.prototype.update = function() {
 
 LBUI3d.App3D.prototype.render = function() {
     this.views.forEach(function(view) {
-        view.render();
+        view.render(this.lastFrameMillisecs);
     });
 };
 

@@ -36,7 +36,7 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     this.cameraControllers = [];
     
     if (!renderer) {
-        rendererParameters = {
+        var rendererParameters = {
             alpha: true,
             antialias: true,
             logarithmicDepthBuffer: true
@@ -69,6 +69,7 @@ LBUI3d.View3D.prototype = {
 LBUI3d.View3D.prototype.addCameraController = function(controller) {
     this.cameraControllers.push(controller);
     controller.camera = this.camera;
+    controller.view = this;
     
     return this;
 };
@@ -92,14 +93,14 @@ LBUI3d.View3D.prototype.setRotateMode = function() {
     this.setMouseMode(LBUI3d.View3D.MOUSE_ROTATE_MODE);
 };
 
-LBUI3d.View3D.prototype.render = function() {
+LBUI3d.View3D.prototype.render = function(dt) {
     if (!this.isEnabled) {
         return;
     }
     
     var activeController = this.activeCameraController;
     this.cameraControllers.forEach(function(controller) {
-        controller.update(controller === activeController);
+        controller.update(dt, controller === activeController);
     });
     
     this.renderer.render(this.scene3D.scene, this.camera);

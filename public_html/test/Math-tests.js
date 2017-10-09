@@ -55,6 +55,36 @@ QUnit.test( "subDegrees", function( assert ) {
    assert.equal(LBMath.subDegrees(179, -179), -2, "179 => -179");
 });
 
+QUnit.test( "DegRange", function(assert) {
+    var range = new LBMath.DegRange(100, 270);
+    assert.notOk(range.isInRange(99), "99 of 100 -> 270");
+    assert.ok(range.isInRange(100), "100 of 100 -> 270");
+    assert.ok(range.isInRange(180), "180 of 100 -> 270");
+    assert.ok(range.isInRange(-170), "-170 of 100 -> 270");
+    assert.ok(range.isInRange(370), "370 of 100 -> 270");
+    assert.notOk(range.isInRange(371), "371 of 100 -> 270");
+    
+    range = new LBMath.DegRange(100, -50);
+    assert.notOk(range.isInRange(49), "49 of 100 -> -50");
+    assert.ok(range.isInRange(50), "50 of 100 -> -50");
+    assert.ok(range.isInRange(100), "100 of 100 -> -50");
+    assert.notOk(range.isInRange(101), "101 of 100 -> -50");
+    
+    range = new LBMath.DegRange(-100, -90);
+    assert.notOk(range.isInRange(-191), "-191 of -100 -> -90");
+    assert.notOk(range.isInRange(169), "169 of -100 -> -90");
+    assert.ok(range.isInRange(-190), "-190 of -100 -> -90");
+    assert.ok(range.isInRange(170), "170 of -100 -> -90");
+    assert.ok(range.isInRange(-100), "-100 of -100 -> -90");
+    assert.notOk(range.isInRange(-99.99999), "-99.99999 of -100 -> -90");
+    
+    range = new LBMath.DegRange(0, 360);
+    assert.ok(range.isInRange(-180), "-180 0 -> 360");
+    assert.ok(range.isInRange(-179), "-179 0 -> 360");
+    assert.ok(range.isInRange(179), "179 0 -> 360");
+    assert.ok(range.isInRange(180), "180 0 -> 360");
+});
+
 QUnit.test( "round", function( assert ) {
     assert.equal(LBMath.round(123.456, 2), 123.46, "123.456 => 123.46");
     assert.equal(LBMath.round(123.456), 123, "123.456 => 123");

@@ -135,7 +135,7 @@ LBMath.wrapDegrees = function(degrees) {
 };
 
 /**
- * Subtracts b from a in degrees, wrapping the result such that |b - a| &le; 180.
+ * Subtracts b from a in degrees, wrapping the result such that |a - b| &le; 180.
  * @param {Number} a    The degrees to subtract from.
  * @param {Number} b    The degress to subtract.
  * @returns {Number}    The subtraction, wrapped.
@@ -145,6 +145,69 @@ LBMath.subDegrees = function(a, b) {
     b = LBMath.wrapDegrees(b);
     return LBMath.wrapDegrees(a - b);
 };
+
+
+/**
+ * Defines a range in degrees against which angles can be tested.
+ * @constructor
+ * @param {Number} baseDeg  The base angle in degrees.
+ * @param {Number} range    The range from baseDeg, in degrees. This may be negative.
+ * @returns {LBMath.DegRange}
+ */
+LBMath.DegRange = function(baseDeg, range) {
+    if (range < 0) {
+        baseDeg = LBMath.wrapDegrees(baseDeg + range);
+        range = -range;
+    }
+
+    this.minDeg = LBMath.wrapDegrees(baseDeg);
+    this.maxDeg = this.minDeg + range;
+    if (this.maxDeg > 180) {
+        this.maxDeg2 = this.maxDeg - 360;
+        this.maxDeg = 180;
+    }
+    else {
+        // We can use -180 because {@link LBMath.wrapDegrees} returns angles &gt; -180.
+        this.maxDeg2 = -180;
+    }
+};
+
+LBMath.DegRange.prototype = {
+    /**
+     * Determines if an angle in degrees is within the range.
+     * @param {Number} deg  The angle to test, in degrees.
+     * @returns {Boolean}   true if the angle is within the range.
+     */
+    isInRange:function(deg) {
+        deg = LBMath.wrapDegrees(deg);
+        if (deg < this.minDeg) {
+            return deg <= this.maxDeg2;
+        }
+        return deg <= this.maxDeg;
+    },
+    
+    /**
+     * Adjusts an angle in degrees to fall the the closes edge of the range if it is outside the range.
+     * @param {Number} deg  The angle to clamp, in degrees.
+     * @returns {Number}    Either deg if deg is within the range, or the edge angle closest angularly to deg if it is not.
+     */
+    clampToRange: function(deg) {
+        deg = LBMath.wrapDegrees(deg);
+        if (deg < this.minDeg) {
+            if (deg > this.maxDeg2) {
+                return ((deg - this.maxDeg2) < (this.minDeg - deg)) ? this.maxDeg2 : this.maxDeg;
+            }
+        }
+        else if (deg > this.maxDeg) {
+            // Are we closer to maxDeg or minDeg?
+            return ((deg - this.maxDeg) < (deg - 360 - this.minDeg)) ? this.maxDeg : this.minDeg;
+        }
+        return deg;
+    },
+    
+    constructor: LBMath.DegRange
+};
+
 
 /**
  * Rounds a value to a certain number of decimal places.

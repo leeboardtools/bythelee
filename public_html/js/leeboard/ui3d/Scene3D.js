@@ -24,6 +24,7 @@ define(['three'], function(THREE) {
  */
 var LBUI3d = LBUI3d || {};
 
+
 /**
  * @constructor
  * @returns {LBUI3d.Scene3D}
@@ -31,10 +32,11 @@ var LBUI3d = LBUI3d || {};
 LBUI3d.Scene3D = function() {
     this.scene = new THREE.Scene();
     this.scene.add(new THREE.AmbientLight(0x222222));
-    
+
     this.mainLight = new THREE.DirectionalLight(0xffffff, 1);
     this.scene.add(this.mainLight);
-   
+    
+    this.coordMapping = LBUI3d.DirectCoordMapping;
 };
 
 LBUI3d.Scene3D.prototype = {
@@ -105,6 +107,37 @@ LBUI3d.Scene3D.prototype.loadJSONModel = function(url, onLoad, onProgress, onErr
             me.add(mesh);
         }
     }, onProgress, onError);
+};
+
+
+LBUI3d.DirectCoordMapping = {
+    vector3ToThreeJS: function(vec, vecThree) {
+        return vecThree.copy(vec);
+    },
+    vector3FromThreeJS: function(vecThree, vec) {
+        return vec.copy(vecThree);
+    },
+    quaternionToThreeJS: function(quat, quatThree) {
+        return quatThree.copy(quat);
+    },
+    quaternionFromThreeJS: function(quatThree, quat) {
+        return quat.copy(quatThree);
+    }
+};
+
+LBUI3d.ZIsUpCoordMapping = {
+    vector3ToThreeJS: function(vec, vecThree) {
+        return vecThree.set(vec.x, vec.z, -vec.y);
+    },
+    vector3FromThreeJS: function(vecThree, vec) {
+        return vec.set(vecThree.x, -vecThree.z, vecThree.y);
+    },
+    quaternionToThreeJS: function(quat, quatThree) {
+        return quatThree.set(quat.x, quat.z, -quat.y, quat.w);
+    },
+    quaternionFromThreeJS: function(quatThree, quat) {
+        return quat.set(quatThree.x, -quatThree.z, quatThree.y, quatThree.w);
+    }
 };
 
 return LBUI3d;

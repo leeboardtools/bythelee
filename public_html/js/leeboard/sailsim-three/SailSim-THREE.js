@@ -141,6 +141,9 @@ function mapSailSurfaceToModel(sailSurface, model) {
             
             slice.indexMapping[j] = vertexIndices[minIndex];
             vertexIndices.splice(minIndex, 1);
+            if (!vertexIndices.length) {
+                break;
+            }
         }
     });
     
@@ -161,7 +164,8 @@ LBSailSim.SailEnvTHREE.prototype.update = function() {
     var dt = this.physicsLink.timeStep();
     LBSailSim.Env.prototype.update.call(this, dt);
     
-    this.physicsLink.update(dt);
+    // TEST!!!!
+    //this.physicsLink.update(dt);
     
     // Don't have to call updateDisplayObjects()...
     //this.physicsLink.updateDisplayObjects();

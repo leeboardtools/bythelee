@@ -20,6 +20,7 @@ require( ['three', 'lbsailsim', 'lbui3d', 'lbutil', 'lbmath', 'lbgeometry', 'lba
         
 function LBMyApp() {
     LBUI3d.App3D.call(this);
+    this.mainScene.coordMapping = LBUI3d.ZIsUpCoordMapping;
     
     var mainViewContainer = document.getElementById('main_view');
     this.mainView = new LBUI3d.View3D(this.mainScene, mainViewContainer);
@@ -74,13 +75,14 @@ LBMyApp.prototype = Object.create(LBUI3d.App3D.prototype);
 LBMyApp.prototype.constructor = LBMyApp;
 
 LBMyApp.prototype.addNormalView = function(view) {
-    view.firstPersonController = new LBUI3d.FirstPersonCameraController(view.camera);
-    view.addCameraController(view.firstPersonController);
+    view.localPOVCameraController = new LBUI3d.LocalPOVCameraController(view.camera);
+    view.addCameraController(view.localPOVCameraController);
     
-    view.followController = new LBUI3d.FollowCameraController(view.camera);
-    view.addCameraController(view.followController);
+    //view.followController = new LBUI3d.FollowCameraController(view.camera);
+    //view.addCameraController(view.followController);
     
-    view.setActiveCameraController(view.followController);
+    view.setActiveCameraController(view.localPOVCameraController);
+    //view.setActiveCameraController(view.followController);
     
     view.installOrbitControls(3, 10000, Math.PI * 0.5, false);
     this.addView(view);
@@ -123,18 +125,11 @@ LBMyApp.prototype.initSceneEnv = function() {
     material = new THREE.MeshPhongMaterial({ color: 0xe5ffff, side: THREE.BackSide });
     var dome = new THREE.Mesh(geometry, material);
     this.mainScene.scene.add(dome);
-   
+    
     var light = new THREE.HemisphereLight(0xe5ffff, 0x0086b3, 1);
     this.mainScene.scene.add(light);
-/*
-    var me = this;
-    this.mainScene.loadJSONModel('models/tubby_hull.json', function(model) {
-        me.myModel = model;
-        me.mainScene.scene.add(model);
-    });
-*/    
+
     this.mainScene.scene.add(new THREE.AxisHelper(3));
-// TEST!!!    
 };
 
 LBMyApp.prototype.initSailEnv = function() {
@@ -157,9 +152,14 @@ LBMyApp.prototype.loadEnvCompleted = function() {
     var centerX = 0;
     var centerY = 0;
     var rotDeg = 0;
+    var rollDeg = 0;
+    var pitchDeg = 0;
     rotDeg = 180;
     centerX = 5;
-    this.myBoat = this.sailEnv.checkoutBoat(boatType, boatName, centerX, centerY, rotDeg);
+    rotDeg = 135;
+    rollDeg = 30;
+    //pitchDeg = 30;
+    this.myBoat = this.sailEnv.checkoutBoat(boatType, boatName, centerX, centerY, rotDeg, rollDeg, pitchDeg);
     
     if (this.throttleSliderElement) {
         this.throttleSliderElement.hidden = !this.myBoat.getThrottleController();
@@ -174,8 +174,37 @@ LBMyApp.prototype.loadEnvCompleted = function() {
     var me = this;
     this.views.forEach(function(view) {
         view.cameraControllers.forEach(function(controller) {
-            controller.setTarget(me.myBoat);
+            controller.setTarget(me.myBoat.obj3D);
         });
+        
+        if (view.localPOVCameraController) {
+            // The x-axis of the boat faces aft, and the origin is near the bow. We want to look forward from the cockpit.
+            // TODO: Need to set the cockpit location from the boat's data...
+            view.localPOVCameraController.localPosition.set(3, 0, 1.0);
+            view.localPOVCameraController.localSphericalOrientation.azimuthDeg = 180;
+            
+            if (!me.testAxis) {
+                var geo = new THREE.BoxGeometry(0.1, 0.2, 1.0);
+                var mat = new THREE.MeshBasicMaterial({color: 0x00ff00});
+                var mesh = new THREE.Mesh(geo, mat);
+                mesh.position.z = -0.5;
+                me.testAxis = new THREE.Group();
+                me.testAxis.add(mesh);
+                
+                me.mainScene.scene.add(me.testAxis);
+            }
+        
+            // TEST!!!
+            view.localPOVCameraController.camera = me.testAxis;
+            view.localPOVCameraController.localPosition.set(1.6, 0, 1.0);
+            view.localPOVCameraController.localSphericalOrientation.azimuthDeg = 0;
+/*            var target = new THREE.Object3D();
+            target.position.set(-5, 0, 0);
+            target.rotation.set(0*LBMath.DEG_TO_RAD, -30*LBMath.DEG_TO_RAD, 150*LBMath.DEG_TO_RAD, 'ZYX');
+            target.updateMatrixWorld(true);
+            view.localPOVCameraController.localSphericalOrientation.azimuthDeg = 180;
+            view.localPOVCameraController.setTarget(target);
+*/        }
     });
 };
 
