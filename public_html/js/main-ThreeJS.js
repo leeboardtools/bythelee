@@ -67,8 +67,9 @@ function LBMyApp() {
     this.windDeg = 0;
     this.windForce = 2;
     
-    
     this.physicsEngineType = LBSailSim.SailEnvTHREE.CANNON_PHYSICS;
+    
+    this.updateMouseModeButton();
 };
 
 LBMyApp.prototype = Object.create(LBUI3d.App3D.prototype);
@@ -151,15 +152,17 @@ LBMyApp.prototype.loadEnvCompleted = function() {
     var boatName = Object.keys(this.sailEnv.boatsByType[boatType])[0];
     var centerX = 0;
     var centerY = 0;
-    var rotDeg = 0;
+    var yawDeg = 0;
     var rollDeg = 0;
     var pitchDeg = 0;
-    rotDeg = 180;
+    yawDeg = 180;
     centerX = 5;
-    rotDeg = 135;
-    rollDeg = 30;
+    //rotDeg += 30;
+    //yawDeg = 0;
+    //yawDeg = 90;
+    //rollDeg = 60;
     //pitchDeg = 30;
-    this.myBoat = this.sailEnv.checkoutBoat(boatType, boatName, centerX, centerY, rotDeg, rollDeg, pitchDeg);
+    this.myBoat = this.sailEnv.checkoutBoat(boatType, boatName, centerX, centerY, yawDeg, rollDeg, pitchDeg);
     
     if (this.throttleSliderElement) {
         this.throttleSliderElement.hidden = !this.myBoat.getThrottleController();
@@ -184,27 +187,36 @@ LBMyApp.prototype.loadEnvCompleted = function() {
             view.localPOVCameraController.localSphericalOrientation.azimuthDeg = 180;
             
             if (!me.testAxis) {
-                var geo = new THREE.BoxGeometry(0.1, 0.2, 1.0);
+                var dx = 0.1;
+                var dy = 0.2;
+                var dz = 2.0;
+                //dx = 2;
+                //dz = 0.1;
+                var geo = new THREE.BoxGeometry(dx, dy, dz);
                 var mat = new THREE.MeshBasicMaterial({color: 0x00ff00});
                 var mesh = new THREE.Mesh(geo, mat);
-                mesh.position.z = -0.5;
+                mesh.position.x = -dx/2;
+                mesh.position.y = -dy/2;
+                mesh.position.z = -dz/2;
+
                 me.testAxis = new THREE.Group();
                 me.testAxis.add(mesh);
                 
-                me.mainScene.scene.add(me.testAxis);
+//                me.mainScene.scene.add(me.testAxis);
             }
         
             // TEST!!!
-            view.localPOVCameraController.camera = me.testAxis;
-            view.localPOVCameraController.localPosition.set(1.6, 0, 1.0);
-            view.localPOVCameraController.localSphericalOrientation.azimuthDeg = 0;
+            //view.localPOVCameraController.camera = me.testAxis;
+            //view.localPOVCameraController.localPosition.set(1.6, 0, 1.0);
+            //view.localPOVCameraController.localSphericalOrientation.azimuthDeg = 0;
 /*            var target = new THREE.Object3D();
             target.position.set(-5, 0, 0);
             target.rotation.set(0*LBMath.DEG_TO_RAD, -30*LBMath.DEG_TO_RAD, 150*LBMath.DEG_TO_RAD, 'ZYX');
             target.updateMatrixWorld(true);
             view.localPOVCameraController.localSphericalOrientation.azimuthDeg = 180;
             view.localPOVCameraController.setTarget(target);
-*/        }
+*/        
+        }
     });
 };
 
@@ -602,11 +614,14 @@ LBMyApp.prototype.toggleRunPause = function() {
 };
 
 LBMyApp.prototype.nextMouseMode = function() {
-    var mouseMode = LBUI3d.App3D.prototype.nextMouseMode.call(this);
-    
+    LBUI3d.App3D.prototype.nextMouseMode.call(this);
+    this.updateMouseModeButton();
+};
+
+LBMyApp.prototype.updateMouseModeButton = function() {
     var cursor;
     var innerHTML;
-    switch (mouseMode) {
+    switch (this.mouseMode) {
         case LBUI3d.View3D.MOUSE_PAN_MODE :
             innerHTML = "&#xE89F;";
             cursor = "default";

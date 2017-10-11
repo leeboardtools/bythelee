@@ -15,7 +15,7 @@
  */
 
 
-define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets'], function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets) {
+define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets', 'lbui3d'], function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d) {
     
 
 /**
@@ -165,7 +165,7 @@ LBSailSim.SailEnvTHREE.prototype.update = function() {
     LBSailSim.Env.prototype.update.call(this, dt);
     
     // TEST!!!!
-    //this.physicsLink.update(dt);
+    this.physicsLink.update(dt);
     
     // Don't have to call updateDisplayObjects()...
     //this.physicsLink.updateDisplayObjects();
@@ -188,20 +188,18 @@ LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody = function(rigidBody) {
         
         var obj3D = rigidBody.obj3D;
         LBSailSim.SailEnvTHREE.copyVectorToTHREE(obj3D.position, model.position);
-        LBSailSim.SailEnvTHREE.copyQuaternionToTHREE(obj3D.rotation, model.rotation);
+        LBSailSim.SailEnvTHREE.copyQuaternionToTHREE(obj3D.quaternion, model.quaternion);
         model.updateMatrixWorld(true);
     }
     
     rigidBody.parts.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
 };
 
-LBSailSim.SailEnvTHREE.copyVectorToTHREE = function(vec, vecThree) {
-    vecThree.set(vec.x, vec.z, -vec.y);
-};
+LBSailSim.SailEnvTHREE.copyVectorToTHREE = LBUI3d.ZIsUpCoordMapping.vector3ToThreeJS;
 
-LBSailSim.SailEnvTHREE.copyQuaternionToTHREE = function(quat, quatThree) {
-    quatThree.set(quat.x, quat.z, -quat.y, quat.w);
-};
+LBSailSim.SailEnvTHREE.copyQuaternionToTHREE = LBUI3d.ZIsUpCoordMapping.quaternionToThreeJS;;
+
+LBSailSim.SailEnvTHREE.copyEulerToTHREE = LBUI3d.ZIsUpCoordMapping.eulerToThreeJS;;
 
 return LBSailSim;
 });

@@ -93,9 +93,7 @@ LBUI3d.SphericalOrientation.prototype = {
 
 var _workingPosition = new LBGeometry.Vector3();
 var _workingOrientation = new LBUI3d.SphericalOrientation();
-var _workingLookAt = new LBGeometry.Vector3();
 var _workingEuler = new LBGeometry.Euler();
-var _workingQuaternion = new LBGeometry.Quaternion();
 var _workingVector3 = new LBGeometry.Vector3();
 var _workingMatrix4 = new LBGeometry.Matrix4();
 
@@ -109,14 +107,14 @@ var _workingMatrix4 = new LBGeometry.Matrix4();
  * examples/js/controls folder, such as OrbitControls.js and FirstPersonControls.js.
  * @constructor
  * @param {LBCamera.Camera} camera  The camera to control.
- * @param {LBUI3d.CameraLimits} [globalLimits]   Optional limits on the global camera position.
+ * @param {LBUI3d.CameraLimits} [worldLimits]   Optional limits on the world camera position.
  * @param {LBUI3d.CameraLimits} [localLimits]   Optional limits on the local camera position.
  * @returns {LBUI3d.CameraController}
  */
-LBUI3d.CameraController = function(camera, globalLimits, localLimits) {
+LBUI3d.CameraController = function(camera, worldLimits, localLimits) {
     //this.camera = camera;
 
-    this.globalLimits = globalLimits || new LBUI3d.CameraLimits();
+    this.worldLimits = worldLimits || new LBUI3d.CameraLimits();
     this.localLimits = localLimits || new LBUI3d.CameraLimits();
     
     this.currentPosition = new LBGeometry.Vector3(camera ? camera.position : undefined);
@@ -126,6 +124,10 @@ LBUI3d.CameraController = function(camera, globalLimits, localLimits) {
     
     this.maxLinearAccel = 10;
     this.maxAngularAccel = 10;
+    
+    this.mouseMode = -1;
+    
+    this.zoomEnabled = true;
 };
 
 LBUI3d.CameraController.prototype = {
@@ -136,19 +138,123 @@ LBUI3d.CameraController.prototype.setTarget = function(target) {
     this.target = target;
 };
 
-LBUI3d.CameraController.prototype.getPanMouseHandler = function() {
+LBUI3d.CameraController.MOUSE_PAN_MODE = 0;
+LBUI3d.CameraController.MOUSE_ROTATE_MODE = 1;
+
+LBUI3d.CameraController.TRACKING_STATE_IDLE = 0;
+LBUI3d.CameraController.TRACKING_STATE_PAN = 1;
+LBUI3d.CameraController.TRACKING_STATE_END_PAN = 2;
+LBUI3d.CameraController.TRACKING_STATE_ROTATE = 3;
+LBUI3d.CameraController.TRACKING_STATE_END_ROTATE = 4;
+
+LBUI3d.CameraController.prototype.setMouseMode = function(mode) {
+    if (this.mouseMode !== mode) {
+        this.mouseMode = mode;
+    }
+};
+
+LBUI3d.CameraController.prototype.installEventHandlers = function(domElement) {
+    if (this.domElement !== domElement) {
+        if (this.domElement) {
+            this.uninstallEventHandlers();
+        }
+
+        this.domElement = domElement;
+        
+        if (this.domElement) {
+            var me = this;
+            this.onWheelFunction = function(event) {
+                me.onMouseWheel(event);
+            };
+            domElement.addEventListener('wheel', this.onWheelFunction, false);
+            
+            this.onMouseDownFunction = function(event) {
+                me.onMouseDown(event);
+            };
+            domElement.addEventListener('mousedown', this.onMouseDownFunction, false);
+            
+            this.onTouchStartFunction = function(event) {
+                me.onTouchStart(event);
+            };
+            domElement.addEventListener('touchstart', this.onTouchStartFunction, false);
+            
+            this.onTouchEndFunction = function(event) {
+                me.onTouchEnd(event);
+            };
+            domElement.addEventListener('touchend', this.onTouchEndFunction, false);
+            
+            this.onTouchMoveFunction = function(event) {
+                me.onTouchMove(event);
+            };
+            domElement.addEventListener('touchmove', this.onTouchMoveFunction, false);
+        }
+    }
+};
+
+LBUI3d.CameraController.prototype.uninstallEventHandlers = function() {
+    if (this.domElement) {
+        this.domElement.removeEventListener('wheel', this.onWheelFunction, false);
+        this.domElement.removeEventListener('mousedown', this.onMouseDownFunction, false);
+        this.domElement.removeEventListener('touchstart', this.onTouchStartFunction, false);
+        this.domElement.removeEventListener('touchend', this.onTouchEndFunction, false);
+        this.domElement.removeEventListener('touchmove', this.onTouchMoveFunction, false);
+        
+        if (this.onMouseUpFunction) {
+            document.removeEventListener('mouseup', this.onMouseUpFunction, false);
+            this.onMouseUpFunction = null;
+        }
+        if (this.onMouseMoveFunction) {
+            document.removeEventListener('mousemove', this.onMouseMoveFunction, false);
+            this.onMouseUpFunction = null;
+        }
+
+        this.domElement = null;
+    }
+};
+
+LBUI3d.CameraController.prototype.onMouseWheel = function(event) {
+    if (this.zoomEnabled) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        this.handleMouseWheel(event);
+    }
+};
+
+LBUI3d.CameraController.prototype.onMouseDown = function(event) {
     
 };
 
-LBUI3d.CameraController.prototype.getRotateMouseHandler = function() {
+LBUI3d.CameraController.prototype.onMouseMove = function(event) {
     
 };
 
-LBUI3d.CameraController.prototype.requestLocalCameraPOV = function(position, sphericalOrientation) {
-    this.localLimits.applyLimits(position, sphericalOrientation, _workingPosition, _workingOrientation);
+LBUI3d.CameraController.prototype.onMouseUp = function(event) {
     
-    var mat = _workingOrientation.toMatrix4(_workingMatrix4);
+};
+
+LBUI3d.CameraController.prototype.onTouchStart = function(event) {
     
+};
+
+LBUI3d.CameraController.prototype.onTouchMove = function(event) {
+    
+};
+
+LBUI3d.CameraController.prototype.onTouchEnd = function(event) {
+    
+};
+
+LBUI3d.CameraController.prototype.handleMouseWheel = function(event) {
+    if (event.deltaY < 0) {
+        console.log("Zoom Out");
+    }
+    else if (event.deltaY > 0) {
+        console.log("Zoom In");
+    }
+};
+
+LBUI3d.CameraController.adjustMatForCameraAxis = function(mat) {
     // The camera view is along its y axis, so we need to rotate the y axis by 90 degrees about
     // the local z axis to align the camera's y axis with  the spherical orientation's x axis. 
     // We can do that by hand, since the rotation matrix is simple:
@@ -164,27 +270,24 @@ LBUI3d.CameraController.prototype.requestLocalCameraPOV = function(position, sph
     mat.elements[4] = old11;
     mat.elements[5] = old21;
     mat.elements[6] = old31;
+};
+
+LBUI3d.CameraController.prototype.requestLocalCameraPOV = function(position, sphericalOrientation) {
+    this.localLimits.applyLimits(position, sphericalOrientation, _workingPosition, _workingOrientation);
     
+    var mat = _workingOrientation.toMatrix4(_workingMatrix4);
+    LBUI3d.CameraController.adjustMatForCameraAxis(mat);
+    mat.setPosition(_workingPosition);
+
     if (this.target) {
         this.target.updateMatrixWorld();
-        _workingPosition.applyMatrix4(this.target.matrixWorld);
         mat.premultiply(this.target.matrixWorld);
     }
     
-    this.destPosition.copy(_workingPosition);
-    this.destQuaternion.setFromRotationMatrix(mat);
+    mat.decompose(this.destPosition, this.destQuaternion, _workingVector3);
 };
 
-LBUI3d.CameraController.prototype.requestGlobalCameraPOV = function(dir, up) {
-    
-};
-
-LBUI3d.CameraController.prototype._setDestPOV = function(position, rotationMat) {
-    this.destPosition.copy(position);
-    
-    // The camera y axis is the direction of view, so rotate it.
-    // The rotation matrix defines the rotation of the x axis to where we want to look.
-    // The camera uses the y axis
+LBUI3d.CameraController.prototype.requestWorldCameraPOV = function(dir, up) {
 };
 
 /**
@@ -209,9 +312,6 @@ LBUI3d.CameraController.prototype.update = function(dt, updateCamera) {
         var coordMapping = (this.view && this.view.scene3D) ? this.view.scene3D.coordMapping : LBUI3d.DirectCoordMapping;
         coordMapping.vector3ToThreeJS(this.currentPosition, this.camera.position);
         coordMapping.quaternionToThreeJS(this.currentQuaternion, this.camera.quaternion);
-        
-        debugEuler.setFromQuaternion(this.camera.quaternion);
-        
     }
 };
 

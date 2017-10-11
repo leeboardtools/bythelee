@@ -16,7 +16,7 @@
 
 
 /* global THREE, LBUI3d */
-define(['three', 'lbscene3d', 'three-orbit'], function(THREE, LBUI3d) {
+define(['three', 'lbscene3d', 'lbcameracontrollers', 'three-orbit'], function(THREE, LBUI3d) {
 
 LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     this.scene3D = scene3D;
@@ -55,12 +55,12 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     
     this.isEnabled = true;
     
-    this.mouseMode = -1;
+    this.mouseMode = LBUI3d.View3D.MOUSE_ROTATE_MODE;
     this.setRotateMode();
 };
 
-LBUI3d.View3D.MOUSE_ROTATE_MODE = 0;
-LBUI3d.View3D.MOUSE_PAN_MODE = 1;
+LBUI3d.View3D.MOUSE_ROTATE_MODE = LBUI3d.CameraController.MOUSE_ROTATE_MODE;
+LBUI3d.View3D.MOUSE_PAN_MODE = LBUI3d.CameraController.MOUSE_PAN_MODE;
 
 LBUI3d.View3D.prototype = {
     constructor: LBUI3d.View3D
@@ -70,17 +70,32 @@ LBUI3d.View3D.prototype.addCameraController = function(controller) {
     this.cameraControllers.push(controller);
     controller.camera = this.camera;
     controller.view = this;
+    controller.setMouseMode(this.mouseMode);
     
     return this;
 };
 
 LBUI3d.View3D.prototype.setActiveCameraController = function(controller) {
-    this.activeCameraController = controller;
+    if (this.activeCameraController !== controller) {
+        if (this.activeCameraController) {
+            this.activeCameraController.uninstallEventHandlers();
+        }
+        
+        this.activeCameraController = controller;
+        
+        if (this.activeCameraController) {
+            this.activeCameraController.installEventHandlers(this.renderer.domElement);
+        }
+    }
 };
 
 LBUI3d.View3D.prototype.setMouseMode = function(mode) {
-    if (this.mouseMode === mode) {
-        return this;
+    if (this.mouseMode !== mode) {
+        this.mouseMode = mode;
+        
+        this.cameraControllers.forEach(function(controller) {
+            controller.setMouseMode(mode);
+        });
     }
     return this;
 };

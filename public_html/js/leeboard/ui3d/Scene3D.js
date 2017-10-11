@@ -122,6 +122,12 @@ LBUI3d.DirectCoordMapping = {
     },
     quaternionFromThreeJS: function(quatThree, quat) {
         return quat.copy(quatThree);
+    },
+    eulerToThreeJS: function(euler, eulerThree) {
+        return eulerThree.copy(euler);
+    },
+    eulerFromThreeJS: function(eulerThree, euler) {
+        return euler.copy(eulerThree);
     }
 };
 
@@ -137,6 +143,34 @@ LBUI3d.ZIsUpCoordMapping = {
     },
     quaternionFromThreeJS: function(quatThree, quat) {
         return quat.set(quatThree.x, -quatThree.z, quatThree.y, quatThree.w);
+    },
+    eulerToThreeJS: function(euler, eulerThree) {
+        var order;
+        switch (euler.order) {
+            case 'XYZ' :
+                order = 'XZY';
+                break;
+            case 'XZY' :
+                order = 'XYZ';
+                break;
+            case 'YXZ' :
+                order = 'ZXY';
+                break;
+            case 'YZX' :
+                order = 'ZYX';
+                break;
+            case 'ZXY' :
+                order = 'YXZ';
+                break;
+            case 'ZYX' :
+                order = 'YZX';
+                break;
+        }
+        return eulerThree.set(euler.x, euler.z, -euler.y, order);
+    },
+    
+    eulerFromThreeJS: function(eulerThree, euler) {
+        return euler.copy(eulerThree);
     }
 };
 

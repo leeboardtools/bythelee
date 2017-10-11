@@ -164,11 +164,11 @@ LBUI3d.App3D.prototype.nextMouseMode = function() {
     switch (this.mouseMode) {
     case LBUI3d.View3D.MOUSE_PAN_MODE :
         this.setRotateMode();
-        return LBUI3d.View3D.MOUSE_PAN_MODE;
+        break;
         
     case LBUI3d.View3D.MOUSE_ROTATE_MODE :
         this.setPanMode();
-        return LBUI3d.View3D.MOUSE_ROTATE_MODE;
+        break;
     }
     return this.mouseMode;
 };

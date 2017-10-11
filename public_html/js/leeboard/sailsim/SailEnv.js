@@ -419,15 +419,10 @@ LBSailSim.Env.prototype = {
         boat.name = boatName;
         boat.obj3D.position.x = centerX || 0;
         boat.obj3D.position.y = centerY || 0;
-        if (pitchDeg) {
-            boat.obj3D.rotateY(pitchDeg * LBMath.DEG_TO_RAD);
-        }
-        if (rollDeg) {
-            boat.obj3D.rotateX(rollDeg * LBMath.DEG_TO_RAD);
-        }
-        if (rotDeg) {
-            boat.obj3D.rotateZ(rotDeg * LBMath.DEG_TO_RAD);
-        }
+        rollDeg = rollDeg || 0;
+        pitchDeg = pitchDeg || 0;
+        rotDeg = rotDeg || 0;
+        boat.obj3D.rotation.set(rollDeg * LBMath.DEG_TO_RAD, pitchDeg * LBMath.DEG_TO_RAD, rotDeg * LBMath.DEG_TO_RAD, 'ZYX');
         boat.obj3D.updateMatrixWorld(true);
 
         this.boatsByType[typeName][boatName] = boat;
