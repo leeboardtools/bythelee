@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-define(['lbcamera', 'lbscene3d', 'lbgeometry', 'lbmath', 'lbutil'],
-function(LBCamera, LBUI3d, LBGeometry, LBMath, LBUtil) {
+define(['lbcamera', 'lbscene3d', 'lbgeometry', 'lbmath', 'lbutil', 'lbspherical'],
+function(LBCamera, LBUI3d, LBGeometry, LBMath, LBUtil, LBSpherical) {
 
     'use strict';
 
@@ -63,9 +63,9 @@ LBUI3d.CameraLimits.prototype = {
      * srcPosition and srcOrientation are not modified unless they are the same as
      * dstPosition and dstOrientation, respectively.
      * @param {LBGeometry.Vector3} srcPosition  The position to be limited if necessary.
-     * @param {LBUI3d.SphericalOrientation} srcOrientation  The orientation to be limited if necessary.
+     * @param {LBSpherical.Orientation} srcOrientation  The orientation to be limited if necessary.
      * @param {LBGeometry.Vector3} dstPosition  Set to the position, limited if necessary.
-     * @param {LBUI3d.SphericalOrientation} dstOrientation  Set to the orientation, limited if necessary.
+     * @param {LBSpherical.Orientation} dstOrientation  Set to the orientation, limited if necessary.
      */
     applyLimits: function(srcPosition, srcOrientation, dstPosition, dstOrientation) {
         dstPosition.set(
@@ -81,134 +81,8 @@ LBUI3d.CameraLimits.prototype = {
 };
 
 
-/**
- * Defines an orientation in spherical coordinates. This is basically Euler angles in
- * the order z,y,x, expressed in degrees.
- * <p>
- * An azimuth of 0 degrees points towards the +x axis.
- * An altitude of + degrees points towards the +z axis.
- * The rotation angle is around the azimuth/altitude axis
- * @constructor
- * @returns {CameraControllers_L18.LBUI3d.SphericalOrientation}
- */
-LBUI3d.SphericalOrientation = function() {
-    /**
-     * The azimuth angle in degrees, this is the rotation about the world z-axis.
-     * @member {Number}
-     */
-    this.azimuthDeg = 0;
-
-    /**
-     * The altitude angle in degrees, this is the rotation about the y-axis after it
-     * has been rotated by the azimuth..
-     * @member {Number}
-     */
-    this.altitudeDeg = 0;
-    
-    /**
-     * The rotation angle in degrees, this is the rotation about the local x-axis
-     * after the azimuth and altitude rotations.
-     * @member {Number}
-     */
-    this.rotationDeg = 0;
-};
-
-LBUI3d.SphericalOrientation.prototype = {
-    /**
-     * Creates a copy of this.
-     * @returns {LBUI3d.SphericalOrientation}   The copy.
-     */
-    clone: function() {
-        var obj = new LBUI3d.SphericalOrientation();
-        return obj.copy(this);
-    },
-    
-    /**
-     * Sets this to match another orientation.
-     * @param {LBUI3d.SphericalOrientation} other   The orientation to copy.
-     * @returns {LBUI3d.SphericalOrientation}   this.
-     */
-    copy: function(other) {
-        this.azimuthDeg = other.azimuthDeg;
-        this.altitudeDeg = other.altitudeDeg;
-        this.rotationDeg = other.rotationDeg;
-        return this;
-    },
-    
-    /**
-     * Determines if this orientation and another orientation are the same.
-     * @param {LBUI3d.SphericalOrientation} other   The orientation to test against.
-     * @returns {boolean}   true if they are the same.
-     */
-    equals: function(other) {
-        return LBMath.degreesEqual(this.azimuthDeg, other.azimuthDeg)
-            && LBMath.degreesEqual(this.altitudeDeg, other.altitudeDeg)
-            && LBMath.degreesEqual(this.rotationDeg, other.rotationDeg);
-    },
-    
-    /**
-     * Calculates a point at a distance along the ray defined by the orientation.
-     * @param {Number} r    The distance.
-     * @param {LBGeometry.Vector3} [store]    If defined the object to store the point in.
-     * @returns {LBGeometry.Vector3}    The point.
-     */
-    calcLookAtPoint: function(r, store) {
-        r = r || 1;
-        store = store || new LBGeometry.Vector3();
-        
-        var theta = (90 - this.altitudeDeg) * LBMath.DEG_TO_RAD;
-        var phi = this.azimuthDeg * LBMath.DEG_TO_RAD;
-        var r_sinTheta = r * Math.sin(theta);
-        return store.set(r_sinTheta * Math.cos(phi), r_sinTheta * Math.sin(phi), r * Math.cos(theta));
-    },
-    
-    /**
-     * Calculates the {@link LBGeometry.Euler} equivalent.
-     * @param {LBGeometry.Euler} [store]    If defined the object to store into.
-     * @returns {LBGeometry.Euler}  The Euler object.
-     */
-    toEuler: function(store) {
-        return (store) ? store.set(this.rotationDeg * LBMath.DEG_TO_RAD, this.altitudeDeg * LBMath.DEG_TO_RAD, this.azimuthDeg * LBMath.DEG_TO_RAD, 'ZYX')
-            : new LBGeometry.Euler(this.rotationDeg * LBMath.DEG_TO_RAD, this.altitudeDeg * LBMath.DEG_TO_RAD, this.azimuthDeg * LBMath.DEG_TO_RAD, 'ZYX');
-    },
-    
-    /**
-     * Calculates the {@link LBGeometry.Quaternion} equivalent.
-     * @param {LBGeometry.Quaternion} [store]   If defined the object to store into.
-     * @returns {LBGeometry.Quaternion} The quaternion.
-     */
-    toQuaternion: function(store) {
-        store = store || new LBGeometry.Quaternion();
-        return store.setFromEuler(this.toEuler(_workingEuler));
-    },
-    
-    /**
-     * Calculates a {@link LBGeometry.Matrix4} rotation matrix equivalent of the orientation.
-     * @param {LBGeometry.Matrix4} [store]  If defined the object to store into.
-     * @returns {LBGeometry.Matrix4}    The rotation matrix.
-     */
-    toMatrix4: function(store) {
-        store = store || new LBGeometry.Matrix4();
-        return store.makeRotationFromEuler(this.toEuler(_workingEuler));
-    },
-    
-    constructor: LBUI3d.SphericalOrientation
-};
-
-
-LBUI3d.SphericalPoint = function(radius, azimuthDeg, altitudeDeg) {
-    this.radius = radius || 0;
-    this.azimuthDeg = azimuthDeg || 0;
-    this.altitudeDeg = altitudeDeg || 0;
-};
-
-LBUI3d.SphericalPoint.prototype = {
-    constructor: LBUI3d.SphericalPoint
-};
-
 var _workingPosition = new LBGeometry.Vector3();
-var _workingOrientation = new LBUI3d.SphericalOrientation();
-var _workingEuler = new LBGeometry.Euler();
+var _workingOrientation = new LBSpherical.Orientation();
 var _workingVector3 = new LBGeometry.Vector3();
 var _workingMatrix4 = new LBGeometry.Matrix4();
 
@@ -826,7 +700,7 @@ LBUI3d.CameraController.prototype.calcScreenDistance = function() {
  * Converts a camera position and spherical orientation in target local coordinates to
  * a world position and quaternion.
  * @param {LBGeometry.Vector3} localPos The local position.
- * @param {LBUI3d.SphericalOrientation} localOrientation    The local spherical orientation.
+ * @param {LBSpherical.Orientation} localOrientation    The local spherical orientation.
  * @param {LBGeometry.Vector3} worldPos Set to the world position.
  * @param {LBGeometry.Quaternion} worldQuaternion   Set to the quaternion representing the orientation in world coordinates.
  * @returns {undefined}
@@ -898,9 +772,9 @@ LBUI3d.LocalPOVCameraController = function(localLimits) {
     
     /**
      * The current camera spherical orientation.
-     * @member {LBUI3d.SphericalOrientation}
+     * @member {LBSpherical.Orientation}
      */
-    this.localOrientation = new LBUI3d.SphericalOrientation();
+    this.localOrientation = new LBSpherical.Orientation();
     
     /**
      * This is used to determine the azimuth of the forward direction for the standard views.
@@ -1008,7 +882,7 @@ LBUI3d.LocalPOVCameraController.prototype.updateCameraPosition = function(dt, po
 /**
  * Sets the point of view of the camera to a specific position and spherical orientation.
  * @param {LBGeometry.Vector3} position The local position.
- * @param {LBUI3d.SphericalOrientation} sphericalOrientation    The spherical orientation.
+ * @param {LBSpherical.Orientation} sphericalOrientation    The spherical orientation.
  * @returns {undefined}
  */
 LBUI3d.LocalPOVCameraController.prototype.setLocalCameraPOV = function(position, sphericalOrientation) {
@@ -1019,7 +893,7 @@ LBUI3d.LocalPOVCameraController.prototype.setLocalCameraPOV = function(position,
 /**
  * Requests the point of view of the camera be decelerated to 0 velocity given an initial velocity.
  * @param {LBGeometry.Vector3} positionVel The local position velocity.
- * @param {LBUI3d.SphericalOrientation} orientationVel    The spherical orientation velocity.
+ * @param {LBSpherical.Orientation} orientationVel    The spherical orientation velocity.
  * @returns {undefined}
  */
 LBUI3d.LocalPOVCameraController.prototype.requestLocalCameraPOVDeceleration = function(positionVel, orientationVel) {
@@ -1044,7 +918,7 @@ LBUI3d.LocalPOVCameraController.prototype.requestLocalCameraPOVDeceleration = fu
     this.localPositionDecel.x = calcDecelRateForTime(positionVel.x, dt);
     this.localPositionDecel.y = calcDecelRateForTime(positionVel.y, dt);
     
-    this.localOrientationDecel = this.localOrientationDecel || new LBUI3d.SphericalOrientation();
+    this.localOrientationDecel = this.localOrientationDecel || new LBSpherical.Orientation();
     this.localOrientationDecel.azimuthDeg = calcDecelRateForTime(orientationVel.azimuthDeg, dt);
     this.localOrientationDecel.altitudeDeg = calcDecelRateForTime(orientationVel.altitudeDeg, dt);
 };
@@ -1134,11 +1008,11 @@ LBUI3d.LocalPOVCameraController.prototype.finishPan = function(isCancel) {
  * Presumes {@link LBUI3d.LocalPOVCameraController#screenDistance} has been set to a valid distance.
  * @param {Number} x    The x coordinate of the point on the screen in the view container's client coordinates.
  * @param {Number} y    The y coordinate of the point on the screen in the view container's client coordinates.
- * @param {LBUI3d.SphericalOrientation} [store] If defined the object to store the orientation into.
- * @returns {LBUI3d.SphericalOrientation}   The spherical orientation
+ * @param {LBSpherical.Orientation} [store] If defined the object to store the orientation into.
+ * @returns {LBSpherical.Orientation}   The spherical orientation
  */
 LBUI3d.LocalPOVCameraController.prototype.calcOrientationFromScreenPos = function(x, y, store) {
-    store = store || new LBUI3d.SphericalOrientation();
+    store = store || new LBSpherical.Orientation();
     
     var dx = x - this.view.container.clientWidth / 2;
     var dy = y - this.view.container.clientHeight / 2;
@@ -1191,7 +1065,7 @@ LBUI3d.LocalPOVCameraController.prototype.finishRotate = function(isCancel) {
     }
     
     if ((this.deltaT > 0) && (this.degDecel > 0)) {
-        this.localOrientationVel = this.localOrientationVel || new LBUI3d.SphericalOrientation();
+        this.localOrientationVel = this.localOrientationVel || new LBSpherical.Orientation();
         
         // If we have an orientation change, then we have a velocity that we can 
         // decelerate to 0.
@@ -1218,7 +1092,6 @@ LBUI3d.FollowCameraController = function(globalLimits) {
 
 LBUI3d.FollowCameraController.prototype = Object.create(LBUI3d.CameraController.prototype);
 LBUI3d.FollowCameraController.prototype.constructor = LBUI3d.FollowCameraController;
-
 
 return LBUI3d;
 });

@@ -36,6 +36,7 @@ var require = {
         'lbmath': 'leeboard/core/Math',
         'lbphysics': 'leeboard/core/Physics',
         'lbphysicslink': 'leeboard/core/PhysicsLink',
+        'lbspherical': 'leeboard/core/Spherical',
         'lbutil': 'leeboard/core/Util',
         'lbvolume': 'leeboard/core/Volume',
         
