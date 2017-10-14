@@ -24,10 +24,34 @@ function(LBCamera, LBUI3d, LBGeometry, LBMath) {
  * @returns {LBUI3d.CameraLimits}
  */
 LBUI3d.CameraLimits = function() {
+    /**
+     * The minimum allowed position.
+     * @member {LBGeometry.Vector3}
+     */
     this.minPos = new LBGeometry.Vector3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
+
+    /**
+     * The maximum allowed position.
+     * @member {LBGeometry.Vector3}
+     */
     this.maxPos = new LBGeometry.Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
+    
+    /**
+     * The allowed range for azimuth degrees.
+     * @member {LBMath.DegRange}
+     */
     this.azimuthRange = new LBMath.DegRange(-180, 360);
+    
+    /**
+     * The allowed range for altitude degrees.
+     * @member {LBMath.DegRange}
+     */
     this.altitudeRange = new LBMath.DegRange(-90, 360);
+    
+    /**
+     * The allowed range for rotation degrees.
+     * @member {LBMath.DegRange}
+     */
     this.rotationRange = new LBMath.DegRange(-180, 360);
 };
 
@@ -66,8 +90,24 @@ LBUI3d.CameraLimits.prototype = {
  * @returns {CameraControllers_L18.LBUI3d.SphericalOrientation}
  */
 LBUI3d.SphericalOrientation = function() {
+    /**
+     * The azimuth angle in degrees, this is the rotation about the world z-axis.
+     * @member {Number}
+     */
     this.azimuthDeg = 0;
+
+    /**
+     * The altitude angle in degrees, this is the rotation about the y-axis after it
+     * has been rotated by the azimuth..
+     * @member {Number}
+     */
     this.altitudeDeg = 0;
+    
+    /**
+     * The rotation angle in degrees, this is the rotation about the local x-axis
+     * after the azimuth and altitude rotations.
+     * @member {Number}
+     */
     this.rotationDeg = 0;
 };
 
@@ -188,24 +228,64 @@ var _workingMatrix4 = new LBGeometry.Matrix4();
  * @returns {LBUI3d.CameraController}
  */
 LBUI3d.CameraController = function(worldLimits, localLimits) {
+    /**
+     * The world limits applied to the camera position.
+     * @member {LBUI3d.CameraLimits}
+     */
     this.worldLimits = worldLimits || new LBUI3d.CameraLimits();
+
+    /**
+     * The local limits applied to the camera position.
+     * @member {LBUI3d.CameraLimits}
+     */
     this.localLimits = localLimits || new LBUI3d.CameraLimits();
     
+    /**
+     * The current camera position in world coordinates.
+     * @member {LBGeometry.Vector3}
+     */
     this.currentPosition = new LBGeometry.Vector3();
+    
+    /**
+     * The current camera orientation in world coordinates.
+     * @member {LBGeometry.Quaternion}
+     */
     this.currentQuaternion = new LBGeometry.Quaternion();
-    this.destPosition = new LBGeometry.Vector3();
-    this.destQuaternion = new LBGeometry.Quaternion();
     
-    this.maxLinearAccel = 10;
-    this.maxAngularAccel = 10;
-    
+    /**
+     * The current mouse mode.
+     * @member {LBUI3d.CameraController.MOUSE_PAN_MODE|LBUI3d.CameraController.MOUSE_ROTATE_MODE}
+     */
     this.mouseMode = -1;
     
+    /**
+     * Enables tracked zooming if true.
+     * @member {Boolean}
+     */
     this.zoomEnabled = true;
+    
+    /**
+     * The current camera zoom scale.
+     * @member {Number}
+     */
     this.zoomScale = 1;
+    
+    /**
+     * The minimum camera zoom scale.
+     * @member {Number}
+     */
     this.minZoomScale = 0.025;
+    
+    /**
+     * The maximum camera zoom scale.
+     * @member {Number}
+     */
     this.maxZoomScale = 150;
     
+    /**
+     * The current tracking state.
+     * @member {LBUI3d.CameraController.TRACKING_STATE_IDLE|LBUI3d.CameraController.TRACKING_STATE_PAN|LBUI3d.CameraController.TRACKING_STATE_ROTATE|LBUI3d.CameraController.TRACKING_STATE_ZOOM}
+     */
     this.trackingState = LBUI3d.CameraController.TRACKING_STATE_IDLE;
 };
 
@@ -810,38 +890,91 @@ LBUI3d.CameraController.prototype.updateCameraPosition = function(dt, position, 
 LBUI3d.LocalPOVCameraController = function(localLimits) {
     LBUI3d.CameraController.call(this, null, localLimits);
     
+    /**
+     * The current local camera position.
+     * @member {LBGeometry.Vector3}
+     */
     this.localPosition = new LBGeometry.Vector3();
+    
+    /**
+     * The current camera spherical orientation.
+     * @member {LBUI3d.SphericalOrientation}
+     */
     this.localOrientation = new LBUI3d.SphericalOrientation();
     
+    /**
+     * This is used to determine the azimuth of the forward direction for the standard views.
+     * @member {Number}
+     */
     this.forwardAzimuthDeg = 0;
     
+    /**
+     * The deceleration value to use for position, when decelerating after a mouse up
+     * with position velocity. In position units/second^2.
+     * @member {Number}
+     */
     this.positionDecel = 1;
+    
+    /**
+     * The deceleration value to use for orientation degrees, when decelerating after a mouse up
+     * with orientation velocity. In degrees/second^2.
+     * @member {Number}
+     */
     this.degDecel = 1800;
+    
+    /**
+     * The maximum number of seconds to allow for decelerating after a mouse up with position
+     * or orientation velocity.
+     * @member {Number}
+     */
     this.maxTransitionTime = 5;
     
+    /**
+     * The current transition time in seconds when decelerating after a mouse up with position or orientation
+     * velocity. 0 if not decelerating.
+     */
     this.currentTransitionTime = 0;
 };
 
 LBUI3d.LocalPOVCameraController.prototype = Object.create(LBUI3d.CameraController.prototype);
 LBUI3d.LocalPOVCameraController.prototype.constructor = LBUI3d.LocalPOVCameraController;
 
-function decelVelTowardsZero(dt, localVel, decel) {
-    if (localVel > 0) {
-        localVel -= dt * decel;
-        return Math.max(localVel, 0);
+/**
+ * Updates a velocity value for decelerating to zero velocity.
+ * @param {Number} dt   The time step.
+ * @param {Number} vel  The velocity to decelerate towards zero.
+ * @param {Number} decel    The deceleration rate, must be &geq; 0.
+ * @returns {Number}    The updated velocity.
+ */
+function decelVelTowardsZero(dt, vel, decel) {
+    if (vel > 0) {
+        vel -= dt * decel;
+        return Math.max(vel, 0);
     }
-    else if (localVel < 0) {
-        localVel += dt * decel;
-        return Math.min(localVel, 0);
+    else if (vel < 0) {
+        vel += dt * decel;
+        return Math.min(vel, 0);
     }
-    return localVel;
+    return vel;
 };
 
+/**
+ * Calculates the time to decelerate a velocity to zero given the deceleration rate.
+ * @param {Number} vel  The velocity.
+ * @param {Number} decel    The deceleration, the sign is ignored.
+ * @returns {Number}    The time required to decelerate vel to 0.
+ */
 function calcDecelTimeToZero(vel, decel) {
     // dV / dT = a
     return Math.abs(vel / decel);
 };
 
+/**
+ * Calculates the deceleration rate for decelerating a velocity to zero over a given time.
+ * @param {Number} vel  The velocity.
+ * @param {Number} time The time.
+ * @returns {Number}    The absolute value of the deceleration.
+ */
 function calcDecelRateForTime(vel, time) {
     // dV / dT = a
     return Math.abs(vel / time);

@@ -42,7 +42,8 @@
  * limitations under the License.
  */
 
-/* global LBPhaser, LBCamera, LBGeometry, Phaser, Leeboard, LBMath */
+define(['lbphaserutil', 'lbmath', 'lbutil', 'lbcamera', 'lbgeometry', 'phaser'],
+function(LBPhaser, LBMath, LBUtil, LBCamera, LBGeometry, Phaser) {
 
 /**
  * This is a hack projection of 3D objects onto the Phaser 2D surface using
@@ -141,10 +142,12 @@ LBPhaser.Project3D.prototype = {
      * @param {Number[]} [indices]  Optional array of the indices of the points in vertices to use for drawing,
      * otherwise vertices is presumed to be in the desired order of the vertices.
      * @param {LBGeometry.Matrix4} [toWorldXfrm]    If defined the transform used to convert
-     * the vertices to world coordiantes.
+     * the vertices to world coordinates.
+     * @param {Boolean} [doubleSided=false] If true the panel is treated as having two
+     * sides.
      * @returns {LBPhaser.Project3D}    this.
      */
-    addPanel: function(frameColor, lineWidth, closeFrame, fillColor, alpha, vertices, indices, toWorldXfrm) {
+    addPanel: function(frameColor, lineWidth, closeFrame, fillColor, alpha, vertices, indices, toWorldXfrm, doubleSided) {
         if (Number.isNaN(frameColor)) {
             frameColor = undefined;
         }
@@ -163,6 +166,7 @@ LBPhaser.Project3D.prototype = {
         panel.lineWidth = (frameColor !== undefined) ? lineWidth : 0;
         panel.fillColor = fillColor;
         panel.alpha = alpha;
+        panel.doubleSided = doubleSided;
         panel.pathVertices = [];
         panel.zSum = 0;
         
@@ -208,7 +212,7 @@ LBPhaser.Project3D.prototype = {
         pos.set(pos.x * this.toPixelsX, pos.y * this.toPixelsY, pos.z);
         
         // If we're the third vertex, check if panel is facing the correct direction.
-        if (panel.pathVertices.length === 2) {
+        if (!panel.doubleSided &amp;&amp; (panel.pathVertices.length === 2)) {
             var x0_1 = panel.pathVertices[0].x - panel.pathVertices[1].x;
             var y0_1 = panel.pathVertices[0].y - panel.pathVertices[1].y;
             var x2_1 = pos.x - panel.pathVertices[1].x;
@@ -227,7 +231,7 @@ LBPhaser.Project3D.prototype = {
     
     _addPanelToZBuffer: function(z, panel) {
         z = -z; // Use negative z because we want to process the panels from largest z to smallest z (smaller is closer to camera)
-        var index = Leeboard.bsearch(this.zValues, z) + 1;
+        var index = LBUtil.bsearch(this.zValues, z) + 1;
         this.zValues.splice(index, 0, z);
         this.zPanels.splice(index, 0, panel);
     },
@@ -240,6 +244,12 @@ LBPhaser.Project3D.prototype = {
         // Generate the graphics...
         var graphics = this.graphics;
         this.zPanels.forEach(function(panel) {
+            if (panel.fillColor !== undefined) {
+                graphics.beginFill(panel.fillColor, panel.alpha);
+                graphics.drawPolygon(panel.pathVertices);
+                graphics.endFill();
+            }
+
             if (panel.frameColor !== undefined) {
                 graphics.lineStyle(panel.lineWidth, panel.frameColor, panel.alpha);
                 graphics.moveTo(panel.frameVertices[0].x, panel.frameVertices[0].y);
@@ -252,13 +262,7 @@ LBPhaser.Project3D.prototype = {
                 
                 // This effectively stops the line drawing...
                 graphics.lineStyle(0);
-            }
-            
-            if (panel.fillColor !== undefined) {
-                graphics.beginFill(panel.fillColor, panel.alpha);
-                graphics.drawPolygon(panel.pathVertices);
-                graphics.endFill();
-            }
+            }            
         });
     },
     
@@ -301,6 +305,22 @@ LBPhaser.Project3DPanels = function(vertices, indices) {
 
 LBPhaser.Project3DPanels.prototype = {
     /**
+     * Loads the basic settings (no panel vertices) from properties in a data object.
+     * @param {Object} data The data object to load from.
+     * @returns {LBPhaser.Project3DPanels}  this.
+     */
+    loadBasic: function(data) {
+        this.frameColor = LBGeometry.Color.colorValueFromData(data.frameColor, this.frameColor);
+        this.lineWidth = data.lineWidth || 1;
+        this.closeFrame = data.closeFrame;
+        this.alpha = data.alpha !== undefined ? data.alpha : 1;
+        this.fillColor = LBGeometry.Color.colorValueFromData(data.fillColor, this.fillColor);
+        this.doubleSided = data.doubleSided;
+        
+        return this;
+    },
+    
+    /**
      * Adds a set of vertices defining a pnael.
      * @param {LBGeometry.Vector3[]} vertices   The array of vertices for the panel.
      * @param {Number[]} [indices]  If defined the indices of the points in vertices
@@ -336,10 +356,22 @@ LBPhaser.Project3DPanels.prototype = {
         toWorldXfrm = toWorldXfrm || this.toWorldXfrm;
         for (var i = 0; i &lt; this.panelsVertices.length; ++i) {
             project3D.addPanel(this.frameColor, this.lineWidth, this.closeFrame, this.fillColor, this.alpha, 
-                    this.panelsVertices[i], undefined, toWorldXfrm);
+                    this.panelsVertices[i], undefined, toWorldXfrm, this.doubleSided);
         }
         
         return this;
+    },
+
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        if (this.panelVertices) {
+            this.panelVertices.length = 0;
+            this.panelVertices = null;
+        }
     },
     
     constructor: LBPhaser.Project3DPanels
@@ -364,12 +396,7 @@ LBPhaser.Project3DPanels.prototype = {
  */
 LBPhaser.Project3D.createPanelsFromVolumesData = function(volumes, data) {
     var projectPanels = new LBPhaser.Project3DPanels();
-    
-    projectPanels.frameColor = LBGeometry.Color.colorValueFromData(data.frameColor, projectPanels.frameColor);
-    projectPanels.lineWidth = data.lineWidth || 1;
-    projectPanels.closeFrame = data.closeFrame;
-    projectPanels.alpha = data.alpha !== undefined ? data.alpha : 1;
-    projectPanels.fillColor = LBGeometry.Color.colorValueFromData(data.fillColor, projectPanels.fillColor);
+    projectPanels.loadBasic(data);
     
     var volFaces = data.volFaces;
     for (var i = 0; i &lt; volFaces.length; i += 2) {
@@ -379,12 +406,12 @@ LBPhaser.Project3D.createPanelsFromVolumesData = function(volumes, data) {
         var volume = volumes[volIndex];
         if (faceIndex === -1) {
             // Use all the faces of the volume.
-            volume.faces().forEach(function(face) {
+            volume.getFaces().forEach(function(face) {
                 projectPanels.addPanelVertices(volume.vertices, face);
             });
         }
         else {
-            var face = volume.faces()[faceIndex];
+            var face = volume.getFaces()[faceIndex];
             projectPanels.addPanelVertices(volume.vertices, face);
         }
     }
@@ -448,22 +475,39 @@ LBPhaser.Project3D.loadVolumePanels = function(volumes, data) {
  * Helper that calls {@link LBPhaser.Project3DPanels#project} for each object in an
  * array of objects.
  * @param {LBPhaser.Project3D} [project3D]    The projection object, if undefined nothing is done.
- * @param {LBPhaser.Project3DPanels[]} [volumePanels]   The array panels objects to be
+ * @param {LBPhaser.Project3DPanels[]} [panelsArray]   The array panels objects to be
  * project, may be undefined.
  * @param {LBGeometry.Matrix4} [toWorldXfrm]    Optional transform matrix to transform the
  * panel vertex coordinates to world coordinates.
  * @returns {undefined}
  */
-LBPhaser.Project3D.projectVolumePanels = function(project3D, volumePanels, toWorldXfrm) {
-    if (!project3D || !volumePanels) {
+LBPhaser.Project3D.projectPanelsArray = function(project3D, panelsArray, toWorldXfrm) {
+    if (!project3D || !panelsArray) {
         return;
     }
     
-    volumePanels.forEach(function(panels) {
+    panelsArray.forEach(function(panels) {
         panels.project(project3D, toWorldXfrm);
     });
 };
-</code></pre>
+
+/**
+ * Helper that calls {@link LBPhaser.Project3DPanels#destroy} for each object in an
+ * array of objects.
+ * @param {LBPhaser.Project3DPanels[]} [panelsArray]   The array panels objects to be destroyed,
+ * may be undefined.
+ * @returns {undefined}
+ */
+LBPhaser.Project3D.destroyPanelsArray = function(panelsArray) {
+    if (panelsArray) {
+        panelsArray.forEach(function(panels) {
+            panels.destroy();
+        });
+    }
+};
+
+return LBPhaser;
+});</code></pre>
         </article>
     </section>
 
@@ -473,13 +517,13 @@ LBPhaser.Project3D.projectVolumePanels = function(project3D, volumePanels, toWor
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="-_anonymous_-LBAssets.Loader.html">Loader</a></li><li><a href="-_anonymous_-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="-_anonymous_-LBCamera.Camera.html">Camera</a></li><li><a href="-_anonymous_-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="-_anonymous_-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="-_anonymous_-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="-_anonymous_-LBControls.SmoothController.html">SmoothController</a></li><li><a href="-_anonymous_-LBControls.SteppedController.html">SteppedController</a></li><li><a href="-_anonymous_-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="-_anonymous_-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="-_anonymous_-LBFoils.ClCd.html">ClCd</a></li><li><a href="-_anonymous_-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="-_anonymous_-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="-_anonymous_-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="-_anonymous_-LBFoils.Foil.html">Foil</a></li><li><a href="-_anonymous_-LBGeometry.Color.html">Color</a></li><li><a href="-_anonymous_-LBGeometry.Euler.html">Euler</a></li><li><a href="-_anonymous_-LBGeometry.Face3.html">Face3</a></li><li><a href="-_anonymous_-LBGeometry.Geometry.html">Geometry</a></li><li><a href="-_anonymous_-LBGeometry.Line2.html">Line2</a></li><li><a href="-_anonymous_-LBGeometry.Line3.html">Line3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="-_anonymous_-LBGeometry.Object3D.html">Object3D</a></li><li><a href="-_anonymous_-LBGeometry.Plane.html">Plane</a></li><li><a href="-_anonymous_-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="-_anonymous_-LBGeometry.Sphere.html">Sphere</a></li><li><a href="-_anonymous_-LBGeometry.Vector2.html">Vector2</a></li><li><a href="-_anonymous_-LBGeometry.Vector3.html">Vector3</a></li><li><a href="-_anonymous_-LBMath.CSpline.html">CSpline</a></li><li><a href="-_anonymous_-LBMath.DegRange.html">DegRange</a></li><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="-_anonymous_-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="-_anonymous_-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="-_anonymous_-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="-_anonymous_-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="-_anonymous_-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="-_anonymous_-LBVolume.Tetra.html">Tetra</a></li><li><a href="-_anonymous_-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="-_anonymous_-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="-_anonymous_-LBVolume.Volume.html">Volume</a></li><li><a href="LBCannon.CannonPhysicsLink.html">CannonPhysicsLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBUI3d.App3D.html">App3D</a></li><li><a href="LBUI3d.CameraController.html">CameraController</a></li><li><a href="LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="LBUI3d.FollowCameraController.html">FollowCameraController</a></li><li><a href="LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="LBUI3d.SphericalOrientation.html">SphericalOrientation</a></li><li><a href="LBUI3d.View3D.html">View3D</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBAssets_.html">LBAssets|</a></li><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBCurve.html">LBCurve</a></li><li><a href="LBDebug.html">LBDebug</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li><li><a href="LBUI3d.html">LBUI3d</a></li><li><a href="LBUtil.html">LBUtil</a></li><li><a href="LBVolume.html">LBVolume</a></li></ul><h3>Global</h3><ul><li><a href="global.html#.">.</a></li><li><a href="global.html#Detector">Detector</a></li><li><a href="global.html#THREE">THREE</a></li><li><a href="global.html#%257B@link">{@link</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:43 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Oct 14 2017 10:42:13 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

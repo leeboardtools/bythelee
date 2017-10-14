@@ -19,7 +19,7 @@ define(function() {
 
 /**
  * 
- * @namespace LBAssets|
+ * @namespace LBAssets
  */
 var LBAssets = LBAssets || {};
 

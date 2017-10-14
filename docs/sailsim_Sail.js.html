@@ -42,11 +42,12 @@
  * limitations under the License.
  */
 
-
-/* global LBSailSim, LBFoils, LBControls, LBGeometry, LBMath, LBPhysics */
+define(['lbsailsimbase', 'lbutil', 'lbmath', 'lbgeometry', 'lbcurve', 'lbcontrols', 'lbphysics', 'lbfoils', 'lbfoilinstance'], 
+function(LBSailSim, LBUtil, LBMath, LBGeometry, LBCurve, LBControls, LBPhysics, LBFoils) {
+    
 
 /**
- * Implementation of {@link LBFoils.Foil} for sails, supports reefing and flatness factors.
+ * Implementation of {@link LBFoils.Foil} for sails, will support reefing and flatness factors.
  * @constructor
  * @param {LBSailSim.SailInstance} sailInstance The sail instance that owns this.
  * @returns {LBSailSim.SailFoil}
@@ -78,6 +79,144 @@ LBSailSim.SailFoil.prototype.calcLocalLiftDragMoment = function(rho, qInfLocal, 
     return result;
 };
 
+/**
+ * Call when done with the object to have it release any internal references
+ * to other objects to help with garbage collection.
+ * @returns {undefined}
+ */
+LBSailSim.SailFoil.prototype.destroy = function() {
+    this.sailInstance = null;
+    LBFoils.Foil.prototype.destroy.call(this);
+};
+
+
+/**
+ * Represents a single slice through a sail for {@link LBSailSim.SailSurface}.
+ * @constructor
+ * @param {Number} slicePos The local position of the slice along the reference leading edge of the sail.
+ * @param {Number} surfaceLength  The length of the slice.
+ * @param {Number} [pointCount=5] The number of points in the slice.
+ * @param {Number} [camberScale=1]  Optional scale to be applied to the assigned camber.
+ * @returns {LBSailSim.SailSlice}
+ */
+LBSailSim.SailSlice = function(slicePos, surfaceLength, pointCount, camberScale) {
+    
+    /**
+     * The local position of the slice along the reference leading edge of the sail.
+     * @readonly
+     * @member {Number}
+     */
+    this.slicePos = slicePos;
+    
+    /**
+     * The surface length of the slice.
+     * @readonly
+     * @member {Number}
+     */
+    this.surfaceLength = surfaceLength;
+    
+    pointCount = pointCount || 5;
+    if (pointCount &lt; 2) {
+        pointCount = 2;
+    }
+    
+    /**
+     * The array of 3D points on the slice. The first point is at the reference leading edge.
+     * @member {LBGeometry.Vector3[]}
+     */
+    this.points = [];
+    for (var i = 0; i &lt; pointCount; ++i) {
+        this.points.push(new LBGeometry.Vector3());
+    }
+    
+    /**
+     * An array of index values corresponding to the points, can be used to refer
+     * to a vertex index to be associated with each point.
+     */
+    this.indexMapping = [];
+    
+    this.camberScale = (camberScale !== undefined) ? camberScale : 1;
+};
+
+LBSailSim.SailSlice.prototype = {
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        if (this.points) {
+            this.points.length = 0;
+            this.points = null;
+        }
+        this.indexMapping = null;
+    },
+    
+    constructor: LBSailSim.SailSlice
+};
+
+/**
+ * Helper that creates and loads an {@link LBSailSim.SailSlice} from properties in a data object.
+ * @param {Number}  slicePosRange   The full range length of the slice positions, used for
+ * computing the actual position when given a slice position as a fraction.
+ * @param {Object} data The data object.
+ * @returns {LBSailSim.SailSlice}   The loaded sail slice.
+ */
+LBSailSim.SailSlice.createFromData = function(slicePosRange, data) {
+    var slicePos;
+    if (data.slicePosFraction !== undefined) {
+        slicePos = data.slicePosFraction * slicePosRange;
+    }
+    else {
+        slicePos = data.slicePos;
+    }
+    
+    var surfaceLength = data.surfaceLength;
+    if (!surfaceLength) {
+        console.warn("LBSailSim.SailSlice.createFromData: data.surfaceLength is required!");
+        return undefined;
+    }
+    if (surfaceLength &lt; 0) {
+        console.warn("LBSailSim.SailSlice.createFromData: data.surfaceLength must be >= 0!");
+        return undefined;
+    }
+    
+    return new LBSailSim.SailSlice(slicePos, surfaceLength, data.pointCount, data.camberScale);
+};
+
+
+/**
+ * Represents the surface of the sail, primarily for visualization purposes.
+ * @constructor
+ * @returns {LBSailSim.SailSurface}
+ */
+LBSailSim.SailSurface = function() {    
+    /**
+     * The slices representing the surface.
+     * @member {LBSailSim.SailSlice[]}
+     */
+    this.slices = [];
+};
+
+LBSailSim.SailSurface.prototype = {    
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        if (this.slices) {
+            this.slices.forEach(function(slice) {
+                slice.destroy();
+            });
+            this.slices.length = 0;
+            this.slices = null;
+        }
+    },
+    
+    constructor: LBSailSim.SailSurface
+};
+
 
 /**
  * The {@link LBSailSim.FoilInstance} implementation for sails.
@@ -93,19 +232,19 @@ LBSailSim.SailInstance = function() {
      * The flatness factor, 0 is most flat, 1 is least flat.
      * @member {Number}
      */
-    this.flatness = 0.5;
+    this.flatnessFactor = 0.5;
     
     /**
      * The twist factor, 0 is least twist, 1 is most twist.
      * @member {Number}
      */
-    this.twist = 0.5;
+    this.twistFactor = 0.5;
     
     /**
      * The reefing factor, 0 is most reefed, 1 is not reefed.
      * @member {Number}
      */
-    this.reef = 1;
+    this.reefFactor = 1;
     
     /**
      * ??? Forgot what vreef stands for!
@@ -144,6 +283,30 @@ LBSailSim.SailInstance = function() {
     this.maxSheetLength = 1;
     
     /**
+     * The minimum sail twist in degrees.
+     * @member {Number}
+     */
+    this.minTwistDeg = 5;
+    
+    /**
+     * The maximum sail twist in degrees.
+     * @member {Number}
+     */
+    this.maxTwistDeg = 30;
+    
+    /**
+     * The minimum camber as a fraction of the chord length.
+     * @member {Number}
+     */
+    this.minCamberFraction = 1/20;
+    
+    /**
+     * The maximum camber as a fraction of the chord length.
+     * @member {Number}
+     */
+    this.maxCamberFraction = 1/7;
+    
+    /**
      * The spars associated with this sail.
      * @member {LBPhysics.RigidBody[]}
      */
@@ -162,11 +325,72 @@ LBSailSim.SailInstance = function() {
      * @member {Number}
      */
     this.maxRotationDeg = 0;
+    
+    /**
+     * The surface representation of the sail.
+     * @member {LBSailSim.SailSurface}
+     */
+    this.sailSurface = new LBSailSim.SailSurface();
+    
+    /**
+     * The implementation of {@link LBSailSim.SailShaper} used to shape the sail surface
+     * {@link LBSailSim.SailInstance#sailSurface}.
+     * @member {LBSailSim.SailShaper}
+     */
+    this.sailShaper = undefined;
 };
 
 
 LBSailSim.SailInstance.prototype = Object.create(LBSailSim.FoilInstance.prototype);
 LBSailSim.SailInstance.prototype.constructor = LBSailSim.SailInstance;
+
+/**
+ * Call when done with the object to have it release any internal references
+ * to other objects to help with garbage collection.
+ * @returns {undefined}
+ */
+LBSailSim.SailInstance.prototype.destroy = function() {
+    if (this.spars) {
+        this.spars.length = 0;
+        this.spars = null;
+        this.sparName = null;
+
+        this.sheetAnchorBoat = null;
+        this.sheetAnchorSail = null;
+        
+        if (this.sailShaper) {
+            this.sailShaper = this.sailShaper.destroy();
+        }
+        this.sailSurface = this.sailSurface.destroy();
+        
+        LBSailSim.FoilInstance.prototype.destroy.call(this);
+    }
+};
+
+/**
+ * Returns the total twist of the sail between the head and foot, in degrees.
+ * @returns {Number}    The twist in degrees
+ */
+LBSailSim.SailInstance.prototype.getTwistDeg = function() {
+    return this.twistFactor * (this.maxTwistDeg - this.minTwistDeg) + this.minTwistDeg;
+};
+
+/**
+ * Returns the current maximum camber of the sail as a fraction of the chord.
+ * @returns {Number}    The camber as a fraction of the chord.
+ */
+LBSailSim.SailInstance.prototype.getCamberFraction = function() {
+    return this.flatnessFactor * (this.maxCamberFraction - this.minCamberFraction) + this.minCamberFraction;
+};
+
+/**
+ * Returns the current position of the maximum camber of the sail as a fraction of the
+ * chord from the leading edge.
+ * @returns {Number}    The maximum camber position as a fraction of the chord.
+ */
+LBSailSim.SailInstance.prototype.getCamberPosFraction = function() {
+    return 0.45;
+};
 
 // @inheritdoc...
 LBSailSim.SailInstance.prototype.updateFoilForce = function(dt, flow) {
@@ -185,6 +409,10 @@ LBSailSim.SailInstance.prototype.updateFoilForce = function(dt, flow) {
     this.spars.forEach(function(spar) {
         spar.setPositionAndQuaternion(this.obj3D.position, this.obj3D.quaternion);
     }, this);
+    
+    if (this.sailShaper) {
+        this.sailShaper.updateSailSurface(this, this.sailSurface);
+    }
     
     return this;
 };
@@ -216,10 +444,6 @@ LBSailSim.SailInstance.prototype._updateRotationLimits = function() {
         deg2 -= this.rotationOffsetDegs[2];
         var rad = (deg2 - deg) * LBMath.DEG_TO_RAD;
         this.obj3D.rotateOnAxis(LBGeometry.Z_AXIS, rad);
-        
-        this.spars.forEach(function(spar) {
-            spar.setPositionAndQuaternion(this.obj3D.position, this.obj3D.quaternion);
-        }, this);
     }
 };
 
@@ -251,8 +475,47 @@ LBSailSim.SailInstance.prototype.load = function(data, sailEnv) {
     this.minSheetLength = data.minSheetLength || 0;
     this.maxSheetLength = data.maxSheetLength || 1;
     
+    if ((data.minTwistDeg !== undefined) &amp;&amp; (data.minTwistDeg >= 0)) {
+        this.minTwistDeg = data.minTwistDeg;
+    }
+    if ((data.maxTwistDeg !== undefined) &amp;&amp; (data.maxTwistDeg >= 0)) {
+        this.maxTwistDeg = data.maxTwistDeg;
+    }
+    if (this.minTwistDeg > this.maxTwistDeg) {
+        var tmp = this.minTwistDeg;
+        this.minTwistDeg = this.maxTwistDeg;
+        this.maxTwistDeg = tmp;
+    }
+    
+    if ((data.minChordFraction !== undefined) &amp;&amp; (data.minChordFraction >= 0)) {
+        this.minChordFraction = data.minChordFraction;
+    }
+    if ((data.maxChordFraction !== undefined) &amp;&amp; (data.maxChordFraction >= 0)) {
+        this.maxChordFraction = data.maxChordFraction;
+    }
+    if (this.minChordFraction > this.maxChordFraction) {
+        var tmp = this.minChordFraction;
+        this.minChordFraction = this.maxChordFraction;
+        this.maxChordFraction = tmp;
+    }
+    
     this._updateRotationLimits();
+    
+    if (data.sailShaper) {
+        this._loadSailShaper(data.sailShaper);
+    }
     return this;
+};
+
+LBSailSim.SailInstance.prototype._loadSailShaper = function(data) {
+    var shaper = LBUtil.newClassInstanceFromData(data);
+    if (!shaper) {
+        return;
+    }
+    
+    shaper.load(this, data);
+    
+    this.sailShaper = shaper;
 };
 
 // @inheritdoc
@@ -362,7 +625,245 @@ LBSailSim.SailController.prototype.setSheetLength = function(value) {
     for (var i = 0; i &lt; this.sails.length; ++i) {
         this.sails[i].setSheetLengthRatio(ratio);
     }
-};</code></pre>
+};
+
+/**
+ * Call when done with the object to have it release any internal references
+ * to other objects to help with garbage collection.
+ * @returns {undefined}
+ */
+LBSailSim.SailController.prototype.destroy = function() {
+    if (this.sails) {
+        this.sails.length = 0;
+        this.sails = null;
+        this.controllee = null;
+        this.sailName = null;
+        this.vessel = null;
+        
+        LBControls.SmoothController.prototype.destroy.call(this);
+    }
+};
+
+
+/**
+ * Helper object for calculating points along the cambered sail surface.
+ * @constructor
+ * @returns {LBSailSim.SailCamberCurve}
+ */
+LBSailSim.SailCamberCurve = function() {
+    /**
+     * The maximum camber as a fraction of the chord length.
+     * @member {Number}
+     */
+    this.camberFraction = 0;
+    
+    /**
+     * The position of the maximum camber from the leading edge as a fraction of the
+     * chord length.
+     * @member {Number}
+     */
+    this.camberPosFraction = 0;
+    
+    /**
+     * The curve used to compute the actual points.
+     * @member {LBCurve.QuadraticBezier2}
+     */
+    this.curve = new LBCurve.QuadraticBezier2();
+    
+    this.setCamber(0.1, 0.45);
+};
+
+LBSailSim.SailCamberCurve.prototype = {
+    /**
+     * Sets up the curve for a given camber.
+     * @param {Number} camberFraction   The maximum camber as a fraction of the chord length.
+     * @param {Number} camberPosFraction    The position of the maximum camber from the leading
+     * edge as a fraction of the chord length.
+     * @returns {LBSailSim.SailCamberCurve} this.
+     */
+    setCamber: function(camberFraction, camberPosFraction) {
+        if ((this.camberFraction !== camberFraction) || (this.camberPosFraction !== camberPosFraction)) {
+            this.camberFraction = camberFraction;
+            this.camberPosFraction = camberPosFraction;
+            
+            // We presume a chord length of 1 to keep things simple...
+            var p1x = 2 * (camberPosFraction - 0.5) + 0.5;
+            var p1y = 2 * camberFraction;
+            this.curve.setControlPoints(LBGeometry.ORIGIN, new LBGeometry.Vector2(p1x, p1y), LBGeometry.X_AXIS);
+        }
+        return this;
+    },
+    
+    /**
+     * Calculates a point along the surface of the cambered curve.
+     * @param {Number} surfacePos   The position along the surface to be computed,
+     * as a fraction of the total surface length, should be &amp;ge; 0 and &amp;le; 1.
+     * @param {LBGeometry.Vector2} [store]  If defined the object to store the result in. 
+     * @param {Number} [surfaceLength=1]    If defined the length of the surface of the curve.
+     * @returns {LBGeometry.Vector2}    The point at the desired position.
+     */
+    calcXY: function(surfacePos, store, surfaceLength) {
+        store = this.curve.calcPoint(surfacePos, store);        
+        surfaceLength = LBUtil.isVar(surfaceLength) ? surfaceLength : 1;
+        
+        var curveSurfaceLength = this.curve.getCurveLength();
+        if (!LBMath.isLikeZero(curveSurfaceLength)) {
+            store.multiplyScalar(surfaceLength / curveSurfaceLength);
+        }
+        
+        return store;
+    },
+    
+    constructor: LBSailSim.SailCamberCurve
+};
+
+
+/**
+ * Base class for the objects that compute the shape of a sail.
+ * @returns {LBSailSim.SailShaper}
+ */
+LBSailSim.SailShaper = function() {
+    /**
+     * The curve object that can be used to compute points along a camber curve.
+     * @member {LBSailSim.CamberCurve}
+     */
+    this.camberCurve = new LBSailSim.SailCamberCurve();
+};
+
+LBSailSim.SailShaper.prototype = {
+    /**
+     * Loads the sail shaper from properties of a data object.
+     * @param {LBSailSim.SailInstance}  sailInstance    The sail instance calling this.
+     * @param {Object} data The data object.
+     * @returns {LBSailSim.SailShaper}  this.
+     */
+    load: function(sailInstance, data) {
+        return this;
+    },
+    
+    /**
+     * Called by {@link LBSailSim.SailInstance#updateFoilForce} to have the sail surface
+     * updated.
+     * @param {LBSailSim.SailInstance} sailInstance The sail instance this is for.
+     * @param {LBSailSim.SailSurface} surface   The surface to be updated.
+     * @returns {undefined}
+     */
+    updateSailSurface: function(sailInstance, surface) {
+        throw "updateSailSurface not implemented by this!";
+    },
+    
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    dispose: function() {
+        if (this.camberCurve) {
+            this.camberCurve = null;            
+        }
+    },
+    
+    constructor: LBSailSim.SailShaper
+};
+
+/**
+ * Sail shaper for triangular sails.
+ * @constructor
+ * @extends LBSailSim.SailShaper
+ * @returns {LBSailSim.TriangleSailShaper}
+ */
+LBSailSim.TriangleSailShaper = function() {
+    LBSailSim.SailShaper.call(this);
+    
+    /**
+     * The length of the luff of the sail.
+     * @member {Number}
+     */
+    this.luffLength = undefined;
+    
+    /**
+     * The length of the foot of the sail.
+     * @member {Number}
+     */
+    this.footLength = undefined;
+    
+    /**
+     * The length of the head of the sail.
+     * @member {Number}
+     */
+    this.headLength = undefined;
+};
+
+LBSailSim.TriangleSailShaper._workingVector2 = new LBGeometry.Vector2();
+LBSailSim.TriangleSailShaper.prototype = Object.create(LBSailSim.SailShaper.prototype);
+LBSailSim.TriangleSailShaper.prototype.constructor = LBSailSim.TriangleSailShaper;
+
+LBSailSim.TriangleSailShaper.prototype.load = function(sailInstance, data) {
+    this.luffLength = data.luffLength;
+    
+    var surface = sailInstance.sailSurface;
+    surface.slices.length = 0;
+    
+    if (data.footLength !== undefined) {
+        surface.slices.push(new LBSailSim.SailSlice(0, this.footLength, 2));
+    }
+    if (data.slices) {
+        for (var i = 0; i &lt; data.slices.length; ++i) {
+            var slice = LBSailSim.SailSlice.createFromData(this.luffLength, data.slices[i]);
+            if (slice) {
+                surface.slices.push(slice);
+            }
+        }
+    }
+    if (data.headLength !== undefined) {
+        surface.slices.push(new LBSailSim.SailSlice(this.luffLength, data.headLength, 2));
+    }
+
+    this.footLength = surface.slices[0].surfaceLength;
+    this.headLength = surface.slices[surface.slices.length - 1].surfaceLength;
+};
+
+LBSailSim.TriangleSailShaper.prototype.updateSailSurface = function(sailInstance, surface) {
+    var totalTwistDeg = sailInstance.getTwistDeg();
+    var totalTwistRad = totalTwistDeg * LBMath.DEG_TO_RAD;
+    
+    var camberFraction = sailInstance.getCamberFraction();
+    var camberPosFraction = sailInstance.getCamberPosFraction();
+    
+    if (sailInstance.foilDetails.angleDeg &lt; 0) {
+        camberFraction = -camberFraction;
+    }
+    else {
+        totalTwistRad = -totalTwistRad;
+    }
+    
+    this.camberCurve.setCamber(camberFraction, camberPosFraction);
+    var camberPos = LBSailSim.TriangleSailShaper._workingVector2;
+    
+    for (var i = 0; i &lt; surface.slices.length; ++i) {
+        var slice = surface.slices[i];
+        // First point is the leading edge which is currently always at x = y = 0.
+        slice.points[0].set(0, 0, slice.slicePos);
+        
+        var twistRad = slice.slicePos / this.luffLength * totalTwistRad;
+        var cosTwist = Math.cos(twistRad);
+        var sinTwist = Math.sin(twistRad);
+        var scale = 1 / (slice.points.length - 1);
+        
+        for (var p = 1; p &lt; slice.points.length; ++p) {
+            this.camberCurve.calcXY(p * scale, camberPos, slice.surfaceLength);
+            camberPos.y *= slice.camberScale;
+            
+            var x = cosTwist * camberPos.x + sinTwist * camberPos.y;
+            var y = -sinTwist * camberPos.x + cosTwist * camberPos.y;
+            slice.points[p].set(x, y, slice.slicePos);
+        }
+    }
+};
+
+return LBSailSim;
+});
+</code></pre>
         </article>
     </section>
 
@@ -372,13 +873,13 @@ LBSailSim.SailController.prototype.setSheetLength = function(value) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="-_anonymous_-LBAssets.Loader.html">Loader</a></li><li><a href="-_anonymous_-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="-_anonymous_-LBCamera.Camera.html">Camera</a></li><li><a href="-_anonymous_-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="-_anonymous_-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="-_anonymous_-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="-_anonymous_-LBControls.SmoothController.html">SmoothController</a></li><li><a href="-_anonymous_-LBControls.SteppedController.html">SteppedController</a></li><li><a href="-_anonymous_-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="-_anonymous_-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="-_anonymous_-LBFoils.ClCd.html">ClCd</a></li><li><a href="-_anonymous_-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="-_anonymous_-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="-_anonymous_-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="-_anonymous_-LBFoils.Foil.html">Foil</a></li><li><a href="-_anonymous_-LBGeometry.Color.html">Color</a></li><li><a href="-_anonymous_-LBGeometry.Euler.html">Euler</a></li><li><a href="-_anonymous_-LBGeometry.Face3.html">Face3</a></li><li><a href="-_anonymous_-LBGeometry.Geometry.html">Geometry</a></li><li><a href="-_anonymous_-LBGeometry.Line2.html">Line2</a></li><li><a href="-_anonymous_-LBGeometry.Line3.html">Line3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="-_anonymous_-LBGeometry.Object3D.html">Object3D</a></li><li><a href="-_anonymous_-LBGeometry.Plane.html">Plane</a></li><li><a href="-_anonymous_-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="-_anonymous_-LBGeometry.Sphere.html">Sphere</a></li><li><a href="-_anonymous_-LBGeometry.Vector2.html">Vector2</a></li><li><a href="-_anonymous_-LBGeometry.Vector3.html">Vector3</a></li><li><a href="-_anonymous_-LBMath.CSpline.html">CSpline</a></li><li><a href="-_anonymous_-LBMath.DegRange.html">DegRange</a></li><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="-_anonymous_-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="-_anonymous_-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="-_anonymous_-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="-_anonymous_-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="-_anonymous_-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="-_anonymous_-LBVolume.Tetra.html">Tetra</a></li><li><a href="-_anonymous_-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="-_anonymous_-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="-_anonymous_-LBVolume.Volume.html">Volume</a></li><li><a href="LBCannon.CannonPhysicsLink.html">CannonPhysicsLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBUI3d.App3D.html">App3D</a></li><li><a href="LBUI3d.CameraController.html">CameraController</a></li><li><a href="LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="LBUI3d.FollowCameraController.html">FollowCameraController</a></li><li><a href="LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="LBUI3d.SphericalOrientation.html">SphericalOrientation</a></li><li><a href="LBUI3d.View3D.html">View3D</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBAssets_.html">LBAssets|</a></li><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBCurve.html">LBCurve</a></li><li><a href="LBDebug.html">LBDebug</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li><li><a href="LBUI3d.html">LBUI3d</a></li><li><a href="LBUtil.html">LBUtil</a></li><li><a href="LBVolume.html">LBVolume</a></li></ul><h3>Global</h3><ul><li><a href="global.html#.">.</a></li><li><a href="global.html#Detector">Detector</a></li><li><a href="global.html#THREE">THREE</a></li><li><a href="global.html#%257B@link">{@link</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:43 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Oct 14 2017 10:42:13 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

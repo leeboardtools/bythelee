@@ -42,20 +42,20 @@
  * limitations under the License.
  */
 
-/* global Leeboard, Phaser, LBGeometry, LBFoils, LBSailSim, LBMath */
-
-/**
- * 
- * @namespace LBSailSim
- */
+define(['lbutil', 'lbmath', 'lbgeometry', 'lbphysics', 'lbfoils', 'lbsailsimbase', 'lbassets', 'lbvessel'], 
+function(LBUtil, LBMath, LBGeometry, LBPhysics, LBFoils, LBSailSim, LBAssets) {
+    
 
 /**
  * The main sailing environment, basically the sailing world.
  * @class SailEnv
+ * @param {LBAssets.Loader} [assetLoader]   The optional asset loader.
  * @constructor
  * @returns {LBSailSim.Env}
  */
-LBSailSim.Env = function() {
+LBSailSim.Env = function(assetLoader) {
+    this.assetLoader = assetLoader || new LBAssets.Loader();
+    
     this.wind = new LBSailSim.Wind();
     this.water = new LBSailSim.Water();
     
@@ -94,6 +94,13 @@ LBSailSim.Env = function() {
      * @member {Array}
      */
     this.boatCallbacks = [];
+    
+    
+    this.loadCoordinator = new LBAssets.MultiLoadCoordinator();
+    
+    this.floatingObjectDefs = {};
+    this.floatingObjects = [];
+    this.floatingObjectsByClassification = {};
 };
 
 LBSailSim.Env.prototype = {
@@ -128,6 +135,157 @@ LBSailSim.Env.prototype = {
     calcWaterRe: function(vel, len) {
         return this.water.calcRe(vel, len);
     },
+    
+    
+    /**
+     * Resets the environment to be empty. {@link LBSailSim.SailEnv#loadEnv} will have to
+     * be called again.
+     */
+    clearEnv: function() {
+        this.returnAllBoats();
+        
+        this.clCdCurves.length = 0;
+        this.boatDatas = {};
+        this.boatsByType = {};
+        
+        this.floatingObjectDefs = {};
+        this.floatingObjects.length = 0;
+        this.floatingObjectsByClassification = {};
+    },
+    
+    /**
+     * Loads the environment from a JSON data file. The loading is asynchronous.
+     * @param {String} name The plain name of the data file, it should not have a path nor
+     * an extension. The file must be located in the data/env/ folder.
+     * @param {Function} [onLoaded] Optional function called when loading is complete.
+     * @param {Function} [onError] Optional function called on load failures.
+     */
+    loadEnv: function(name, onLoaded, onError) {
+        var me = this;
+        var fileName = 'data/env/' + name + '.json';
+        this.assetLoader.loadJSON(name, fileName, function(data) {
+            me._loadEnvFromData(data, onLoaded, onError);
+        });
+    },
+    
+    _loadEnvFromData: function(data, onLoaded, onError) {
+        var me = this;
+        this.loadCoordinator.setup(onLoaded, onError);
+        this.loadCoordinator.beginLoadCalls();
+            
+        this.assetLoader.loadJSON(data.boatList, data.boatList, 
+            this.loadCoordinator.getOnLoadFunction(function(data) {
+                me.loadBoatDatas(data);
+            }),
+            this.loadCoordinator.getOnProgressFunction(),
+            this.loadCoordinator.getOnErrorFunction());
+                
+        this.assetLoader.loadJSON(data.clCdCurves, data.clCdCurves, 
+            this.loadCoordinator.getOnLoadFunction(function(data) {
+                me.loadClCdCurves(data);
+            }),
+            this.loadCoordinator.getOnProgressFunction(),
+            this.loadCoordinator.getOnErrorFunction());
+        
+        if (data.boundaries) {
+            this._loadBoundaries(data.boundaries);
+        }
+        
+        if (data.floating) {
+            this._loadFloating(data.floating);
+        }
+    // Need to load the environment JSON file.
+    // When the file is loaded, need to install the scenery.
+    // The environment consists of:
+    // a) Objects (buoys, floating docks, flotsam)
+    //      Coordinates, 3D model, Volumes, constraints, additional properties (dock, ???)
+    // b) Boats available for checkout.
+    // c) clcdcurves.json
+    // d) Shallows?
+    // e) Current map?
+    // f) 
+    
+        this.loadCoordinator.endLoadCalls();
+    },
+    
+    _loadBoundaries: function(data) {
+        
+    },
+    
+    _loadFloating: function(data) {
+        if (data.objectDefs) {
+            data.objectDefs.forEach(this._loadFloatingObjectDef, this);
+        }
+        if (data.objects) {
+            data.objects.forEach(this._loadFloatingObject, this);
+        }
+    },
+    
+    _loadFloatingObjectDef: function(data) {
+        this.floatingObjectDefs[data.name] = data;
+    },
+    
+    _loadFloatingObject: function(data) {
+        // Get the object definition and load the object from it.
+        if (!data.def) {
+            console.error("Could not load the floating object '" + data.name + "', data.def was not defined.");
+            return;
+        }
+        
+        var objectDef = this.floatingObjectDefs[data.def];
+        if (!objectDef) {
+            console.error("Could not load the floating object '" + data.name + "', the data definition '" + data.def + "' was not defined.");
+            return;
+        }
+        
+        var rigidBody = LBPhysics.RigidBody.createFromData(objectDef);        
+        this.floatingObjects.push(rigidBody);
+
+        if (data.pos) {
+            LBGeometry.loadVector3(data.pos, rigidBody.obj3D.position);
+        }
+        
+        rigidBody.obj3D.updateMatrixWorld(true);
+        rigidBody.classification = data.classification || "";
+        
+        var classifiedObjects = this.floatingObjectsByClassification[rigidBody.classification];
+        if (!classifiedObjects) {
+            classifiedObjects = [];
+            this.floatingObjectsByClassification[rigidBody.classification] = classifiedObjects;
+        }
+        classifiedObjects.push(rigidBody);
+        
+        // TODO: Handle the type.
+        
+        this.floatingObjectLoaded(data, rigidBody, objectDef);
+    },
+    
+    /**
+     * Called when a floating object has been loaded to provide optional further proessing.
+     * @param {Object} data The data object used to load the floating object.
+     * @param {LBPhysics.RigidBody} rigidBody   The rigid body floating object.
+     * @param {Object} objectDef    The definition object.
+     */
+    floatingObjectLoaded: function(data, rigidBody, objectDef) {
+        
+    },
+    
+
+    //
+    // Floating object scenario:
+    // ObjectDefs are used to create the actual object instances.
+    // From an ObjectDef, we create an LBPhysics.RigidBody object.
+    // The ObjectDef is just the data definition.
+    // For a floating object, we have the reference to the object def,
+    // So on loading the floating object, we do the following:
+    //      Obtain the ObjectDef.
+    //      Create the RigidBody object from the object def.
+    //      [ThreeJS] From the object def data, also load the 3D JSON Model via Scene3D.
+    //          Async, so callback will associate the model with the rigid body.
+    //          Model is added to the scene via Scene3D.
+    //      [Phaser] From the object def data, also load the Phaser sprite.
+    //      Add the rigid body object to the physics link.
+    //
     
     /**
      * Loads {@link LBFoils.ClCdCurve} from a data object.
@@ -241,9 +399,9 @@ LBSailSim.Env.prototype = {
 
         boatName = boatName || typeName;
         var boatInstance = boatsOfType[boatName];
-        // Need to use use Leeboard.isVar(), as boatInstance is a string and an empty
+        // Need to use use LBUtil.isVar(), as boatInstance is a string and an empty
         // string is treated as false.
-        if (!Leeboard.isVar(boatInstance)) {
+        if (!LBUtil.isVar(boatInstance)) {
             // Boat name for boat type is not supported.
             return false;
         }
@@ -266,9 +424,11 @@ LBSailSim.Env.prototype = {
      * @param {Number} [centerX=0] The initial x coordinate of the boat.
      * @param {Number} [centerY=0] The initial y coordinate of the boat.
      * @param {Number} [rotDeg=0] The initial rotation of the boat, in degrees.
+     * @param {Number} [rollDeg=0] The initial roll angle of the boat, in degrees.
+     * @param {Number} [pitchDeg=0] The initial pitch angel of the boat, in degrees.
      * @returns {object}    The boat instance, undefined if the boat is not available.
      */
-    checkoutBoat: function(typeName, boatName, centerX, centerY, rotDeg) {
+    checkoutBoat: function(typeName, boatName, centerX, centerY, rotDeg, rollDeg, pitchDeg) {
         if (!this.isBoatAvailable(typeName, boatName)) {
             return undefined;
         }
@@ -284,9 +444,13 @@ LBSailSim.Env.prototype = {
             return undefined;
         }
         
+        boat.name = boatName;
         boat.obj3D.position.x = centerX || 0;
         boat.obj3D.position.y = centerY || 0;
-        boat.obj3D.rotation.z = (rotDeg || 0) * LBMath.DEG_TO_RAD;
+        rollDeg = rollDeg || 0;
+        pitchDeg = pitchDeg || 0;
+        rotDeg = rotDeg || 0;
+        boat.obj3D.rotation.set(rollDeg * LBMath.DEG_TO_RAD, pitchDeg * LBMath.DEG_TO_RAD, rotDeg * LBMath.DEG_TO_RAD, 'ZYX');
         boat.obj3D.updateMatrixWorld(true);
 
         this.boatsByType[typeName][boatName] = boat;
@@ -340,6 +504,7 @@ LBSailSim.Env.prototype = {
             if (boatsOfType[boat.boatName] === boat) {
                 boatsOfType[boat.boatName] = "";
                 this._boatReturned(boat);
+                boat.destroy();
                 return true;
             }
         }
@@ -367,6 +532,21 @@ LBSailSim.Env.prototype = {
                 }
             },
             this);
+    },
+    
+    /**
+     * Returns all the boats that have been checked out.
+     * @return {LBSailSim.SailEnv} this.
+     */
+    returnAllBoats: function() {
+        var me = this;
+        Object.values(this.boatsByType).forEach(function(boatsOfType) {
+           Object.values(boatsOfType).forEach(function(boat) {
+               me.returnBoat(boat);
+           });
+        });
+        
+        return this;
     },
     
     /**
@@ -407,10 +587,98 @@ LBSailSim.Wind = function() {
      * @member {Number}
      */
     this.kViscosity = 1.48e-5;
+    
+    /**
+     * The average wind speed in m/s.
+     * @member {Number}
+     */
+    this.averageMPS;
+    
+    /**
+     * The average direction the wind is blowing from in degrees.
+     * @member {Number}
+     */
+    this.averageFromDeg = 0;
+    
+    this.setAverageForce(3);
+};
+
+LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS = [
+    1.5,    // 0
+    3.5,
+    6.5,
+    10.5,   // 3
+    16.5,
+    21.5,
+    27.5,   // 6
+    33.5,
+    40.5,
+    47.5,   // 9
+    55.5,
+    63.5
+];
+
+LBSailSim.Wind.MAX_BEAUFORT_FORCE = 12;
+
+/**
+ * Converts a wind speed in knots to Beaufort force.
+ * @param {Number} knots    The speed in knots.
+ * @returns {Number}    The Beaufort force number.
+ */
+LBSailSim.Wind.getForceForKnots = function(knots) {
+    for (var i = 0; i &lt; LBSailSim.Wind.MAX_BEAUFORT_FORCE; ++i) {
+        if (knots &lt; LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS[i]) {
+            return i;
+        }
+    }
+    return i;
 };
 
 LBSailSim.Wind.prototype = {
     constructor: LBSailSim.Wind,
+    
+    /**
+     * Sets the average speed of the wind using a Beaufort force value.
+     * The average speed is set to the mid-value of the speeds for the force value.
+     * @param {Number} force    The force on the Beaufort wind scale.
+     * @returns {LBSailSim.Wind.prototype}  this.
+     */
+    setAverageForce: function(force) {
+        if (force &lt; 0) {
+            force = 0;
+        }
+        else if (force > LBSailSim.Wind.MAX_BEAUFORT_FORCE) {
+            force = LBSailSim.Wind.MAX_BEAUFORT_FORCE;
+        }
+        
+        var minKts = (force > 0) ? LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS[force - 1] : 0;
+        var maxKts;
+        if (force === LBSailSim.Wind.MAX_BEAUFORT_FORCE) {
+            maxKts = 2 * LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS[force] - LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS[force - 1];
+        }
+        else {
+            maxKts = LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS[force];
+        }
+        
+        this.averageMPS = LBUtil.kt2mps(0.5 * (minKts + maxKts));
+        
+        return this;
+    },
+    
+    /**
+     * Sets the average heading angle from which the wind is blowing.
+     * @param {Number} deg  
+     * @returns {LBSailSim.Wind.prototype}  this.
+     */
+    setAverageFromDeg: function(deg) {
+        deg = LBMath.wrapDegrees(deg);
+        if (deg !== this.averageFromDeg) {
+            this.averageFromDeg = deg;
+        }
+        
+        return this;
+    },
+    
     
     /**
      * Retrieves the wind velocity at a given point
@@ -421,12 +689,11 @@ LBSailSim.Wind.prototype = {
      * @returns {object}    The object containing the velocity.
      */
     getFlowVelocity: function(x, y, z, vel) {
-        var vx = 4;
-        var vy = 0;
+        var speed = this.averageMPS;
+        var headingRad = (270 - this.averageFromDeg) * LBMath.DEG_TO_RAD;
+        var vx = speed * Math.cos(headingRad);
+        var vy = speed * Math.sin(headingRad);
         
-        //vx = 0;
-        //vy = 2;
-
         if (!vel) {
             return new LBGeometry.Vector3(vx, vy);
         }
@@ -533,6 +800,9 @@ LBSailSim.getFlowVelocity = function(flow, pos, vel) {
     var z = pos.z || 0;
     return flow.getFlowVelocity(pos.x, pos.y, z, vel);
 };
+
+return LBSailSim;
+});
 </code></pre>
         </article>
     </section>
@@ -543,13 +813,13 @@ LBSailSim.getFlowVelocity = function(flow, pos, vel) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="-_anonymous_-LBAssets.Loader.html">Loader</a></li><li><a href="-_anonymous_-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="-_anonymous_-LBCamera.Camera.html">Camera</a></li><li><a href="-_anonymous_-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="-_anonymous_-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="-_anonymous_-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="-_anonymous_-LBControls.SmoothController.html">SmoothController</a></li><li><a href="-_anonymous_-LBControls.SteppedController.html">SteppedController</a></li><li><a href="-_anonymous_-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="-_anonymous_-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="-_anonymous_-LBFoils.ClCd.html">ClCd</a></li><li><a href="-_anonymous_-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="-_anonymous_-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="-_anonymous_-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="-_anonymous_-LBFoils.Foil.html">Foil</a></li><li><a href="-_anonymous_-LBGeometry.Color.html">Color</a></li><li><a href="-_anonymous_-LBGeometry.Euler.html">Euler</a></li><li><a href="-_anonymous_-LBGeometry.Face3.html">Face3</a></li><li><a href="-_anonymous_-LBGeometry.Geometry.html">Geometry</a></li><li><a href="-_anonymous_-LBGeometry.Line2.html">Line2</a></li><li><a href="-_anonymous_-LBGeometry.Line3.html">Line3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="-_anonymous_-LBGeometry.Object3D.html">Object3D</a></li><li><a href="-_anonymous_-LBGeometry.Plane.html">Plane</a></li><li><a href="-_anonymous_-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="-_anonymous_-LBGeometry.Sphere.html">Sphere</a></li><li><a href="-_anonymous_-LBGeometry.Vector2.html">Vector2</a></li><li><a href="-_anonymous_-LBGeometry.Vector3.html">Vector3</a></li><li><a href="-_anonymous_-LBMath.CSpline.html">CSpline</a></li><li><a href="-_anonymous_-LBMath.DegRange.html">DegRange</a></li><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="-_anonymous_-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="-_anonymous_-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="-_anonymous_-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="-_anonymous_-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="-_anonymous_-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="-_anonymous_-LBVolume.Tetra.html">Tetra</a></li><li><a href="-_anonymous_-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="-_anonymous_-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="-_anonymous_-LBVolume.Volume.html">Volume</a></li><li><a href="LBCannon.CannonPhysicsLink.html">CannonPhysicsLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBUI3d.App3D.html">App3D</a></li><li><a href="LBUI3d.CameraController.html">CameraController</a></li><li><a href="LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="LBUI3d.FollowCameraController.html">FollowCameraController</a></li><li><a href="LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="LBUI3d.SphericalOrientation.html">SphericalOrientation</a></li><li><a href="LBUI3d.View3D.html">View3D</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBAssets_.html">LBAssets|</a></li><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBCurve.html">LBCurve</a></li><li><a href="LBDebug.html">LBDebug</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li><li><a href="LBUI3d.html">LBUI3d</a></li><li><a href="LBUtil.html">LBUtil</a></li><li><a href="LBVolume.html">LBVolume</a></li></ul><h3>Global</h3><ul><li><a href="global.html#.">.</a></li><li><a href="global.html#Detector">Detector</a></li><li><a href="global.html#THREE">THREE</a></li><li><a href="global.html#%257B@link">{@link</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:43 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Oct 14 2017 10:42:13 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

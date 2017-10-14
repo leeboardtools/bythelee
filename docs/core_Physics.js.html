@@ -42,7 +42,9 @@
  * limitations under the License.
  */
 
-/* global Leeboard, LBGeometry, LBMath, LBVolume */
+define(['lbutil', 'lbmath', 'lbgeometry', 'lbvolume'],
+function(LBUtil, LBMath, LBGeometry, LBVolume) {
+    
 
 /**
  * @namespace   LBPhysics
@@ -51,17 +53,18 @@ var LBPhysics = LBPhysics || {};
 
 /**
  * Calculates the moment about the origin of a force applied at a position.
- * @param {type} force  The force.
- * @param {type} position   The application point of the force.
+ * @param {LBGeometry.Vector3} force  The force.
+ * @param {LbGeometry.Vector3} position   The application point of the force.
+ * @param {LBGeometry.Vector3} [store]  If defined the 3D vector to receive the cross product.
  * @returns {object} Vector representing the moment about the origin from 
  * force being applied at position.
  */
-LBPhysics.calcMoment = function(force, position) {
-    // Need to use Leeboard.isVar() because z is numeric.
-    if (!Leeboard.isVar(force.z)) {
-        return LBGeometry.crossVectors2(position, force);
+LBPhysics.calcMoment = function(force, position, store) {
+    // Need to use LBUtil.isVar() because z is numeric.
+    if (!LBUtil.isVar(force.z)) {
+        return LBGeometry.crossVectors2(position, force, store);
     }
-    return LBGeometry.crossVectors3(position, force);
+    return LBGeometry.crossVectors3(position, force, store);
 };
 
 /**
@@ -77,19 +80,19 @@ LBPhysics.Resultant3D = function(force, moment, position) {
      * The force vector.
      * @member {LBGeometry.Vector3}
      */
-    this.force = Leeboard.copyCommonProperties(new LBGeometry.Vector3(), force);
+    this.force = LBUtil.copyCommonProperties(new LBGeometry.Vector3(), force);
 
     /**
      * The moment vector.
      * @member {LBGeometry.Vector3}
      */
-    this.moment = Leeboard.copyCommonProperties(new LBGeometry.Vector3(), moment);
+    this.moment = LBUtil.copyCommonProperties(new LBGeometry.Vector3(), moment);
 
     /**
      * The force application point.
      * @member {LBGeometry.Vector3}
      */
-    this.applPoint = Leeboard.copyCommonProperties(new LBGeometry.Vector3(), position);
+    this.applPoint = LBUtil.copyCommonProperties(new LBGeometry.Vector3(), position);
 };
 
 LBPhysics.Resultant3D._workingLine3 = new LBGeometry.Line3();
@@ -292,19 +295,69 @@ LBPhysics.Resultant3D.prototype = {
         this.moment.zero();
         this.applPoint.zero();
         return this;
+    },
+    
+    
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        this.force = null;
+        this.moment = null;
+        this.applPoint = null;
     }
 };
 
 
+LBPhysics._calcVector3VelocityWorkingArray = [];
 /**
- * This is used to track the transforms for converting between a world coordinate
- * system and a local coordinate system. It can also keep track of the previous transforms
- * so it may calculate the world and local velocities of points in either coordinate
- * system.
- * @constructor
- * @returns {LBPhysics.CoordSystemState}
+ * Given an array of positions, calculates the velocity using backward finite difference.
+ * @param {Number} dt   The time step.
+ * @param {LBGeometry.Vector3[]} positions  The array of positions, positions[0] is the latest,
+ *  positions[1] is at t - dt, positions[2] is at t - 2*dt, etc.
+ * @param {LBGeometry.Vector3} store    If defined the vector to store the velocity into.
+ * @param {Number} [positionCount]  If defined the number of positions in positions to use, otherwise
+ *  all the positions are considered.
+ * @returns {LBGeometry.Vector3}    The velocity vector.
  */
-LBPhysics.CoordSystemState = function() {
+LBPhysics.calcVector3Velocity = function(dt, positions, store, positionCount) {
+    store = store || new LBGeometry.Vector3();    
+    
+    positionCount = positionCount || positions.length;
+    positionCount = Math.min(positionCount, LBMath.finiteDiffBackFirst.MAX_TERMS);
+    
+    var args = LBPhysics._calcVector3VelocityWorkingArray;
+    args[0] = dt;
+    
+    args.length = 1;
+    for (var i = 0; i &lt; positionCount; ++i) {
+        args[i+1] = positions[i].x;
+    }    
+    store.x = LBMath.finiteDiffBackFirst(args);
+        
+    args.length = 1;
+    for (var i = 0; i &lt; positionCount; ++i) {
+        args[i+1] = positions[i].y;
+    }    
+    store.y = LBMath.finiteDiffBackFirst(args);
+        
+    args.length = 1;
+    for (var i = 0; i &lt; positionCount; ++i) {
+        args[i+1] = positions[i].z;
+    }    
+    store.z = LBMath.finiteDiffBackFirst(args);
+    
+    return store;
+};
+
+/**
+ * Holds a pair of transforms for converting between a world coordinate system and a
+ * local coordinate system. Used by [@link LBPhysics.CoordSystemState}.
+ * @returns {LBPhysics.CoordTransforms}
+ */
+LBPhysics.CoordTransforms = function() {
     /**
      * The matrix transforming from local to world coordinates.
      * @member {LBGeometry.Matrix4}
@@ -316,60 +369,18 @@ LBPhysics.CoordSystemState = function() {
      * @member {LBGeometry.Matrix4}
      */
     this.localXfrm = new LBGeometry.Matrix4();
-    
-    /**
-     * The matrix transforming from local to world coordinates from the previous time step.
-     * @member {LBGeometry.Matrix4}
-     */    
-    this.prevWorldXfrm = new LBGeometry.Matrix4();
-    
-    /**
-     * The matrix transforming from world to local coordinates from the previous time step.
-     * @member {LBGeometry.Matrix4}
-     */    
-    this.prevLocalXfrm = new LBGeometry.Matrix4();
-    
-    /**
-     * The last time step.
-     * @member {Number}
-     */
-    this.dt = 0;
-    
-    
-    this.isXfrmsValid = false;
-  
 };
 
-LBPhysics.CoordSystemState._workingPosA = new LBGeometry.Vector3();
-LBPhysics.CoordSystemState._workingPosB = new LBGeometry.Vector3();
-LBPhysics.CoordSystemState._workingPosC = new LBGeometry.Vector3();
-LBPhysics.CoordSystemState._workingPosD = new LBGeometry.Vector3();
-LBPhysics.CoordSystemState._workingPlane = new LBGeometry.Plane();
-
-LBPhysics.CoordSystemState.prototype = {
+LBPhysics.CoordTransforms.prototype = {
     /**
-     * Sets the world and local transforms, saving the previous transforms in the
-     * process. If either Xfrm matrix is not defined it is obtained by inverting the
+     * Sets the world and local transforms. If either Xfrm matrix is not defined it is obtained by inverting the
      * other matrix, if both are not defined then the matrices are set to the identity
      * matrix.
      * @param {object} [worldXfrm]    If defined, the 4x4 matrix for transforming from local to world coordinaes.
-     * @param {Number} [dt]   The simulation time change from the last call to this, used
-     * to compute velocity.
      * @param {object} [localXfrm]    If defined, the 4x4 matrix for transforming from world to local coordinates.
-     * @returns {LBPhysics.CoordSystemState} this.
+     * @returns {LBPhysics.CoordTransforms} this.
      */
-    setXfrms: function(worldXfrm, dt, localXfrm) {
-        // Need to use Leeboard.isVar() because dt is numeric.
-        if (Leeboard.isVar(dt) &amp;&amp; (dt > 0)) {
-            // Save the current transforms...
-            this.dt = dt;
-            this.prevWorldXfrm.copy(this.worldXfrm);
-            this.prevLocalXfrm.copy(this.localXfrm);
-        }
-        else {
-            this.dt = 0;
-        }
-        
+    setXfrms: function(worldXfrm, localXfrm) {        
         if (!localXfrm){
             if (!worldXfrm) {
                 // Presume they're both going to be identity...
@@ -390,65 +401,320 @@ LBPhysics.CoordSystemState.prototype = {
             this.worldXfrm.copy(worldXfrm);
         }
         
-        if ((this.dt === 0) || !this.isXfrmsValid) {
-            // No time change, make the previous transforms match the current transforms.
-            this.prevWorldXfrm.copy(this.worldXfrm);
-            this.prevLocalXfrm.copy(this.localXfrm);
-        }
-        this.isXfrmsValid = true;
+        return this;
+    },
+    
+    /**
+     * Sets this to match another.
+     * @param {LBPhysics.CoordTransforms} other The transforms to be copied.
+     * @returns {LBPhysics.CoordTransforms} this.
+     */
+    copy: function(other) {
+        this.worldXfrm.copy(other.worldXfrm);
+        this.localXfrm.copy(other.localxXfrm);
         
         return this;
     },
+    
+    /**
+     * Converts a vector from local to world coordinates.
+     * @param {LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the world coordinates.
+     */
+    vector3ToWorld: function(vector, store) {
+        if (!store) {
+            store = vector.clone();
+        }
+        else if (store !== vector) {
+            store.copy(vector);
+        }
+        
+        store.applyMatrix4(this.worldXfrm);
+        return store;
+    },
+    
+    /**
+     * Converts a vector from world to local coordinates.
+     * @param {LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the local coordinates.
+     */
+    vector3ToLocal: function(vector, store) {
+        if (!store) {
+            store = vector.clone();
+        }
+        else if (store !== vector) {
+            store.copy(vector);
+        }
+        
+        store.applyMatrix4(this.localXfrm);
+        return store;
+    },
+    
+    /**
+     * Applies the local to world rotation to a vector.
+     * @param {LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the world coordinates.
+     */
+    vector3ToWorldRotation: function(vector, store) {
+        if (!store) {
+            store = vector.clone();
+        }
+        else if (store !== vector) {
+            store.copy(vector);
+        }
+        
+        store.applyMatrix4Rotation(this.worldXfrm);
+        return store;
+    },
+    
+    /**
+     * Applies the world to local rotation to a vector.
+     * @param {LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the local coordinates.
+     */
+    vector3ToLocalRotation: function(vector, store) {
+        if (!store) {
+            store = vector.clone();
+        }
+        else if (store !== vector) {
+            store.copy(vector);
+        }
+        
+        store.applyMatrix4Rotation(this.localXfrm);
+        return store;
+    },
+    
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        this.localXfrm = null;
+        this.worldXfrm = null;
+        
+    },
+    
+    constructor: LBPhysics.CoordTransforms
+};
+
+
+/**
+ * This is used to track the transforms for converting between a world coordinate
+ * system and a local coordinate system. It can also keep track of the previous transforms
+ * so it may calculate the world and local velocities of points in either coordinate
+ * system.
+ * @constructor
+ * @param {Number} [velTerms=2]   The number of terms to use for the finite difference
+ * velocity calculation, must be at least 2.
+ * @returns {LBPhysics.CoordSystemState}
+ */
+LBPhysics.CoordSystemState = function(velTerms) {
+    if (velTerms === undefined) {
+        velTerms = 2;
+    }
+    if (velTerms &lt;= 0) {
+        velTerms = 2;
+    }
+    else if (velTerms > LBMath.finiteDiffBackFirst.MAX_TERMS) {
+        velTerms = LBMath.finiteDiffBackFirst.MAX_TERMS;
+    }
+
+    /**
+     * The array of coordinate transforms
+     */
+    this.xfrmsBuffer = new LBUtil.RollingBuffer(velTerms);
+    
+    /**
+     * The time step passed to {@link LBPhysics.CoordSystemState#setXfrms}.
+     * @member {Number}
+     */
+    this.dt = 0;
+  
+};
+
+LBPhysics.CoordSystemState._workingPosA = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPosB = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPosC = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPosD = new LBGeometry.Vector3();
+LBPhysics.CoordSystemState._workingPlane = new LBGeometry.Plane();
+LBPhysics.CoordSystemState._workingPositions = [];
+
+LBPhysics.CoordSystemState.prototype = {
+    /**
+     * Sets the world and local transforms, saving the previous transforms in the
+     * process. If either Xfrm matrix is not defined it is obtained by inverting the
+     * other matrix, if both are not defined then the matrices are set to the identity
+     * matrix.
+     * @param {object} [worldXfrm]    If defined, the 4x4 matrix for transforming from local to world coordinaes.
+     * @param {Number} [dt]   The simulation time change from the last call to this, used
+     * to compute velocity.
+     * @param {object} [localXfrm]    If defined, the 4x4 matrix for transforming from world to local coordinates.
+     * @returns {LBPhysics.CoordSystemState} this.
+     */
+    setXfrms: function(worldXfrm, dt, localXfrm) {
+        // Need to use LBUtil.isVar() because dt is numeric.
+        if ((dt === undefined) || dt &lt;= 0) {
+            this.xfrmsBuffer.clear();
+        }
+        this.dt = dt;
+        
+        if (!this.xfrmsBuffer.isFull()) {
+            // If we're not full we need to create a new xfrms object.
+            this.xfrmsBuffer.push(new LBPhysics.CoordTransforms());
+        }
+        else {
+            // We'll just push the oldest xfrms object back to the front...
+            this.xfrmsBuffer.push(this.xfrmsBuffer.getOldest());
+        }
+        this.xfrmsBuffer.getNewest().setXfrms(worldXfrm, localXfrm);
+        
+        this.worldXfrm = this.xfrmsBuffer.getNewest().worldXfrm;
+        this.localXfrm = this.xfrmsBuffer.getNewest().localXfrm;
+        
+        return this;
+    },
+    
+    /**
+     * Retrieves the number of positions used for computing velocity.
+     */
+    getVelocityTerms: function() {
+        return this.xfrmsBuffer.getMaxSize();
+    },
+    
+    /**
+     * Converts a vector from local to world coordinates.
+     * @param {LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the world coordinates.
+     */
+    vector3ToWorld: function(vector, store) {
+        return this.xfrmsBuffer.getNewest().vector3ToWorld(vector, store);
+    },
+    
+    /**
+     * Converts a vector from world to local coordinates.
+     * @param {LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
+     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
+     * may be the same as vector.
+     * @returns {LBGeometry.Vector3}    The vector containing the local coordinates.
+     */
+    vector3ToLocal: function(vector, store) {
+        return this.xfrmsBuffer.getNewest().vector3ToLocal(vector, store);
+    },
+
     
     /**
      * Marks the coordinate transforms as invalid so the initial transforms are not
      * saved for velocity calculations.
      */
     reset: function() {
-        this.isXfrmsValid = false;
+        this.xfrmsBuffer.clear();
     },
     
     
     /**
      * Calculates world position, world velocity, and local velocity for a given local
      * point.
-     * @param {object} localPos The local coordinates of the point of interest.
+     * @param {LBGeometry.Vector3} localPos The local coordinates of the point of interest.
      * @param {object} results  The object to receive the results. Results are stored
      * in keys, and are only computed if the key exists:
      *      &lt;li>worldPos: The world coordinates of localPos.
      *      &lt;li>worldVel:   The velocity of localPos in world coordinates.
-     *      &lt;li>localVel:   The velocity of localPos in local coordinates.
-     * @param {object} [prevLocalPos] If defined, the previous local position, used for velocity calculation,
+     *      &lt;li>localVel:   The velocity of localPos in local coordinates. Note that this is
+     *      the world velocity rotated into local coordinates, it is not the velocity
+     *      of the position relative to the local coordinate system (if that were the case
+     *      then this would always be 0 if prevLocalPos were not defined).
+     * @param {LBGeometry.Vector3} [prevLocalPos] If defined, the previous local position, used for velocity calculation,
      * if not defined then the previous position is presumed to be localPos.
      * @returns {LBPhysics.CoordSystemState} this.
      */
     calcVectorLocalToWorld: function(localPos, results, prevLocalPos) {
         var worldPos = results.worldPos || LBPhysics.CoordSystemState._workingPosA;
-        worldPos.copy(localPos);
-        worldPos.applyMatrix4(this.worldXfrm);
+        if (!this.xfrmsBuffer.getCurrentSize()) {
+            worldPos.copy(localPos);
+            if (results.worldVel) {
+                results.worldVel.zero();
+            }
+            if (results.localVel) {
+                results.localVel.zero();
+            }
+            return this;
+        }
+        
+        this.xfrmsBuffer.getNewest().vector3ToWorld(localPos, worldPos);
 
-        var isWorldVel = results.worldVel;
-        var isLocalVel = results.localVel;
-        if (isWorldVel || isLocalVel) {
-            if (this.dt &lt;= 0) {
+        var worldVel = results.worldVel;
+        var localVel = results.localVel;
+        if (worldVel || localVel) {
+            if (this.xfrmsBuffer.getCurrentSize() &lt;= 1) {
                 // No time change, no velocity.
-                if (isWorldVel) {
-                    results.worldVel.zero();
+                if (worldVel) {
+                    worldVel.zero();
                 }
-                if (isLocalVel) {
-                    results.localVel.zero();
+                if (localVel) {
+                    localVel.zero();
                 }
             }
-            else {
-                prevLocalPos = prevLocalPos || localPos;
-                var prevPos = LBPhysics.CoordSystemState._workingPosB;
-                prevPos.copy(prevLocalPos);
-                prevPos.applyMatrix4(this.prevWorldXfrm);
+            else {                
+                var positionCount;
+                var prevLocalPosArray = undefined;
+                if (prevLocalPos) {
+                    if (Array.isArray(prevLocalPos)) {
+                        prevLocalPosArray = prevLocalPos;
+                        positionCount = prevLocalPosArray.length + 1;
+                    }
+                    else {
+                        positionCount = 2;
+                    }
+                }
+                else {
+                    positionCount = Math.min(this.xfrmsBuffer.getCurrentSize(), LBMath.finiteDiffBackFirst.MAX_TERMS);
+                }
                 
-                var worldVel = (isWorldVel) ? results.worldVel : LBPhysics.CoordSystemState._workingPosC;
-                worldVel.subVectors(worldPos, prevPos).multiplyScalar(1/this.dt);
+                var positions = LBPhysics.CoordSystemState._workingPositions;
+                for (var i = positions.length; i &lt; positionCount; ++i) {
+                    positions[i] = new LBGeometry.Vector3();
+                }
+
+                // We already computed the world position of localPos, which is positions[0],
+                // so don't have to do a transform.
+                positions[0].copy(worldPos);
                 
-                if (isLocalVel) {
+                if (prevLocalPos) {
+                    if (prevLocalPosArray) {
+                        for (var i = 1; i &lt; positionCount; ++i) {
+                            positions[i].copy(prevLocalPosArray[i - 1]);
+                        }
+                    }
+                    else {
+                        positions[1].copy(prevLocalPos);
+                    }
+                }
+                else {
+                    for (var i = 1; i &lt; positionCount; ++i) {
+                        positions[i].copy(localPos);
+                    }
+                }
+
+                var base = positionCount - 1;
+                for (var i = 1; i &lt; positionCount; ++i) {
+                    this.xfrmsBuffer.get(base - i).vector3ToWorld(positions[i], positions[i]);
+                }
+                
+                worldVel = worldVel || LBPhysics.CoordSystemState._workingPosC;
+                LBPhysics.calcVector3Velocity(this.dt, positions, worldVel, positionCount);
+                
+                if (localVel) {
                     results.localVel.copy(worldVel);
                     results.localVel.applyMatrix4Rotation(this.localXfrm);
                 }
@@ -465,13 +731,12 @@ LBPhysics.CoordSystemState.prototype = {
      * @returns {Number}    The angular velocity in radians/sec.
      */
     calcAngularVelocityAboutLocalAxis: function(rotAxis) {
-        if (this.dt === 0) {
+        if (this.xfrmsBuffer.getCurrentSize() &lt;= 1) {
             return 0;
         }
         
         var prevPos = LBPhysics.CoordSystemState._workingPosA;
-        prevPos.copy(rotAxis);
-        prevPos.applyMatrix4Rotation(this.worldXfrm);
+        this.xfrmsBuffer.getNewest().vector3ToWorldRotation(rotAxis, prevPos);
         
         // refPlane is the plane perpendicular to rotAxis in world coordinates.
         var refPlane = LBPhysics.CoordSystemState._workingPlane;        
@@ -484,9 +749,8 @@ LBPhysics.CoordSystemState.prototype = {
         LBGeometry.makeOrthogonal(rotAxis, prevPos);
         var currentPos = LBPhysics.CoordSystemState._workingPosB;
         currentPos.copy(prevPos);
-        
-        prevPos.applyMatrix4Rotation(this.prevWorldXfrm);
-        currentPos.applyMatrix4Rotation(this.worldXfrm);
+        this.xfrmsBuffer.get(this.xfrmsBuffer.getCurrentSize() - 2).vector3ToWorldRotation(prevPos, prevPos);        
+        this.xfrmsBuffer.getNewest().vector3ToWorldRotation(currentPos, currentPos);
         
         var prevProj = LBPhysics.CoordSystemState._workingPosC;
         refPlane.projectPoint(prevPos, prevProj);
@@ -504,6 +768,22 @@ LBPhysics.CoordSystemState.prototype = {
         }
         
         return angle / this.dt;
+    },
+    
+    
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        if (this.xfrmsBuffer) {
+            this.xfrmsBuffer.destroy();
+            this.xfrmsBuffer = null;
+        }
+        
+        this.worldXfrm = null;
+        this.localXfrm = null;
     },
     
     constructor: LBPhysics.CoordSystemState
@@ -649,6 +929,16 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     this.volumes = [];
     
     /**
+     * Dampling to apply to the linear velocity, 0 &amp;le; damping &amp;ge; 1
+     */
+    this.linearDamping = 0.01;
+    
+    /**
+     * Dampling to apply to the angular velocity, 0 &amp;le; damping &amp;ge; 1
+     */
+    this.angularDamping = 0.01;
+    
+    /**
      * The coordinate system state used to track changes in the location of the
      * local coordinate system in the world space. Primarily used to track velocity.
      * @type LBPhysics.CoordSystemState
@@ -761,7 +1051,7 @@ LBPhysics.RigidBody.prototype = {
         
         if (this.volumes.length > 0) {
             if (data.mass) {
-                LBVolume.Volume.allocateMassToVolumess(this.volumes, data.mass);
+                LBVolume.Volume.allocateMassToVolumes(this.volumes, data.mass);
             }
             
             var comResult = LBVolume.Volume.totalCenterOfMass(this.volumes);
@@ -778,6 +1068,19 @@ LBPhysics.RigidBody.prototype = {
         }
         else {
             this.momentInertia.identity().multiplyScalar(this.mass);
+        }
+        
+        if (typeof(data.linearDamping) === 'number') {
+            this.linearDamping = data.linearDamping;
+        }
+        if (typeof(data.angularDampling) === 'number') {
+            this.angularDamping = data.angularDamping;
+        }
+        
+        if (data.velocityTerms) {
+            if (data.velocityTerms !== this.coordSystem.getVelocityTerms()) {
+                this.coordSystem = new LBPhysics.CoordSystemState(data.velocityTerms);
+            }
         }
         
         this.physicalPropertiesDirty = true;
@@ -826,6 +1129,48 @@ LBPhysics.RigidBody.prototype = {
             this.physicalPropertiesDirty = true;
         }
         return this;
+    },
+    
+    /**
+     * Retrieves a part or part of a part given the names of the parts of interest.
+     * @param {String|String[]} names   The name of the part if only a part of this
+     * rigid body is desired, or an array of the names of the parts, with the
+     * name of the part of this rigid body at index startIndex, and the name of the part of that
+     * part at startIndex + 1, and so forth.
+     * @param {Number} [startIndex=0]   The index of the first name in names if names is
+     * an array of strings.
+     * @returns {undefined|LBPhysics.RigidBody} The part, undefined if not found.
+     */
+    getPart: function(names, startIndex) {
+        if (!Array.isArray(names)) {
+            return this.getPartWithName(names);
+        }
+        
+        startIndex = startIndex || 0;
+        
+        var name = names[startIndex];
+        var part = this.getPartWithName(names[startIndex]);
+        if (part) {
+            if (startIndex + 1 &lt; names.length) {
+                return part.getPart(names, startIndex + 1);
+            }
+        }
+        
+        return part;
+    },
+    
+    /**
+     * Retrieves a part of this rigid body by name.
+     * @param {String} name The name of the part.
+     * @returns {LBPhysics.RigidBody|undefined} The part, undefined if not found.
+     */
+    getPartWithName: function(name) {
+        for (var i = 0; i &lt; this.parts.length; ++i) {
+            if (this.parts[i].name === name) {
+                return this.parts[i];
+            }
+        }
+        return undefined;
     },
     
     /**
@@ -1107,13 +1452,65 @@ LBPhysics.RigidBody.prototype = {
         }
     },
     
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        if (this.obj3D) {
+            this.obj3D = null;
+
+            this.centerOfMass = null;
+            this.coordSystem = this.coordSystem.destroy();
+            
+            this.coordSystemResults.localVel = null;
+            this.coordSystemResults.worldVel = null;
+            this.coordSystemResults = null;
+            
+            this.invMomentInertia = null;
+            this.loadData = null;
+            this.localLinearVelocity = null;
+            this.momentInertia = null;
+            this.name = null;
+            
+            this.parts.forEach(function(part) {
+                part.destroy();
+            });
+            this.parts.length = 0;
+            this.parts = null;
+            
+            this.resultant = this.resultant.destroy();
+            
+            this.totalCenterOfMass = null;
+            this.totalInvMomentInertia = null;
+            this.totalMomentInertia = null;
+            this.totalResultant = this.totalResultant.destroy();
+            
+            this.worldLinearVelocity = null;
+
+            if (this.volumes) {
+                this.volumes.forEach(function(vol) {
+                    vol.destroy();
+                });
+                this.volumes.length = 0;
+                this.volumes = null;
+            }
+            
+            if (this.xyOutline) {
+                this.xyOutline.length = 0;
+                this.xyOutline = null;
+            }
+        }
+    },
+    
     constructor: LBPhysics.RigidBody
 };
 
 
 /**
  * Helper that creates and loads a rigid body from a data object. If the data object contains
- * a 'className' property, the value of that property is passed directly to Leeboard.stringToNewClassInstance()
+ * a 'className' property, the value of that property is passed directly to LBUtil.stringToNewClassInstance()
  * along with the optional 'constructorArgs' property to create
  * the rigid body object, otherwise if defCreatorFunc is defined it is called to create
  * the rigid body object, otherwise {@link LBPhysics.RigidBody} is used.
@@ -1133,7 +1530,7 @@ LBPhysics.RigidBody.createFromData = function(data, defCreatorFunc) {
     
     var rigidBody;
     if (data.className) {
-        rigidBody = Leeboard.newClassInstanceFromData(data);
+        rigidBody = LBUtil.newClassInstanceFromData(data);
     }
     else {
         if (defCreatorFunc) {
@@ -1168,6 +1565,9 @@ LBPhysics.RigidBody.getRigidBodiesWithName = function(rigidBodies, name, store) 
     
     return store;
 };
+
+return LBPhysics;
+});
 </code></pre>
         </article>
     </section>
@@ -1178,13 +1578,13 @@ LBPhysics.RigidBody.getRigidBodiesWithName = function(rigidBodies, name, store) 
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="-_anonymous_-LBAssets.Loader.html">Loader</a></li><li><a href="-_anonymous_-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="-_anonymous_-LBCamera.Camera.html">Camera</a></li><li><a href="-_anonymous_-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="-_anonymous_-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="-_anonymous_-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="-_anonymous_-LBControls.SmoothController.html">SmoothController</a></li><li><a href="-_anonymous_-LBControls.SteppedController.html">SteppedController</a></li><li><a href="-_anonymous_-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="-_anonymous_-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="-_anonymous_-LBFoils.ClCd.html">ClCd</a></li><li><a href="-_anonymous_-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="-_anonymous_-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="-_anonymous_-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="-_anonymous_-LBFoils.Foil.html">Foil</a></li><li><a href="-_anonymous_-LBGeometry.Color.html">Color</a></li><li><a href="-_anonymous_-LBGeometry.Euler.html">Euler</a></li><li><a href="-_anonymous_-LBGeometry.Face3.html">Face3</a></li><li><a href="-_anonymous_-LBGeometry.Geometry.html">Geometry</a></li><li><a href="-_anonymous_-LBGeometry.Line2.html">Line2</a></li><li><a href="-_anonymous_-LBGeometry.Line3.html">Line3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="-_anonymous_-LBGeometry.Object3D.html">Object3D</a></li><li><a href="-_anonymous_-LBGeometry.Plane.html">Plane</a></li><li><a href="-_anonymous_-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="-_anonymous_-LBGeometry.Sphere.html">Sphere</a></li><li><a href="-_anonymous_-LBGeometry.Vector2.html">Vector2</a></li><li><a href="-_anonymous_-LBGeometry.Vector3.html">Vector3</a></li><li><a href="-_anonymous_-LBMath.CSpline.html">CSpline</a></li><li><a href="-_anonymous_-LBMath.DegRange.html">DegRange</a></li><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="-_anonymous_-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="-_anonymous_-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="-_anonymous_-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="-_anonymous_-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="-_anonymous_-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="-_anonymous_-LBVolume.Tetra.html">Tetra</a></li><li><a href="-_anonymous_-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="-_anonymous_-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="-_anonymous_-LBVolume.Volume.html">Volume</a></li><li><a href="LBCannon.CannonPhysicsLink.html">CannonPhysicsLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBUI3d.App3D.html">App3D</a></li><li><a href="LBUI3d.CameraController.html">CameraController</a></li><li><a href="LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="LBUI3d.FollowCameraController.html">FollowCameraController</a></li><li><a href="LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="LBUI3d.SphericalOrientation.html">SphericalOrientation</a></li><li><a href="LBUI3d.View3D.html">View3D</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBAssets_.html">LBAssets|</a></li><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBCurve.html">LBCurve</a></li><li><a href="LBDebug.html">LBDebug</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li><li><a href="LBUI3d.html">LBUI3d</a></li><li><a href="LBUtil.html">LBUtil</a></li><li><a href="LBVolume.html">LBVolume</a></li></ul><h3>Global</h3><ul><li><a href="global.html#.">.</a></li><li><a href="global.html#Detector">Detector</a></li><li><a href="global.html#THREE">THREE</a></li><li><a href="global.html#%257B@link">{@link</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:43 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Oct 14 2017 10:42:13 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

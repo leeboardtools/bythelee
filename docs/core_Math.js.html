@@ -42,7 +42,9 @@
  * limitations under the License.
  */
     
-/* global Leeboard */
+define(['lbutil'],
+function(LBUtil) {
+    
 
 /**
  * 
@@ -131,6 +133,19 @@ LBMath.clamp = function(val, limitA, limitB) {
 };
 
 /**
+ * Maps a value within a range so it has the same relative position to a new range.
+ * @param {Number} val  The value to be mapped.
+ * @param {Number} lowerOld The value in the old range corresponding to lowerNew.
+ * @param {Number} upperOld The value in the old range corresponding to upperNew.
+ * @param {Number} lowerNew One point in the upper range.
+ * @param {Number} upperNew Another point in the upper range.
+ * @returns {Number}    The mapped value.
+ */
+LBMath.mapInRange = function(val, lowerOld, upperOld, lowerNew, upperNew) {
+    return (val - lowerOld) * (upperNew - lowerNew) / (upperOld - lowerOld) + lowerNew;
+};
+
+/**
  * Adjusts an angle in degrees so it satisfies -180 &amp;lt; degrees &amp;ge; 180.
  * @param {Number} degrees  The anngle in degrees to wrap.
  * @returns {Number}    degrees wrapped to -180 &amp;lt; degrees &amp;ge; 180.
@@ -146,6 +161,95 @@ LBMath.wrapDegrees = function(degrees) {
 
     return degrees;
 };
+
+/**
+ * Determines if two angles in degrees represent the same angle (i.e. wrapping is taken
+ * into account).
+ * @param {Number} a    The first angle.
+ * @param {Number} b    The second angle.
+ * @returns {Boolean}   true if a and b represent the same angle.
+ */
+LBMath.degreesEqual = function(a, b) {
+    if (a === b) {
+        return true;
+    }
+    return LBMath.wrapDegrees(a) === LBMath.wrapDegrees(b);
+},
+
+/**
+ * Subtracts b from a in degrees, wrapping the result such that |a - b| &amp;le; 180.
+ * @param {Number} a    The degrees to subtract from.
+ * @param {Number} b    The degress to subtract.
+ * @returns {Number}    The subtraction, wrapped.
+ */
+LBMath.subDegrees = function(a, b) {
+    a = LBMath.wrapDegrees(a);
+    b = LBMath.wrapDegrees(b);
+    return LBMath.wrapDegrees(a - b);
+};
+
+
+/**
+ * Defines a range in degrees against which angles can be tested.
+ * @constructor
+ * @param {Number} baseDeg  The base angle in degrees.
+ * @param {Number} range    The range from baseDeg, in degrees. This may be negative.
+ * @returns {LBMath.DegRange}
+ */
+LBMath.DegRange = function(baseDeg, range) {
+    if (range &lt; 0) {
+        baseDeg = LBMath.wrapDegrees(baseDeg + range);
+        range = -range;
+    }
+
+    this.minDeg = LBMath.wrapDegrees(baseDeg);
+    this.maxDeg = this.minDeg + range;
+    if (this.maxDeg > 180) {
+        this.maxDeg2 = this.maxDeg - 360;
+        this.maxDeg = 180;
+    }
+    else {
+        // We can use -180 because {@link LBMath.wrapDegrees} returns angles &amp;gt; -180.
+        this.maxDeg2 = -180;
+    }
+};
+
+LBMath.DegRange.prototype = {
+    /**
+     * Determines if an angle in degrees is within the range.
+     * @param {Number} deg  The angle to test, in degrees.
+     * @returns {Boolean}   true if the angle is within the range.
+     */
+    isInRange:function(deg) {
+        deg = LBMath.wrapDegrees(deg);
+        if (deg &lt; this.minDeg) {
+            return deg &lt;= this.maxDeg2;
+        }
+        return deg &lt;= this.maxDeg;
+    },
+    
+    /**
+     * Adjusts an angle in degrees to fall the the closes edge of the range if it is outside the range.
+     * @param {Number} deg  The angle to clamp, in degrees.
+     * @returns {Number}    Either deg if deg is within the range, or the edge angle closest angularly to deg if it is not.
+     */
+    clampToRange: function(deg) {
+        deg = LBMath.wrapDegrees(deg);
+        if (deg &lt; this.minDeg) {
+            if (deg > this.maxDeg2) {
+                return ((deg - this.maxDeg2) &lt; (this.minDeg - deg)) ? this.maxDeg2 : this.maxDeg;
+            }
+        }
+        else if (deg > this.maxDeg) {
+            // Are we closer to maxDeg or minDeg?
+            return ((deg - this.maxDeg) &lt; (deg - 360 - this.minDeg)) ? this.maxDeg : this.minDeg;
+        }
+        return deg;
+    },
+    
+    constructor: LBMath.DegRange
+};
+
 
 /**
  * Rounds a value to a certain number of decimal places.
@@ -282,6 +386,17 @@ LBMath.CSpline = function(xs, ys) {
 };
 
 LBMath.CSpline.prototype = {
+    /**
+     * Call when done with the object to have it release any internal references
+     * to other objects to help with garbage collection.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        this.xs = null;
+        this.y2s = null;
+        this.ys = null;
+    },
+
     constructor: LBMath.CSpline,
     
     /**
@@ -325,7 +440,7 @@ LBMath.CSpline.prototype = {
      * -1 if x &amp;lt; this.xs[0].
      */
     findLowIndex: function(x) {
-        return Leeboard.bsearch(this.xs, x);
+        return LBUtil.bsearch(this.xs, x);
     },
 
     /**
@@ -354,6 +469,97 @@ LBMath.CSpline.prototype = {
         return y;
     }
 };
+
+
+/**
+ * First order backward finite difference with two terms. Equations from:
+ * https://en.wikipedia.org/wiki/Finite_difference_coefficient
+ * @param {Number} dt   The time step.
+ * @param {Number} f0   The latest value.
+ * @param {Number} fm1  The value at time -dt
+ * @returns {Number}    The finite difference.
+ */
+LBMath.finiteDiffBackFirst_2 = function(dt, f0, fm1) {
+    return (f0 - fm1) / dt;
+};
+
+/**
+ * First order backward finite difference with three terms. Equations from:
+ * https://en.wikipedia.org/wiki/Finite_difference_coefficient
+ * @param {Number} dt   The time step.
+ * @param {Number} f0   The latest value.
+ * @param {Number} fm1  The value at time -dt
+ * @param {Number} fm2  The value at time -2*dt
+ * @returns {Number}    The finite difference.
+ */
+LBMath.finiteDiffBackFirst_3 = function(dt, f0, fm1, fm2) {
+    return (1.5*f0 - 2*fm1 + 0.5*fm2) / dt;
+};
+
+/**
+ * First order backward finite difference with four terms. Equations from:
+ * https://en.wikipedia.org/wiki/Finite_difference_coefficient
+ * @param {Number} dt   The time step.
+ * @param {Number} f0   The latest value.
+ * @param {Number} fm1  The value at time -dt
+ * @param {Number} fm2  The value at time -2*dt
+ * @param {Number} fm3  The value at time -3*dt
+ * @returns {Number}    The finite difference.
+ */
+LBMath.finiteDiffBackFirst_4 = function(dt, f0, fm1, fm2, fm3) {
+    return (11/6*f0 - 3*fm1 + 1.5*fm2 - fm3/3) / dt;
+};
+
+/**
+ * First order backward finite difference with five terms. Equations from:
+ * https://en.wikipedia.org/wiki/Finite_difference_coefficient
+ * @param {Number} dt   The time step.
+ * @param {Number} f0   The latest value.
+ * @param {Number} fm1  The value at time -dt
+ * @param {Number} fm2  The value at time -2*dt
+ * @param {Number} fm3  The value at time -3*dt
+ * @param {Number} fm4  The value at time -4*dt
+ * @returns {Number}    The finite difference.
+ */
+LBMath.finiteDiffBackFirst_5 = function(dt, f0, fm1, fm2, fm3, fm4) {
+    return (25/12*f0 - 4*fm1 + 3*fm2 -4*fm3/3 + 0.25*fm4) / dt;
+};
+
+/**
+ * First order backward finite difference that adapts to the number of values
+ * passed in.
+ * @param {Number|Number[]} dt   The time step if a single value, if an array then the array
+ * contains the arguments described below, including the dt.
+ * @param {Number} [f0]   The latest value.
+ * @param {Number} [fm1]  The value at time -dt
+ * @param {Number} [fm2]  The value at time -2*dt
+ * @param {Number} [fm3]  The value at time -3*dt
+ * @param {Number} [fm4]  The value at time -4*dt
+ * @returns {Number}    The finite difference.
+ */
+LBMath.finiteDiffBackFirst = function(dt, f0, fm1, fm2, fm3, fm4) {
+    var args = (Array.isArray(dt)) ? dt : arguments;
+    if (args.length === 3) {
+        return LBMath.finiteDiffBackFirst_2(args[0], args[1], args[2]);
+    }
+    if (args.length === 4) {
+        return LBMath.finiteDiffBackFirst_3(args[0], args[1], args[2], args[3]);
+    }
+    if (args.length === 5) {
+        return LBMath.finiteDiffBackFirst_4(args[0], args[1], args[2], args[3], args[4]);
+    }
+    
+    return LBMath.finiteDiffBackFirst_5(args[0], args[1], args[2], args[3], args[4], args[5]);
+};
+
+/**
+ * The maximum number of terms supported by {@link LBMath.finiteDiffBackFirst}.
+ * @type Number
+ */
+LBMath.finiteDiffBackFirst.MAX_TERMS = 5;
+
+return LBMath;
+});
 </code></pre>
         </article>
     </section>
@@ -364,13 +570,13 @@ LBMath.CSpline.prototype = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LBCamera.Camera.html">Camera</a></li><li><a href="LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="LBControls.SmoothController.html">SmoothController</a></li><li><a href="LBControls.SteppedController.html">SteppedController</a></li><li><a href="LBFoils.ClCd.html">ClCd</a></li><li><a href="LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="LBFoils.Foil.html">Foil</a></li><li><a href="LBGeometry.Color.html">Color</a></li><li><a href="LBGeometry.Euler.html">Euler</a></li><li><a href="LBGeometry.Face3.html">Face3</a></li><li><a href="LBGeometry.Geometry.html">Geometry</a></li><li><a href="LBGeometry.Line2.html">Line2</a></li><li><a href="LBGeometry.Line3.html">Line3</a></li><li><a href="LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="LBGeometry.Object3D.html">Object3D</a></li><li><a href="LBGeometry.Plane.html">Plane</a></li><li><a href="LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="LBGeometry.Sphere.html">Sphere</a></li><li><a href="LBGeometry.Vector2.html">Vector2</a></li><li><a href="LBGeometry.Vector3.html">Vector3</a></li><li><a href="LBMath.CSpline.html">CSpline</a></li><li><a href="LBPhaser.Arrow.html">Arrow</a></li><li><a href="LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="LBPhaser.CannonLink.html">CannonLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBVolume.Cuboid.html">Cuboid</a></li><li><a href="LBVolume.Tetra.html">Tetra</a></li><li><a href="LBVolume.TriBipyramid.html">TriBipyramid</a></li><li><a href="LBVolume.TriPrism.html">TriPrism</a></li><li><a href="LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBVolume.html">LBVolume</a></li><li><a href="Leeboard.html">Leeboard</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="-_anonymous_-LBAssets.Loader.html">Loader</a></li><li><a href="-_anonymous_-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="-_anonymous_-LBCamera.Camera.html">Camera</a></li><li><a href="-_anonymous_-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="-_anonymous_-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="-_anonymous_-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="-_anonymous_-LBControls.SmoothController.html">SmoothController</a></li><li><a href="-_anonymous_-LBControls.SteppedController.html">SteppedController</a></li><li><a href="-_anonymous_-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="-_anonymous_-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="-_anonymous_-LBFoils.ClCd.html">ClCd</a></li><li><a href="-_anonymous_-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="-_anonymous_-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="-_anonymous_-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="-_anonymous_-LBFoils.Foil.html">Foil</a></li><li><a href="-_anonymous_-LBGeometry.Color.html">Color</a></li><li><a href="-_anonymous_-LBGeometry.Euler.html">Euler</a></li><li><a href="-_anonymous_-LBGeometry.Face3.html">Face3</a></li><li><a href="-_anonymous_-LBGeometry.Geometry.html">Geometry</a></li><li><a href="-_anonymous_-LBGeometry.Line2.html">Line2</a></li><li><a href="-_anonymous_-LBGeometry.Line3.html">Line3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="-_anonymous_-LBGeometry.Object3D.html">Object3D</a></li><li><a href="-_anonymous_-LBGeometry.Plane.html">Plane</a></li><li><a href="-_anonymous_-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="-_anonymous_-LBGeometry.Sphere.html">Sphere</a></li><li><a href="-_anonymous_-LBGeometry.Vector2.html">Vector2</a></li><li><a href="-_anonymous_-LBGeometry.Vector3.html">Vector3</a></li><li><a href="-_anonymous_-LBMath.CSpline.html">CSpline</a></li><li><a href="-_anonymous_-LBMath.DegRange.html">DegRange</a></li><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="-_anonymous_-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="-_anonymous_-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="-_anonymous_-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="-_anonymous_-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="-_anonymous_-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="-_anonymous_-LBVolume.Tetra.html">Tetra</a></li><li><a href="-_anonymous_-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="-_anonymous_-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="-_anonymous_-LBVolume.Volume.html">Volume</a></li><li><a href="LBCannon.CannonPhysicsLink.html">CannonPhysicsLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBUI3d.App3D.html">App3D</a></li><li><a href="LBUI3d.CameraController.html">CameraController</a></li><li><a href="LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="LBUI3d.FollowCameraController.html">FollowCameraController</a></li><li><a href="LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="LBUI3d.SphericalOrientation.html">SphericalOrientation</a></li><li><a href="LBUI3d.View3D.html">View3D</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBAssets_.html">LBAssets|</a></li><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBCurve.html">LBCurve</a></li><li><a href="LBDebug.html">LBDebug</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li><li><a href="LBUI3d.html">LBUI3d</a></li><li><a href="LBUtil.html">LBUtil</a></li><li><a href="LBVolume.html">LBVolume</a></li></ul><h3>Global</h3><ul><li><a href="global.html#.">.</a></li><li><a href="global.html#Detector">Detector</a></li><li><a href="global.html#THREE">THREE</a></li><li><a href="global.html#%257B@link">{@link</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Jul 29 2017 16:52:43 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Oct 14 2017 10:42:13 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
