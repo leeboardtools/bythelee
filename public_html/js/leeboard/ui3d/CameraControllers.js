@@ -226,9 +226,8 @@ LBUI3d.CameraController.MOUSE_ROTATE_MODE = 1;
 
 LBUI3d.CameraController.TRACKING_STATE_IDLE = 0;
 LBUI3d.CameraController.TRACKING_STATE_PAN = 1;
-LBUI3d.CameraController.TRACKING_STATE_END_PAN = 2;
-LBUI3d.CameraController.TRACKING_STATE_ROTATE = 3;
-LBUI3d.CameraController.TRACKING_STATE_END_ROTATE = 4;
+LBUI3d.CameraController.TRACKING_STATE_ROTATE = 2;
+LBUI3d.CameraController.TRACKING_STATE_ZOOM = 3;
 
 LBUI3d.CameraController.VIEW_FWD            = 0;
 LBUI3d.CameraController.VIEW_FWD_STBD       = 1;
@@ -360,10 +359,84 @@ LBUI3d.CameraController.prototype.endTracking = function(isCancel) {
         case LBUI3d.CameraController.TRACKING_STATE_ROTATE:
             this.finishRotate(isCancel);
             break;
+            
+        case LBUI3d.CameraController.TRACKING_STATE_ZOOM :
+            this.finishZoom(isCancel);
+            break;
     }
     
     this.trackingState = LBUI3d.CameraController.TRACKING_STATE_IDLE;
 };
+
+/**
+ * Starts tracking, called by the mouse down and on touch event handlers when appropriate.
+ * @param {Number} x    The x coordinate to start tracking at.
+ * @param {Number} y    The y coordinate to start tracking at.
+ * @param {Number} timeStamp    The event time stamp.
+ * @param {LBUI3d.CameraController.TRACKING_STATE_PAN|LBUI3d.CameraController.TRACKING_STATE_ROTATE} trackingState  The tracking
+ * state to enter.
+ * @returns {undefined}
+ */
+LBUI3d.CameraController.prototype.startTracking = function(x, y, timeStamp, trackingState) {
+    this.startX = x;
+    this.startY = y;
+
+    this.lastX = this.startX;
+    this.lastY = this.startY;
+    this.lastT = timeStamp;
+
+    this.deltaX = 0;
+    this.deltaY = 0;
+    this.deltaT = 0;
+
+    this.trackingState = trackingState;
+    
+    switch (trackingState) {
+        case LBUI3d.CameraController.TRACKING_STATE_PAN :
+            this.startPan();
+            break;
+
+        case LBUI3d.CameraController.TRACKING_STATE_ROTATE :
+            this.startRotate();
+            break;
+            
+        case LBUI3d.CameraController.TRACKING_STATE_ZOOM :
+            this.startZoom();
+            break;
+    }
+};
+
+/**
+ * Called by the mouse and touch move event handlers to track movements.
+ * @param {Number} x    The current x coordinate.
+ * @param {Number} y    The current y coordinate.
+ * @param {Number} timeStamp    The event time stamp.
+ * @returns {undefined}
+ */
+LBUI3d.CameraController.prototype.performTrack = function(x, y, timeStamp) {
+    this.deltaX = x - this.lastX;
+    this.deltaY = y - this.lastY;
+    this.deltaT = timeStamp - this.lastT;
+
+    switch (this.trackingState) {
+        case LBUI3d.CameraController.TRACKING_STATE_PAN :
+            this.trackPan(x, y, timeStamp);
+            break;
+
+        case LBUI3d.CameraController.TRACKING_STATE_ROTATE :
+            this.trackRotate(x, y, timeStamp);
+            break;
+            
+        case LBUI3d.CameraController.TRACKING_STATE_ZOOM :
+            this.trackZoom(x, y, timeStamp);
+            break;
+    }
+
+    this.lastX = x;
+    this.lastY = y;
+    this.lastT = timeStamp;
+};
+
 
 /**
  * Event handler for mouse wheel events.
@@ -388,18 +461,8 @@ LBUI3d.CameraController.prototype.onMouseDown = function(event) {
     event.preventDefault();
     
     if (event.button === 0) {
-        // Start tracking.
-        this.startX = event.clientX;
-        this.startY = event.clientY;
-
-        this.lastX = this.startX;
-        this.lastY = this.startY;
-        this.lastT = event.timeStamp;
-
-        this.deltaX = 0;
-        this.deltaY = 0;
-        this.deltaT = 0;
-
+        // Install our mouse move and up event handlers in the document to effectively capture
+        // mouse events.
         if (!this.onMouseMoveFuncion) {
             var me = this;
             this.onMouseMoveFunction = function(event) {
@@ -417,16 +480,14 @@ LBUI3d.CameraController.prototype.onMouseDown = function(event) {
 
             document.addEventListener('mouseup', this.onMouseUpFunction, false);
         }
-
+        
         switch (this.mouseMode) {
             case LBUI3d.CameraController.MOUSE_PAN_MODE :
-                this.trackingState = LBUI3d.CameraController.TRACKING_STATE_PAN;
-                this.startPan();
+                this.startTracking(event.clientX, event.clientY, event.timeStamp, LBUI3d.CameraController.TRACKING_STATE_PAN);
                 break;
 
             case LBUI3d.CameraController.MOUSE_ROTATE_MODE :
-                this.trackingState = LBUI3d.CameraController.TRACKING_STATE_ROTATE;
-                this.startRotate();
+                this.startTracking(event.clientX, event.clientY, event.timeStamp, LBUI3d.CameraController.TRACKING_STATE_ROTATE);
                 break;
         }
     }
@@ -441,24 +502,9 @@ LBUI3d.CameraController.prototype.onMouseMove = function(event) {
     event.preventDefault();
     
     if ((this.trackingState === LBUI3d.CameraController.TRACKING_STATE_PAN)
-     || (this.trackingState === LBUI3d.CameraController.TRACKING_STATE_ROTATE)) {
-        this.deltaX = event.clientX - this.lastX;
-        this.deltaY = event.clientY - this.lastY;
-        this.deltaT = event.timeStamp - this.lastT;
-
-        switch (this.mouseMode) {
-            case LBUI3d.CameraController.MOUSE_PAN_MODE :
-                this.trackPan(event);
-                break;
-
-            case LBUI3d.CameraController.MOUSE_ROTATE_MODE :
-                this.trackRotate(event);
-                break;
-        }
-
-        this.lastX = event.clientX;
-        this.lastY = event.clientY;
-        this.lastT = event.timeStamp;
+     || (this.trackingState === LBUI3d.CameraController.TRACKING_STATE_ROTATE)
+     || (this.trackingState === LBUI3d.CameraController.TRACKING_STATE_ZOOM)) {
+        this.performTrack(event.clientX, event.clientY, event.timeStamp);
     }
 };
 
@@ -470,8 +516,14 @@ LBUI3d.CameraController.prototype.onMouseMove = function(event) {
 LBUI3d.CameraController.prototype.onMouseUp = function(event) {
     event.preventDefault();
 
-    this.endTracking(false, event);
+    this.endTracking(false);
 };
+
+function touchDistance(event) {
+    var dx = event.touches[0].pageX - event.touches[1].pageX;
+    var dy = event.touches[0].pageY - event.touches[1].pageY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
 
 /**
  * The touch start event handler.
@@ -479,7 +531,23 @@ LBUI3d.CameraController.prototype.onMouseUp = function(event) {
  * @param {TouchEvent} event    The touch event.
  */
 LBUI3d.CameraController.prototype.onTouchStart = function(event) {
+    //event.preventDefault();
     
+    switch (event.touches.length) {
+        case 1 :
+            this.startTracking(event.touches[0].pageX, event.touches[0].pageY, event.timeStamp, 
+                LBUI3d.CameraController.TRACKING_STATE_ROTATE);
+            break;
+            
+        case 2 :
+            this.startTracking(touchDistance(event), 0, event.timeStamp, LBUI3d.CameraController.TRACKING_STATE_ZOOM);
+            break;
+            
+        case 3 :
+            this.startTracking(event.touches[0].pageX, event.touches[0].pageY, event.timeStamp, 
+                LBUI3d.CameraController.TRACKING_STATE_PAN);
+            break;
+    }
 };
 
 /**
@@ -488,7 +556,19 @@ LBUI3d.CameraController.prototype.onTouchStart = function(event) {
  * @param {TouchEvent} event    The touch event.
  */
 LBUI3d.CameraController.prototype.onTouchMove = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
     
+    switch (event.touches.length) {
+        case 1 :
+        case 3 :
+            this.performTrack(event.touches[0].pageX, event.touches[0].pageY, event.timeStamp);
+            break;
+            
+        case 2 :
+            this.performTrack(touchDistance(event), 0, event.timeStamp);
+            break;
+    }
 };
 
 /**
@@ -497,7 +577,9 @@ LBUI3d.CameraController.prototype.onTouchMove = function(event) {
  * @param {TouchEvent} event    The touch event.
  */
 LBUI3d.CameraController.prototype.onTouchEnd = function(event) {
+    event.preventDefault();
     
+    this.endTracking(false);
 };
 
 /**
@@ -533,6 +615,38 @@ LBUI3d.CameraController.prototype.setZoom = function(zoom) {
 
 
 /**
+ * Called to start zooming.
+ * @protected
+ */
+LBUI3d.CameraController.prototype.startZoom = function() {
+    this.startZoomScale = this.zoomScale;
+};
+
+/**
+ * Called to actively track a zoom.
+ * @protected
+ * @param {Number} x    The tracked x coordinate.
+ * @param {Number} y    The tracked y coordinate.
+ * @param {Number} timeStamp    The track event time stamp.
+ */
+LBUI3d.CameraController.prototype.trackZoom = function(x, y, timeStamp) {
+    this.setZoom(this.startZoomScale * x / this.startX);
+};
+
+/**
+ * Called to finish zoom tracking.
+ * @protected
+ * @param {Boolean} isCancel    If true the zoom should be cancelled.
+ */
+LBUI3d.CameraController.prototype.finishZoom = function(isCancel) {
+    if (isCancel) {
+        this.setZoom(this.startZoomScale);
+        return;
+    }
+};
+
+
+/**
  * Called to start panning.
  * @protected
  */
@@ -543,9 +657,11 @@ LBUI3d.CameraController.prototype.startPan = function() {
 /**
  * Called to actively track a pan.
  * @protected
- * @param {MouseEvent} event    The mouse event or equivalent.
+ * @param {Number} x    The tracked x coordinate.
+ * @param {Number} y    The tracked y coordinate.
+ * @param {Number} timeStamp    The track event time stamp.
  */
-LBUI3d.CameraController.prototype.trackPan = function(event) {
+LBUI3d.CameraController.prototype.trackPan = function(x, y, timeStamp) {
     
 };
 
@@ -569,9 +685,11 @@ LBUI3d.CameraController.prototype.startRotate = function() {
 /**
  * Called to actively track a rotation.
  * @protected
- * @param {MouseEvent} event    The mouse event or equivalent.
+ * @param {Number} x    The tracked x coordinate.
+ * @param {Number} y    The tracked y coordinate.
+ * @param {Number} timeStamp    The track event time stamp.
  */
-LBUI3d.CameraController.prototype.trackRotate = function(event) {
+LBUI3d.CameraController.prototype.trackRotate = function(x, y, timeStamp) {
     
 };
 
@@ -784,7 +902,7 @@ LBUI3d.LocalPOVCameraController.prototype.startPan = function() {
 };
 
 
-LBUI3d.LocalPOVCameraController.prototype.trackPan = function(event) {
+LBUI3d.LocalPOVCameraController.prototype.trackPan = function(x, y, timeStamp) {
 };
 
 
@@ -824,7 +942,7 @@ LBUI3d.LocalPOVCameraController.prototype.startRotate = function() {
 };
 
 
-LBUI3d.LocalPOVCameraController.prototype.trackRotate = function(event) {
+LBUI3d.LocalPOVCameraController.prototype.trackRotate = function(x, y, timeStamp) {
     if (!this.screenDistance) {
         return;
     }
@@ -832,7 +950,7 @@ LBUI3d.LocalPOVCameraController.prototype.trackRotate = function(event) {
     this.prevLocalOrientation = LBUI3d.SphericalOrientation.copyOrClone(this.prevLocalOrientation, 
         this.localOrientation);
 
-    this.workingOrientation = this.calcOrientationFromScreenPos(event.clientX, event.clientY, this.workingOrientation);
+    this.workingOrientation = this.calcOrientationFromScreenPos(x, y, this.workingOrientation);
     
     this.workingOrientation.azimuthDeg += this.originalLocalOrientation.azimuthDeg - this.startOrientation.azimuthDeg;
     this.workingOrientation.altitudeDeg += this.originalLocalOrientation.altitudeDeg - this.startOrientation.altitudeDeg;
@@ -852,12 +970,12 @@ LBUI3d.LocalPOVCameraController.prototype.finishRotate = function(isCancel) {
     if ((this.deltaT > 0) && (this.deceleration > 0)) {
         // If we have an orientation change, then we have a velocity that we can 
         // decelerate to 0.
-        var vAzimuthDeg = (this.localOrientation.azimuthDeg - this.prevOrientation.azimuthDeg) / this.deltaT;
+        var vAzimuthDeg = (this.localOrientation.azimuthDeg - this.prevLocalOrientation.azimuthDeg) / this.deltaT;
         if (LBMath.isLikeZero(vAzimuthDeg)) {
             vAzimuthDeg = 0;
         }
 
-        var vAltitudeDeg = (this.localOrientation.altitudeDeg - this.prevOrientation.altitudeDeg) / this.deltaT;
+        var vAltitudeDeg = (this.localOrientation.altitudeDeg - this.prevLocalOrientation.altitudeDeg) / this.deltaT;
         if (LBMath.isLikeZero(vAltitudeDeg)) {
             vAltitudeDeg = 0;
         }

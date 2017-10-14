@@ -26,6 +26,8 @@ are both checked.
 
 TODO:
 
+Detect no mouse, remove pan/rotate control if no mouse.
+
 View controllers to have:
 Follow at distance
 First Person (On boat, could choose different boats)
@@ -64,7 +66,7 @@ Follow:
 <i class="material-icons">&#xE925;</i>
 
 
-Put Wind Indicator on Boat
+Put Wind Indicator on Boat, mast head?
 
 Add drop-down button for toggling force arrows.
 

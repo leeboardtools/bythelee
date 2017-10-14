@@ -24,7 +24,7 @@ function LBMyApp() {
     
     var mainViewContainer = document.getElementById('main_view');
     this.mainView = new LBUI3d.View3D(this.mainScene, mainViewContainer);
-    this.addNormalView(this.mainView);
+    this.addNormalView(this.mainView, LBUI3d.CameraController.VIEW_FWD);
     
     this.activeView = this.mainView;
     
@@ -77,18 +77,33 @@ function LBMyApp() {
 LBMyApp.prototype = Object.create(LBUI3d.App3D.prototype);
 LBMyApp.prototype.constructor = LBMyApp;
 
-LBMyApp.prototype.addNormalView = function(view) {
+LBMyApp.prototype.addNormalView = function(view, standardView) {
     view.localPOVCameraController = new LBUI3d.LocalPOVCameraController();
     view.addCameraController(view.localPOVCameraController);
+    
+    // The x-axis of the boat faces aft, and the origin is near the bow. We want to look forward from the cockpit.
+    // TODO: Need to set the cockpit location from the boat's data...
+    view.localPOVCameraController.localPosition.set(3, 0, 1.0);
+    view.localPOVCameraController.localOrientation.azimuthDeg = 180;
+    view.localPOVCameraController.forwardAzimuthDeg = 180;
     
     //view.followController = new LBUI3d.FollowCameraController(view.camera);
     //view.addCameraController(view.followController);
     
     view.setActiveCameraController(view.localPOVCameraController);
     //view.setActiveCameraController(view.followController);
+
+    if (this.myBoat) {
+        var me = this;
+        view.cameraControllers.forEach(function(controller) {
+                controller.setTarget(me.myBoat.obj3D);
+            });
+    }
     
-    view.installOrbitControls(3, 10000, Math.PI * 0.5, false);
+    //view.installOrbitControls(3, 10000, Math.PI * 0.5, false);
     this.addView(view);
+    
+    view.localPOVCameraController.setStandardView(standardView);
 };
 
 LBMyApp.prototype.init = function(mainContainer) {
@@ -309,6 +324,10 @@ LBMyApp.prototype.onKeyDownEvent = function(event) {
                 LBMyApp.moveControllerWithKey(this.myBoat.getMainsheetController(), event, true, this.mainsheetControl);
                 return;
             }
+            break;
+            
+        case 'Escape' :
+            this.activeView.activeCameraController.endTracking(true);
             break;
             
         case 'q' :
@@ -603,9 +622,9 @@ LBMyApp.prototype.toggleMap = function() {
     }
 };
 
-LBMyApp.prototype.createPIPView = function(pipElement) {
+LBMyApp.prototype.createPIPView = function(pipElement, standardView) {
     var view = new LBUI3d.View3D(this.mainScene, pipElement);
-    this.addNormalView(view);
+    this.addNormalView(view, standardView);
     return view;
 };
 
@@ -615,7 +634,7 @@ LBMyApp.prototype.togglePIPLowerLeft = function() {
     
     if (isOn) {
         if (!this.pipLowerLeftView) {
-            this.pipLowerLeftView = this.createPIPView(element);
+            this.pipLowerLeftView = this.createPIPView(element, LBUI3d.CameraController.VIEW_AFT_STBD);
         }
         this.pipLowerLeftView.isEnabled = true;
     }
@@ -637,7 +656,7 @@ LBMyApp.prototype.togglePIPLowerRight = function() {
     
     if (isOn) {
         if (!this.pipLowerRightView) {
-            this.pipLowerRightView = this.createPIPView(element);
+            this.pipLowerRightView = this.createPIPView(element, LBUI3d.CameraController.VIEW_AFT_PORT);
         }
         this.pipLowerRightView.isEnabled = true;
     }
