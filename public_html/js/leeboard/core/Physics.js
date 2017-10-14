@@ -16,6 +16,8 @@
 
 define(['lbutil', 'lbmath', 'lbgeometry', 'lbvolume'],
 function(LBUtil, LBMath, LBGeometry, LBVolume) {
+
+    'use strict';
     
 
 /**

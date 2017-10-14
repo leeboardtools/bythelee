@@ -16,7 +16,10 @@
 
 
 /* global THREE, LBUI3d */
-define(['three', 'lbscene3d', 'lbcamera', 'lbcameracontrollers', 'three-orbit'], function(THREE, LBUI3d, LBCamera) {
+define(['three', 'lbscene3d', 'lbcamera', 'lbcameracontrollers', 'three-orbit'], 
+function(THREE, LBUI3d, LBCamera) {
+
+    'use strict';
 
 
 /**

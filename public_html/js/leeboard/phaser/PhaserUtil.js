@@ -17,6 +17,9 @@
 define(['lbmath', 'lbgeometry', 'phaser'],
 function(LBMath, LBGeometry, Phaser) {
 
+    'use strict';
+
+
 /**
  * @namespace LBPhaser
  */

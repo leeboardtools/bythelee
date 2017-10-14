@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-define(['lbcamera', 'lbscene3d', 'lbgeometry', 'lbmath'],
-function(LBCamera, LBUI3d, LBGeometry, LBMath) {
+define(['lbcamera', 'lbscene3d', 'lbgeometry', 'lbmath', 'lbutil'],
+function(LBCamera, LBUI3d, LBGeometry, LBMath, LBUtil) {
+
+    'use strict';
 
 
 /**
@@ -193,18 +195,16 @@ LBUI3d.SphericalOrientation.prototype = {
     constructor: LBUI3d.SphericalOrientation
 };
 
-/**
- * Creates a copy or a clone of an {@link LBUI3d.SphericalOrientation}, depending
- * upon whether or not the destination exists.
- * @param {LBUI3d.SphericalOrientation} dst If defined, the destination object to be
- * copied into, otherwise a new object is created.
- * @param {LBUI3d.SphericalOrientation} src The object to be copied or cloned.
- * @returns {LBUI3d.SphericalOrientation}   A copy or clone of src.
- */
-LBUI3d.SphericalOrientation.copyOrClone = function(dst, src) {
-    return (dst) ? dst.copy(src) : src.clone();
+
+LBUI3d.SphericalPoint = function(radius, azimuthDeg, altitudeDeg) {
+    this.radius = radius || 0;
+    this.azimuthDeg = azimuthDeg || 0;
+    this.altitudeDeg = altitudeDeg || 0;
 };
 
+LBUI3d.SphericalPoint.prototype = {
+    constructor: LBUI3d.SphericalPoint
+};
 
 var _workingPosition = new LBGeometry.Vector3();
 var _workingOrientation = new LBUI3d.SphericalOrientation();
@@ -1037,8 +1037,8 @@ LBUI3d.LocalPOVCameraController.prototype.requestLocalCameraPOVDeceleration = fu
     }
     
     this.currentTransitionTime = dt;
-    this.localPositionVel = LBGeometry.Vector3.copyOrClone(this.localPositionVel, positionVel);
-    this.localOrientationVel = LBUI3d.SphericalOrientation.copyOrClone(this.localOrientationVel, orientationVel);
+    this.localPositionVel = LBUtil.copyOrClone(this.localPositionVel, positionVel);
+    this.localOrientationVel = LBUtil.copyOrClone(this.localOrientationVel, orientationVel);
     
     this.localPositionDecel = this.localPositionDecel || new LBGeometry.Vector3();
     this.localPositionDecel.x = calcDecelRateForTime(positionVel.x, dt);
@@ -1107,8 +1107,8 @@ LBUI3d.LocalPOVCameraController.prototype.panPOV = function(dx, dy) {
 
 
 LBUI3d.LocalPOVCameraController.prototype.startPan = function() {
-    this.originalLocalPosition = LBGeometry.Vector3.copyOrClone(this.originalLocalPosition, this.localPosition);
-    this.originalLocalOrientation = LBUI3d.SphericalOrientation.copyOrClone(this.originalLocalOrientation, 
+    this.originalLocalPosition = LBUtil.copyOrClone(this.originalLocalPosition, this.localPosition);
+    this.originalLocalOrientation = LBUtil.copyOrClone(this.originalLocalOrientation, 
         this.localOrientation);
         
     this.screenDistance = this.calcScreenDistance();
@@ -1153,8 +1153,8 @@ LBUI3d.LocalPOVCameraController.prototype.calcOrientationFromScreenPos = functio
 LBUI3d.LocalPOVCameraController.prototype.startRotate = function() {
     this.currentTransitionTime = 0;
     
-    this.originalLocalPosition = LBGeometry.Vector3.copyOrClone(this.originalLocalPosition, this.localPosition);
-    this.originalLocalOrientation = LBUI3d.SphericalOrientation.copyOrClone(this.originalLocalOrientation, 
+    this.originalLocalPosition = LBUtil.copyOrClone(this.originalLocalPosition, this.localPosition);
+    this.originalLocalOrientation = LBUtil.copyOrClone(this.originalLocalOrientation, 
         this.localOrientation);
         
 
@@ -1170,7 +1170,7 @@ LBUI3d.LocalPOVCameraController.prototype.trackRotate = function(x, y, timeStamp
         return;
     }
     
-    this.prevLocalOrientation = LBUI3d.SphericalOrientation.copyOrClone(this.prevLocalOrientation, 
+    this.prevLocalOrientation = LBUtil.copyOrClone(this.prevLocalOrientation, 
         this.localOrientation);
 
     this.workingOrientation = this.calcOrientationFromScreenPos(x, y, this.workingOrientation);
@@ -1206,7 +1206,7 @@ LBUI3d.LocalPOVCameraController.prototype.finishRotate = function(isCancel) {
 /**
  * A camera controller that tries to follow the target at a given position relative to the
  * target. This differs from {@link LBUI3d.LocalPOVCameraController} in that for this
- * the camera is looking at the target, whereas for the first person controller the
+ * the camera is looking towards the target, whereas for the first person controller the
  * camera is looking from the target.
  * @constructor
  * @param {LBUI3d.CameraLimits} [globalLimits]   Optional limits on the global camera position.

@@ -17,6 +17,8 @@
 define(['lbmath', 'lbgeometry'],
 function(LBMath, LBGeometry) {
 
+    'use strict';
+
 
 /**
  * 

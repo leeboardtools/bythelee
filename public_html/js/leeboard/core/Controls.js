@@ -18,6 +18,7 @@
 define(['lbutil', 'lbmath'],
 function(LBUtil, LBMath) {
     
+    'use strict';
 
 /**
  * @namespace LBControls

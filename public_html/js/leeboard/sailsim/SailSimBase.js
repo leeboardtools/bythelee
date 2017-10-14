@@ -22,6 +22,8 @@ define(function() {
  */
 var LBSailSim = LBSailSim || {};
 
+    'use strict';
+
 return LBSailSim;
 
 });

@@ -18,6 +18,8 @@
 define(['lbutil', 'lbgeometry', 'lbphysics', 'cannon'],
 function(LBUtil, LBGeometry, LBPhysics, CANNON) {
 
+    'use strict';
+
 /**
  * @namespace LBCannon
  */

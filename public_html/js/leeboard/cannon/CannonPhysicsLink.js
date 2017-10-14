@@ -18,6 +18,8 @@
 define(['lbcannonutil', 'lbgeometry', 'lbphysics', 'cannon', 'lbphysicslink'],
 function(LBCannon, LBGeometry, LBPhysics, CANNON, LBPhysicsLink) {
 
+    'use strict';
+
 /**
  * Manages linking a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}
  * with a {@link LBPhysics.RigidBody}.

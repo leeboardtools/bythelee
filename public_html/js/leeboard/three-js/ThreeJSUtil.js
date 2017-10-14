@@ -18,6 +18,9 @@
 /* global LBGeometry */
 
 define(['lbgeometry'], function(LBGeometry) {
+
+    'use strict';
+
     
 /**
  * 

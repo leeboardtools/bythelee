@@ -20,5 +20,8 @@
 
 define(['lbphaserutil', 'lbphaserp2link', 'lbphasercontrols', 'lbphaserphysicsview', 'lbphaserproject3d'], 
 function(LBPhaser) {
+
+    'use strict';
+
     return LBPhaser;
 });

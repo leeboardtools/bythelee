@@ -18,6 +18,9 @@
 define(['lbphaserutil', 'lbutil', 'lbmath', 'lbgeometry', 'phaser'],
 function(LBPhaser, LBUtil, LBMath, LBGeometry, Phaser) {
 
+    'use strict';
+
+
 /**
  * A Phaser view onto physics objects represented via a {@link LBPhysics.PhysicsLink}.
  * @param {LBPhysics.PhysicsLink} physicsLink    The physics link containing the physics objects.

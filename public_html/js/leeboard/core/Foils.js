@@ -17,6 +17,8 @@
 define(['lbutil', 'lbmath', 'lbgeometry', 'lbphysics'],
 function(LBUtil, LBMath, LBGeometry, LBPhysics) {
     
+    'use strict';
+
 
 /**
  * @namespace LBFoils
@@ -636,7 +638,7 @@ LBFoils.Foil.prototype = {
         
         if (details) {
             details.angleDeg = angleDeg;
-            details.qInfLocal = LBGeometry.Vector3.copyOrClone(details.qInfLocal, qInfLocal);
+            details.qInfLocal = LBUtil.copyOrClone(details.qInfLocal, qInfLocal);
         }
         return LBFoils.ClCd.calcLiftDragMoment(coefs, rho, this.area, qInfSpeed, qInfLocal, chordLength, this.aspectRatio, store);
     },
@@ -720,7 +722,7 @@ LBFoils.Foil.prototype = {
         }
         
         if (details) {
-            details.worldVel = LBGeometry.Vector3.copyOrClone(details.worldVel, velResults.worldVel);
+            details.worldVel = LBUtil.copyOrClone(details.worldVel, velResults.worldVel);
         }
         
         appVel.negate();

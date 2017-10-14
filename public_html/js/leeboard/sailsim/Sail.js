@@ -16,6 +16,8 @@
 
 define(['lbsailsimbase', 'lbutil', 'lbmath', 'lbgeometry', 'lbcurve', 'lbcontrols', 'lbphysics', 'lbfoils', 'lbfoilinstance'], 
 function(LBSailSim, LBUtil, LBMath, LBGeometry, LBCurve, LBControls, LBPhysics, LBFoils) {
+
+    'use strict';
     
 
 /**

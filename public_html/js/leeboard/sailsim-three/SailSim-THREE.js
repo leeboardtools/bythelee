@@ -15,8 +15,11 @@
  */
 
 
-define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets', 'lbui3d'], function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d) {
+define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets', 'lbui3d'], 
+function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d) {
     
+    'use strict';
+
 
 /**
  * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2} or Cannon physics.

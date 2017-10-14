@@ -17,6 +17,9 @@
     
 define(['lbphysics', 'lbgeometry', 'lbsailsimbase', 'lbmath'], 
 function(LBPhysics, LBGeometry, LBSailSim, LBMath) {
+
+    'use strict';
+
     
 /**
  * An instance of a propulsor, which is an object that exerts some type of propulsive

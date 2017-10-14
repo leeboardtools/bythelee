@@ -18,6 +18,9 @@
 define(['lbsailsimbase', 'lbmath'], 
 function(LBSailSim, LBMath) {
 
+    'use strict';
+
+
 LBSailSim.Delft = {};
 
 /**

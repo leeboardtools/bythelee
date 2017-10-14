@@ -15,5 +15,7 @@
  */
 
 define(['lbscene3d', 'lbview3d', 'lbapp3d', 'lbcameracontrollers', 'three-detector'], function(LBUI3d) {
+    'use strict';
+
     return LBUI3d;
 });

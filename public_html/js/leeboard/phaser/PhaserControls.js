@@ -18,6 +18,9 @@
 define(['lbphaserutil', 'lbmath', 'phaser'],
 function(LBPhaser, LBMath, Phaser) {
 
+    'use strict';
+
+
 
 /**
  * A Phaser based slider control, the control contains a thumb that moves along either

@@ -18,6 +18,8 @@
 /* global THREE, LBMath */
 define(['three'], function(THREE) {
 
+    'use strict';
+
 /**
  * 
  * @namespace LBUI3d

@@ -15,7 +15,11 @@
  */
 
 
-define(['lbsailsim', 'lbcannonphysicslink', 'lbphaser'], function(LBSailSim, LBCannon, LBPhaser) {
+define(['lbsailsim', 'lbcannonphysicslink', 'lbphaser'], 
+function(LBSailSim, LBCannon, LBPhaser) {
+
+    'use strict';
+
 
 /**
  * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2} or Cannon physics.

@@ -17,6 +17,9 @@
 define(['lbphaserutil', 'lbmath', 'lbutil', 'lbcamera', 'lbgeometry', 'phaser'],
 function(LBPhaser, LBMath, LBUtil, LBCamera, LBGeometry, Phaser) {
 
+    'use strict';
+
+
 /**
  * This is a hack projection of 3D objects onto the Phaser 2D surface using
  * a {@link Phaser.Graphics} object.

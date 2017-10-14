@@ -17,6 +17,8 @@
 
 define(function() {
 
+    'use strict';
+
 /**
  * 
  * @namespace LBAssets

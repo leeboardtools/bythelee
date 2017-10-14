@@ -19,6 +19,9 @@
 define(['lbutil', 'lbscene3d', 'lbview3d'], 
 function(LBUtil, LBUI3d) {
 
+    'use strict';
+
+
 /**
  * Our 3D application framework.
  * @constructor

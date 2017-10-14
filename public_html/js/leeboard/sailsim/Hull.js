@@ -18,6 +18,8 @@
 define(['lbsailsimbase', 'lbutil', 'lbmath', 'lbgeometry', 'lbvolume', 'lbphysics', 'lbdelft', 'lbdebug'],
 function(LBSailSim, LBUtil, LBMath, LBGeometry, LBVolume, LBPhysics, LBDelft, LBDebug) {
     
+    'use strict';
+
 
 /**
  * Spline used for calculating the friction coefficient Cf given the roughness

@@ -17,6 +17,8 @@
 define(['lbsailsimbase', 'lbsail', 'lbhull', 'lbpropulsor', 'lbcontrols', 'lbphysics', 'lbutil', 'lbmath', 'lbgeometry', 'lbdebug', 'lbfoilinstance'], 
 function(LBSailSim, LBSail, LBHull, LBPropulsor, LBControls, LBPhysics, LBUtil, LBMath, LBGeometry, LBDebug) {
 
+    'use strict';
+
 /**
  * A controller for rudders. This supports controlling more than one rudder, though
  * it only has a single rudder angle.

@@ -18,6 +18,8 @@
 define(['three'],
 function(THREE) {
 
+    'use strict';
+
 /**
  * 
  * @namespace   LBCamera

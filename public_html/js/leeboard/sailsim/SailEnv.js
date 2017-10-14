@@ -17,6 +17,8 @@
 define(['lbutil', 'lbmath', 'lbgeometry', 'lbphysics', 'lbfoils', 'lbsailsimbase', 'lbassets', 'lbvessel'], 
 function(LBUtil, LBMath, LBGeometry, LBPhysics, LBFoils, LBSailSim, LBAssets) {
     
+    'use strict';
+
 
 /**
  * The main sailing environment, basically the sailing world.

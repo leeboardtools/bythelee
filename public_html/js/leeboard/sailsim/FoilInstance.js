@@ -19,6 +19,8 @@
 define(['lbphysics', 'lbfoils', 'lbgeometry', 'lbdebug', 'lbsailsimbase'], 
 function(LBPhysics, LBFoils, LBGeometry, LBDebug, LBSailSim) {
     
+    'use strict';
+
 
 /**
  * An instance of a foil, a foil is something that generates a force due

@@ -20,6 +20,8 @@
 
 define(['lbcannonphysicslink', 'lbcannonutil'], 
 function(LBCannon) {
+
+    'use strict';
     
     return LBCannon;
 });

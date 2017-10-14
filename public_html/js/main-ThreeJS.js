@@ -18,6 +18,9 @@
 require( ['three', 'lbsailsim', 'lbui3d', 'lbutil', 'lbmath', 'lbgeometry', 'lbassets', 'lbsailsimthree'],
     function(THREE, LBSailSim, LBUI3d, LBUtil, LBMath, LBGeometry, LBAssets) {
         
+        
+    'use strict';
+        
 function LBMyApp() {
     LBUI3d.App3D.call(this);
     this.mainScene.coordMapping = LBUI3d.ZIsUpCoordMapping;
@@ -784,8 +787,9 @@ if ( ! Detector.webgl ) {
     mainErrorElement.style.visibility = "visible";
 }
 else {
-    myApp = new LBMyApp();
-    myApp.start(document.getElementById('main_view'));
+    // Putting myApp in window so it can be called from HTML event handlers.
+    window.myApp = new LBMyApp();
+    window.myApp.start(document.getElementById('main_view'));
 }
 
 }

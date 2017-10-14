@@ -15,7 +15,11 @@
  */
 
 
-define(['lbsailsim', 'lbphaser'], function(LBSailSim, LBPhaser) {
+define(['lbsailsim', 'lbphaser'], 
+function(LBSailSim, LBPhaser) {
+
+    'use strict';
+
 
 /**
  * Base class for the sailsim Phaser views.

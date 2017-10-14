@@ -16,6 +16,8 @@
     
 define(['lbutil'],
 function(LBUtil) {
+
+    'use strict';
     
 
 /**

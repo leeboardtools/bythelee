@@ -15,6 +15,8 @@
  */
 
 define(function() {
+
+    'use strict';
     
 /**
  * @namespace LBUtil
@@ -164,6 +166,24 @@ LBUtil.copyAndMirrorArray = function(array) {
         newArray.push(array[i]);
     }
     return newArray;
+};
+
+
+/**
+ * If a destination object exists, a source object is copied to it using a copy
+ * member function, otherwise the source object is cloned using a clone member function.
+ * <p>
+ * Typical usage is:
+ * <p>
+ *      dst = LBUtil.copyOrClone(dst, src);
+ * 
+ * @param {Object} dst  The destination object, may be undefined or null. If it exists,
+ * it must have a copy method.
+ * @param {Object} src  The source object, must have a clone method.
+ * @returns {Object}    dst if dst existed, the clone of src if it did not.
+ */
+LBUtil.copyOrClone = function(dst, src) {
+    return (dst) ? dst.copy(src) : src.clone();
 };
 
 

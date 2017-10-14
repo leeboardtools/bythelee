@@ -16,6 +16,8 @@
 
 define(function() {
     
+    'use strict';
+
 /**
  * 
  * @namespace LBDebug

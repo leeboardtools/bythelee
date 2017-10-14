@@ -17,6 +17,7 @@
 define(['three', 'lbutil', 'lbmath'],
 function(THREE, LBUtil, LBMath) {
     
+    'use strict';
 
 /**
  * The geometry components are primarily based upon the THREE.js
@@ -303,21 +304,6 @@ LBGeometry.Vector3.prototype.zero = function() {
  */
 LBGeometry.Vector3.prototype.isZero = function() {
     return this.x === 0 && this.y === 0 && this.z === 0;
-};
-
-/**
- * Helper that copies a source vector to a destination vector, or if the destination vector
- * is undefined clones the source vector.
- * <p>
- * Use is:
- * <p>
- *      vec = LBGeometry.Vector3.copyOrClone(vec, srcVec);
- * @param {LBGeometry.Vector3} dstVec   The destination vector, may be undefined.
- * @param {LBGeometry.Vector3} srcVec   The source vector, should not be undefined.
- * @returns {LBGeometry.Vector3}    dstVec if dstVec was defined, the clone of srcVec if not defined.
- */
-LBGeometry.Vector3.copyOrClone = function(dstVec, srcVec) {
-    return (dstVec) ? dstVec.copy(srcVec) : srcVec.clone();
 };
 
 /**

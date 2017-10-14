@@ -22,6 +22,9 @@
 define(['lbsailsimbase', 'lbutil', 'lbdelft', 'lbfoilinstance', 'lbhull', 'lbpropulsor', 'lbsail', 'lbsailenv', 'lbvessel'], 
 function(LBSailSim, LBUtil) {
 
+    'use strict';
+
+
 LBUtil.registerNamespace('LBSailSim', LBSailSim);
 
 /**

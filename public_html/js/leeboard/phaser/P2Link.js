@@ -18,6 +18,9 @@
 define(['lbphaserutil', 'lbutil', 'lbgeometry', 'lbphysics', 'phaser', 'lbphysicslink'],
 function(LBPhaser, LBUtil, LBGeometry, LBPhysics, Phaser, LBPhysicsLink) {
 
+    'use strict';
+
+
 /**
  * Manages linking a {@link https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body|Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody}, updating
  * the position/rotation of the rigid body from the P2 body and applying the forces

@@ -17,6 +17,8 @@
 
 define(['lbphysics'],
 function(LBPhysics) {
+
+    'use strict';
     
 
 /**
