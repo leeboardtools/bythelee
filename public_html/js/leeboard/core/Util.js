@@ -412,10 +412,10 @@ LBUtil.toggleFullScreen = function(element) {
         exitFullscreen = document.webkitExitFullscreen;
     }
     else if (element.mozRequestFullScreen) {
-        fullscreenEnabled = document.mozFullscreenEnabled;
-        fullscreenElement = document.mozFullscreenElement;
+        fullscreenEnabled = document.mozFullScreenEnabled;
+        fullscreenElement = document.mozFullScreenElement;
         requestFullscreen = element.mozRequestFullScreen;
-        exitFullscreen = document.mozCancelFullscreen;
+        exitFullscreen = document.mozCancelFullScreen;
     }
     else if (element.msRequestFullscreen) {
         fullscreenEnabled = document.msFullscreenEnabled;
