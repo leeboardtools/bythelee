@@ -26,6 +26,7 @@ var LBUI3d = LBUI3d || {};
 
 
 /**
+ * Our repesentation of a scene.
  * @constructor
  * @returns {LBUI3d.Scene3D}
  */
@@ -36,6 +37,9 @@ LBUI3d.Scene3D = function() {
     this.mainLight = new THREE.DirectionalLight(0xffffff, 1);
     this.scene.add(this.mainLight);
     
+    /**
+     * Object used for coordinate mapping to the underlying scene's coordinate system.
+     */
     this.coordMapping = LBUI3d.DirectCoordMapping;
 };
 
@@ -43,9 +47,6 @@ LBUI3d.Scene3D.prototype = {
     constructor: LBUI3d.Scene3D
 };
 
-LBUI3d.Scene3D.prototype.getBackgroundColor = function() {
-    return this.scene.background;
-};
 
 /**
  * Loads a Blender model that was exported to a JSON. This currently encapsulates the
@@ -110,6 +111,10 @@ LBUI3d.Scene3D.prototype.loadJSONModel = function(url, onLoad, onProgress, onErr
 };
 
 
+/**
+ * Provides a one-to-one coordinate mapping between our coordinate system and
+ * the underlying scene's coordinate system. This mapping presumes the Y axis is up.
+ */
 LBUI3d.DirectCoordMapping = {
     vector3ToThreeJS: function(vec, vecThree) {
         return vecThree.copy(vec);
@@ -131,6 +136,10 @@ LBUI3d.DirectCoordMapping = {
     }
 };
 
+/**
+ * Provides a mapping from a Z axis is up coordinate system to the underlying scene's
+ * Y axis is up coordinate system.
+ */
 LBUI3d.ZIsUpCoordMapping = {
     vector3ToThreeJS: function(vec, vecThree) {
         return vecThree.set(vec.x, vec.z, -vec.y);

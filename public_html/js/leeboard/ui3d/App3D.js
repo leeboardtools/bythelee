@@ -81,24 +81,44 @@ LBUI3d.App3D.prototype = {
     constructor: LBUI3d.App3D
 };
 
+/**
+ * The main initialization function.
+ * @protected
+ * @param {Object} mainContainer    The main DOM container.
+ */
 LBUI3d.App3D.prototype.init = function(mainContainer) {
     this.mainContainer = mainContainer;
     var me = this;
     window.addEventListener('resize', function() { me.onWindowResize(); }, false);
 };
 
+/**
+ * Retrieves the current run state, one of the LBUI3d.App3D.RUN_STATE_ constants.
+ * @return {Number} The current run state.
+ */
 LBUI3d.App3D.prototype.getRunState = function() {
     return this._runState;
 };
 
+/**
+ * 
+ * @return {Boolean}    True if the application run state is running.
+ */
 LBUI3d.App3D.prototype.isRunning = function() {
     return this._runState === LBUI3d.App3D.RUN_STATE_RUNNING;
 };
 
+/**
+ * 
+ * @return {Boolean}    True if the application run state is paused.
+ */
 LBUI3d.App3D.prototype.isPaused = function() {
     return this._runState === LBUI3d.App3D.RUN_STATE_PAUSED;
 };
 
+/**
+ * Toggles the application run state between running and paused.
+ */
 LBUI3d.App3D.prototype.togglePaused = function() {
     if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
         this.pause();
@@ -108,12 +128,18 @@ LBUI3d.App3D.prototype.togglePaused = function() {
     }
 };
 
+/**
+ * Puts the application run state into pause.
+ */
 LBUI3d.App3D.prototype.pause = function() {
     if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
         this._runState = LBUI3d.App3D.RUN_STATE_PAUSED;
     }
 };
 
+/**
+ * Puts the application run state into continuous running.
+ */
 LBUI3d.App3D.prototype.runContinuous = function() {
     if (this._runState !== LBUI3d.App3D.RUN_STATE_RUNNING) {
         this._runState = LBUI3d.App3D.RUN_STATE_RUNNING;
@@ -121,6 +147,9 @@ LBUI3d.App3D.prototype.runContinuous = function() {
     }
 };
 
+/**
+ * Performs one simulation/render pass and the puts the application run state into pause.
+ */
 LBUI3d.App3D.prototype.runSingleStep = function() {
     if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
         this.enterPaused();
@@ -131,11 +160,19 @@ LBUI3d.App3D.prototype.runSingleStep = function() {
     }
 };
 
+/**
+ * Adds a view to the application.
+ * @param {LBUI3d.View} view    The view to add.
+ */
 LBUI3d.App3D.prototype.addView = function(view) {
     this.views.push(view);
     view.setMouseMode(this.mouseMode);
 };
 
+/**
+ * Removes a view from the application.
+ * @param {LBUI3d.View} view    The view to remove.
+ */
 LBUI3d.App3D.prototype.removeView = function(view) {
     var index = this.views.indexOf(view);
     if (index >= 0) {
@@ -143,6 +180,10 @@ LBUI3d.App3D.prototype.removeView = function(view) {
     }
 };
 
+/**
+ * Changes the mouse mode of all the views and their camera controllers.
+ * @param {Number} mode The mouse mode to set.
+ */
 LBUI3d.App3D.prototype.setMouseMode = function(mode) {
     if (this.mouseMode !== mode) {
         this.views.forEach(function(view) {
@@ -152,14 +193,24 @@ LBUI3d.App3D.prototype.setMouseMode = function(mode) {
     }
 };
 
+/**
+ * Sets the current mouse mode to rotate.
+ */
 LBUI3d.App3D.prototype.setRotateMode = function() {
     this.setMouseMode(LBUI3d.View3D.MOUSE_ROTATE_MODE);
 };
 
+/**
+ * Sets the current mouse mode to pan.
+ */
 LBUI3d.App3D.prototype.setPanMode = function() {
     this.setMouseMode(LBUI3d.View3D.MOUSE_PAN_MODE);
 };
 
+/**
+ * Changes the current mouse mode to the 'next' mouse mode.
+ * @return {Number} The newly set mouse mode.
+ */
 LBUI3d.App3D.prototype.nextMouseMode = function() {
     switch (this.mouseMode) {
     case LBUI3d.View3D.MOUSE_PAN_MODE :
@@ -173,28 +224,48 @@ LBUI3d.App3D.prototype.nextMouseMode = function() {
     return this.mouseMode;
 };
 
+/**
+ * The 'resize' event handler for the top-level window.
+ * @protected
+ */
 LBUI3d.App3D.prototype.onWindowResize = function() {
     this.views.forEach(function(view) {
         view.onWindowResize();
     });
 };
 
+/**
+ * Toggles full screen mode.
+ * @param {Object} container    A DOM container object.
+ * @return {unresolved}
+ */
 LBUI3d.App3D.prototype.toggleFullScreen = function(container) {
     container = container || this.mainContainer;
     return LBUtil.toggleFullScreen(container);
 };
 
-
+/**
+ * Called each cycle, before {@link LBUI3d.App3D.render}.
+ * @protected
+ */
 LBUI3d.App3D.prototype.update = function() {
     
 };
 
+/**
+ * Called each render cycle.
+ * @protected
+ */
 LBUI3d.App3D.prototype.render = function() {
     this.views.forEach(function(view) {
-        view.render(this.lastFrameMillisecs);
+        view.render(this.lastFrameMillisecs / 1000);
     });
 };
 
+/**
+ * Called each time the number of frames per second has been updated.
+ * @protected
+ */
 LBUI3d.App3D.prototype.fpsUpdated = function() {
     
 };
@@ -229,6 +300,12 @@ function LBUI3dApp3DAnimate(timeStamp) {
     LBUI3d.App3D.activeApp._cycle(timeStamp);
 }
 
+/**
+ * The main function for starting the application.
+ * @param {Object} mainContainer    The main DOM container.
+ * @param {Boolean} [startPaused=false] If true the application is started in the
+ * paused state.
+ */
 LBUI3d.App3D.prototype.start = function(mainContainer, startPaused) {
     LBUI3d.App3D.activeApp = this;
     

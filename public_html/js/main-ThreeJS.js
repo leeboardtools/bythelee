@@ -26,6 +26,8 @@ function LBMyApp() {
     this.mainView = new LBUI3d.View3D(this.mainScene, mainViewContainer);
     this.addNormalView(this.mainView);
     
+    this.activeView = this.mainView;
+    
     this.pipLowerLeftView = undefined;
     this.pipLowerRightView = undefined;
     
@@ -76,7 +78,7 @@ LBMyApp.prototype = Object.create(LBUI3d.App3D.prototype);
 LBMyApp.prototype.constructor = LBMyApp;
 
 LBMyApp.prototype.addNormalView = function(view) {
-    view.localPOVCameraController = new LBUI3d.LocalPOVCameraController(view.camera);
+    view.localPOVCameraController = new LBUI3d.LocalPOVCameraController();
     view.addCameraController(view.localPOVCameraController);
     
     //view.followController = new LBUI3d.FollowCameraController(view.camera);
@@ -184,7 +186,8 @@ LBMyApp.prototype.loadEnvCompleted = function() {
             // The x-axis of the boat faces aft, and the origin is near the bow. We want to look forward from the cockpit.
             // TODO: Need to set the cockpit location from the boat's data...
             view.localPOVCameraController.localPosition.set(3, 0, 1.0);
-            view.localPOVCameraController.localSphericalOrientation.azimuthDeg = 180;
+            view.localPOVCameraController.localOrientation.azimuthDeg = 180;
+            view.localPOVCameraController.forwardAzimuthDeg = 180;
             
             if (!me.testAxis) {
                 var dx = 0.1;
@@ -261,29 +264,80 @@ LBMyApp.prototype.onKeyDownEvent = function(event) {
                     controller.setValue(0);
                     LBMyApp.updateControlFromController(controller, this.rudderControl);
                 }
+                return;
             }
             break;
         case 'ArrowLeft' :
-            if (this.myBoat) {
+            if (event.ctrlKey && this.activeView && this.activeView.activeCameraController) {
+                this.activeView.activeCameraController.rotatePOVDeg(10, 0);
+                return;
+            }
+            else if (this.myBoat) {
                 LBMyApp.moveControllerWithKey(this.myBoat.getRudderController(), event, true, this.rudderControl);
+                return;
             }
             break;
             
         case 'ArrowRight' :
-            if (this.myBoat) {
+            if (event.ctrlKey && this.activeView && this.activeView.activeCameraController) {
+                this.activeView.activeCameraController.rotatePOVDeg(-10, 0);
+                return;
+            }
+            else if (this.myBoat) {
                 LBMyApp.moveControllerWithKey(this.myBoat.getRudderController(), event, false, this.rudderControl);
+                return;
             }
             break;
             
         case 'ArrowUp' :
-            if (this.myBoat) {
+            if (event.ctrlKey && this.activeView && this.activeView.activeCameraController) {
+                this.activeView.activeCameraController.rotatePOVDeg(0, 10);
+                return;
+            }
+            else if (this.myBoat) {
                 LBMyApp.moveControllerWithKey(this.myBoat.getMainsheetController(), event, false, this.mainsheetControl);
+                return;
             }
             break;
             
         case 'ArrowDown' :
-            if (this.myBoat) {
+            if (event.ctrlKey && this.activeView && this.activeView.activeCameraController) {
+                this.activeView.activeCameraController.rotatePOVDeg(0, -10);
+                return;
+            }
+            else if (this.myBoat) {
                 LBMyApp.moveControllerWithKey(this.myBoat.getMainsheetController(), event, true, this.mainsheetControl);
+                return;
+            }
+            break;
+            
+        case 'q' :
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_FWD_PORT);
+            break;
+        case 'w' :
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_FWD);
+            break;
+        case 'e' :
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_FWD_STBD);
+            break;
+        case 'a' :
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_PORT);
+            break;
+        case 'd' :
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_STBD);
+            break;
+        case 'z' :
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_AFT_PORT);
+            break;
+        case 'x' :
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_AFT);
+            break;
+        case 'c' :
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_AFT_STBD);
+            break;
+        case 's' :
+            if (this.activeView.activeCameraController === this.activeView.localPOVCameraController) {
+                this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_UP);
             }
             break;
     }

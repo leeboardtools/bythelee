@@ -135,6 +135,20 @@ LBMath.wrapDegrees = function(degrees) {
 };
 
 /**
+ * Determines if two angles in degrees represent the same angle (i.e. wrapping is taken
+ * into account).
+ * @param {Number} a    The first angle.
+ * @param {Number} b    The second angle.
+ * @returns {Boolean}   true if a and b represent the same angle.
+ */
+LBMath.degreesEqual = function(a, b) {
+    if (a === b) {
+        return true;
+    }
+    return LBMath.wrapDegrees(a) === LBMath.wrapDegrees(b);
+},
+
+/**
  * Subtracts b from a in degrees, wrapping the result such that |a - b| &le; 180.
  * @param {Number} a    The degrees to subtract from.
  * @param {Number} b    The degress to subtract.
