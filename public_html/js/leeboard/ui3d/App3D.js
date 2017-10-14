@@ -247,18 +247,20 @@ LBUI3d.App3D.prototype.toggleFullScreen = function(container) {
 /**
  * Called each cycle, before {@link LBUI3d.App3D.render}.
  * @protected
+ * @param {Number} dt The number of milliseconds since the last call to this.
  */
-LBUI3d.App3D.prototype.update = function() {
+LBUI3d.App3D.prototype.update = function(dt) {
     
 };
 
 /**
  * Called each render cycle.
  * @protected
+ * @param {Number} dt The number of milliseconds since the last call to this.
  */
-LBUI3d.App3D.prototype.render = function() {
+LBUI3d.App3D.prototype.render = function(dt) {
     this.views.forEach(function(view) {
-        view.render(this.lastFrameMillisecs / 1000);
+        view.render(dt);
     });
 };
 
@@ -286,11 +288,12 @@ LBUI3d.App3D.prototype._cycle = function(timeStamp) {
         this.lastFrameMillisecs = timeStamp - this._lastFrameTimeStamp;
     }
     else {
-        this.lastFrameMillisecs = 1/60;
+        this.lastFrameMillisecs = 1000/60;
     }
     
-    this.update();
-    this.render();
+    var dt = this.lastFrameMillisecs / 1000;
+    this.update(dt);
+    this.render(dt);
     ++this.frameCount;
 
     this._lastFrameTimeStamp = timeStamp;

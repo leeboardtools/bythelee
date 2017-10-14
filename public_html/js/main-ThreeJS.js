@@ -374,10 +374,10 @@ LBMyApp.prototype.onKeyPressEvent = function(event) {
     }
 };
 
-LBMyApp.prototype.update = function() {
+LBMyApp.prototype.update = function(dt) {
     LBUI3d.App3D.prototype.update.call(this);
     
-    this.sailEnv.update();
+    this.sailEnv.update(dt);
     
     this.updateHUDBoat();
     this.updateHUDWind();
@@ -472,6 +472,7 @@ LBMyApp.prototype.updateHUDWind = function() {
 
 LBMyApp.prototype.updateCameras = function() {
     if (this.mainView.controls && this.mainView.controls.target && this.myBoat) {
+        // This is for the old orbit controls...
         LBSailSim.SailEnvTHREE.copyVectorToTHREE(this.myBoat.obj3D.getWorldPosition(), this.mainView.controls.target);
         this.mainView.controls.update();
     }

@@ -316,7 +316,7 @@ LBGeometry.Vector3.prototype.isZero = function() {
  * @param {LBGeometry.Vector3} srcVec   The source vector, should not be undefined.
  * @returns {LBGeometry.Vector3}    dstVec if dstVec was defined, the clone of srcVec if not defined.
  */
-LBGeometry.copyOrCloneVector3 = function(dstVec, srcVec) {
+LBGeometry.Vector3.copyOrClone = function(dstVec, srcVec) {
     return (dstVec) ? dstVec.copy(srcVec) : srcVec.clone();
 };
 
@@ -1278,6 +1278,13 @@ LBGeometry.Color.colorValueFromData = function(data, defColor) {
  * @type LBGeometry.Vector3
  */
 LBGeometry.ORIGIN = new LBGeometry.Vector3();
+
+/**
+ * The 3D point (0, 0, 0)
+ * @constant
+ * @type LBGeometry.Vector3
+ */
+LBGeometry.ZERO = LBGeometry.ORIGIN;
 
 /**
  * A vector representing the x-axis.

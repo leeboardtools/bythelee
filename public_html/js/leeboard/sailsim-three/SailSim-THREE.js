@@ -158,10 +158,13 @@ LBSailSim.SailEnvTHREE.prototype._boatReturned = function(boat) {
 
 /**
  * The main simulation update method, call from the {@link LBUI3d.App3D}'s update() method.
+ * @param {Number} dt   The time step.
  * @returns {undefined}
  */
-LBSailSim.SailEnvTHREE.prototype.update = function() {
-    var dt = this.physicsLink.timeStep();
+LBSailSim.SailEnvTHREE.prototype.update = function(dt) {
+    dt = dt || this.physicsLink.timeStep();
+    
+    dt = this.physicsLink.timeStep();
     LBSailSim.Env.prototype.update.call(this, dt);
     
     // TEST!!!!
