@@ -45,10 +45,11 @@ LBUI3d.CameraLimits = function() {
     this.azimuthRange = new LBMath.DegRange(-180, 360);
     
     /**
-     * The allowed range for altitude degrees.
+     * The allowed range for elevation degrees. Note that by default we avoid
+     * 90 and -90 degrees, which become degenerate.
      * @member {LBMath.DegRange}
      */
-    this.altitudeRange = new LBMath.DegRange(-90, 360);
+    this.elevationRange = new LBMath.DegRange(-89.99, 179.98);
     
     /**
      * The allowed range for rotation degrees.
@@ -68,13 +69,18 @@ LBUI3d.CameraLimits.prototype = {
      * @param {LBSpherical.Orientation} dstOrientation  Set to the orientation, limited if necessary.
      */
     applyLimits: function(srcPosition, srcOrientation, dstPosition, dstOrientation) {
-        dstPosition.set(
-                LBMath.clamp(srcPosition.x, this.minPos.x, this.maxPos.x), 
-                LBMath.clamp(srcPosition.y, this.minPos.y, this.maxPos.y), 
-                LBMath.clamp(srcPosition.z, this.minPos.z, this.maxPos.z));
-        dstOrientation.azimuthDeg = this.azimuthRange.clampToRange(srcOrientation.azimuthDeg);
-        dstOrientation.altitudeDeg = this.altitudeRange.clampToRange(srcOrientation.altitudeDeg);
-        dstOrientation.rotationDeg = this.rotationRange.clampToRange(srcOrientation.rotationDeg);
+        if (dstPosition && srcPosition) {
+            dstPosition.set(
+                    LBMath.clamp(srcPosition.x, this.minPos.x, this.maxPos.x), 
+                    LBMath.clamp(srcPosition.y, this.minPos.y, this.maxPos.y), 
+                    LBMath.clamp(srcPosition.z, this.minPos.z, this.maxPos.z));
+        }
+        
+        if (dstOrientation && srcOrientation) {
+            dstOrientation.azimuthDeg = this.azimuthRange.clampToRange(srcOrientation.azimuthDeg);
+            dstOrientation.elevationDeg = this.elevationRange.clampToRange(srcOrientation.elevationDeg);
+            dstOrientation.rotationDeg = this.rotationRange.clampToRange(srcOrientation.rotationDeg);
+        }
     },
 
     constructor: LBUI3d.CameraLimits
@@ -83,6 +89,7 @@ LBUI3d.CameraLimits.prototype = {
 
 var _workingPosition = new LBGeometry.Vector3();
 var _workingOrientation = new LBSpherical.Orientation();
+var _workingQuaternion = new LBGeometry.Quaternion();
 var _workingVector3 = new LBGeometry.Vector3();
 var _workingMatrix4 = new LBGeometry.Matrix4();
 
@@ -658,6 +665,21 @@ LBUI3d.CameraController.prototype.finishRotate = function(isCancel) {
 
 
 /**
+ * Calculates the presumed distance to the screen based.
+ * This currently only supports {@link LBCamera.PerspectiveCamera}s.
+ * @returns {Number}    The distance, 0 if not supported.
+ */
+LBUI3d.CameraController.prototype.calcScreenDistance = function() {
+    if (this.camera.isPerspectiveCamera) {
+        if (this.view.container) {
+            return this.view.container.clientHeight / (2 * Math.tan(this.camera.fov * LBMath.DEG_TO_RAD * 0.5));
+        }
+    }
+    return 0;
+};
+
+
+/**
  * Helper used to adjust a rotation matrix to align the camera axis with the presumed
  * local x-axis (the camera view is along its y axis, so we need to rotate the y axis).
  * @protected
@@ -679,20 +701,6 @@ LBUI3d.CameraController.adjustMatForCameraAxis = function(mat) {
     mat.elements[4] = old11;
     mat.elements[5] = old21;
     mat.elements[6] = old31;
-};
-
-/**
- * Calculates the presumed distance to the screen based.
- * This currently only supports {@link LBCamera.PerspectiveCamera}s.
- * @returns {Number}    The distance, 0 if not supported.
- */
-LBUI3d.CameraController.prototype.calcScreenDistance = function() {
-    if (this.camera.isPerspectiveCamera) {
-        if (this.view.container) {
-            return this.view.container.clientHeight / (2 * Math.tan(this.camera.fov * LBMath.DEG_TO_RAD * 0.5));
-        }
-    }
-    return 0;
 };
 
 
@@ -718,6 +726,23 @@ LBUI3d.CameraController.prototype.localPosOrientationToWorldPosQuaternion = func
     }
     
     mat.decompose(worldPos, worldQuaternion, _workingVector3);
+};
+
+
+/**
+ * Converts a camera position and spherical orientation in world coordinates to
+ * a world position and quaternion, adjusting for the camera alignment.
+ * @param {LBSpherical.Orientation} worldOrientation    The local spherical orientation.
+ * @param {LBGeometry.Quaternion} worldQuaternion   Set to the quaternion representing the orientation in world coordinates.
+ * @returns {undefined}
+ */
+LBUI3d.CameraController.prototype.worldOrientationToWorldQuaternion = function(worldOrientation, worldQuaternion) {
+    this.worldLimits.applyLimits(null, worldOrientation, null, _workingOrientation);
+    
+    var mat = _workingOrientation.toMatrix4(_workingMatrix4);
+    LBUI3d.CameraController.adjustMatForCameraAxis(mat);
+    
+    mat.decompose(_workingPosition, worldQuaternion, _workingVector3);
 };
 
 
@@ -807,7 +832,7 @@ LBUI3d.LocalPOVCameraController = function(localLimits) {
      * The current transition time in seconds when decelerating after a mouse up with position or orientation
      * velocity. 0 if not decelerating.
      */
-    this.currentTransitionTime = 0;
+    this.currentDecelerationTime = 0;
 };
 
 LBUI3d.LocalPOVCameraController.prototype = Object.create(LBUI3d.CameraController.prototype);
@@ -856,9 +881,9 @@ function calcDecelRateForTime(vel, time) {
 
 LBUI3d.LocalPOVCameraController.prototype.updateCameraPosition = function(dt, position, quaternion) {
     if (this.target) {
-        if (this.currentTransitionTime > 0) {
-            dt = Math.min(dt, this.currentTransitionTime);
-            this.currentTransitionTime -= dt;
+        if (this.currentDecelerationTime > 0) {
+            dt = Math.min(dt, this.currentDecelerationTime);
+            this.currentDecelerationTime -= dt;
             
             this.localPosition.x += this.localPositionVel.x * dt;
             this.localPosition.y += this.localPositionVel.y * dt;
@@ -866,11 +891,11 @@ LBUI3d.LocalPOVCameraController.prototype.updateCameraPosition = function(dt, po
             this.localPositionVel.y = decelVelTowardsZero(dt, this.localPositionVel.y, this.localPositionDecel.y);
             
             // Probably want to convert this to quaternion based...
-            this.localOrientation.altitudeDeg += this.localOrientationVel.altitudeDeg * dt;
+            this.localOrientation.elevationDeg += this.localOrientationVel.elevationDeg * dt;
             this.localOrientation.azimuthDeg += this.localOrientationVel.azimuthDeg * dt;
             
-            this.localOrientationVel.altitudeDeg = decelVelTowardsZero(dt, this.localOrientationVel.altitudeDeg, 
-                this.localOrientationDecel.altitudeDeg);
+            this.localOrientationVel.elevationDeg = decelVelTowardsZero(dt, this.localOrientationVel.elevationDeg, 
+                this.localOrientationDecel.elevationDeg);
             this.localOrientationVel.azimuthDeg = decelVelTowardsZero(dt, this.localOrientationVel.azimuthDeg, 
                 this.localOrientationDecel.azimuthDeg);
         }
@@ -902,15 +927,15 @@ LBUI3d.LocalPOVCameraController.prototype.requestLocalCameraPOVDeceleration = fu
     var dt = calcDecelTimeToZero(positionVel.x, this.positionDecel);
     dt = Math.max(dt, calcDecelTimeToZero(positionVel.y, this.positionDecel));
     dt = Math.max(dt, calcDecelTimeToZero(orientationVel.azimuthDeg, this.degDecel));
-    dt = Math.max(dt, calcDecelTimeToZero(orientationVel.altitudeDeg, this.degDecel));
+    dt = Math.max(dt, calcDecelTimeToZero(orientationVel.elevationDeg, this.degDecel));
     dt = Math.min(dt, this.maxTransitionTime);
     
     if (LBMath.isLikeZero(dt)) {
-        this.currentTransitionTime = 0;
+        this.currentDecelerationTime = 0;
         return;
     }
     
-    this.currentTransitionTime = dt;
+    this.currentDecelerationTime = dt;
     this.localPositionVel = LBUtil.copyOrClone(this.localPositionVel, positionVel);
     this.localOrientationVel = LBUtil.copyOrClone(this.localOrientationVel, orientationVel);
     
@@ -920,13 +945,13 @@ LBUI3d.LocalPOVCameraController.prototype.requestLocalCameraPOVDeceleration = fu
     
     this.localOrientationDecel = this.localOrientationDecel || new LBSpherical.Orientation();
     this.localOrientationDecel.azimuthDeg = calcDecelRateForTime(orientationVel.azimuthDeg, dt);
-    this.localOrientationDecel.altitudeDeg = calcDecelRateForTime(orientationVel.altitudeDeg, dt);
+    this.localOrientationDecel.elevationDeg = calcDecelRateForTime(orientationVel.elevationDeg, dt);
 };
 
 
 LBUI3d.LocalPOVCameraController.prototype.setStandardView = function(view) {
     var azimuthDeg = 0;
-    this.localOrientation.altitudeDeg = 0;
+    this.localOrientation.elevationDeg = 0;
     
     switch (view) {
         case LBUI3d.CameraController.VIEW_FWD :
@@ -955,7 +980,7 @@ LBUI3d.LocalPOVCameraController.prototype.setStandardView = function(view) {
             break;
         case LBUI3d.CameraController.VIEW_UP :
             azimuthDeg = this.localOrientation.azimuthDeg - this.forwardAzimuthDeg;
-            this.localOrientation.altitudeDeg = -90;
+            this.localOrientation.elevationDeg = -89;
             break;
             
         default :
@@ -968,7 +993,7 @@ LBUI3d.LocalPOVCameraController.prototype.setStandardView = function(view) {
 
 LBUI3d.LocalPOVCameraController.prototype.rotatePOVDeg = function(horzDeg, vertDeg) {
     this.localOrientation.azimuthDeg += horzDeg;
-    this.localOrientation.altitudeDeg += vertDeg;
+    this.localOrientation.elevationDeg += vertDeg;
     this.setLocalCameraPOV(this.localPosition, this.localOrientation);
 };
 
@@ -1018,14 +1043,14 @@ LBUI3d.LocalPOVCameraController.prototype.calcOrientationFromScreenPos = functio
     var dy = y - this.view.container.clientHeight / 2;
     
     store.azimuthDeg = Math.atan2(dx, this.screenDistance) * LBMath.RAD_TO_DEG;
-    store.altitudeDeg = -Math.atan2(dy, this.screenDistance) * LBMath.RAD_TO_DEG;
+    store.elevationDeg = Math.atan2(dy, this.screenDistance) * LBMath.RAD_TO_DEG;
 
     return store;
 };
 
 
 LBUI3d.LocalPOVCameraController.prototype.startRotate = function() {
-    this.currentTransitionTime = 0;
+    this.currentDecelerationTime = 0;
     
     this.originalLocalPosition = LBUtil.copyOrClone(this.originalLocalPosition, this.localPosition);
     this.originalLocalOrientation = LBUtil.copyOrClone(this.originalLocalOrientation, 
@@ -1050,7 +1075,7 @@ LBUI3d.LocalPOVCameraController.prototype.trackRotate = function(x, y, timeStamp
     this.workingOrientation = this.calcOrientationFromScreenPos(x, y, this.workingOrientation);
     
     this.workingOrientation.azimuthDeg += this.originalLocalOrientation.azimuthDeg - this.startOrientation.azimuthDeg;
-    this.workingOrientation.altitudeDeg += this.originalLocalOrientation.altitudeDeg - this.startOrientation.altitudeDeg;
+    this.workingOrientation.elevationDeg += this.originalLocalOrientation.elevationDeg - this.startOrientation.elevationDeg;
     
     this.localOrientation.copy(this.workingOrientation);
     this.setLocalCameraPOV(this.localPosition, this.localOrientation);
@@ -1070,7 +1095,7 @@ LBUI3d.LocalPOVCameraController.prototype.finishRotate = function(isCancel) {
         // If we have an orientation change, then we have a velocity that we can 
         // decelerate to 0.
         this.localOrientationVel.azimuthDeg = (this.localOrientation.azimuthDeg - this.prevLocalOrientation.azimuthDeg) / this.deltaT;
-        this.localOrientationVel.altitudeDeg = (this.localOrientation.altitudeDeg - this.prevLocalOrientation.altitudeDeg) / this.deltaT;
+        this.localOrientationVel.elevationDeg = (this.localOrientation.elevationDeg - this.prevLocalOrientation.elevationDeg) / this.deltaT;
         
         this.requestLocalCameraPOVDeceleration(LBGeometry.ZERO, this.localOrientationVel);
     }
@@ -1078,20 +1103,389 @@ LBUI3d.LocalPOVCameraController.prototype.finishRotate = function(isCancel) {
 
 
 /**
- * A camera controller that tries to follow the target at a given position relative to the
- * target. This differs from {@link LBUI3d.LocalPOVCameraController} in that for this
+ * A camera controller that acts as a chase, it follows the target at a given location relative to the
+ * target's local coordinate system. This differs from {@link LBUI3d.LocalPOVCameraController} in that for this
  * the camera is looking towards the target, whereas for the first person controller the
  * camera is looking from the target.
+ * <p>
+ * How the controller updates the camera's position and orientation is determined by the
+ * chase mode.
+ * <p>
+ * For {@link LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL}, the controller tries to
+ * update the camera such that the target stays fixed relative to the camera. The location
+ * of the camera is specified relative to the target via {@link LBUI3d.ChaseCameraController#desiredCoordinates},
+ * which is a {@link LBSpherical.CoordinatesRAA}. The reference orientation of the camera
+ * is based upon a local reference orientation frame relative to the target's local
+ * coordinates where the x axis points to the target and the z axis is in the same direction
+ * as the target's z axis when the elevation and azimuth angles are zero. 
+ * {@link LBUI3d.ChaseCameraController#desiredOrientation} is then added to this local
+ * reference orientation to obtain the camera's orientation in the target's local
+ * coordinate system.
+ * <p>
+ * For {@link LBUI3d.ChaseCameraController.CHASE_MODE_WORLD}, the controller tries to
+ * update the camera such that the camera maintains a fixed world height, but in the horizontal
+ * plane stays at the same azimuth angle relative to the target's local coordinates.
+ * The reference orientation of the camera is based upon a reference orientation frame
+ * that is pointed at the target. This reference frame is in world coordinates.
+ * {@link LBUI3d.ChaseCameraController#desiredOrientation} is then added to this 
+ * orientation reference frame to obtain the camera's orientation in world coordinates.
+ * <p>
+ * Rotation/zoom have the effect of moving the location of the camera relative to the target's
+ * local coordinate system, while panning has the effect of changing the orientation of the camera
+ * within its local orientation frame.
  * @constructor
+ * @param {Number} [distance]   The distance from the target to set up the camera at.
+ * @param {LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL|LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL} 
+ * [chaseMode=LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL]  The orientation mode, determines how
+ * the camera's orientation is changed as the camera tracks the target.
  * @param {LBUI3d.CameraLimits} [globalLimits]   Optional limits on the global camera position.
  * @returns {LBUI3d.LocalPOVCameraController}
  */
-LBUI3d.FollowCameraController = function(globalLimits) {
+LBUI3d.ChaseCameraController = function(distance, chaseMode, globalLimits) {
+    distance = distance || 10;
+    
     LBUI3d.CameraController.call(this, globalLimits);
+    
+    // The camera is ideally positioned at a certain spherical coordinates from the target
+    // in the target's local coordinate system.
+    // The camera reference orientation is pointing at the target with z the up direction.
+    // Panning the camera involves changing the orientation of the camera relative to its local orientation reference.
+    // Rotating/zooming the camera has the effect of changing the spherical coordinates
+    // of the camera relative to the target.
+    //
+    // Since the target may be moving all over the place, and we're not on the target,
+    // we want to smoothly move in world coordinates. This means that we need to establish
+    // a desired world position/orientation, and try to smoothly move towards it, which
+    // would be changing every tick.
+    
+    /**
+     * The chase mode, how the camera's orientation is updated as the target is
+     * tracked.
+     * @member {LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL|LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL} 
+     */
+    this.chaseMode = chaseMode || LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL;
+    
+    /**
+     * The desired position of the camera relative to the target's local coordinate system, in
+     * spherical coordinates.
+     * @member {LBSpherical.CoordinatesRAA}
+     */
+    this.desiredCoordinates = new LBSpherical.CoordinatesRAA(distance);
+    
+    /**
+     * The desired orientation of the camera relative to a reference frame that has
+     * the camera pointing at the target and the z axis up.
+     * @member {LBSpherical.Orientation}
+     */
+    this.desiredOrientation = new LBSpherical.Orientation();
+    
+    this.currentDecelerationTime = 0;
+    
+    this.desiredCoordinatesVel = new LBSpherical.CoordinatesRAA();
+    this.desiredOrientationVel = new LBSpherical.Orientation();
+    
+    this.desiredCoordinatesDecel = new LBSpherical.CoordinatesRAA();
+    this.desiredOrientationDecel = new LBSpherical.Orientation();
+    
+    this.zoomScale = distance;
 };
 
-LBUI3d.FollowCameraController.prototype = Object.create(LBUI3d.CameraController.prototype);
-LBUI3d.FollowCameraController.prototype.constructor = LBUI3d.FollowCameraController;
+var _chasePos;
+var _chaseOrientation;
+var _chaseWorldCoordinates;
+var _chaseEuler;
+
+
+LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL = 0;
+LBUI3d.ChaseCameraController.CHASE_MODE_WORLD = 1;
+
+LBUI3d.ChaseCameraController.prototype = Object.create(LBUI3d.CameraController.prototype);
+LBUI3d.ChaseCameraController.prototype.constructor = LBUI3d.ChaseCameraController;
+
+LBUI3d.ChaseCameraController.prototype.updateCameraPosition = function(dt, position, quaternion) {
+    if (this.target) {
+        if (this.currentDecelerationTime > 0) {
+            // The current transition is for decelerating via the desired coordinate and orientation
+            // velocities. This gives us a new desired coordinates and orientation.
+            dt = Math.min(dt, this.currentDecelerationTime);
+            this.currentDecelerationTime -= dt;
+            
+            this.desiredCoordinates.radius += this.desiredCoordinatesVel.radius * dt;
+            this.desiredCoordinates.azimuthDeg += this.desiredCoordinatesVel.azimuthDeg * dt;
+            this.desiredCoordinates.elevationDeg += this.desiredCoordinatesVel.elevationDeg * dt;
+            
+            this.desiredCoordinates.radius = decelVelTowardsZero(dt, 
+                    this.desiredCoordinatesVel.radius, this.desiredCoordinatesDecel.radius);
+            this.desiredCoordinates.azimuthDeg = decelVelTowardsZero(dt, 
+                    this.desiredCoordinatesVel.azimuthDeg, this.desiredCoordinatesDecel.azimuthDeg);
+            this.desiredCoordinates.elevationDeg = decelVelTowardsZero(dt, 
+                    this.desiredCoordinatesVel.elevationDeg, this.desiredCoordinatesDecel.elevationDeg);
+
+            this.desiredOrientation.azimuthDeg += this.desiredOrientationVel.azimuthDeg * dt;
+            this.desiredOrientation.elevationDeg += this.desiredOrientationVel.elevationDeg * dt;
+
+            this.desiredOrientation.azimuthDeg = decelVelTowardsZero(dt, 
+                    this.desiredOrientationVel.azimuthDeg, this.desiredOrientationDecel.azimuthDeg);
+            this.desiredOrientation.elevationDeg = decelVelTowardsZero(dt, 
+                    this.desiredOrientationVel.elevationDeg, this.desiredOrientationDecel.elevationDeg);
+        }
+        
+        switch (this.chaseMode) {
+            case LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL :
+                this.handleLocalChaseMode(position, quaternion);
+                break;
+                
+            case LBUI3d.ChaseCameraController.CHASE_MODE_WORLD :
+                this.handleWorldChaseMode(position, quaternion);
+                break;
+        }
+    }
+};
+
+LBUI3d.ChaseCameraController.prototype.handleLocalChaseMode = function(position, quaternion) {
+
+    // Now update the desired world position/quaternion
+    // We figure out the position in the target's local coordinates.
+    _chasePos = this.desiredCoordinates.toVector3(_chasePos);
+
+    // For the local orientation, first determine the reference frame, which is
+    // along the line to the target, which in turn is the reverse of the azimuth/elevation
+    // of the camera position.
+    _chaseOrientation = _chaseOrientation || new LBSpherical.Orientation();
+    _chaseOrientation.azimuthDeg = this.desiredCoordinates.azimuthDeg + 180;
+    _chaseOrientation.elevationDeg = -this.desiredCoordinates.elevationDeg;
+
+    // Now adjust the reference frame by the desired orientation.
+    _chaseOrientation.azimuthDeg += this.desiredOrientation.azimuthDeg;
+    _chaseOrientation.elevationDeg += this.desiredOrientation.elevationDeg;
+    
+    this.localPosOrientationToWorldPosQuaternion(_chasePos, _chaseOrientation, position, quaternion);
+};
+
+LBUI3d.ChaseCameraController.prototype.handleWorldChaseMode = function(position, quaternion) {
+    // The azimuth of the desired coordinates is relative to the target's azimuth, but
+    // the elevation and radial distance are in world coordinates.
+    _chaseWorldCoordinates = LBUtil.copyOrClone(_chaseWorldCoordinates, this.desiredCoordinates);
+    _chaseEuler = _chaseEuler || new LBGeometry.Euler();
+    _chaseEuler.setFromQuaternion(this.target.quaternion, 'ZYX');
+    _chaseWorldCoordinates.azimuthDeg += _chaseEuler.z * LBMath.RAD_TO_DEG;
+    
+    position = _chaseWorldCoordinates.toVector3(position);
+    position.add(this.target.position);
+
+    // For the orientation, first determine the reference frame, which is
+    // along the line to the target, which in turn is the reverse of the azimuth/elevation
+    // of the camera position.
+    _chaseOrientation = _chaseOrientation || new LBSpherical.Orientation();
+    _chaseOrientation.azimuthDeg = _chaseWorldCoordinates.azimuthDeg + 180;
+    _chaseOrientation.elevationDeg = -_chaseWorldCoordinates.elevationDeg;
+
+    // Now adjust the reference frame by the desired orientation.
+    _chaseOrientation.azimuthDeg += this.desiredOrientation.azimuthDeg;
+    _chaseOrientation.elevationDeg += this.desiredOrientation.elevationDeg;
+    
+    this.worldOrientationToWorldQuaternion(_chaseOrientation, quaternion);
+};
+
+
+LBUI3d.ChaseCameraController.prototype.decelerateToZero = function(coordinatesVel, orientationVel) {
+/*    // Figure out the longest time to decel to zero.
+    // Then figure out the deceleration rates to take that time to zero.
+    var dt = calcDecelTimeToZero(positionVel.x, this.positionDecel);
+    dt = Math.max(dt, calcDecelTimeToZero(positionVel.y, this.positionDecel));
+    dt = Math.max(dt, calcDecelTimeToZero(orientationVel.azimuthDeg, this.degDecel));
+    dt = Math.max(dt, calcDecelTimeToZero(orientationVel.elevationDeg, this.degDecel));
+    dt = Math.min(dt, this.maxTransitionTime);
+    
+    if (LBMath.isLikeZero(dt)) {
+        this.currentDecelerationTime = 0;
+        return;
+    }
+    
+    this.currentDecelerationTime = dt;
+    this.localPositionVel = LBUtil.copyOrClone(this.localPositionVel, positionVel);
+    this.localOrientationVel = LBUtil.copyOrClone(this.localOrientationVel, orientationVel);
+    
+    this.localPositionDecel = this.localPositionDecel || new LBGeometry.Vector3();
+    this.localPositionDecel.x = calcDecelRateForTime(positionVel.x, dt);
+    this.localPositionDecel.y = calcDecelRateForTime(positionVel.y, dt);
+    
+    this.localOrientationDecel = this.localOrientationDecel || new LBSpherical.Orientation();
+    this.localOrientationDecel.azimuthDeg = calcDecelRateForTime(orientationVel.azimuthDeg, dt);
+    this.localOrientationDecel.elevationDeg = calcDecelRateForTime(orientationVel.elevationDeg, dt);
+*/
+
+};
+
+LBUI3d.ChaseCameraController.prototype.desiredCameraPositionUpdated = function() {
+    
+};
+
+LBUI3d.ChaseCameraController.prototype.setStandardView = function(view) {
+    var azimuthDeg = 0;
+    this.desiredCoordinates.elevationDeg = 30;
+    this.desiredOrientation.zero();
+    
+    switch (view) {
+        case LBUI3d.CameraController.VIEW_FWD :
+            azimuthDeg = 0;
+            break;
+        case LBUI3d.CameraController.VIEW_FWD_STBD :
+            azimuthDeg = -45;
+            break;
+        case LBUI3d.CameraController.VIEW_STBD :
+            azimuthDeg = -90;
+            break;
+        case LBUI3d.CameraController.VIEW_AFT_STBD :
+            azimuthDeg = -135;
+            break;
+        case LBUI3d.CameraController.VIEW_AFT :
+            azimuthDeg = 180;
+            break;
+        case LBUI3d.CameraController.VIEW_AFT_PORT :
+            azimuthDeg = 135;
+            break;
+        case LBUI3d.CameraController.VIEW_PORT :
+            azimuthDeg = 90;
+            break;
+        case LBUI3d.CameraController.VIEW_FWD_PORT :
+            azimuthDeg = 45;
+            break;
+        case LBUI3d.CameraController.VIEW_UP :
+            azimuthDeg = this.desiredCoordinates.azimuthDeg - this.forwardAzimuthDeg;
+            this.desiredCoordinates.elevationDeg = 89;
+            break;
+            
+        default :
+            return;
+    }
+    
+    this.desiredCoordinates.azimuthDeg = azimuthDeg + this.forwardAzimuthDeg;
+    this.desiredCameraPositionUpdated();
+};
+
+LBUI3d.ChaseCameraController.prototype.rotatePOVDeg = function(horzDeg, vertDeg) {
+    this.desiredCoordinates.azimuthDeg += horzDeg;
+    this.desiredCoordinates.elevationDeg += vertDeg;
+    this.desiredCameraPositionUpdated();
+};
+
+
+LBUI3d.ChaseCameraController.prototype.panPOV = function(dx, dy) {
+    this.desiredOrientation.azimuthDeg += dx;
+    this.desiredOrientation.elevationDeg.y += dy;
+    this.desiredCameraPositionUpdated();
+};
+
+LBUI3d.ChaseCameraController.prototype.setZoom = function(zoom) {
+    zoom = LBMath.clamp(zoom, this.minZoomScale, this.maxZoomScale);
+    if (zoom !== this.zoomScale) {
+        this.zoomScale = zoom;
+        this.desiredCoordinates.radius = zoom;
+        this.desiredCameraPositionUpdated();
+    }
+};
+
+LBUI3d.ChaseCameraController.prototype.startPan = function() {
+    this.currentDecelerationTime = 0;
+
+    this.originalDesiredOrientation = LBUtil.copyOrClone(this.originalDesiredOrientation, this.desiredOrientation);
+
+    this.screenDistance = this.calcScreenDistance();
+    if (this.screenDistance) {
+        this.startOrientation = this.calcOrientationFromScreenPos(this.startX, this.startY, this.startOrientation);
+    }
+};
+
+
+LBUI3d.ChaseCameraController.prototype.trackPan = function(x, y, timeStamp) {
+    if (!this.screenDistance) {
+        return;
+    }
+    
+    this.prevDesiredOrientation = LBUtil.copyOrClone(this.prevDesiredOrientation, 
+        this.desiredOrientation);
+
+    this.workingOrientation = this.calcOrientationFromScreenPos(x, y, this.workingOrientation);
+    
+    this.workingOrientation.azimuthDeg += this.originalDesiredOrientation.azimuthDeg - this.startOrientation.azimuthDeg;
+    this.workingOrientation.elevationDeg += this.originalDesiredOrientation.elevationDeg - this.startOrientation.elevationDeg;
+    
+    this.desiredOrientation.copy(this.workingOrientation);
+    this.desiredCameraPositionUpdated();
+};
+
+
+LBUI3d.ChaseCameraController.prototype.finishPan = function(isCancel) {
+    if (isCancel) {
+        this.desiredOrientation.copy(this.originalDesiredOrientation);
+        this.desiredCameraPositionUpdated();
+        return;
+    }
+    
+    if ((this.deltaT > 0) && (this.degDecel > 0)) {
+        this.desiredOrientationVel = this.desiredOrientationVel || new LBSpherical.Orientation();
+        
+        // If we have an orientation change, then we have a velocity that we can 
+        // decelerate to 0.
+        this.desiredOrientationVel.azimuthDeg = (this.desiredOrientation.azimuthDeg - this.prevDesiredOrientation.azimuthDeg) / this.deltaT;
+        this.desiredOrientationVel.elevationDeg = (this.desiredOrientation.elevationDeg - this.prevDesiredOrientation.elevationDeg) / this.deltaT;
+        
+        this.decelerateToZero(LBSpherical.CoordinatesRAA.ZERO, this.desiredOrientationVel);
+    }
+};
+
+
+LBUI3d.ChaseCameraController.prototype.startRotate = function() {
+    this.currentDecelerationTime = 0;
+    
+    this.originalCoordinates = LBUtil.copyOrClone(this.originalCoordinates, this.desiredCoordinates);
+
+    this.screenDistance = this.calcScreenDistance();
+    if (this.screenDistance) {
+        this.startOrientation = this.calcOrientationFromScreenPos(this.startX, this.startY, this.startOrientation);
+    }
+};
+
+
+LBUI3d.ChaseCameraController.prototype.trackRotate = function(x, y, timeStamp) {
+    if (!this.screenDistance) {
+        return;
+    }
+/*    
+    this.prevLocalOrientation = LBUtil.copyOrClone(this.prevLocalOrientation, 
+        this.localOrientation);
+
+    this.workingOrientation = this.calcOrientationFromScreenPos(x, y, this.workingOrientation);
+    
+    this.workingOrientation.azimuthDeg += this.originalLocalOrientation.azimuthDeg - this.startOrientation.azimuthDeg;
+    this.workingOrientation.elevationDeg += this.originalLocalOrientation.elevationDeg - this.startOrientation.elevationDeg;
+    
+    this.localOrientation.copy(this.workingOrientation);
+    this.desiredCameraPositionUpdated();
+    */
+
+    this.desiredCameraPositionUpdated();
+};
+
+
+LBUI3d.ChaseCameraController.prototype.finishRotate = function(isCancel) {
+    if (isCancel) {
+        this.desiredCoordinates.copy(this.originalDesiredCoordinates);
+        this.setLocalCameraPOV(this.localPosition, this.localOrientation);
+        return;
+    }
+
+    if ((this.deltaT > 0) && (this.degDecel > 0)) {
+        this.desiredCoordinatesVel = this.desiredCoordinatesVel || new LBSpherical.CoordinatesRAA();
+        
+        this.desiredCoordinatesVel.radius = 0;
+        this.desiredCoordinatesVel.azimuthDeg = (this.desiredCoordinates.azimuthDeg - this.prevDesiredCoordinates.azimuthDeg) / this.deltaT;
+        this.desiredCoordinates.elevationDeg = (this.desiredCoordinates.elevationDeg - this.prevDesiredCoordinates.elevationDeg) / this.deltaT;
+        
+        this.decelerateToZero(this.desiredCoordinatesVel, LBSpherical.Orientation.ZERO);
+    }
+};
 
 return LBUI3d;
 });

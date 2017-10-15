@@ -171,24 +171,34 @@ LBMath.subDegrees = function(a, b) {
  * @returns {LBMath.DegRange}
  */
 LBMath.DegRange = function(baseDeg, range) {
-    if (range < 0) {
-        baseDeg = LBMath.wrapDegrees(baseDeg + range);
-        range = -range;
-    }
-
-    this.minDeg = LBMath.wrapDegrees(baseDeg);
-    this.maxDeg = this.minDeg + range;
-    if (this.maxDeg > 180) {
-        this.maxDeg2 = this.maxDeg - 360;
-        this.maxDeg = 180;
-    }
-    else {
-        // We can use -180 because {@link LBMath.wrapDegrees} returns angles &gt; -180.
-        this.maxDeg2 = -180;
-    }
+    this.setRange(baseDeg, range);
 };
 
 LBMath.DegRange.prototype = {
+    /**
+     * Sets the range from a base angle and the range from the base angle.
+     * @param {Number} baseDeg  The base angle in degrees.
+     * @param {Number} range    The range from baseDeg, in degrees. This may be negative.
+     * @returns {LBMath.DegRange}   this.
+     */
+    setRange: function(baseDeg, range) {
+        if (range < 0) {
+            baseDeg = LBMath.wrapDegrees(baseDeg + range);
+            range = -range;
+        }
+
+        this.minDeg = LBMath.wrapDegrees(baseDeg);
+        this.maxDeg = this.minDeg + range;
+        if (this.maxDeg > 180) {
+            this.maxDeg2 = this.maxDeg - 360;
+            this.maxDeg = 180;
+        }
+        else {
+            // We can use -180 because {@link LBMath.wrapDegrees} returns angles &gt; -180.
+            this.maxDeg2 = -180;
+        }
+    },
+    
     /**
      * Determines if an angle in degrees is within the range.
      * @param {Number} deg  The angle to test, in degrees.

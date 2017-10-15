@@ -27,7 +27,7 @@ function LBMyApp() {
     
     var mainViewContainer = document.getElementById('main_view');
     this.mainView = new LBUI3d.View3D(this.mainScene, mainViewContainer);
-    this.addNormalView(this.mainView, LBUI3d.CameraController.VIEW_FWD);
+    this.addNormalView(this.mainView);
     
     this.activeView = this.mainView;
     
@@ -85,16 +85,17 @@ LBMyApp.prototype.addNormalView = function(view, standardView) {
     view.addCameraController(view.localPOVCameraController);
     
     // The x-axis of the boat faces aft, and the origin is near the bow. We want to look forward from the cockpit.
+    view.localPOVCameraController.forwardAzimuthDeg = 180;
+
     // TODO: Need to set the cockpit location from the boat's data...
     view.localPOVCameraController.localPosition.set(3, 0, 1.0);
     view.localPOVCameraController.localOrientation.azimuthDeg = 180;
-    view.localPOVCameraController.forwardAzimuthDeg = 180;
     
-    //view.followController = new LBUI3d.FollowCameraController(view.camera);
-    //view.addCameraController(view.followController);
+    view.chaseController = new LBUI3d.ChaseCameraController(20, LBUI3d.ChaseCameraController.CHASE_MODE_WORLD);
+    view.chaseController.desiredCoordinates.elevationDeg = 20;
+    view.chaseController.forwardAzimuthDeg = 0;
+    view.addCameraController(view.chaseController);
     
-    view.setActiveCameraController(view.localPOVCameraController);
-    //view.setActiveCameraController(view.followController);
 
     if (this.myBoat) {
         var me = this;
@@ -106,7 +107,12 @@ LBMyApp.prototype.addNormalView = function(view, standardView) {
     //view.installOrbitControls(3, 10000, Math.PI * 0.5, false);
     this.addView(view);
     
-    view.localPOVCameraController.setStandardView(standardView);
+    view.setActiveCameraController(view.chaseController);
+
+    if (standardView !== undefined) {
+        view.setActiveCameraController(view.localPOVCameraController);
+        view.localPOVCameraController.setStandardView(standardView);
+    }
 };
 
 LBMyApp.prototype.init = function(mainContainer) {
@@ -204,8 +210,6 @@ LBMyApp.prototype.loadEnvCompleted = function() {
             // The x-axis of the boat faces aft, and the origin is near the bow. We want to look forward from the cockpit.
             // TODO: Need to set the cockpit location from the boat's data...
             view.localPOVCameraController.localPosition.set(3, 0, 1.0);
-            view.localPOVCameraController.localOrientation.azimuthDeg = 180;
-            view.localPOVCameraController.forwardAzimuthDeg = 180;
             
             if (!me.testAxis) {
                 var dx = 0.1;
@@ -358,9 +362,7 @@ LBMyApp.prototype.onKeyDownEvent = function(event) {
             this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_AFT_STBD);
             break;
         case 's' :
-            if (this.activeView.activeCameraController === this.activeView.localPOVCameraController) {
-                this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_UP);
-            }
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_UP);
             break;
     }
 };
@@ -371,7 +373,7 @@ LBMyApp.prototype.onKeyPressEvent = function(event) {
             this.togglePaused();
             break;
             
-        case 'KeyS' :
+        case 'KeyT' :
             this.runSingleStep();
             break;
     }
@@ -455,7 +457,8 @@ LBMyApp.prototype.updateHUDWind = function() {
     }
     
     if (this.appWindDirElement) {
-        this.appWindDirElement.style.transform = "rotate(" + windDir + "deg)";
+        var windFrom = -LBMath.wrapDegrees(windDir);
+        this.appWindDirElement.style.transform = "rotate(" + windFrom + "deg)";
     }
     
     var force = LBSailSim.Wind.getForceForKnots(windSpeed);
@@ -789,7 +792,10 @@ if ( ! Detector.webgl ) {
 else {
     // Putting myApp in window so it can be called from HTML event handlers.
     window.myApp = new LBMyApp();
-    window.myApp.start(document.getElementById('main_view'));
+    
+    var startPaused = false;
+    //startPaused = true;
+    window.myApp.start(document.getElementById('main_view'), startPaused);
 }
 
 }

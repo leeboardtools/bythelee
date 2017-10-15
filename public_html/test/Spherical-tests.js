@@ -20,25 +20,47 @@
 define(['lbspherical', 'lbutil', 'lbgeometry', 'lbmath'], function (LBSpherical, LBUtil, LBGeometry, LBMath) {
 
 var checkVector3 = require('test/Geometry-tests.js').checkVector3;
+var checkEuler = require('test/Geometry-tests.js').checkEuler;
 
 QUnit.module('Spherical-tests');
 
-function checkSphericalCoordinatesRAA(assert, spherical, radius, azimuthDeg, altitudeDeg, msg, tolerance) {
+function checkSphericalOrientation(assert, spherical, azimuthDeg, elevationDeg, rotationDeg, msg, tolerance) {
+    if (!LBUtil.isVar(msg)) {
+        msg = "";
+    }
+    assert.nearEqual(LBMath.wrapDegrees(spherical.azimuthDeg), LBMath.wrapDegrees(azimuthDeg), msg + " Azimuth OK", tolerance);
+    assert.nearEqual(LBMath.wrapDegrees(spherical.elevationDeg), LBMath.wrapDegrees(elevationDeg), msg + " Elevation OK", tolerance);
+    assert.nearEqual(LBMath.wrapDegrees(spherical.rotationDeg), LBMath.wrapDegrees(rotationDeg), msg + " Rotation OK", tolerance);
+};
+
+function checkSphericalCoordinatesRAA(assert, spherical, radius, azimuthDeg, elevationDeg, msg, tolerance) {
     if (!LBUtil.isVar(msg)) {
         msg = "";
     }
     assert.nearEqual(spherical.radius, radius, msg + " Radius OK", tolerance);
     assert.nearEqual(LBMath.wrapDegrees(spherical.azimuthDeg), LBMath.wrapDegrees(azimuthDeg), msg + " Azimuth OK", tolerance);
-    assert.nearEqual(LBMath.wrapDegrees(spherical.altitudeDeg), LBMath.wrapDegrees(altitudeDeg), msg + " Altitude OK", tolerance);
+    assert.nearEqual(LBMath.wrapDegrees(spherical.elevationDeg), LBMath.wrapDegrees(elevationDeg), msg + " Elevation OK", tolerance);
 };
+
+QUnit.test('Orientation', function(assert) {
+    var orientation = new LBSpherical.Orientation(10, 20, 30);
+    
+    var ez = orientation.azimuthDeg * LBMath.DEG_TO_RAD;
+    var ey = orientation.elevationDeg * LBMath.DEG_TO_RAD;
+    var ex = orientation.rotationDeg * LBMath.DEG_TO_RAD;
+    
+    var euler = orientation.toEuler();
+    checkEuler(assert, euler, ex, ey, ez, 'ZYX', "to Euler");
+    
+});
 
 QUnit.test('CoordinatesRAA', function(assert) {
     var spherical = new LBSpherical.CoordinatesRAA(10, 20, 30);
     
     var cartesian = spherical.toVector3();
     
-    var theta = spherical.azimuthDeg * LBMath.DEG_TO_RAD;
-    var phi = (90 - spherical.altitudeDeg) * LBMath.DEG_TO_RAD;
+    var theta = (90 - spherical.elevationDeg) * LBMath.DEG_TO_RAD;
+    var phi = spherical.azimuthDeg * LBMath.DEG_TO_RAD;
     var x = spherical.radius * Math.sin(theta) * Math.cos(phi);
     var y = spherical.radius * Math.sin(theta) * Math.sin(phi);
     var z = spherical.radius * Math.cos(theta);
@@ -46,17 +68,18 @@ QUnit.test('CoordinatesRAA', function(assert) {
     
     var spherical2 = new LBSpherical.CoordinatesRAA();
     spherical2.setFromVector3(cartesian);
-    checkSphericalCoordinatesRAA(assert, spherical2, spherical.radius, spherical.azimuthDeg, spherical.altitudeDeg, "fromVector3");
+    checkSphericalCoordinatesRAA(assert, spherical2, spherical.radius, spherical.azimuthDeg, spherical.elevationDeg, "fromVector3");
     
     
-    spherical.altitudeDeg = -130;
+    spherical.elevationDeg = -30;
     spherical.toVector3(cartesian);
     
     spherical2.setFromVector3(cartesian);
-    checkSphericalCoordinatesRAA(assert, spherical2, spherical.radius, spherical.azimuthDeg, spherical.altitudeDeg, "fromVector3 Neg Altitude");
+    checkSphericalCoordinatesRAA(assert, spherical2, spherical.radius, spherical.azimuthDeg, spherical.elevationDeg, "fromVector3 Neg elevation");
 });
 
 return {
+    checkSphericalOrientation: checkSphericalOrientation,
     checkSphericalCoordinatesRAA: checkSphericalCoordinatesRAA
 };
 });
