@@ -65,7 +65,6 @@ var require = {
         
         'lbthreejs': 'leeboard/three-js/ThreeJSUtil',
         
-        'three-orbit': 'leeboard/three-js-extras/controls/OrbitControls',
         'three-detector': 'leeboard/three-js-extras/Detector',
         
         'lbapp3d': 'leeboard/ui3d/App3D',
@@ -75,11 +74,6 @@ var require = {
         'lbui3d': 'leeboard/ui3d/LBUI3d'
     },
     shim: {
-        'three-orbit': {
-            deps: ['three'],
-            exports: 'THREE'
-        },
-        
         'phaser': {
             exports: 'Phaser'
         },

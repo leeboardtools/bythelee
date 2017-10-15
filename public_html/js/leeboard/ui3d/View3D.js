@@ -16,7 +16,7 @@
 
 
 /* global THREE, LBUI3d */
-define(['three', 'lbscene3d', 'lbcamera', 'lbcameracontrollers', 'three-orbit'], 
+define(['three', 'lbscene3d', 'lbcamera', 'lbcameracontrollers'], 
 function(THREE, LBUI3d, LBCamera) {
 
     'use strict';
@@ -210,28 +210,6 @@ LBUI3d.View3D.prototype.onWindowResize = function() {
     this.camera.updateProjectionMatrix();
 };
 
-/**
- * This will go away, currently used to install a {@link THREE.OrbitControls} for testing.
- * @param {type} minDistance
- * @param {type} maxDistance
- * @param {type} maxPolarAngle
- * @param {type} enableKeys
- */
-LBUI3d.View3D.prototype.installOrbitControls = function(minDistance, maxDistance, maxPolarAngle, enableKeys) {
-    this.controls = new THREE.OrbitControls(this.camera, this.container);
-    if (enableKeys !== undefined) {
-        this.controls.enableKeys = enableKeys;
-    }
-    if (minDistance !== undefined) {
-        this.controls.minDistance = minDistance;
-    }
-    if (maxDistance !== undefined) {
-        this.controls.maxDistance = maxDistance;
-    }
-    if (maxPolarAngle !== undefined) {
-        this.controls.maxPolarAngle = maxPolarAngle;
-    }
-};
 
 return LBUI3d;
 

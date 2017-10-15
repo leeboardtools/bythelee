@@ -130,7 +130,6 @@ LBMyApp.prototype.addNormalView = function(view, standardView) {
     view.chaseController.forwardAzimuthDeg = 0;
     view.addCameraController(view.chaseController);
     
-    //view.installOrbitControls(3, 10000, Math.PI * 0.5, false);
     this.addView(view);
     this.updateViewForMyBoat(view);
     
@@ -472,8 +471,6 @@ LBMyApp.prototype.update = function(dt) {
     
     this.updateHUDBoat();
     this.updateHUDWind();
-    
-    this.updateCameras();
 };
 
 /**
@@ -568,19 +565,6 @@ LBMyApp.prototype.updateHUDWind = function() {
         var style = window.getComputedStyle(led, null);
         led.style.backgroundColor = setColorFunctionAlpha(style.backgroundColor, ' 0.1');
     }
-};
-
-/**
- * Handles updating the cameras (currently only used for the old ThreeJS orbit controls).
- * @returns {undefined}
- */
-LBMyApp.prototype.updateCameras = function() {
-    if (this.mainView.controls && this.mainView.controls.target && this.myBoat) {
-        // This is for the old orbit controls...
-        LBSailSim.SailEnvTHREE.copyVectorToTHREE(this.myBoat.obj3D.getWorldPosition(), this.mainView.controls.target);
-        this.mainView.controls.update();
-    }
-
 };
 
 
