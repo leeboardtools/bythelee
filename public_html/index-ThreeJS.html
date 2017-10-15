@@ -91,6 +91,13 @@ and open the template in the editor.
                 background-color: whitesmoke;
             }
             
+            /*
+            Prevent focus box from being drawn around sliders
+            */
+            input[type=range]::-moz-focus-outer {
+                border:0;
+            }
+            
             .vertical_slider {
                 margin: 0px;
                 padding: 0px;

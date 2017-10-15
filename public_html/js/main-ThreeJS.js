@@ -20,6 +20,15 @@ require( ['three', 'lbsailsim', 'lbui3d', 'lbutil', 'lbmath', 'lbgeometry', 'lba
         
         
     'use strict';
+    
+    
+function noSliderKeys(slider) {
+    if (slider) {
+        slider.addEventListener('keydown', function(event) {
+            event.preventDefault();
+        });
+    }
+}    
         
 function LBMyApp() {
     LBUI3d.App3D.call(this);
@@ -55,13 +64,18 @@ function LBMyApp() {
 
     this.rudderSliderElement = document.getElementById('rudder_slider');
     this.rudderControl = document.getElementById('rudder');
+    noSliderKeys(this.rudderControl);
     this.throttleSliderElement = document.getElementById('throttle_slider');
     this.throttleControl = document.getElementById('throttle');
+    noSliderKeys(this.throttleControl);
     
     this.mainsheetSliderElement = document.getElementById('main_slider');
     this.mainsheetControl = document.getElementById('mainsheet');
+    noSliderKeys(this.mainsheetControl);
+
     this.jibsheetSliderElement = document.getElementById('jib_slider');
     this.jibsheetControl = document.getElementById('jibsheet');
+    noSliderKeys(this.jibsheetControl);
     
     this.assetLoader = new LBAssets.Loader();
     
@@ -732,9 +746,6 @@ LBMyApp.prototype.onRudderChange = function(value, min, max) {
             rudderController.setMappedValue(value, max, min);
         }
     }
-    if (this.rudderControl) {
-        this.rudderControl.blur();
-    }
 };
 
 LBMyApp.prototype.onThrottleChange = function(value, min, max) {
@@ -743,9 +754,6 @@ LBMyApp.prototype.onThrottleChange = function(value, min, max) {
         if (controller) {
             controller.setMappedValue(value, min, max);
         }
-    }
-    if (this.throttleControl) {
-        this.throttleControl.blur();
     }
 };
 
@@ -756,9 +764,6 @@ LBMyApp.prototype.onJibsheetChange = function(value, min, max) {
             controller.setMappedValue(value, min, max);
         }
     }
-    if (this.jibsheetControl) {
-        this.jibsheetControl.blur();
-    }
 };
 
 LBMyApp.prototype.onMainsheetChange = function(value, min, max) {
@@ -767,9 +772,6 @@ LBMyApp.prototype.onMainsheetChange = function(value, min, max) {
         if (controller) {
             controller.setMappedValue(value, min, max);
         }
-    }
-    if (this.mainsheetControl) {
-        this.mainsheetControl.blur();
     }
 };
 
