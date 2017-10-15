@@ -26,7 +26,7 @@ are both checked.
 
 TODO:
 
-Detect no mouse, remove pan/rotate control if no mouse.
+
 
 View controllers to have:
 Follow at distance
@@ -67,6 +67,8 @@ Follow:
 
 
 Put Wind Indicator on Boat, mast head?
+
+Add Splash Screen
 
 Add drop-down button for toggling force arrows.
 

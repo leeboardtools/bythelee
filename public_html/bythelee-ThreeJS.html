@@ -641,7 +641,8 @@ and open the template in the editor.
                 <div id="hull_controls">
                     <div id="rudder_slider">
                         <div class="slider_top_label">Rudder</div>
-                        <div><input id="rudder" class="horizontal_slider hull_control_slider" type="range" value="0" min="-100" max="100" oninput="myApp.onRudderChange(value, min, max)"></div>
+                        <div><input id="rudder" class="horizontal_slider hull_control_slider" type="range" value="0" min="-100" max="100" oninput="myApp.onRudderChange(value, min, max)"
+                                    data-flip_min_max="true"></div>
                     </div>
                     <div id="throttle_slider">
                         <div class="slider_bottom_label">Throttle</div>
@@ -797,9 +798,16 @@ and open the template in the editor.
                 <div id="fatal_error_msg2" class="fatal_error fatal_error_msg"></div>
             </div>
         </div>
-<!--
-        <script src="js/main-ThreeJS.js"></script>
--->
+
+        <script>
+            // TODO:
+            // Put up a splash screen that we can hide when we're loaded.
+            // 
+            // For now, hide these, they're made visible when appropriate.
+            document.getElementById('throttle_slider').hidden = true;
+            document.getElementById('jib_slider').hidden = true;
+        </script>
+        
         <script src="js/require-js-config.js"></script>
         <script src="js/lib/require.js" data-main="main-ThreeJS"></script>
         

@@ -277,6 +277,26 @@ LBSpherical.CoordinatesRAA.prototype = {
         return store;
     },
     
+    
+    /**
+     * Adjust the elevation so the cartesian coordinate equivalent has a given z,
+     * while maintaining the azimuth and radius.
+     * @param {Number} z    The z coordinate of interest. If this is larger than
+     * the radius, then the radius will just be set to this and the elevation will be 90.
+     * @returns {LBSpherical.CoordinatesRAA}    this.
+     */
+    adjustElevationForZ: function(z) {
+        if (z <= this.radius) {
+            var theta = Math.acos(z / this.radius);
+            this.elevationDeg = 90 - theta * LBMath.RAD_TO_DEG;
+        }
+        else {
+            this.radius = z;
+            this.elevationDeg = 90;
+        }
+        return this;
+    },
+    
     constructor: LBSpherical.CoordinatesRAA
 };
     

@@ -197,6 +197,17 @@ LBMath.DegRange.prototype = {
             // We can use -180 because {@link LBMath.wrapDegrees} returns angles &gt; -180.
             this.maxDeg2 = -180;
         }
+        return this;
+    },
+    
+    /**
+     * Sets the range from a lower and an upper limit.
+     * @param {type} limitA
+     * @param {type} limitB
+     * @returns {LBMath.DegRange}   this.
+     */
+    setRangeFromLimits: function(limitA, limitB) {
+        return this.setRange(limitA, limitB - limitA);
     },
     
     /**
