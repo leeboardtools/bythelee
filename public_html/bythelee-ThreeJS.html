@@ -357,7 +357,7 @@ and open the template in the editor.
             
             /* The wind SVG icon. */
             .wind_icon {
-                padding: 5px;
+                padding: 7px;
                 width: 1.5rem;
                 height: 1.5rem;
             }
@@ -386,9 +386,43 @@ and open the template in the editor.
                 float: left;
             }
             
+            .north_east {
+                transform: rotate(45deg);
+            }
+            
+            .east {
+                transform: rotate(90deg);
+            }
+            
+            .south_east {
+                transform: rotate(135deg);
+            }
+            
+            .south {
+                transform: rotate(180deg);
+            }
+            
+            .south_west {
+                transform: rotate(225deg);
+            }
+            
+            .west {
+                transform: rotate(270deg);
+            }
+            
+            .north_west {
+                transform: rotate(315deg);
+            }
+            
             #wind_menu {
                 position: absolute;
                 left: 10rem;
+                padding: 5px;
+            }
+            
+            #view_menu {
+                position: absolute;
+                left: 12rem;
                 padding: 5px;
             }
             
@@ -517,6 +551,32 @@ and open the template in the editor.
                         </div>
                         <div id="app_wind_decrease" class="dropdown_item menu_button" onclick="myApp.windDecrease()">
                             <i class="material-icons">&#xE5DB;</i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="view_menu" class="dropdown">
+                    <div class="dropdown_btn menu_button">
+                        <i class="material-icons">insert_photo</i>
+                    </div>
+                    <div class="dropdown_items">
+                        <div id="view_aft" class="dropdown_item menu_button" onclick="myApp.viewAft()">
+                            <i class="material-icons">arrow_downward</i>
+                        </div>
+                        <div id="view_fwd" class="dropdown_item menu_button" onclick="myApp.viewFwd()">
+                            <i class="material-icons">arrow_upward</i>
+                        </div>
+                        <div id="view_port" class="dropdown_item menu_button" onclick="myApp.viewPort()">
+                            <i class="material-icons">arrow_back</i>
+                        </div>
+                        <div id="view_stbd" class="dropdown_item menu_button" onclick="myApp.viewStbd()">
+                            <i class="material-icons">arrow_forward</i>
+                        </div>
+                        <div id="view_up" class="dropdown_item menu_button" onclick="myApp.viewUp()">
+                            <i class="material-icons">cloud_queue</i>
+                        </div>
+                        <div id="camera_view" class="dropdown_item menu_button" onclick="myApp.nextCameraView()">
+                            <i class="material-icons">directions_boat</i>
                         </div>
                     </div>
                 </div>

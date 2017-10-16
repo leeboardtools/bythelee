@@ -101,6 +101,7 @@ function LBMyApp() {
     this.physicsEngineType = LBSailSim.SailEnvTHREE.CANNON_PHYSICS;
     
     this.updateMouseModeButton();
+    this.updateCameraViewButton();
 };
 
 LBMyApp.prototype = Object.create(LBUI3d.App3D.prototype);
@@ -124,16 +125,18 @@ LBMyApp.prototype.addNormalView = function(view, standardView) {
     view.localPOVCameraController.localPosition.set(3, 0, 1.0);
     view.localPOVCameraController.localOrientation.azimuthDeg = 180;
     
-    view.chaseController = new LBUI3d.ChaseCameraController(20, LBUI3d.ChaseCameraController.CHASE_MODE_WORLD);
-    view.chaseController.worldLimits.minPos.z = 1;
-    view.chaseController.desiredCoordinates.elevationDeg = 20;
-    view.chaseController.forwardAzimuthDeg = 0;
-    view.addCameraController(view.chaseController);
+    var chaseMode = LBUI3d.ChaseCameraController.CHASE_MODE_WORLD;
+    //chaseMode = LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL;
+    view.chaseCameraController = new LBUI3d.ChaseCameraController(20, chaseMode);
+    view.chaseCameraController.worldLimits.minPos.z = 1;
+    view.chaseCameraController.desiredCoordinates.elevationDeg = 20;
+    view.chaseCameraController.forwardAzimuthDeg = 0;
+    view.addCameraController(view.chaseCameraController);
     
     this.addView(view);
     this.updateViewForMyBoat(view);
     
-    view.setActiveCameraController(view.chaseController);
+    view.setActiveCameraController(view.chaseCameraController);
 
     if (standardView !== undefined) {
         view.setActiveCameraController(view.localPOVCameraController);
@@ -670,6 +673,139 @@ LBMyApp.prototype.windBack = function() {
  */
 LBMyApp.prototype.windVeer = function() {
     this.setWindDirDeg(this.windDeg + 10);
+};
+
+
+/**
+ * @param {type} dir One of the LBUI3d.CameraController.VIEW_ constants.
+ * @returns {undefined}
+ */
+LBMyApp.prototype.setCameraView = function(dir) {
+    if (!this.activeView) {
+        return;
+    }
+    if (!this.activeView.activeCameraController) {
+        return;
+    }
+    
+    this.activeView.activeCameraController.setStandardView(dir);
+};
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.viewFwd = function() {
+    this.setCameraView(LBUI3d.CameraController.VIEW_FWD);
+};
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.viewAft = function() {
+    this.setCameraView(LBUI3d.CameraController.VIEW_AFT);
+};
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.viewFwdPort = function() {
+    this.setCameraView(LBUI3d.CameraController.VIEW_FWD_PORT);
+};
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.viewFwdStbd = function() {
+    this.setCameraView(LBUI3d.CameraController.VIEW_FWD_STBD);
+};
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.viewPort = function() {
+    this.setCameraView(LBUI3d.CameraController.VIEW_PORT);
+};
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.viewStbd = function() {
+    this.setCameraView(LBUI3d.CameraController.VIEW_STBD);
+};
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.viewAftPort = function() {
+    this.setCameraView(LBUI3d.CameraController.VIEW_AFT_PORT);
+};
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.viewAftStbd = function() {
+    this.setCameraView(LBUI3d.CameraController.VIEW_AFT_STBD);
+};
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.viewUp = function() {
+    this.setCameraView(LBUI3d.CameraController.VIEW_UP);
+};
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.nextCameraView = function() {
+    if (!this.activeView) {
+        return;
+    }
+    var activeController = this.activeView.activeCameraController;
+    if (!activeController || (activeController === this.activeView.localPOVCameraController)) {
+        this.activeView.setActiveCameraController(this.activeView.chaseCameraController);
+    }
+    else {
+        this.activeView.setActiveCameraController(this.activeView.localPOVCameraController);
+    }
+    
+    this.updateCameraViewButton();
+};
+
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.updateCameraViewButton = function() {
+    var cursor;
+    var innerHTML;
+    switch (this.activeView.activeCameraController) {
+        case this.activeView.localPOVCameraController :
+            innerHTML = "directions_boat";
+            break;
+            
+        case this.activeView.chaseCameraController :
+            innerHTML = "wallpaper";
+            break;
+            
+        default :
+            return;
+    }
+    
+    var element = document.getElementById('camera_view');
+    var elements = element.getElementsByTagName('i');
+    elements[0].innerHTML = innerHTML;
 };
 
 

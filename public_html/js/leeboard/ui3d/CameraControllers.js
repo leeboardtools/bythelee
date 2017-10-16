@@ -264,7 +264,7 @@ LBUI3d.CameraController.prototype.rotatePOVDeg = function(horzDeg, vertDeg) {
 };
 
 /**
- * Pans the camera point of view horizontall or vertically
+ * Pans the camera point of view horizontarrow_forwardall or vertically
  * @param {Number} dx   The amount to pan horizontally.
  * @param {Number} dy   The amount to pan vertically.
  */
@@ -1058,7 +1058,7 @@ LBUI3d.LocalPOVCameraController.prototype.setStandardView = function(view) {
             break;
         case LBUI3d.CameraController.VIEW_UP :
             azimuthDeg = this.localOrientation.azimuthDeg - this.forwardAzimuthDeg;
-            this.localOrientation.elevationDeg = -89;
+            this.localOrientation.elevationDeg = 89;
             break;
             
         default :
