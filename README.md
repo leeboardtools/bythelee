@@ -13,21 +13,13 @@ The sailing simulator is 3D simulator. It maintains the state of the boats in 3D
 
 Three open source Javascript libraries are currently used:
 
-* [three.js](https://threejs.org/) is used primarily for its 3D geometry classes and the Object3D class. The files in **By The Lee** that refer directly to three.js are very limited (Geometry-THREE.js for one), so if the need should arise, it should not be too painful to remove the dependence on three.js.
+* [three.js](https://threejs.org/) is now the primary 3D framework. Because of the way **By The Lee** started (it was based on [Phaser CE](https://github.com/photonstorm/phaser-ce/blob/master/README.md), the files in the core and sailing simulator components provide an encapsulation of three.js. For example, there's core/Geometry-THREE.js, which defines LBGeometry.Vector3 amongst other objects, as an enhanced alias for THREE.Vector3.
 
 * [cannon.js](https://github.com/schteppe/cannon.js/blob/master/README.markdown) is the 3D physics engine.
 
-* [Phaser CE](https://github.com/photonstorm/phaser-ce/blob/master/README.md) is the current UI framework. It is an HTML5 2D game engine.
+* [RequireJS](http://requirejs.org/) is used to manage dependencies.
 
-The plan is to eventually migrate away from Phaser CE, probably into using three.js for 3D rendering. At the moment I have a pseudo 3D renderer under Phaser, but speed tests on my Motorola Moto G phone showed that the pseudo 3D renderer was really slowing things down. Some quick time tests with the Version 0.02 on http://leeboardtools.github.io showed the following fps':
-
-* Cannon + pseudo 3D rendering: 30 fps
-* Phaser P2 + pseudo 3D rendering: 32 fps
-* Cannon + straight 2D rendering: 40 fps
-
-I'm going to presume that using three.js for rendering will not have anywhere near as bad a fps drop as the pseudo 3D rendering, since WebGL will be much faster than creating 2D polygons.
-
-What I need to figure out first is how to best to handle the 2D UI, such as the HUD and controls.
+The HUD display and controls are all implemented using HTML elements.
 
 
 ## Development ##
@@ -65,22 +57,6 @@ The docs folder will then be populated with the appropriate HTML files for the d
 
 ### The Release ###
 At the moment I don't use a minimizer, some day I will.
-Other than that, the release process consists of copying the files from public\_html to the root folder of the leeboardtools.github.io repository, skipping the following files:
-
-* phaser.min.js
-* phaser.js
-* three.min.js
-* three.js
-* cannon.min.js
-* cannon.js
-
-(phaser.min.js, three.min.js and cannon.js are already in the repository, and won't change unless the Phaser or three.js version changes)
-
-Additionally, the index.html file needs to be updated with a commenting out of the following two lines:
-
-* `<script src="js/phaser.js"></script>`
-* `<script src="js/three.js"></script>`
-
-These lines are used to include the non-minimized versions of Phaser and three.js for debugging.
+Other than that, the release process consists of copying the files from public\_html to the root folder of the leeboardtools.github.io repository.
 
 Some day, such as when I get around to using a minimizer, I'll automate this...
