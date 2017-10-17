@@ -93,6 +93,7 @@ LBSailSim.SailEnvTHREE.prototype._boatCheckedOut = function(boat, data) {
             me.envGroup.add(model);
             
             loadVesselPartModel(boat.spars, model, me.app3d.mainScene);
+            loadVesselPartModel(boat.windIndicators, model, me.app3d.mainScene);
             loadVesselPartModel(boat.hydrofoils, model, me.app3d.mainScene);
             loadVesselPartModel(boat.airfoils, model, me.app3d.mainScene);
         });

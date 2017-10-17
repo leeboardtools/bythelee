@@ -81,6 +81,26 @@
                 "k": 200e-6,
                 "debugForces": true
             },
+            "windIndicators": [
+                {
+                    "name": "portWindIndicator",
+                    "mass": 0,
+                    "obj3D": {
+                        "position" : { "x": 1.7, "y": -0.7, "z": 0.6 },
+                        "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                        },
+                    "threeModel": "models/tubby/port_wind_indicator.json"
+                },
+                {
+                    "name": "stbdWindIndicator",
+                    "mass": 0,
+                    "obj3D": {
+                        "position" : { "x": 1.7, "y": 0.7, "z": 0.6 },
+                        "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                        },
+                    "threeModel": "models/tubby/stbd_wind_indicator.json"
+                }
+            ],
             "spars": [
                 {
                     "name": "mainmast",

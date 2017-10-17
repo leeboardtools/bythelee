@@ -27,46 +27,12 @@ are both checked.
 TODO:
 
 
-
-View controllers to have:
-Follow at distance
-First Person (On boat, could choose different boats)
-Overhead
-Fixed (Fixed coordinates)
-Fixed to target (Orbit)
-
-View menu:
-<i class="material-icons">insert_photo</i>  <== Main Icon
-<i class="material-icons">&#xE251;</i>
-
-or
-<i class="material-icons">settings_overscan</i>
-<i class="material-icons">&#xE8C4;</i>
+Camera Controllers:
+Fix ChaseCameraController elevation limit.
 
 
-4 Views:
-<i class="material-icons">keyboard_arrow_down</i>   <== Forward
-<i class="material-icons">&#xE313;</i>
+Add water surface or wake, need some reference frame for water.
 
-<i class="material-icons">keyboard_arrow_left</i>   <== Stbd
-<i class="material-icons">&#xE314;</i>
-
-<i class="material-icons">keyboard_arrow_right</i>  <== Port
-<i class="material-icons">&#xE315;</i>
-
-<i class="material-icons">keyboard_arrow_up</i> <== Aft
-<i class="material-icons">&#xE316;</i>
-
-Follow:
-<i class="material-icons">directions_boat</i>
-<i class="material-icons">&#xE532;</i>
-
-
-<i class="material-icons">pan_tool</i>
-<i class="material-icons">&#xE925;</i>
-
-
-Put Wind Indicator on Boat, mast head?
 
 Add Splash Screen
 
@@ -146,7 +112,6 @@ Wind manager
 
 Sailing boundaries
 
-Zoom?
 
 
 

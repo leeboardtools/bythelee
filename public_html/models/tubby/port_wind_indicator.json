@@ -1,0 +1,34 @@
+{
+    "materials":[{
+        "transparent":false,
+        "DbgName":"Port Color",
+        "colorDiffuse":[0.440631,0.0132107,0.0132107],
+        "specularCoef":50,
+        "DbgIndex":0,
+        "opacity":1,
+        "blending":"NormalBlending",
+        "depthWrite":true,
+        "shading":"phong",
+        "colorEmissive":[0,0,0],
+        "doubleSided":false,
+        "wireframe":false,
+        "depthTest":true,
+        "colorSpecular":[0.5,0.5,0.5],
+        "DbgColor":15658734,
+        "visible":true
+    }],
+    "uvs":[],
+    "metadata":{
+        "type":"Geometry",
+        "materials":1,
+        "faces":2,
+        "uvs":0,
+        "generator":"io_three",
+        "version":3,
+        "vertices":4,
+        "normals":2
+    },
+    "faces":[34,3,2,1,0,0,0,0,34,2,0,1,0,1,1,1],
+    "normals":[0,1,-4.37114e-08,0,1,-4.37114e-08],
+    "vertices":[0.2,2.73196e-09,0.0625,0.15,0,0,-0.2,0,0,0.2,-2.73196e-09,-0.0625]
+}

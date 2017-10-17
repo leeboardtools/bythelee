@@ -269,6 +269,13 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
      */
     this.controllers = [];
     
+    /**
+     * The array of wind indicators. Making them rigid bodies instead of
+     * just LBGeometry.Object3D just to keep their management simple.
+     * @member {LbPhysics.RigidBody[]}
+     */
+    this.windIndicators = [];
+    
     // Later:
     //this.crew = [];
     
@@ -319,6 +326,9 @@ LBSailSim.Vessel.prototype.destroy = function() {
         });
         this.controllers.length = 0;
         this.controllers = null;
+        
+        this.windIndicators.length = 0;
+        this.windIndicators = null;
 
         this.jibsheetController = null;
         this.mainsheetController = null;
@@ -410,6 +420,17 @@ LBSailSim.Vessel.prototype.addSpar = function(spar) {
 LBSailSim.Vessel.prototype.addBallast = function(ballast) {
     this.ballasts.push(ballast);
     this.addPart(ballast);
+    return this;
+};
+
+/**
+ * Adds a wind indicator to the vessel.
+ * @param {LBPhysics.RigidBody} windIndidator  The wind indicator.
+ * @returns {LBSailSim.Vessel}  this.
+ */
+LBSailSim.Vessel.prototype.addWindIndicator = function(windIndidator) {
+    this.windIndicators.push(windIndidator);
+    this.addPart(windIndidator);
     return this;
 };
 
@@ -621,6 +642,44 @@ LBSailSim.Vessel.prototype._loadBallasts = function(data, loadCallback) {
     return this;
 };
 
+
+/**
+ * Called from {@link LBSailSim.Vessel#_loadWindIndicators} to create and load a wind indicator
+ * object from properties in a data object.
+ * @protected
+ * @param {object} data The data object.
+ * @returns {LBPhysics.RigidBody}   The wind indicator object.
+ */
+LBSailSim.Vessel.prototype._createAndLoadWindIndicator = function(data) {
+    return LBPhysics.RigidBody.createFromData(data);
+};
+
+/**
+ * Loads the array of wind indicator objects from properties of data objects in an
+ * array of data objects.
+ * @protected
+ * @param {Array} data  The array of data objects.
+ * @param {object} [loadCallback]   If defined, a callback object with functions that
+ * get called back after each component is loaded.
+ * @returns {LBSailSim.Vessel}  this.
+ */
+LBSailSim.Vessel.prototype._loadWindIndicators = function(data, loadCallback) {
+    if (!data) {
+        return this;
+    }
+    
+    for (var i = 0; i < data.length; ++i) {
+        var windIndicator = this._createAndLoadWindIndicator(data[i]);
+        if (windIndicator) {
+            if (loadCallback && loadCallback.windIndicatorLoaded) {
+                loadCallback.windIndicatorLoaded(this, windIndicator, data[i]);
+            }
+            this.addWindIndicator(windIndicator);
+        }
+    }
+    return this;
+};
+
 /**
  * Called from {@link LBSailSim.Vessel#_loadControllers} to create and load a controller 
  * object from properties in a data object.
@@ -687,6 +746,7 @@ LBSailSim.Vessel.prototype.load = function(data, loadCallback) {
     
     this._loadSpars(data.spars, loadCallback);
     this._loadBallasts(data.ballasts, loadCallback);
+    this._loadWindIndicators(data.windIndicators, loadCallback);
     this._loadPropulsors(data.propulsors, loadCallback);
     this._loadFoils(data.hydrofoils, this.hydrofoils, loadCallback);
     
@@ -760,6 +820,11 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
         this.hullResultant = this.hull.updateForces(dt);
         this.addWorldResultant(this.hullResultant);
     }
+    
+    var appWindRad = (this.getApparentWindBearingDeg()) * LBMath.DEG_TO_RAD;
+    this.windIndicators.forEach(function(indicator) {
+        indicator.obj3D.rotation.z = appWindRad;
+    });
     
     this.handleDebugFields();
     

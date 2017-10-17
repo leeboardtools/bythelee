@@ -1314,6 +1314,9 @@ LBPhysics.RigidBody.prototype = {
                     continue;
                 }
                 var partMass = part.getTotalMass();
+                if (!partMass) {
+                    continue;
+                }
                 this.totalMass += partMass;
                 
                 var partCenterOfMass = part.getTotalCenterOfMass();
