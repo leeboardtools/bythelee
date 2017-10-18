@@ -176,23 +176,10 @@ LBMyApp.prototype.init = function(mainContainer) {
  * @returns {undefined}
  */
 LBMyApp.prototype.initSceneEnv = function() {
-    // Water
-    var geometry = new THREE.PlaneGeometry(10000, 10000);
-    var material = new THREE.MeshBasicMaterial({ color: 0x0086b3, side: THREE.DoubleSide });
-    var plane = new THREE.Mesh(geometry, material);
-    plane.rotateX(-LBMath.PI_2);
-    this.mainScene.scene.add(plane);
-    
-    // Sky
-    geometry = new THREE.SphereGeometry(1000, 25, 25);
-    material = new THREE.MeshPhongMaterial({ color: 0xe5ffff, side: THREE.BackSide });
-    var dome = new THREE.Mesh(geometry, material);
-    this.mainScene.scene.add(dome);
-    
     var light = new THREE.HemisphereLight(0xe5ffff, 0x0086b3, 1);
-    this.mainScene.scene.add(light);
+    this.mainScene.add(light);
 
-    this.mainScene.scene.add(new THREE.AxisHelper(3));
+//    this.mainScene.add(new THREE.AxisHelper(3));
 };
 
 

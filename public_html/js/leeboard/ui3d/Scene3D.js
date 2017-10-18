@@ -46,6 +46,23 @@ LBUI3d.Scene3D = function() {
 };
 
 LBUI3d.Scene3D.prototype = {
+    /**
+     * Adds one or more 3D objects to the scene.
+     * @param {LBGeometry.Object3D} object3D    The object(s) to add.
+     * @returns {LBUI3d.Scene3D}    this.
+     */
+    add: function(object3D) {
+        this.scene.add.apply(this.scene, arguments);
+    },
+    
+    /**
+     * Removes one or more 3D objects from the scene.
+     * @returns {LBUI3d.Scene3D}    this.
+     */
+    remove: function() {
+        this.scene.remove.apply(this.scene, arguments);
+    },
+    
     constructor: LBUI3d.Scene3D
 };
 

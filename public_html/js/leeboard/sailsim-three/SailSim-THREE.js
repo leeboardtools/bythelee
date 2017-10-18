@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets', 'lbui3d'], 
-function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d) {
+define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets', 'lbui3d', 'lbwater3d', 'lbsky3d'], 
+function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d, LBWater3D, LBSky3D) {
     
     'use strict';
 
@@ -43,8 +43,11 @@ LBSailSim.SailEnvTHREE = function(app3d, physicsType, assetLoader) {
             break;
     }
     
+    this.water3D = new LBSailSim.Water3D(app3d.mainScene, this);
+    this.sky3D = new LBSailSim.Sky3D(app3d.mainScene, this);
+    
     this.envGroup = new THREE.Group();
-    this.app3d.mainScene.scene.add(this.envGroup);
+    this.app3d.mainScene.add(this.envGroup);
 };
 
 
@@ -171,12 +174,14 @@ LBSailSim.SailEnvTHREE.prototype.update = function(dt) {
     dt = this.physicsLink.timeStep();
     LBSailSim.Env.prototype.update.call(this, dt);
     
-    // TEST!!!!
     this.physicsLink.update(dt);
     
     // Don't have to call updateDisplayObjects()...
     //this.physicsLink.updateDisplayObjects();
     this.physicsLink.rigidBodies.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
+    
+    this.water3D.update(dt);
+    this.sky3D.update(dt);
 };
 
 LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody = function(rigidBody) {
