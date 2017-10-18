@@ -11,7 +11,7 @@ At the moment the **By The Lee** app can be run from http://leeboardtools.github
 
 The sailing simulator is 3D simulator. It maintains the state of the boats in 3D space, and calculates the various sailing forces in 3D. However, it does not implement an actual physics engine. Instead, it relies upon a host to take the forces and generate the appropriate accelerations and perform the integration of accelerations and velocities as well as resolve any collisions.
 
-Three open source Javascript libraries are currently used:
+The following open source Javascript libraries are currently used:
 
 * [three.js](https://threejs.org/) is now the primary 3D framework. Because of the way **By The Lee** started (it was based on [Phaser CE](https://github.com/photonstorm/phaser-ce/blob/master/README.md), the files in the core and sailing simulator components provide an encapsulation of three.js. For example, there's core/Geometry-THREE.js, which defines LBGeometry.Vector3 amongst other objects, as an enhanced alias for THREE.Vector3.
 
@@ -36,6 +36,8 @@ The core portion of the library is in public\_html/js/leeboard/core.
 The sailing simulator is in public\_html/js/leeboard/sailsim.
 
 The third party libraries are in public\_html/js/lib.
+
+Image files copied from ThreeJS are in public\_html/images/three-js.
 
 
 ### Unit Tests ###
