@@ -60,8 +60,15 @@ LBUI3d.App3D = function() {
     
     /**
      * The number of milliseconds elapsed between the last frame and the current frame.
+     * @member {Number}
      */
     this.lastFrameMillisecs = 0;
+    
+    /**
+     * The total number of milliseconds the application has been operating in run or step mode.
+     * @member {Number}
+     */
+    this.runMillisecs = 0;
     
     /**
      * The mouse mode currently active in all the views.
@@ -146,6 +153,7 @@ LBUI3d.App3D.prototype.pause = function() {
 LBUI3d.App3D.prototype.runContinuous = function() {
     if (this._runState !== LBUI3d.App3D.RUN_STATE_RUNNING) {
         this._runState = LBUI3d.App3D.RUN_STATE_RUNNING;
+        this._lastFrameTimeStamp = 0;
         LBUI3dApp3DAnimate((performance || Date).now());
     }
 };
@@ -158,6 +166,7 @@ LBUI3d.App3D.prototype.runSingleStep = function() {
         this.enterPaused();
     }
     else {
+        this._lastFrameTimeStamp = 0;
         LBUI3dApp3DAnimate((performance || Date).now());
         this._runState = LBUI3d.App3D.RUN_STATE_PAUSED;
     }
@@ -298,6 +307,7 @@ LBUI3d.App3D.prototype._cycle = function(timeStamp) {
     this.update(dt);
     this.render(dt);
     ++this.frameCount;
+    this.runMillisecs += this.lastFrameMillisecs;
 
     this._lastFrameTimeStamp = timeStamp;
 };

@@ -31,7 +31,10 @@ Camera Controllers:
 Fix ChaseCameraController elevation limit.
 
 
-Add water surface or wake, need some reference frame for water.
+Work on the timing in App3D._cycle().
+
+Wake: In Hull, maybe change the determing of the wakeEndPort, wakeEndStbd to look for
+the points farthest from the center that are aft of the velocity perpendicular.
 
 
 Add Splash Screen

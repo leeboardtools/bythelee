@@ -21,7 +21,7 @@ var require = {
         'three': 'lib/three',
         'cannon': 'lib/cannon',
         'phaser': 'lib/phaser',
-        'tween': 'lib/tween',
+        'tween': 'lib/Tween',
         
         'lbcannonutil': 'leeboard/cannon/CannonUtil',
         'lbcannonphysicslink': 'leeboard/cannon/CannonPhysicsLink',
@@ -64,6 +64,7 @@ var require = {
         
         'lbsailsimthree': 'leeboard/sailsim-three/SailSim-THREE',
         'lbsky3d': 'leeboard/sailsim-three/Sky3D',
+        'lbwakes3d': 'leeboard/sailsim-three/Wakes3D',
         'lbwater3d': 'leeboard/sailsim-three/Water3D',
         
         'lbthreejs': 'leeboard/three-js/ThreeJSUtil',
@@ -80,6 +81,10 @@ var require = {
     shim: {
         'phaser': {
             exports: 'Phaser'
+        },
+        
+        'tween': {
+            exports: 'TWEEN'
         },
         
         'cannon': {

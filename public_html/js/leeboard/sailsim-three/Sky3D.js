@@ -25,8 +25,8 @@ LBSailSim.Sky3D = function(scene3D, sailEnv) {
     
     var geometry = new THREE.SphereGeometry(1000, 25, 25);
     var material = new THREE.MeshPhongMaterial({ color: 0xe5ffff, side: THREE.BackSide });
-    var dome = new THREE.Mesh(geometry, material);
-    this.scene3D.add(dome);
+    this.skyMesh = new THREE.Mesh(geometry, material);
+    this.scene3D.add(this.skyMesh);
 };
 
 LBSailSim.Sky3D.prototype = {

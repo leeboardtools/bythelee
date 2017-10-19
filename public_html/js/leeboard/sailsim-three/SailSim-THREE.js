@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets', 'lbui3d', 'lbwater3d', 'lbsky3d'], 
-function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d, LBWater3D, LBSky3D) {
+define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets', 'lbui3d', 'lbwater3d', 'lbsky3d', 'lbwakes3d', 'tween'], 
+function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d, LBWater3D, LBSky3D, LBWakes3D, TWEEN) {
     
     'use strict';
 
@@ -45,6 +45,11 @@ LBSailSim.SailEnvTHREE = function(app3d, physicsType, assetLoader) {
     
     this.water3D = new LBSailSim.Water3D(app3d.mainScene, this);
     this.sky3D = new LBSailSim.Sky3D(app3d.mainScene, this);
+    this.wakes3D = new LBSailSim.Wakes3D(app3d.mainScene, this);
+    
+    // For testing...
+    //this.water3D.waterMesh.visible = false;
+    //this.sky3D.skyMesh.visible = false;
     
     this.envGroup = new THREE.Group();
     this.app3d.mainScene.add(this.envGroup);
@@ -101,6 +106,8 @@ LBSailSim.SailEnvTHREE.prototype._boatCheckedOut = function(boat, data) {
             loadVesselPartModel(boat.airfoils, model, me.app3d.mainScene);
         });
     }
+    
+    this.wakes3D.addVessel(boat);
 };
 
 function loadVesselPartModel(parts, parentModel, mainScene) {
@@ -159,6 +166,7 @@ function mapSailSurfaceToModel(sailSurface, model) {
 };
 
 LBSailSim.SailEnvTHREE.prototype._boatReturned = function(boat) {
+    this.wakes3D.removeVessel(boat);
     LBSailSim.Env.prototype._boatReturned.call(this, boat);
     this.physicsLink.removeRigidBody(boat);
 };
@@ -172,6 +180,8 @@ LBSailSim.SailEnvTHREE.prototype.update = function(dt) {
     dt = dt || this.physicsLink.timeStep();
     
     dt = this.physicsLink.timeStep();
+    
+    TWEEN.update(this.app3d.runMillisecs);
     LBSailSim.Env.prototype.update.call(this, dt);
     
     this.physicsLink.update(dt);
@@ -182,6 +192,7 @@ LBSailSim.SailEnvTHREE.prototype.update = function(dt) {
     
     this.water3D.update(dt);
     this.sky3D.update(dt);
+    this.wakes3D.update(dt);
 };
 
 LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody = function(rigidBody) {
