@@ -19,6 +19,8 @@ The following open source Javascript libraries are currently used:
 
 * [RequireJS](http://requirejs.org/) is used to manage dependencies.
 
+* [tween.js](https://github.com/tweenjs/tween.js/) is used to provide tweening, such as the automatic motion tracking of the wake particles.
+
 The HUD display and controls are all implemented using HTML elements.
 
 
