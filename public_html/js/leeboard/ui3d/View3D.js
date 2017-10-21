@@ -69,8 +69,10 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     if (!renderer) {
         var rendererParameters = {
             alpha: true,
-            antialias: true,
-            logarithmicDepthBuffer: true
+            // Can't do logarithmicDepthBuffer with sprite based stuff.
+            // https://github.com/mrdoob/three.js/issues/5133
+            //logarithmicDepthBuffer: true,
+            antialias: true
         };
         renderer = new THREE.WebGLRenderer(rendererParameters);
     }

@@ -51,8 +51,10 @@ LBSailSim.SailEnvTHREE = function(app3d, physicsType, assetLoader) {
     //this.water3D.waterMesh.visible = false;
     //this.sky3D.skyMesh.visible = false;
     
-    this.envGroup = new THREE.Group();
-    this.app3d.mainScene.add(this.envGroup);
+//    this.envGroup = new THREE.Group();
+//    this.app3d.mainScene.add(this.envGroup);
+
+    this.envGroup = this.app3d.mainScene;
 };
 
 

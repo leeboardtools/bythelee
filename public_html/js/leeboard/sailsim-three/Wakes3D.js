@@ -31,14 +31,25 @@ function(LBSailSim, LBParticles, LBGeometry, LBMath, TWEEN, THREE) {
 LBSailSim.Wakes3D = function(scene3D, sailEnv) {
     this.scene3D = scene3D;
     this.sailEnv = sailEnv;
+
+    this.particles = new LBParticles.ParticleSystem({
+        maxParticles: 10000
+    });
+    scene3D.add(this.particles);
     
-    var material = this._createParticleMaterial();
-    
-    /**
-     * The particle cache the particles come from.
-     * @member {LBParticles.Cache}
-     */
-    this.particles = new LBParticles.Cache(scene3D, material);
+    this.particleOptions = {
+        position: new LBGeometry.Vector3(),
+        positionRandomness: .1,
+        velocity: new LBGeometry.Vector3(),
+        velocityRandomness: .0,
+        //color: 0xaa88ff,
+        color: 0x808080,
+        colorRandomness: .1,
+        turbulence: .0,
+        lifetime: 10,
+        size: 10,
+        sizeRandomness: 1
+    };
     
     /**
      * The collection of vessels for which wakes are generated.
@@ -58,12 +69,10 @@ LBSailSim.Wakes3D = function(scene3D, sailEnv) {
      */
     this.particleDuration = 10;
     
-    this.particleFrequency = 3;
+    this.particleFrequency = 0;
+    
+    this.particlesToGenerate = 1;
 };
-
-var _workingPos = new LBGeometry.Vector3();
-var _workingVel = new LBGeometry.Vector3();
-var _workingDest = new LBGeometry.Vector3();
 
 LBSailSim.Wakes3D.prototype = {
     addVessel: function(vessel) {
@@ -89,14 +98,18 @@ LBSailSim.Wakes3D.prototype = {
         
         if (this.delayCount) {
             --this.delayCount;
-            return;
         }
-        this.delayCount = this.particleFrequency;
+        else {
+            this.delayCount = this.particleFrequency;
 
-        var me = this;
-        this.vessels.forEach(function(vessel) {
-            me._updateVesselWake(vessel, dt);
-        });
+            var me = this;
+            this.vessels.forEach(function(vessel) {
+                me._updateVesselWake(vessel, dt);
+            });
+        }
+        
+        this.particles.update(this.sailEnv.app3d.runMillisecs / 1000);
+        
     },
     
     _updateVesselWake: function(vessel, dt) {
@@ -106,8 +119,6 @@ LBSailSim.Wakes3D.prototype = {
         if (speedSq < this.minWakeSpeedSq) {
             return;
         }
-        
-        var speed = Math.sqrt(speedSq);
         
         // Get the span of the hull's waterline across the velocity direction.
         var hull = vessel.hull;
@@ -126,77 +137,38 @@ LBSailSim.Wakes3D.prototype = {
         // the edges of the wake will form an angle of 19.47 degrees to the
         // mid-point as the wake progresses.
         
-        var spanValue = Math.random();
-        
-        // TEST!!!
-//        spanValue = this.spanValue || 0;
-//        this.spanValue = 1 - spanValue;
-//        spanValue = (spanValue > 0.5) ? 1 : 0;
-        
-        _workingPos.lerpVectors(wakeEndStbd, wakeEndPort, spanValue);
-        var centerSpanValue = spanValue - 0.5;
-        _workingPos.z = 0.01;
-        
-        var alpha = 2 * centerSpanValue * wakeAngle;
-        var wakeVel = Math.sin(wakeAngle);
-        var velAlpha = alpha + velVesselAngle;
-        _workingVel.x = wakeVel * Math.cos(velAlpha);
-        _workingVel.y = wakeVel * Math.sin(velAlpha);
-        _workingVel.z = 0;
-        
-        _workingDest.x = _workingPos.x + _workingVel.x * this.particleDuration;
-        _workingDest.y = _workingPos.y + _workingVel.y * this.particleDuration;
-        _workingDest.z = _workingPos.z;
-        
-//        console.log("Wake: " + velocity.x + ' ' + velocity.y + '   ' + spanValue + '   ' + _workingVel.x + ' ' + _workingVel.y);
-        
-        var particles = this.particles;
-        var particle = this.particles.getParticle();
-        
-        particle.scale.x = particle.scale.y = 0.15;
-        this.scene3D.coordMapping.vector3ToThreeJS(_workingPos, particle.position);
-        this.scene3D.coordMapping.vector3ToThreeJS(_workingDest, _workingDest);
-        particle.visible = true;
-        
-        var nowMillisecs = this.sailEnv.app3d.runMillisecs;
-        var duration_ms = this.particleDuration * 1000;
-        
-        new TWEEN.Tween(particle.position)
-                .to({ x: _workingDest.x, y: _workingDest.y, z: _workingDest.z }, duration_ms)
-                .onComplete(function() {
-                    particles.returnParticle(particle);
-                })
-                .start(nowMillisecs);
-        new TWEEN.Tween(particle.scale)
-                .to({ x: 0.01, y: 0.01 }, duration_ms)
-                .easing(TWEEN.Easing.Quadratic.In)
-                .start(nowMillisecs);
-    },
-    
-    _createParticleMaterial: function() {
-        // Copied from https://github.com/mrdoob/three.js/blob/master/examples/canvas_particles_sprites.html
-        var canvas = document.createElement('canvas');
-        canvas.width = 16;
-        canvas.height = 16;
-        var context = canvas.getContext('2d');
-        var gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 
-            0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
-        gradient.addColorStop(0, 'rgba(60, 60, 60, 1)');
-        gradient.addColorStop(0.7, 'rgba(40, 40, 40, 1)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
-        
-        context.fillStyle = gradient;
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        
-        return new THREE.SpriteMaterial( {
-            map: new THREE.CanvasTexture(canvas),
-            blending: THREE.AdditiveBlending
-        });
+        for (var i = this.particlesToGenerate; i > 0; --i) {
+            var spanValue = Math.random();
+
+            var pos = this.particleOptions.position;
+            pos.lerpVectors(wakeEndStbd, wakeEndPort, spanValue);
+            var centerSpanValue = spanValue - 0.5;
+            pos.z = 0.01;
+
+            var alpha = 2 * centerSpanValue * wakeAngle;
+            var wakeVel = Math.sin(wakeAngle);
+            var velAlpha = alpha + velVesselAngle;
+
+            var vel = this.particleOptions.velocity;
+            wakeVel = 0;
+            vel.x = wakeVel * Math.cos(velAlpha);
+            vel.y = wakeVel * Math.sin(velAlpha);
+            vel.z = 0;
+            
+            //pos.z = 1;
+            //vel.x = velocity.x / 9;
+            //vel.y = velocity.y / 9;
+
+            this.scene3D.coordMapping.vector3ToThreeJS(pos, pos);
+            this.scene3D.coordMapping.vector3ToThreeJS(vel, vel);
+
+            this.particles.spawnParticle(this.particleOptions);
+        }
     },
     
     destroy: function() {
         if (this.particles) {
-            this.particles.destroy();
+            this.particles.dispose();
             this.particles = undefined;
         
             this.scene3D = undefined;

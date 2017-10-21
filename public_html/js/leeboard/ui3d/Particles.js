@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-define(['lbgeometry', 'three'],
+define(['lbgeometry', 'three', 'three-gpuparticlesystem'],
 function(LBGeometry, THREE) {
     
     'use strict';
@@ -109,6 +109,21 @@ LBParticles.Cache.prototype = {
     
     constructor: LBParticles.Cache
 };
+
+
+LBParticles.ParticleSystem = function(options) {
+    options = options || {};
+    if (!options.PARTICLE_NOISE_TEXTURE || !options.PARTICLE_SPRITE_TEXTURE) {
+        var textureLoader = new THREE.TextureLoader();
+        options.particleNoiseTex = options.particleNoiseTex || textureLoader.load( 'textures/three-js/perlin-512.png' );
+	options.particleSpriteTex = options.particleSpriteTex || textureLoader.load( 'textures/three-js/particle2.png' );
+    }
+    
+    THREE.GPUParticleSystem.call(this, options);
+};
+
+LBParticles.ParticleSystem.prototype = Object.create(THREE.GPUParticleSystem.prototype);
+
 
 
 return LBParticles;
