@@ -46,7 +46,7 @@ QUnit.test('Orientation', function(assert) {
     var orientation = new LBSpherical.Orientation(10, 20, 30);
     
     var ez = orientation.azimuthDeg * LBMath.DEG_TO_RAD;
-    var ey = orientation.elevationDeg * LBMath.DEG_TO_RAD;
+    var ey = -orientation.elevationDeg * LBMath.DEG_TO_RAD;
     var ex = orientation.rotationDeg * LBMath.DEG_TO_RAD;
     
     var euler = orientation.toEuler();

@@ -232,7 +232,7 @@ LBMath.DegRange.prototype = {
         deg = LBMath.wrapDegrees(deg);
         if (deg < this.minDeg) {
             if (deg > this.maxDeg2) {
-                return ((deg - this.maxDeg2) < (this.minDeg - deg)) ? this.maxDeg2 : this.maxDeg;
+                return ((deg - this.maxDeg2) < (this.minDeg - deg)) ? this.maxDeg2 : this.minDeg;
             }
         }
         else if (deg > this.maxDeg) {

@@ -27,13 +27,23 @@ are both checked.
 TODO:
 
 
+Water/Wake:
+Centered on the camera target.
+Have a list of vessels.
+Track the motion of the target, this will be an offset uniform for the n/s/e/w sump stuff.
+Add smoothstep for n/s/e/w to handle coordinates outside the main bounds.
+Add a velocity dampening factor.
+
+
 Camera Controllers:
 Fix ChaseCameraController elevation limit.
 
 
 Work on the timing in App3D._cycle().
+Only disable simulation when paused, keep camera controller updating operational so can change the view.
 
-Wake: In Hull, maybe change the determing of the wakeEndPort, wakeEndStbd to look for
+
+Wake: In Hull, maybe change the determining of the wakeEndPort, wakeEndStbd to look for
 the points farthest from the center that are aft of the velocity perpendicular.
 
 
