@@ -25,15 +25,18 @@ function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d, LBWater3D, LB
  * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2} or Cannon physics.
  * This pretty much just ties together the physics link and the sailing environment.
  * @constructor
- * @param {LBSailSim.SailEnvTHREE.CANNON_PHYSICS} physicsType  The physics engine to use.
  * @param {LBApp3D} app3d   The app calling this.
+ * @param {LBView3D} mainView   The main view of the app.
+ * @param {LBSailSim.SailEnvTHREE.CANNON_PHYSICS} physicsType  The physics engine to use.
  * @param {LBAssets.Loader} [assetLoader]   The optional asset loader.
  * @returns {LBSailSim.SailEnvTHREE}
  */
-LBSailSim.SailEnvTHREE = function(app3d, physicsType, assetLoader) {
+LBSailSim.SailEnvTHREE = function(app3d, mainView, physicsType, assetLoader) {
     LBSailSim.Env.call(this, assetLoader);
     
     this.app3d = app3d;
+    this.mainView = mainView;
+    
     this.physicsType = physicsType;
     
     switch (physicsType) {

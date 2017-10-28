@@ -47,7 +47,7 @@ LBSailSim.PhaserView = function(sailEnv, worldGroup) {
     this.boatVelocityArrowStyle = new LBPhaser.ArrowStyle(0x008888, velocityArrowScaler, 0.5, 6);
     this.appWindVelocityArrowStyle = new LBPhaser.ArrowStyle(0x008800, velocityArrowScaler, 0.5, 12);
     
-    this.sailEnv.addBoatCallback(this);
+    this.sailEnv.addCallback(this);
     
     this.sailEnv.physicsLink.addView(this);
 
@@ -284,7 +284,7 @@ LBSailSim.PhaserView.prototype.destroy = function() {
     if (this.sailEnv) {
         this.worldGroup = null;
 
-        this.sailEnv.removeBoatCallback(this);
+        this.sailEnv.removeCallback(this);
         this.sailEnv.physicsLink.removeView(this);
         this.sailEnv = null;
     }

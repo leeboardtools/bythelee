@@ -38,6 +38,7 @@ LBUI3d.Scene3D = function() {
     this.scene.add(new THREE.AmbientLight(0x222222));
 
     this.mainLight = new THREE.DirectionalLight(0xffffff, 1);
+    this.mainLight.position.set(0, 300, 250);
     this.scene.add(this.mainLight);
     
     /**

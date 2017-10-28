@@ -67,7 +67,7 @@ LBSailSim.Env = function(assetLoader) {
      * appropriate time.
      * @member {Array}
      */
-    this.boatCallbacks = [];
+    this.callbacks = [];
     
     
     this.loadCoordinator = new LBAssets.MultiLoadCoordinator();
@@ -289,24 +289,24 @@ LBSailSim.Env.prototype = {
     
     
     /**
-     * Adds a boat callback object.
+     * Adds a callback object.
      * @param {Object} callback The callback object.
      * @returns {LBSailSim.Env} this.
      */
-    addBoatCallback: function(callback) {
-        this.boatCallbacks.push(callback);
+    addCallback: function(callback) {
+        this.callbacks.push(callback);
         return this;
     },
     
     /**
-     * Removes a boat callback object.
+     * Removes a callback object.
      * @param {Object} callback The callback object to remove.
      * @returns {LBSailSim.Env} this.
      */
-    removeBoatCallback: function(callback) {
-        var index = this.boatCallbacks.indexOf(callback);
+    removeCallback: function(callback) {
+        var index = this.callbacks.indexOf(callback);
         if (index >= 0) {
-            this.boatCallbacks.splice(index, 1);
+            this.callbacks.splice(index, 1);
         }
         return this;
     },
@@ -457,7 +457,7 @@ LBSailSim.Env.prototype = {
      * @param {Object} data The data object that was passed to {@link LBSailSim.Env#checkoutBoat}.
      */
     _boatCheckedOut: function(boat, data) {
-        this.boatCallbacks.forEach(
+        this.callbacks.forEach(
             function(callback) {
                 if (callback.onBoatCheckedOut) {
                     callback.onBoatCheckedOut(boat, data);
@@ -499,7 +499,7 @@ LBSailSim.Env.prototype = {
      * @param {object} boat The boat that was returned.
      */
     _boatReturned: function(boat) {
-        this.boatCallbacks.forEach(
+        this.callbacks.forEach(
             function(callback) {
                 if (callback.onBoatReturned) {
                     callback.onBoatReturned(boat);
@@ -521,6 +521,32 @@ LBSailSim.Env.prototype = {
         });
         
         return this;
+    },
+    
+    /**
+     * Sets the vessel that has focus, this is where if needed the simulation focuses
+     * its resources.
+     * @param {LBSailSim.Vessel} vessel   The vessel to set as the focus boat, may be undefined/null.
+     */
+    setFocusVessel: function(vessel) {
+        if (this.focusVessel !== vessel) {
+            this.focusVessel = vessel;
+            this.callbacks.forEach(
+                    function(callback) {
+                        if (callback.onSetFocusVessel) {
+                            callback.onSetFocusVessel(vessel);
+                        }
+                    },
+                this);
+        }
+    },
+    
+    /**
+     * 
+     * @returns {LBSailSim.Vessel}  The vessel that currently is the focus of the simulation, may be undefined or null.
+     */
+    getFocusVessel: function() {
+        return this.focusVessel;
     },
     
     /**

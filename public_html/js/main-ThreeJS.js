@@ -188,7 +188,7 @@ LBMyApp.prototype.initSceneEnv = function() {
  * @returns {undefined}
  */
 LBMyApp.prototype.initSailEnv = function() {
-    this.sailEnv = new LBSailSim.SailEnvTHREE(this, this.physicsEngineType, this.assetLoader);
+    this.sailEnv = new LBSailSim.SailEnvTHREE(this, this.mainView, this.physicsEngineType, this.assetLoader);
     
     this.loadEnvironment('basin');
 };
@@ -227,6 +227,7 @@ LBMyApp.prototype.loadEnvCompleted = function() {
     //rollDeg = 60;
     //pitchDeg = 30;
     this.myBoat = this.sailEnv.checkoutBoat(boatType, boatName, centerX, centerY, yawDeg, rollDeg, pitchDeg);
+    this.sailEnv.setFocusVessel(this.myBoat);
     
     if (this.rudderSliderElement) {
         this.rudderSliderElement.hidden = !this.myBoat.getRudderController();

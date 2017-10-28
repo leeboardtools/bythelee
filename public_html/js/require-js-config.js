@@ -77,6 +77,7 @@ var require = {
         'lbview3d': 'leeboard/ui3d/View3D',
         'lbcameracontrollers': 'leeboard/ui3d/CameraControllers',
         'lbparticles': 'leeboard/ui3d/Particles',
+        'lbshaders': 'leeboard/ui3d/Shaders',
         'lbui3d': 'leeboard/ui3d/LBUI3d'
     },
     shim: {
