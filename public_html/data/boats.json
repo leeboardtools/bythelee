@@ -17,7 +17,7 @@
             "mass": 378,
             "massRadius": 4,    "_comment": "Used for the force arrows",
             "linearDamping": 0.1,
-            "angularDamping": 0.05,
+            "angularDamping": 0.2,
             "velocityTerms": 3,
             "volumes": {
                 "mirrorPlane": {
@@ -326,7 +326,17 @@
                     "maxForce": 200
                 }
             ],
-            "ballasts": [],
+            "ballasts": [
+                {
+                    "name": "weight",
+                    "mass": 75,
+                    "obj3D": {
+                        "position" : { "x": 4.5, "y": 0.0, "z": 0.5 },
+                        "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                        }
+                }
+                
+            ],
             "controllers": [
                 {
                     "className": "LBSailSim.RudderController",
