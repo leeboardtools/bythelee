@@ -111,6 +111,13 @@ LBParticles.Cache.prototype = {
 };
 
 
+/**
+ * GPU based paraticle system based upon ThreeJS' examples/GPUParticleSystem.js.
+ * This class exists primarily to set the paths to the default textures...
+ * @constructor
+ * @param {Object} options
+ * @returns {LBParticles.ParticleSystem}
+ */
 LBParticles.ParticleSystem = function(options) {
     options = options || {};
     if (!options.PARTICLE_NOISE_TEXTURE || !options.PARTICLE_SPRITE_TEXTURE) {

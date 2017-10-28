@@ -47,8 +47,8 @@ LBSailSim.SailEnvTHREE = function(app3d, mainView, physicsType, assetLoader) {
     }
     
     this.water3D = new LBSailSim.Water3D(app3d.mainScene, this);
-    this.sky3D = new LBSailSim.Sky3D(app3d.mainScene, this);
     this.wakes3D = new LBSailSim.Wakes3D(app3d.mainScene, this);
+    this.sky3D = new LBSailSim.Sky3D(app3d.mainScene, this);
     
     // For testing...
     //this.water3D.waterMesh.visible = false;
@@ -195,8 +195,8 @@ LBSailSim.SailEnvTHREE.prototype.update = function(dt) {
     //this.physicsLink.updateDisplayObjects();
     this.physicsLink.rigidBodies.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
     
-    this.water3D.update(dt);
     this.sky3D.update(dt);
+    this.water3D.update(dt);
     this.wakes3D.update(dt);
 };
 

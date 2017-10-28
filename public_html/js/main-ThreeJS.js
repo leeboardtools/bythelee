@@ -176,8 +176,8 @@ LBMyApp.prototype.init = function(mainContainer) {
  * @returns {undefined}
  */
 LBMyApp.prototype.initSceneEnv = function() {
-    var light = new THREE.HemisphereLight(0xe5ffff, 0x0086b3, 1);
-    this.mainScene.add(light);
+    //var light = new THREE.HemisphereLight(0xe5ffff, 0x0086b3, 1);
+    //this.mainScene.add(light);
 
 //    this.mainScene.add(new THREE.AxisHelper(3));
 };

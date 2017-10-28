@@ -71,6 +71,7 @@ var require = {
         
         'three-detector': 'leeboard/three-js-extras/Detector',
         'three-gpuparticlesystem': 'leeboard/three-js-extras/GPUParticleSystem',
+        'three-watershader': 'leeboard/three-js-extras/WaterShader',
         
         'lbapp3d': 'leeboard/ui3d/App3D',
         'lbscene3d': 'leeboard/ui3d/Scene3D',
@@ -90,6 +91,11 @@ var require = {
         },
         
         'three-gpuparticlesystem': {
+            deps: ['three'],
+            exports: 'THREE'
+        },
+        
+        'three-watershader': {
             deps: ['three'],
             exports: 'THREE'
         },

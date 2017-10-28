@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>WebGL Check</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="js/lib/three.js"></script>
+        <style>
+            td {
+                padding-right: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div>This is a very simple check of the WebGL capabilities of this device based upon what ThreeJS reports.</div>
+        <div></div>
+        <div>Results:</div>
+        <table id='table'>
+            <thead>
+                <tr><td>Item</td><td>Result</td></tr>
+            </thead>
+            <tbody id='table_body'></tbody>
+        </table>
+        <script>
+            function addResult(title, result) {
+                var tr = document.createElement('tr');
+                var tdTitle = document.createElement('td');
+                tdTitle.appendChild(document.createTextNode(title));
+                tr.appendChild(tdTitle);
+                
+                var tdResult = document.createElement('td');
+                tdResult.appendChild(document.createTextNode(result));
+                tr.appendChild(tdResult);
+                
+                document.getElementById('table_body').appendChild(tr);
+            }
+            document.body.onload = function() {
+                var renderer = new THREE.WebGLRenderer();
+                var caps = renderer.capabilities;
+                addResult('floatFragmentTextures', caps.floatFragmentTextures);
+                addResult('floatVertexTextures', caps.floatVertexTextures);
+                addResult('getMaxAnisotropy', caps.getMaxAnisotropy());
+                addResult('getMaxPrecision', caps.getMaxPrecision());
+                addResult('logarithmicDepthBuffer', caps.logarithmicDepthBuffer);
+                addResult('maxAttributes', caps.maxAttributes);
+                addResult('maxCubmapSize', caps.maxCubemapSize);
+                addResult('maxFragmentUniforms', caps.maxFragmentUniforms);
+                addResult('maxTextureSize', caps.maxTextureSize);
+                addResult('maxTextures', caps.maxTextures);
+                addResult('maxVaryings', caps.maxVaryings);
+                addResult('maxVertexTextures', caps.maxVertexTextures);
+                addResult('maxVertexUniforms', caps.maxVertexUniforms);
+                addResult('precision', caps.precision);
+                addResult('vertexTextures', caps.vertexTextures);
+            };
+        </script>
+        
+    </body>
+</html>

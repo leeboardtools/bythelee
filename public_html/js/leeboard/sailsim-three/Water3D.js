@@ -15,33 +15,65 @@
  */
 
 
-define(['lbsailsim', 'lbmath', 'three'],
+define(['lbsailsim', 'lbmath', 'three', 'three-watershader'],
 function(LBSailSim, LBMath, THREE) {
 
 LBSailSim.Water3D = function(scene3D, sailEnv) {
     this.scene3D = scene3D;
     this.sailEnv = sailEnv;
     
-    var WIDTH = 64;    
-    var BOUNDS = 128;
-    var material = this.createWaterMaterial(BOUNDS, WIDTH);
-        
-    var texture = this.createWaterTexture(WIDTH);
-    material.uniforms.heightmap.value = texture;
+    if (!this.loadWater()) {
+        var WIDTH = 64;    
+        var BOUNDS = 128;
+        var material = this.createWaterMaterial(BOUNDS, WIDTH);
 
-    var geometry = new THREE.PlaneBufferGeometry(10000, 10000, WIDTH - 1, WIDTH - 1);
-    geometry.rotateX(-LBMath.PI_2);
-    
-    this.waterMesh = new THREE.Mesh(geometry, material);
-    
-    // TEST!!!
-    //this.waterMesh.position.y = 0.98;
-    //material.wireframe = true;
-    
-    this.scene3D.add(this.waterMesh);
+        var texture = this.createWaterTexture(WIDTH);
+        material.uniforms.heightmap.value = texture;
+
+        var geometry = new THREE.PlaneBufferGeometry(10000, 10000, WIDTH - 1, WIDTH - 1);
+        geometry.rotateX(-LBMath.PI_2);
+
+        this.waterMesh = new THREE.Mesh(geometry, material);
+
+        // TEST!!!
+        //this.waterMesh.position.y = 0.98;
+        //material.wireframe = true;
+
+        this.scene3D.add(this.waterMesh);
+    }
 };
 
 LBSailSim.Water3D.prototype = {
+    loadWater: function() {
+        var waterNormals = new THREE.TextureLoader().load( 'textures/three-js/waternormals.jpg' );
+        waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+
+        var water = new THREE.Water( this.sailEnv.mainView.renderer, this.sailEnv.mainView.camera, this.scene3D.scene, {
+                textureWidth: 512,
+                textureHeight: 512,
+                waterNormals: waterNormals,
+                alpha: 	1.0,
+                sunDirection: this.scene3D.mainLight.position.clone().normalize(),
+                sunColor: 0xffffff,
+                waterColor: 0x001e0f,
+                distortionScale: 15.0,
+                fog: this.scene3D.scene.fog !== undefined
+        } );
+        this.waterShader = water;
+
+        var meshSize = 10000;
+
+        var mirrorMesh = new THREE.Mesh(
+                new THREE.PlaneBufferGeometry( meshSize, meshSize ),
+                water.material
+        );
+
+        mirrorMesh.add( water );
+        mirrorMesh.rotation.x = - Math.PI * 0.5;
+        this.scene3D.add( mirrorMesh );
+        return true;
+    },
+    
     createWaterTexture: function(gridDim) {
         gridDim = gridDim || 64;
 
@@ -99,11 +131,19 @@ LBSailSim.Water3D.prototype = {
         material.defines.WIDTH = gridDim.toFixed( 1 );
         material.defines.BOUNDS = totalDim.toFixed( 1 );
         
+        var uniforms = material.uniforms;
+        uniforms.cellSize = { value: new THREE.Vector2(1/gridDim, 1/gridDim) };
+        uniforms.water = uniforms.heightmap;
+        //uniforms.sky = this.sailEnv.sky3D.skyMesh.texture;
+        
         return material;
     },
     
     update: function(dt) {
-        
+        if (this.waterShader) {
+            this.waterShader.material.uniforms.time.value += 1.0 / 60.0;
+            this.waterShader.render();
+        }
     },
     
     destroy: function() {
@@ -189,6 +229,43 @@ var waterVertexShader = [
     
 ].join('\n');
 
+
+var waterFragmentShader = [
+    // Adapted from https://github.com/evanw/webgl-water/blob/master/renderer.js
+    'uniform sampler2D water;',
+    'uniform samplerCube sky;',
+    'uniform cellSize;',
+    'uniform vec3 eye;',
+    
+    'const vec3 abovewaterColor = vec3(0.25, 1.0, 1.25);',
+    'const vec3 underwaterColor = vec3(0.4, 0.9, 1.0);',
+    
+    'vec3 getSurfaceRayColor(vec3 origin, vec3 ray, vec3 waterColor) {',
+    '   vec3 color = textureCube(sky, ray).rgb;',
+    '   color += vec3(pow(max(0.0, dot(light, ray)), 5000.0)) * vec3(10.0, 8.0, 6.0);',
+    '   if (ray.y < 0.0) color *= waterColor;',
+    '   return color;',
+    '}',
+    
+    'void main() {',
+    '   vec2 uv = gl_FragCoord.xy * cellSize;',
+    '   vec4 info = texture2D(water, uv);',
+    
+    '   vec3 normal = vec3(info.b, sqrt(1.0 - dot(info.ba, info.ba)), info.a);',
+    '   vec3 incomingRay = normalize(position - eye);',
+    
+    '   vec3 reflectedRay = reflect(incomingRay, normal);',
+    '   vec3 refractedRay = refract(incomingRay, normal, IOR_AIR / IOR_WATER);',
+    
+    '   float fresnel = mix(0.25, 1.0, pow(1.0 - dot(normal, -incomingRay), 3.0));',
+    
+    '   vec3 reflectedColor = getSurfaceRayColor(position, reflectedRay, abovewaterColor);',
+    '   vec3 refractedColor = getSurfaceRayColor(position, refractedRay, abovewaterColor);',
+    
+    '   gl_FragColor = vec4(mix(refractedColor, reflectedColor, fresnel), 1.0);',
+    
+    '}'
+].join('\n');
 
 return LBSailSim;
 });

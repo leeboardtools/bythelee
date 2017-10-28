@@ -34,11 +34,12 @@ var LBUI3d = LBUI3d || {};
  */
 LBUI3d.Scene3D = function() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('gray');
-    this.scene.add(new THREE.AmbientLight(0x222222));
+    //this.scene.background = new THREE.Color('gray');
+    this.scene.add(new THREE.AmbientLight(0x444444));
 
-    this.mainLight = new THREE.DirectionalLight(0xffffff, 1);
-    this.mainLight.position.set(0, 300, 250);
+    this.mainLight = new THREE.DirectionalLight(0xffffbb, 1);
+    this.mainLight.position.set(0, 30, 25);
+    
     this.scene.add(this.mainLight);
     
     /**

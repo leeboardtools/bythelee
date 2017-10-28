@@ -26,6 +26,8 @@ are both checked.
 
 TODO:
 
+Shut of wakes if FPS too low.
+Look into adjusting physics time step based on actual FPS.
 
 Water/Wake:
 Centered on the camera target.

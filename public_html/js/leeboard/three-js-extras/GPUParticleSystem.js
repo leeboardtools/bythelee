@@ -15,7 +15,9 @@
  *
  */
 
-THREE = require('three');
+if (this.require) {
+var THREE = require('three');
+}
 
 THREE.GPUParticleSystem = function( options ) {
 

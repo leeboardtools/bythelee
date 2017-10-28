@@ -101,7 +101,7 @@ LBSailSim.ParticleWakes = function(wakes) {
     this.sailEnv = wakes.sailEnv;
     
     this.particles = new LBParticles.ParticleSystem({
-        maxParticles: 10000
+        maxParticles: 1000
     });
     this.scene3D.add(this.particles);
 
