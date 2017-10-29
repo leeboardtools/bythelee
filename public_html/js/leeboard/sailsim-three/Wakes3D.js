@@ -217,7 +217,7 @@ LBSailSim.ParticleWakes.prototype = {
 
 function createShaderWakes(wakes) {
     return null;
-    
+/*    
     var renderer = wakes.sailEnv.mainView.renderer;
     if (!LBShaders.Computer.isSupported(renderer)) {
         return null;
@@ -228,6 +228,7 @@ function createShaderWakes(wakes) {
         return null;
     }
     return shaderWakes;
+*/
 };
 
 LBSailSim.ShaderWakes = function(wakes) {
@@ -257,6 +258,8 @@ LBSailSim.ShaderWakes.prototype = {
         var water3D = this.wakes.sailEnv.water3D;
         var color = undefined;
         //color = 0x808080;
+        
+        // NOTE: water3D.createWaterMaterial() has been removed...
         this.wakeMaterial = water3D.createWaterMaterial(this.wakeBounds, this.wakeGridSize, color);
         
         this.wakeMaterial.wireframe = true;
