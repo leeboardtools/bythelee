@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-define(['three'],
-function(THREE) {
+define(['three', 'lbutil'],
+function(THREE, LBUtil) {
     
 var LBShaders = LBShaders || {};
 
@@ -71,6 +71,8 @@ LBShaders.Computer = function(gridWidth, gridHeight, renderer) {
     this.scene.add(this.passThroughMesh);
 };
 
+var _savedColor;
+
 LBShaders.Computer.prototype = {
     createShaderTexture: function() {
         var data = new Float32Array(this.gridWidth * this.gridHeight * 4);
@@ -103,6 +105,24 @@ LBShaders.Computer.prototype = {
         this.currentTarget = this.previousTarget;
         this.previousTarget = tmp;
         return this;
+    },
+    
+    clearTexture: function(texture, color, alpha) {
+        var savedAlpha = this.renderer.getClearAlpha();
+        if (alpha === undefined) {
+            alpha = savedAlpha;
+        }
+        if (color !== undefined) {
+            _savedColor = LBUtil.copyOrClone(_savedColor, this.renderer.getClearColor());
+            this.renderer.setClearColor(color, alpha);
+        }
+        
+        this.passThroughMaterial.uniforms.texture.value = texture;
+        this.renderer.clearTarget(this.currentTarget, true, false, false);
+        
+        if (color !== undefined) {
+            this.renderer.setClearColor(_savedColor, savedAlpha);
+        }
     },
     
     applyTexture: function(texture) {

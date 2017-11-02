@@ -297,6 +297,27 @@ LBMath.radFromThreeSides = function(a, b, c) {
 
 
 /**
+ * Third order smoothstep function taking a lower edge and an upper edge. Returns
+ * 0 if x &le; edge0, 1 if x &ge; edge1.
+ * @param {Number} edge0    The lower edge value.
+ * @param {Number} edge1    The upper edge value.
+ * @param {Number} x    The x value.
+ * @returns {Number}    The smoothstep value, which is 0 if x &le; edge0 and 1 if x &ge; edge1.
+ */
+LBMath.smoothstep = function(edge0, edge1, x) {
+    if (x <= edge0) {
+        return 0;
+    }
+    else if (x >= edge1) {
+        return 1;
+    }
+    
+    x = (x - edge0) / (edge1 - edge0);
+    return (-2 * x + 3) * x * x;
+};
+
+
+/**
  * Third order smoothstep function per https://en.wikipedia.org/wiki/Smoothstep
  * s(x) = -2*x^3 + 3*x^2
  * @param {Number} x The x value.
