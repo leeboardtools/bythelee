@@ -303,6 +303,18 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
      * @member {Number}
      */
     this.maxForceMag = 10000;
+    
+    /**
+     * The height above the waterline where the apparent wind is measured.
+     * @member {Number}
+     */
+    this.appWindHeight = 2;
+    
+    /**
+     * The locatio of the center of the cockpit, used for positioning the in-boat view.
+     * @member {LBGeometry.Vector3}
+     */
+    this.cockpitCenter = null;
 
     /**
      * The representation of the hull, this is responsible for generating the
@@ -744,6 +756,10 @@ LBSailSim.Vessel.prototype.load = function(data, loadCallback) {
     
     this.debugForces = data.debugForces;
     
+    this.appWindHeight = (data.appWindHeight) ? data.appWindHeight : this.appWindHeight;
+    
+    this.cockpitCenter = (data.cockpitCenter) ? LBGeometry.loadVector3(data.cockpitCenter) : null;
+    
     this._loadSpars(data.spars, loadCallback);
     this._loadBallasts(data.ballasts, loadCallback);
     this._loadWindIndicators(data.windIndicators, loadCallback);
@@ -801,7 +817,7 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
     
     this.updateCoords(dt);
     
-    this.sailEnv.wind.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, 0, this.trueWind);
+    this.sailEnv.wind.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, this.appWindHeight, this.trueWind);
     this.apparentWind.copy(this.trueWind);
     this.apparentWind.sub(this.worldLinearVelocity);
     

@@ -19,6 +19,8 @@
             "linearDamping": 0.1,
             "angularDamping": 0.2,
             "velocityTerms": 3,
+            "appWindHeight": 2,
+            "cockpitCenter": { "x": 4, "y": 0, "z": 2},
             "volumes": {
                 "mirrorPlane": {
                     "normal": { "x": 0, "y": 1, "z": 0},

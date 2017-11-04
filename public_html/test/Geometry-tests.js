@@ -75,7 +75,7 @@ function checkLine2(assert, line, startX, startY, endX, endY, msg, tolerance) {
     }
     checkVector2(assert, line.start, startX, startY, msg + "Start", tolerance);
     checkVector2(assert, line.end, endX, endY, msg + "End", tolerance);
-}
+};
 
 function checkMatrix(assert, mat, refMat, msg, tolerance) {
     if (!LBUtil.isVar(msg)) {
@@ -86,7 +86,7 @@ function checkMatrix(assert, mat, refMat, msg, tolerance) {
     for (var i = 0; i < refMat.elements.length; ++i) {
         assert.nearEqual(mat.elements[i], refMat.elements[i], msg + " E" + i + "OK", tolerance);
     }
-}
+};
 
 function checkOrthogonal(assert, vec, ref, msg) {
     if (!LBUtil.isVar(msg)) {
@@ -94,7 +94,17 @@ function checkOrthogonal(assert, vec, ref, msg) {
     }
     var dot = vec.dot(ref);
     assert.nearEqual(dot, 0, msg + " OK");
-}
+};
+
+function checkRect(assert, rect, minX, minY, maxX, maxY, msg, tolerance) {
+    if (!LBUtil.isVar(msg)) {
+        msg = "";
+    }
+    assert.nearEqual(rect.minX, minX, msg + " minX", tolerance);
+    assert.nearEqual(rect.minY, minY, msg + " minY", tolerance);
+    assert.nearEqual(rect.maxX, maxX, msg + " maxX", tolerance);
+    assert.nearEqual(rect.maxY, maxY, msg + " maxY", tolerance);
+};
 
 QUnit.test( "applyMatrix4Rotation", function( assert ) {
     var m = new LBGeometry.Matrix4();
@@ -241,13 +251,160 @@ QUnit.test( "makeOrthogonal", function( assert ) {
     checkOrthogonal(assert, result, vecA, "0, 0, 1");
 });
 
+QUnit.test("rect", function(assert) {
+    var rect = new LBGeometry.Rect();
+    assert.ok(rect.isEmpty(), "isEmpty");
+    
+    rect.set(1, 2, 3, 4);
+    checkRect(assert, rect, 1, 2, 3, 4, "set");
+    assert.notOk(rect.isEmpty(), "not isEmpty");
+    
+    var clone = rect.clone();
+    checkRect(assert, clone, 1, 2, 3, 4, "clone");
+    
+    assert.ok(rect.isEqual(clone), "rect.isEqual(clone)");
+    assert.ok(clone.isEqual(rect), "clone.isEqual(rect)");
+    
+    var rect2 = new LBGeometry.Rect(new LBGeometry.Vector2(1, 2), new LBGeometry.Vector2(3, 5));
+    checkRect(assert, rect2, 1, 2, 3, 5, "point constructor arg");
+    
+    assert.notOk(rect.isEqual(rect2), "not rect.isEqual(rect2)");
+    assert.notOk(rect2.isEqual(rect), "not rect2.isEqual(rect)");
+    
+    var rect3 = new LBGeometry.Rect(rect2);
+    checkRect(assert, rect3, 1, 2, 3, 5, "rect constructor arg");
+    
+    rect3.set(5, 6, 7, 8);
+    checkRect(assert, rect3, 5, 6, 7, 8, "set");
+    
+    rect3.makeEmpty();
+    assert.ok(rect3.isEmpty(), "makeEmpty");
+    
+    rect3.copy(rect2);
+    checkRect(assert, rect3, 1, 2, 3, 5, "copy");
+    
+    rect3.extendToPoint(2, 4);
+    checkRect(assert, rect3, 1, 2, 3, 5, "extendToPoint x,y inside");
+    
+    rect3.extendToPoint(6, 7);
+    checkRect(assert, rect3, 1, 2, 6, 7, "extendToPoint x,y outside max");
+    
+    rect3.extendToPoint(new LBGeometry.Vector2(0, 1));
+    checkRect(assert, rect3, 0, 1, 6, 7, "extendToPoint Vector2 outside min");
+    
+    assert.ok(rect3.containsPoint(0, 1), "containsPoint xy on min");
+    assert.ok(rect3.containsPoint(new LBGeometry.Vector2(6, 7)), "containsPoint vector2 on max");    
+    assert.notOk(rect3.containsPoint(new LBGeometry.Vector2(-0.00001, 1)), "containsPoint x below min");
+    assert.notOk(rect3.containsPoint(new LBGeometry.Vector2(1, 0.999999)), "containsPoint y below min");
+    assert.notOk(rect3.containsPoint(6.00001, 5), "containsPoint x above max");
+    assert.notOk(rect3.containsPoint(5, 7.0001), "containsPoint y above max");
+    
+    rect.set(10, 20, 100, 200);
+    rect.extendToRect(new LBGeometry.Rect(10, 20, 30, 50));
+    checkRect(assert, rect, 10, 20, 100, 200, "extendToRect inside");
+    
+    rect2.makeEmpty();
+    rect.extendToRect(rect2);
+    checkRect(assert, rect, 10, 20, 100, 200, "extendToRect arg rect empty");
+
+    rect2.extendToRect(rect);
+    checkRect(assert, rect2, 10, 20, 100, 200, "extendToRect initial rect empty");
+    
+    rect3.set(110, 5, 120, 70);
+    assert.notOk(rect3.isEmpty(), "isEmpty 110, 5, 120, 70");
+    
+    rect.extendToRect(rect3);
+    checkRect(assert, rect, 10, 5, 120, 200, "extendToRect extend minY, maxX");
+    
+    rect3.set(-5, 240, 0, 250);
+    rect.extendToRect(rect3);
+    checkRect(assert, rect, -5, 5, 120, 250, "extendToRect extend minX, maxY");
+    
+    rect.set(10, 100, 20, 200);
+    rect2.set(11, 110, 12, 120);
+    rect3.copy(rect2);
+    assert.ok(rect.containsEntireRect(rect2), "containsEntireRect");
+    assert.ok(rect.containsEntireRect(rect), "containsEntireRect self");
+    
+    rect2.minX = 9;
+    assert.notOk(rect.containsEntireRect(rect2), "containsEntireRect minX out");
+    assert.ok(rect.containsAnyOfRect(rect2), "containsAnyOfRect minX out");
+    
+    rect2.copy(rect3);
+    rect2.minY = 99;
+    assert.notOk(rect.containsEntireRect(rect2), "containsEntireRect minY out");
+    assert.ok(rect.containsAnyOfRect(rect2), "containsAnyOfRect minY out");
+    
+    rect2.copy(rect3);
+    rect2.maxX = 21;
+    assert.notOk(rect.containsEntireRect(rect2), "containsEntireRect maxX out");
+    assert.ok(rect.containsAnyOfRect(rect2), "containsAnyOfRect maxX out");
+    
+    rect2.copy(rect3);
+    rect2.maxY = 201;
+    assert.notOk(rect.containsEntireRect(rect2), "containsEntireRect minY out");
+    assert.ok(rect.containsAnyOfRect(rect2), "containsAnyOfRect minY out");
+    
+    rect2.minY = 201;
+    assert.notOk(rect.containsEntireRect(rect2), "containsEntireRect minY, maxY above maxY");
+    assert.notOk(rect.containsAnyOfRect(rect2), "containsAnyOfRect minY,maxY above maxY");
+    
+    rect2.copy(rect3);
+    rect2.maxY = 90;
+    rect2.minY = 99;
+    assert.notOk(rect.containsEntireRect(rect2), "containsEntireRect minY, maxY below minY");
+    assert.notOk(rect.containsAnyOfRect(rect2), "containsAnyOfRect minY,maxY below minY");
+    
+    rect2.copy(rect3);
+    rect2.maxX = 22;
+    rect2.minX = 21;
+    assert.notOk(rect.containsEntireRect(rect2), "containsEntireRect minX, maxX above maxX");
+    assert.notOk(rect.containsAnyOfRect(rect2), "containsAnyOfRect minX,maxX above maxX");
+    
+    rect2.copy(rect3);
+    rect2.maxX = 9;
+    rect2.minX = 8;
+    assert.notOk(rect.containsEntireRect(rect2), "containsEntireRect minX, maxX below minX");
+    assert.notOk(rect.containsAnyOfRect(rect2), "containsAnyOfRect minX,maxX below minX");
+    
+    rect.set(10, 20, 30, 40);
+    rect.offset(1, 2);
+    checkRect(assert, rect, 11, 22, 31, 42, "offset 1, 2");
+    
+    rect.multiply(10, 20);
+    checkRect(assert, rect, 110, 440, 310, 840, "multiply 10, 20");
+    
+    assert.equal(rect.width(), 200, "width");
+    assert.equal(rect.height(), 840-440, "height");
+    assert.equal(rect.centerX(), (110+310)/2, "centerX");
+    assert.equal(rect.centerY(), (840+440)/2, "centerY");
+    
+    rect.set(10, 100, 20, 200);
+
+    var center = rect.getCenter();
+    checkVector2(assert, center, 15, 150, "getCenter");
+    
+    rect.setCenter(50, 250);
+    rect.getCenter(center);
+    checkVector2(assert, center, 50, 250, "getCenter Vector2");
+    checkRect(assert, rect, 45, 200, 55, 300, "setCenter");
+    
+    rect.setWidth(20);
+    rect.setHeight(200);
+    checkRect(assert, rect, 40, 150, 60, 350, "setWidth, setHeight");
+    
+    rect.setSize(10, 100);
+    checkRect(assert, rect, 45, 200, 55, 300, "setSize");
+});
+
 return {
     checkVector2: checkVector2,
     checkVector3: checkVector3,
     checkLine2: checkLine2,
     checkMatrix: checkMatrix,
     checkEuler: checkEuler,
-    checkQuaternion: checkQuaternion
+    checkQuaternion: checkQuaternion,
+    checkRect: checkRect
 };
 
 });

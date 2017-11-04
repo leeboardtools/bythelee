@@ -121,8 +121,12 @@ LBMyApp.prototype.addNormalView = function(view, standardView) {
     // The x-axis of the boat faces aft, and the origin is near the bow. We want to look forward from the cockpit.
     view.localPOVCameraController.forwardAzimuthDeg = 180;
 
-    // TODO: Need to set the cockpit location from the boat's data...
-    view.localPOVCameraController.localPosition.set(3, 0, 1.0);
+    if (this.myBoat && this.myBoat.cockpitCenter) {
+        view.localPOVCameraController.localPosition.copy(this.myBoat.cockpitCenter);
+    }
+    else {
+        view.localPOVCameraController.localPosition.set(3, 0, 1.0);
+    }
     view.localPOVCameraController.localOrientation.azimuthDeg = 180;
     
     var chaseMode = LBUI3d.ChaseCameraController.CHASE_MODE_WORLD;
