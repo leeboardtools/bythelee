@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsimbase', 'lbutil', 'lbmath', 'lbgeometry'],
-function(LBSailSim, LBUtil, LBMath, LBGeometry) {
+define(['lbsailsimbase', 'lbutil', 'lbmath', 'lbgeometry', 'lbrandom'],
+function(LBSailSim, LBUtil, LBMath, LBGeometry, LBRandom) {
     
 'use strict';
 
@@ -49,6 +49,47 @@ LBSailSim.Wind = function() {
      * @member {Number}
      */
     this.averageFromDeg = 0;
+    
+    /**
+     * The direction the wind is blowing towards in vector form.
+     * @member {LBGeometry.Vector2}
+     */
+    this.averageToDir = new LBGeometry.Vector2(-1, 0);
+    
+    /**
+     * How gusty the wind puffs should be, a value of 0 means a constant wind,
+     * while a value of 1 means very gusty.
+     * @member {Number}
+     */
+    this.gustFactor = 0.5;
+    
+    this.elapsedTime = 0;
+    this.nextPuffTime = Number.MAX_VALUE;
+    
+    // minActivePosition and maxActivePosition are updated based on the calls
+    // to getFlowVelocity(), they are reset each time through update().
+    // update() uses the last active range to figure out the active area where puffs
+    // are to be generated.
+    this.minActivePosition = new LBGeometry.Vector2(Number.MAX_VALUE, Number.MAX_VALUE);
+    this.maxActivePosition = new LBGeometry.Vector2(-Number.MAX_VALUE, Number.MAX_VALUE);
+    
+    /**
+     * The area beyond the active boundary to also include in the puff generation.
+     */
+    this.activeMargin = 200;
+    
+    /**
+     * The first puff in the puff linked list.
+     * @member {LBSailSim.WindPuff}
+     */
+    this.firstPuff = null;
+    
+    this._firstFreePuff = null;
+    
+    this._positionRNG = new LBRandom.UniformGenerator();
+    this._speedRNG = new LBRandom.NormalGenerator();
+    this._dirRNG = new LBRandom.NormalGenerator();
+    this._timeRNG = new LBRandom.NormalGenerator();
     
     this.setAverageForce(3);
 };
@@ -84,8 +125,13 @@ LBSailSim.Wind.getForceForKnots = function(knots) {
     return i;
 };
 
+
+var _workingPos = new LBGeometry.Vector2();
+var _workingVel = new LBGeometry.Vector3();
+
 LBSailSim.Wind.prototype = {
     constructor: LBSailSim.Wind,
+    
     
     /**
      * Sets the average speed of the wind using a Beaufort force value.
@@ -110,8 +156,22 @@ LBSailSim.Wind.prototype = {
             maxKts = LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS[force];
         }
         
-        this.averageMPS = LBUtil.kt2mps(0.5 * (minKts + maxKts));
+        var averageMPS = LBUtil.kt2mps(0.5 * (minKts + maxKts));
+        this.setAverageMPS(averageMPS);
         
+        return this;
+    },
+    
+    /**
+     * Sets the average wind speed in m/s.
+     * @param {Number} averageMPS   The average wind speed in m/s
+     * @returns {LBSailSim.Wind}    this.
+     */
+    setAverageMPS: function(averageMPS) {
+        if (this.averageMPS !== averageMPS) {
+            this.averageMPS = averageMPS;
+            this._updatePuffGeneration();
+        }
         return this;
     },
     
@@ -124,11 +184,98 @@ LBSailSim.Wind.prototype = {
         deg = LBMath.wrapDegrees(deg);
         if (deg !== this.averageFromDeg) {
             this.averageFromDeg = deg;
+            
+            this._updatePuffGeneration();
         }
         
         return this;
     },
     
+    /**
+     * Sets how gusty the puffs are.
+     * @param {Number} gustFactor   The gust factor, a factor of 0 means minimal, 
+     * a factor of 1 means very gusty.
+     * @returns {LBSailSim.Wind}    this.
+     */
+    setGustFactor: function(gustFactor) {
+        gustFactor = LBMath.clamp(gustFactor, 0, 1);
+        if (gustFactor !== this.gustFactor) {
+            this.gustFactor = gustFactor;
+            this._updatePuffGeneration();
+        }
+        
+        return this;
+    },
+    
+    _updatePuffGeneration: function() {            
+        var headingRad = this.fromDegToHeadingRad(this.averageFromDeg);
+        this.averageToDir.set(Math.cos(headingRad), Math.sin(headingRad));
+
+        this._speedRNG.mean = this.averageMPS;
+        this._speedRNG.stdev = this.averageMPS * this.gustFactor;
+        this.baseMPS = this.averageMPS - this._speedRNG.stdev;
+        
+        // The lighter the wind speed, the more angular deviation...
+        this._dirRNG.mean = this.averageFromDeg;
+        this._dirRNG.stdev = 180 * this.gustFactor / (this.averageMPS + 1)
+        
+        this._timeRNG.mean = 10;
+        
+        // TEST!!!
+        this._timeRNG.mean = 5;
+        this._timeRNG.stdev = this._timeRNG.mean / 3;
+        
+        this._calcNextPuffTime();
+    },
+    
+    _calcNextPuffTime: function() {
+        var deltaTime = this._timeRNG.nextValue();
+        this.nextPuffTime = this.elapsedTime + deltaTime;
+    },
+    
+    _generatePuff: function() {
+        // Where is the puff generated?
+        // We need a baseline upwind from the center of the active position.
+        // We then need the following:
+        //  - Wind direction - normal distribution
+        //  - Wind speed - normal distribution
+        //  - Wind location - uniform distributino
+        var puff;
+        if (this._firstFreePuff) {
+            puff = this._firstFreePuff;
+            this._firstFreePuff = puff.nextPuff;
+            puff.nextPuff = null;
+        }
+        else {
+            puff = new LBSailSim.WindPuff();
+        }
+        
+        puff.nextPuff = this.firstPuff;
+        this.firstPuff = puff;
+        
+        var span = this.maxActivePosition.distanceTo(this.minActivePosition);
+        var cx = 0.5 * (this.minActivePosition.x + this.maxActivePosition.x);
+        var cy = 0.5 * (this.minActivePosition.y + this.maxActivePosition.y);
+        
+        var halfSpan = 0.5 * span;
+        this._positionRNG.lower = -halfSpan;
+        this._positionRNG.upper = halfSpan;
+        var px = this._positionRNG.nextValue();
+        var py = this._positionRNG.nextValue();
+        _workingPos.set(cx - this.averageToDir.x * px, cy - this.averageToDir.y * py);
+        
+        var speed = this._speedRNG.nextValue();
+        var fromDeg = this._dirRNG.nextValue();
+        var headingRad = this.fromDegToHeadingRad(fromDeg);
+        _workingVel.set(speed * Math.cos(headingRad), speed * Math.sin(headingRad), 0);
+        
+        puff.setupPuff(_workingPos, _workingVel);
+        //setupPuff: function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, distanceToTravel) {
+    },
+    
+    fromDegToHeadingRad: function(deg) {
+        return (270 - deg) * LBMath.DEG_TO_RAD;
+    },
     
     /**
      * Retrieves the wind velocity at a given point
@@ -139,10 +286,9 @@ LBSailSim.Wind.prototype = {
      * @returns {object}    The object containing the velocity.
      */
     getFlowVelocity: function(x, y, z, vel) {
-        var speed = this.averageMPS;
-        var headingRad = (270 - this.averageFromDeg) * LBMath.DEG_TO_RAD;
-        var vx = speed * Math.cos(headingRad);
-        var vy = speed * Math.sin(headingRad);
+        var speed = this.baseMPS;
+        var vx = speed * this.averageToDir.x;
+        var vy = speed * this.averageToDir.y;
         
         if (!vel) {
             return new LBGeometry.Vector3(vx, vy);
@@ -150,6 +296,28 @@ LBSailSim.Wind.prototype = {
         vel.x = vx;
         vel.y = vy;
         vel.z = 0;
+        
+        if (x < this.minActivePosition.x) {
+            this.minActivePosition.x = x;
+        }
+        if (y < this.minActivePosition.y) {
+            this.minActivePosition.y = y;
+        }
+        if (x > this.maxActivePosition.x) {
+            this.maxActivePosition.x = x;
+        }
+        if (y > this.maxActivePosition.y) {
+            this.maxActivePosition.y = y;
+        }
+
+        var puff = this.firstPuff;
+        while (puff) {
+            _workingVel = puff.getFlowVelocity(x, y, z, _workingVel);
+            vel.add(_workingVel);
+            
+            puff = puff.nextPuff;
+        }
+
         return vel;
     },
     
@@ -169,45 +337,75 @@ LBSailSim.Wind.prototype = {
      * @returns {LBSailSim.Wind}    this.
      */
     update: function(dt) {
+        this.elapsedTime += dt;
+        
+        var prevPuff = null;
+        var puff = this.firstPuff;
+        while (puff) {
+            puff.update(dt);
+            
+            if (puff.speedLeading <= 0) {
+                var nextPuff = puff.nextPuff;
+                if (prevPuff) {
+                    prevPuff.nextPuff = puff.nextPuff;
+                }
+                else {
+                    this.firstPuff = puff.nextPuff;
+                }
+                
+                puff.nextPuff = this._firstFreePuff;
+                this._firstFreePuff = puff;
+                
+                puff = nextPuff;
+            }
+            else {
+                prevPuff = puff;
+                puff = puff.nextPuff;
+            }
+        }
+        
+        // Time for a new puff?
+        if (this.elapsedTime >= this.nextPuffTime) {
+            this._generatePuff();
+            this._calcNextPuffTime();
+        }
+        
+        this.minActivePosition.set(Number.MAX_VALUE, Number.MAX_VALUE);
+        this.maxActivePosition.set(-Number.MAX_VALUE, -Number.MAX_VALUE);
+        
         return this;
     }
 };
 
 
 /**
- * Represents a puff of wind. A puff of wind is represented as an isosceles trapezoid (two
- * sides parallel - the bases, the other two the same length - the legs) with the bases
- * representing the leading and trailing edges of the puff. The puff moves along at the
- * average velocity of the wind within the puff. The velocity direction profile within the puff
- * is currently fairly constant fore and aft, but follows a very simple x/y interpolation
- * between the velocity direction at the centerline and the velocity direction at the legs. 
- * The velocity direction at the legs is simply the direction of the legs.
- * The wind speed is constant within the main portion of the puff and tapers towards
- * the edges of the quadrilateral. The speed changes according to the change in volume
- * represented by the quadrilateral. If the quadrilateral is expanding (the leadingWidth is
- * larger than the trailingWidth) then the speed decreases.
+ * Represents a puff of wind. A puff of wind is represented as a segment of an annulus, or ring,
+ * with the velocity flowing outward from the center of the ring. The edge at the outer radius
+ * is the leading edge, the edge at the inner radius is the trailing edge.
+ * <p>
+ * The ideal velocity decreases with distance from the center point to maintain consevervation of mass.
+ * The speed towards the edges of the ring is tapered with a smoothstep function. Also by
+ * default there is more tapering applied towards the trailing edge.
+ * 
  * @constructor
  * @param {LBGeometry.Vector2} leadingPosition  The position of the center of the leading edge of the puff.
  * @param {LBGeometry.Vector2} velocity The velocity the puff is traveling.
  * @param {Number} [depth=10]   The distance between the leading edge and the trailing edge.
- * @param {Number} [leadingWidth=30]    The length of the leading edge of the puff.
- * @param {Number} [trailingWidth=leadingWidth] The length of the trailing edge of the puff. This 
- * should normally be &le; leadingWidth.
+ * @param {Number} [leadingWidth=30]    The arc length of the leading edge of the puff, this is meters.
+ * @param {Number} [expansionDeg=10] The angular range by which the leading edge expands, in degrees, this must be &gt; 0.
  * @param {Number} [distanceToTravel=1000]  The maximum distance the puff will travel. Beyond this distance
  * the puff's speed becomes zero.
  * @returns {LBSailSim.WindPuff}
  */
-LBSailSim.WindPuff = function(leadingPosition, velocity, depth, leadingWidth, trailingWidth, distanceToTravel) {
-    this.setupPuff(leadingPosition, velocity, depth, leadingWidth, trailingWidth, distanceToTravel);
+LBSailSim.WindPuff = function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, distanceToTravel) {
+    this.setupPuff(leadingPosition, velocity, depth, leadingWidth, expansionDeg, distanceToTravel);
     
-    this.leadingTaperSStart = 0.1;
-    this.trailingTaperSStart = 0.5;
-    this.taperTStart = 0.1;
+    this.taperRadialStartLeading = 0.1;
+    this.taperRadialStartTrailing = 0.5;
+    this.taperArcStart = 0.1;
 };
 
 LBSailSim.WindPuff.MIN_PUFF_SPEED_CUTOFF = 0.1;
-
-var _deltaPosition = new LBGeometry.Vector2();
 
 LBSailSim.WindPuff.prototype = {
     /**
@@ -215,101 +413,106 @@ LBSailSim.WindPuff.prototype = {
      * @param {LBGeometry.Vector2} leadingPosition  The position of the center of the leading edge of the puff.
      * @param {LBGeometry.Vector2} velocity The velocity the puff is traveling.
      * @param {Number} [depth=10]   The distance between the leading edge and the trailing edge.
-     * @param {Number} [leadingWidth=30]    The length of the leading edge of the puff.
-     * @param {Number} [trailingWidth=leadingWidth] The length of the trailing edge of the puff. This 
-     * should normally be &le; leadingWidth.
+     * @param {Number} [leadingWidth=30]    The arc length of the leading edge of the puff, this is meters.
+     * @param {Number} [expansionDeg=10] The angular range by which the leading edge expands, in degrees, this must be &gt; 0.
      * @param {Number} [distanceToTravel=1000]  The maximum distance the puff will travel. Beyond this distance
      * the puff's speed becomes zero.
      * @returns {LBSailSim.WindPuff}
      */
-    setupPuff: function(leadingPosition, velocity, depth, leadingWidth, trailingWidth, distanceToTravel) {
+    setupPuff: function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, distanceToTravel) {
         this.leadingPosition = LBUtil.copyOrClone(this.leadingPosition, leadingPosition || new LBGeometry.Vector2());
         this.velocity = LBUtil.copyOrClone(this.velocity, velocity || new LBGeometry.Vector2());
-        this.depth = depth || 10;
-        this.leadingWidth = leadingWidth || 30;
-        this.trailingWidth = trailingWidth || this.leadingWidth;
-        this.distanceToTravel = (distanceToTravel > 0) ? distanceToTravel : 1000;
+        this.depth = depth = depth || 10;
+        leadingWidth = leadingWidth || 30;
+        this.expansionDeg = expansionDeg = expansionDeg || 10;
+        this.distanceToTravel = distanceToTravel = (distanceToTravel > 0) ? distanceToTravel : 1000;
         
-        this.leadingEdgeSpeed = this.velocity.length();
-        if (this.leadingEdgeSpeed <= LBSailSim.WindPuff.MIN_PUFF_SPEED_CUTOFF) {
-            this.leadingEdgeSpeed = 0;
+        this.speedLeading = this.velocity.length();
+        if (this.speedLeading <= LBSailSim.WindPuff.MIN_PUFF_SPEED_CUTOFF) {
+            this.speedLeading = 0;
             this.timeDuration = 0;
         }
         else {
-            // What do we need for the efficient calculation?
-            this.velocityDir = this.velocityDir || new LBGeometry.Vector2();
-            this.velocityDir.copy(this.velocity).normalize();
+            this.velDir = this.velDir || new LBGeometry.Vector2();
+            this.velDir.set(this.velocity.x / this.speedLeading, this.velocity.y / this.speedLeading);
             
-            this.depthSq = depth * depth;
+            // Need to figure out the center point.
+            // Since leadingWidth is arc-length, expansionDeg is the angular equivalent of arc-length,
+            // and we have:
+            //  leadingWidth / (2*PI * r) = expansionDeg / 360
+            this.rLeading = leadingWidth * 360 / (LBMath.TWO_PI * expansionDeg);
+            this.rTrailing = this.rLeading - this.depth;
             
-            this._updateLeadingTrailingEdges();
+            // The center is just the leadingPosition moved in the negative velocity direction
+            // by the radius.
+            this.centerPos = this.centerPos || new LBGeometry.Vector2();
+            this.centerPos.copy(this.velDir)
+                    .multiplyScalar(-this.rLeading)
+                    .add(this.leadingPosition);
             
-            this.edgeVelocityDirAngle = Math.atan2((leadingWidth - trailingWidth) / 2, depth);            
-            this.edgeExpansionSpeed = Math.sin(this.edgeVelocityDirAngle) * this.leadingEdgeSpeed;
+            // To figure out the velocity at a given point, we'll be transforming that point
+            // such that the coordinate frame is rotated to have one edge of the puff at x = 0
+            // and the other edge with y &gt; 0.
+            var expansionRad = expansionDeg * LBMath.DEG_TO_RAD;
+            var edge0Rad = Math.atan2(this.velDir.y, this.velDir.x) - 0.5 * expansionRad;
+            this.cosEdge0 = Math.cos(edge0Rad);
+            this.sinEdge0 = Math.sin(edge0Rad);            
+
+            // We can then do a quick angular bounds check, the point will be in the
+            // puff if rTrailing &le; r &le; rLeading and
+            // pt.y / pt.x = tan(thetaPt) is &ge; 0 and &le; tan(expansionRad).
+            this.maxTanTheta = Math.tan(expansionRad);            
             
-            // The main speed deceleration rate is based on the premise that the
-            // mass flow represented by the puff volume should stay the same. Therefore,
-            // if the volume is expanding (i.e. the leading edge is wider than the
-            // trailing edge, and the depth stays the same) then the velocity needs
-            // to slow down in order to keep the mass flow constant.
-            // Volume at T0 for a unit height = depth * (leadingWidth + trailingWidth)/2
-            // Volume at T0 + dt = depth * (leadingWidth + edgeExpSpeed * dt * 2 + trailingWidth + edgeExpSpeed * dt * 2) / 2
-            // dV = expSpeed * dt * 2
-            this.deceleration = 2 * this.edgeExpansionSpeed;
+            // We want to maintain a constant mass transfer rate. The mass is moving
+            // radially, so for a unit height the mass transfer rate is proportional
+            // to the velocity times the arc length.
+            //  massTransferRate = speed * arcLength
+            //  
+            // The arc length is related to the radius based on the arc fraction of the circumference
+            // at the radius:
+            //  arcLength = expansionRad / (2*PI) * 2*PI*r = expansionRad * radius.
+            // 
+            // or:
+            //  massTransferRate = speed * expansionRad * radius
+            //  
+            // Since the expansion radians is constant, we can wrap that into massTransferRate:
+            //  speedRadiusConst = massTransferRate / expansionRad
+            //  speed * radius = speedRadiusConst
+            this.speedRadiusConst = this.speedLeading * this.rLeading;
             
-            // Throw in a little friction...
-            this.deceleration += 0.01 * this.leadingEdgeSpeed;
+            //
+            // At the trailing edge we then have:
+            //  speedTrailing = speedRadiusConst / rTrailing
+            //
+            // As rLeading expands outward, rTrailing must also expand at a rate that
+            // maintains the same volume. We have the initial volume:
+            //  vol = (PI*rLeading^2 - PI*rTrailing^2) * expansionRad / (2*PI())
+            //  vol = (rLeading^2 - rTrailing^2) * expansionRad / 2
+            // Or, since expansionRad is constant,
+            //  volConst = vol * 2 / expansionRad = rLeading^2 - rTraiing^2
+            // and:
+            //  rTrailing = sqrt(rLeading^2 - volConst)
+            this.volConst = (this.rLeading * this.rLeading - this.rTrailing * this.rTrailing);
+            
+            // Optional deceleration for friction, etc.
+            this.speedDecel = 0;
+            
+            this._leadingEdgeRadiusUpdated();
         }
         
         return this;
     },
     
-    _updateLeadingTrailingEdges: function() {
-        this.leadingEdge = this._updateEdge(this.leadingEdge, this.leadingPosition.x, this.leadingPosition.y, this.leadingWidth);
-
-        var dir = this.velocityDir;
-        var tx = this.leadingPosition.x - dir.x * this.depth;
-        var ty = this.leadingPosition.y - dir.y * this.depth;
-        this.trailingEdge = this._updateEdge(this.trailingEdge, tx, ty, this.trailingWidth);
+    _leadingEdgeRadiusUpdated: function() {
+        this.rLeadingSq = this.rLeading * this.rLeading;
+        this.rTrailing = Math.sqrt(this.rLeadingSq - this.volConst);        
+        this.rTrailingSq = this.rTrailing * this.rTrailing;
         
-        // Update the height taper point.
-        if (!LBMath.isLikeZero(this.leadingEdgeSpeed)) {
-            this.heightTaperPoint = 20 / this.leadingEdgeSpeed;
-        }
-        else {
-            this.heightTaperPoint = 1;
-        }
+        this.depth = this.rLeading - this.rTrailing;
         
-        var trailingEdgeSpeed = this.leadingEdgeSpeed * this.leadingWidth / this.trailingWidth;
-        this.deltaSpeedOverDepth = trailingEdgeSpeed - this.leadingEdgeSpeed;
+        this.heightTaperPoint = 30 / this.speedLeading;
     },
-    
-    _updateEdge: function(edge, cx, cy, edgeWidth) {
-        edge = edge || {
-            centerPosition: new LBGeometry.Vector2(),
-            startPosition: new LBGeometry.Vector2()
-        };
-        edge.centerPosition.set(cx, cy);
-        edge.edgeWidth = edgeWidth;
         
-        var halfWidth = 0.5 * edgeWidth;
-        edge.halfWidthSq = halfWidth * halfWidth;
-        var dir = this.velocityDir;
-        var dx = dir.x * halfWidth;
-        var dy = dir.y * halfWidth;
-        edge.startPosition.set(cx - dy, cy + dx);
-        
-        return edge;
-    },
-    
-    _calcParametricProjection: function(x, y, base, end, lengthSq) {
-        var dx = x - base.x;
-        var dy = y - base.y;
-        var segX = end.x - base.x;
-        var segY = end.y - base.y;
-        return (dx * segX + dy * segY) / lengthSq;
-    },
-    
     
     /**
      * Retrieves the flow velocity due to the puff at a given point.
@@ -321,45 +524,46 @@ LBSailSim.WindPuff.prototype = {
      */
     getFlowVelocity: function(x, y, z, vel) {
         vel = vel ? vel.set(0, 0, 0) : new LBGeometry.Vector3();
-        if (!this.leadingEdgeSpeed || (z <= 0)) {
+        z = (z === null) ? undefined : z;
+        if ((this.speedLeading <= 0) || ((z !== undefined) && (z <= 0))) {
             return vel;
         }
         
-        z = (z === undefined) ? 10 : z;
-        
-        // Project the point onto the segment leadingPosition to trailingPosition, to obtain s.
-        // If ahead of leadingPosition or behind trailingPosition do nothing.
-        var s = this._calcParametricProjection(x, y, this.leadingEdge.centerPosition, this.trailingEdge.centerPosition, this.depthSq);
-        if ((s <= 0) || (s >= 1.0)) {
+        // First check, radius...
+        var dx = x - this.centerPos.x;
+        var dy = y - this.centerPos.y;
+        var rSq = dx * dx + dy * dy;
+        if ((rSq < this.rTrailingSq) || (rSq > this.rLeadingSq)) {
             return vel;
         }
         
-        // Project the point onto the leading edge and onto the trailing edge, the parameters
-        // will be tLeading and tTrailing, respectively.
-        // Since we're parametizing relative to the center position, we use the half width for normalization.
-        var tLeading = this._calcParametricProjection(x, y, this.leadingEdge.centerPosition, this.leadingEdge.startPosition, this.leadingEdge.halfWidthSq);
-        var tTrailing = this._calcParametricProjection(x, y, this.trailingEdge.centerPosition, this.trailingEdge.startPosition, this.trailingEdge.halfWidthSq);
-        var t = tLeading + s * (tTrailing - tLeading);
-        if ((t <= -1) || (t >= 1)) {
+        // Next check, angular bounds.
+        // First we need to rotate to our coordinates.
+        var localX = dx * this.cosEdge0 + dy * this.sinEdge0;
+        var localY = -dx * this.sinEdge0 + dy * this.cosEdge0;
+        var tanTheta = localY / localX;
+        if ((tanTheta < 0) || (tanTheta > this.maxTanTheta)) {
             return vel;
         }
         
-        var velAngle = this.edgeVelocityDirAngle * t;
-        var cosAngle = Math.cos(velAngle);
-        var sinAngle = Math.sin(velAngle);
-        vel.set(this.velocityDir.x * cosAngle - this.velocityDir.y * sinAngle, 
-                this.velocityDir.x * sinAngle + this.velocityDir.y * cosAngle,
-                0);
-
-        var speed = this.leadingEdgeSpeed + s * this.deltaSpeedOverDepth;
-        speed *= LBMath.smoothstep(0, this.leadingTaperSStart, s);
-        speed *= LBMath.smoothstep(0, this.trailingTaperSStart, 1-s);
-        speed *= LBMath.smoothstep(0, this.taperTStart, Math.abs(1 - t));
+        // OK, now we're in bounds.
+        // The velocity direction goes out radially, which simplifies things ALOT!
+        var r = Math.sqrt(rSq);
+        vel.set(dx / r, dy / r, 0);
+        
+        var speed = this.speedRadiusConst / r;
+        var radial = (this.rLeading - r) / this.depth;
+        var arc = 2 * (tanTheta - this.maxTanTheta/2) / this.maxTanTheta;
+        speed *= LBMath.smoothstep(0, this.taperRadialStartLeading, radial);
+        speed *= LBMath.smoothstep(0, this.taperRadialStartTrailing, 1 - radial);
+        speed *= LBMath.smoothstep(0, this.taperArcStart, Math.abs(1 - arc));
         
         // For height, we'll just make it a smoothstep whose mid-point (i.e. 0.5) is at z = 0,
         // and whose edge point is inversely related to the wind speed (i.e. the faster the wind
         // speed, the lower the height at which the step is 1.
-        speed *= LBMath.smoothstep3(z / this.heightTaperPoint + 0.5);
+        if (z) {
+            speed *= LBMath.smoothstep3(z / this.heightTaperPoint + 0.5);
+        }
         
         vel.multiplyScalar(speed);
         
@@ -372,27 +576,45 @@ LBSailSim.WindPuff.prototype = {
      * @returns {undefined}
      */
     update: function(dt) {
-        if (this.leadingEdgeSpeed <= 0) {
+        if (this.speedLeading <= 0) {
             return;
         }
         
-        this.distanceToTravel -= this.leadingEdgeSpeed * dt;
+        // The radial speed is really a function of the radius, since
+        // speed = speedRadiusConst / radius
+        // deltaR = integral(speed, 0 to dt)
+        // But we also potentially have the frictional deceleration.
+        // Since I'm terrible at integrating, I'm just going to do a 4 point
+        // trapezoidal type integration.
+        var dtInteg = 0.25 * dt;
+        var newSpeed = this.speedLeading;
+        var newR = this.rLeading + dtInteg * newSpeed;
+        newSpeed = this.speedRadiusConst / newR - this.speedDecel * dtInteg;
+        newR += dtInteg * newSpeed;
+        newSpeed = this.speedRadiusConst / newR - this.speedDecel * dtInteg;
+        newR += dtInteg * newSpeed;
+        newSpeed = this.speedRadiusConst / newR - this.speedDecel * dtInteg;
+        newR += dtInteg * newSpeed;
+        newSpeed = this.speedRadiusConst / newR - this.speedDecel * dtInteg;
+
+        var deltaRLeading = Math.max(newR - this.rLeading, 0);
+        newSpeed = Math.max(newSpeed, 0);
+        
+        this.distanceToTravel -= deltaRLeading;
         if (this.distanceToTravel <= 0) {
-            this.leadingEdgeSpeed = 0;
+            this.speedLeading = 0;
             this.distanceToTravel = 0;
             return;
-        }
+        }        
         
-        _deltaPosition.copy(this.velocity).multiplyScalar(dt);
-        this.leadingPosition.add(_deltaPosition);
+        this.rLeading += deltaRLeading;        
+        this.speedLeading = newSpeed;
+        this.speedRadiusConst = this.speedLeading * this.rLeading;
         
-        var deltaWidth = 2 * this.edgeExpansionSpeed * dt;
-        this.leadingWidth += deltaWidth;
-        this.trailingWidth += deltaWidth;
+        this.leadingPosition.set(this.centerPos.x + this.rLeading * this.velDir.x,
+                this.centerPos.y + this.rLeading * this.velDir.y);
         
-        this._updateLeadingTrailingEdges();
-        
-        this.leadingEdgeSpeed -= this.deceleration * dt;
+        this._leadingEdgeRadiusUpdated();
     },
     
     constructor: LBSailSim.WindPuff

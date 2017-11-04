@@ -17,84 +17,121 @@
 
 /* global QUnit */
 
-define(['lbwind', 'lbgeometry'],
-function(LBSailSim, LBGeometry) {
+define(['lbwind', 'lbgeometry', 'lbmath'],
+function(LBSailSim, LBGeometry, LBMath) {
 
 var checkVector3 = require('test/Geometry-tests.js').checkVector3;
 var checkVector2 = require('test/Geometry-tests.js').checkVector2;
 
 QUnit.module('Wind-tests');
 
-function speedAtDepth(x, depth, leadingWidth, trailingWidth, speed) {
-    // S0 = speed
-    // S1 = speed * leadingWidth / trailingWidth
-    // dSpeed = speed * (leadingWidth / trailingWidth - 1)    
-    var s = x / depth;
-    var dSpeed = speed * (leadingWidth / trailingWidth - 1);
-    return speed + s * dSpeed;
-};
+function checkVel(assert, puff, radius, arcDeg, z, speed, msg, vel) {
+    var dx = Math.cos(arcDeg * LBMath.DEG_TO_RAD);
+    var dy = Math.sin(arcDeg * LBMath.DEG_TO_RAD);
+    var x = puff.centerPos.x + radius * dx;
+    var y = puff.centerPos.y + radius * dy;
+    var vx = dx * speed;
+    var vy = dy * speed;
+    
+    vel = puff.getFlowVelocity(x, y, z, vel);
+    checkVector3(assert, vel, vx, vy, 0, msg, 1e-3);
+    
+    return vel;
+}
 
-QUnit.test( "WindPuff", function( assert ) {
-    var test = speedAtDepth(0, 10, 6, 3, 1);
-    assert.equal(test, 1);
-    test = speedAtDepth(10, 10, 6, 3, 1);
-    assert.equal(test, 2);
+QUnit.test( "WindPuff-Basic", function( assert ) {
+    var centerPos = new LBGeometry.Vector2(10, 0);
+    var leadingRadius = 100;
+    var velDir = new LBGeometry.Vector2(1, 0).normalize();
     
-    var leadingEdgePos = new LBGeometry.Vector2(10, 0);
-    var speed = 2;
-    var velocity = new LBGeometry.Vector2(2, 0).normalize().multiplyScalar(speed);
-    var depth = 10;
-    var leadingWidth = 7;
-    var trailingWidth = 5;
-    var distanceToTravel = 100;
-    var vRef = new LBGeometry.Vector3();
+    var leadingPos = velDir.clone()
+            .multiplyScalar(leadingRadius)
+            .add(centerPos);
     
-    var puff = new LBSailSim.WindPuff(leadingEdgePos, velocity, depth, leadingWidth, trailingWidth, distanceToTravel);
-    var vel = puff.getFlowVelocity(10, 0);
-    checkVector3(assert, vel, vRef.x, vRef.y, vRef.z, 'at leadingEdgePos');
+    var leadingSpeed = 2;
+    var leadingVel = velDir.clone().multiplyScalar(leadingSpeed);
+    var depth = 5;
+    var expansionDeg = 10;
+    var leadingWidth = LBMath.TWO_PI * leadingRadius * expansionDeg / 360;
+    var distanceToTravel = 1000;
+    
+    var puff = new LBSailSim.WindPuff(leadingPos, leadingVel, depth, leadingWidth, expansionDeg, distanceToTravel);
+    checkVector2(assert, puff.centerPos, centerPos.x, centerPos.y, "centerPos");
+    checkVector2(assert, puff.leadingPosition, leadingPos.x, leadingPos.y, "leadingPos");
+    
+    puff.taperRadialStartLeading = 0;
+    puff.taperRadialStartTrailing = 0;
+    puff.taperArcStart = 0;
+    
+    var small = 0.00001;
+    var trailingRadius = leadingRadius - depth;
 
-    vel = puff.getFlowVelocity(11, 0);
-    checkVector3(assert, vel, vRef.x, vRef.y, vRef.z, 'at beyond leadingEdgePos');
+    var vel = puff.getFlowVelocity(111, 0);
+    checkVector3(assert, vel, 0, 0, 0, "vel beyond leading A");
+    checkVel(assert, puff, trailingRadius - small, 0, undefined, 0, "vel beyond trailing A");
+    checkVel(assert, puff, leadingRadius - small, (0.5 + small) * expansionDeg, undefined, 0, "vel beyond max side");
+    checkVel(assert, puff, leadingRadius - small, -(0.5 + small) * expansionDeg, undefined, 0, "vel beyond min side");
     
-    puff.getFlowVelocity(9, 0, undefined, vel);
-    vRef.copy(velocity).normalize().multiplyScalar(speedAtDepth(1, depth, leadingWidth, trailingWidth, speed));
-    checkVector3(assert, vel, vRef.x, vRef.y, vRef.z, 'full speed inside leadingEdgePos');
+    vel = checkVel(assert, puff, leadingRadius - small, 0, undefined, leadingSpeed, "vel leading Pos", vel);
     
-    puff.getFlowVelocity(5, 0, undefined, vel);
-    vRef.copy(velocity).normalize().multiplyScalar(speedAtDepth(5, depth, leadingWidth, trailingWidth, speed));
-    checkVector3(assert, vel, vRef.x, vRef.y, vRef.z, 'full speed before trailing taper');
+    vel = checkVel(assert, puff, leadingRadius - small, (0.5 - small) * expansionDeg, undefined, leadingSpeed, "vel Max Side Leading");
+    vel = checkVel(assert, puff, leadingRadius - small, -(0.5 - small) * expansionDeg, undefined, leadingSpeed, "vel Min Side Leading");
     
-    puff.getFlowVelocity(2.5, 0, undefined, vel);
-    vRef.copy(velocity).normalize().multiplyScalar(speedAtDepth(7.5, depth, leadingWidth, trailingWidth, speed) * 0.5);
-    checkVector3(assert, vel, vRef.x, vRef.y, vRef.z, 'half speed to trailing taper');
+    // vel * r = const, so vel2 * r2 = vel1 * r1, vel2 = vel1 * r1 / r2
+    var trailingSpeed = leadingSpeed * leadingRadius / trailingRadius;
+    vel = checkVel(assert, puff, trailingRadius + small, 0, undefined, trailingSpeed, "vel trailing Pos");
+    vel = checkVel(assert, puff, trailingRadius + small, (0.5 - small) * expansionDeg, undefined, trailingSpeed, "vel Max Side Trailing");
+    vel = checkVel(assert, puff, trailingRadius + small, -(0.5 - small) * expansionDeg, undefined, trailingSpeed, "vel Min Side Trailing");
     
-    puff.getFlowVelocity(0, 0, undefined, vel);
-    checkVector3(assert, vel, 0, 0, 0, 'at trailingEdge center');
+});
+
+QUnit.test( "WindPuff-Rotated", function( assert ) {
+    var centerPos = new LBGeometry.Vector2(10, 20);
+    var leadingRadius = 100;
+    var velDeg = 30;
+    var velRad = velDeg * LBMath.DEG_TO_RAD;
+    var velDir = new LBGeometry.Vector2(Math.cos(velRad), Math.sin(velRad)).normalize();
     
-    // Check the velocity at the edges by clearing out the tapering.
-    puff.taperTStart = 0;
-    puff.leadingTaperSStart = 0;
-    puff.trailingTaperSStart = 0;
+    var leadingPos = velDir.clone()
+            .multiplyScalar(leadingRadius)
+            .add(centerPos);
     
-    puff.getFlowVelocity(9.999, leadingWidth/2 - 0.001, undefined, vel);
-    var vRef = new LBGeometry.Vector2(depth, (leadingWidth - trailingWidth)/2).normalize().multiplyScalar(velocity.length());
-    checkVector3(assert, vel, vRef.x, vRef.y, 0, 'at positive leading edge no taper', 1e-2);
+    var leadingSpeed = 2;
+    var leadingVel = velDir.clone().multiplyScalar(leadingSpeed);
+    var depth = 5;
+    var expansionDeg = 10;
+    var leadingWidth = LBMath.TWO_PI * leadingRadius * expansionDeg / 360;
+    var distanceToTravel = 1000;
     
-    puff.getFlowVelocity(9.999, -leadingWidth/2 + 0.001, undefined, vel);
-    checkVector3(assert, vel, vRef.x, -vRef.y, 0, 'at negative leading edge no taper', 1e-2);
+    var puff = new LBSailSim.WindPuff(leadingPos, leadingVel, depth, leadingWidth, expansionDeg, distanceToTravel);
+    checkVector2(assert, puff.centerPos, centerPos.x, centerPos.y, "centerPos");
+    checkVector2(assert, puff.leadingPosition, leadingPos.x, leadingPos.y, "leadingPos");
     
-    puff.getFlowVelocity(0.001, leadingWidth/2 - 0.001, undefined, vel);
-    checkVector3(assert, vel, 0, 0, 0, 'trailing edge at leaading width no taper');
+    puff.taperRadialStartLeading = 0;
+    puff.taperRadialStartTrailing = 0;
+    puff.taperArcStart = 0;
     
-    puff.getFlowVelocity(0.001, trailingWidth/2 - 0.001, undefined, vel);
-    vRef.normalize().multiplyScalar(speedAtDepth(9.999, depth, leadingWidth, trailingWidth, speed));
-    checkVector3(assert, vel, vRef.x, vRef.y, 0, 'at positive trailing edge no taper', 1e-2);
+    var small = 0.00001;
+    var trailingRadius = leadingRadius - depth;
+
+    var vel;
+/*    var vel = puff.getFlowVelocity(111, 0);
+    checkVector3(assert, vel, 0, 0, 0, "vel beyond leading A");
+    checkVel(assert, puff, trailingRadius - small, 0, undefined, 0, "vel beyond trailing A");
+    checkVel(assert, puff, leadingRadius - small, (0.5 + small) * expansionDeg, undefined, 0, "vel beyond max side");
+    checkVel(assert, puff, leadingRadius - small, -(0.5 + small) * expansionDeg, undefined, 0, "vel beyond min side");
+*/    
+    vel = checkVel(assert, puff, leadingRadius - small, velDeg, undefined, leadingSpeed, "vel leading Pos", vel);
     
+    vel = checkVel(assert, puff, leadingRadius - small, (0.5 - small) * expansionDeg + velDeg, undefined, leadingSpeed, "vel Max Side Leading");
+    vel = checkVel(assert, puff, leadingRadius - small, -(0.5 - small) * expansionDeg + velDeg, undefined, leadingSpeed, "vel Min Side Leading");
     
-    puff.update(1);
-    checkVector2(assert, puff.leadingPosition, leadingEdgePos.x + speed, 0, "leadingPos after 1s");
-    var edgeSpeed = (leadingWidth - trailingWidth) / (2*depth) * speed;
-    //assert.equal(puff.leadingWidth, leadingWidth + 2*edgeSpeed, "leadingWidth after 1s", 1e-2);
+    // vel * r = const, so vel2 * r2 = vel1 * r1, vel2 = vel1 * r1 / r2
+    var trailingSpeed = leadingSpeed * leadingRadius / trailingRadius;
+    vel = checkVel(assert, puff, trailingRadius + small,  + velDeg, undefined, trailingSpeed, "vel trailing Pos");
+    vel = checkVel(assert, puff, trailingRadius + small, (0.5 - small) * expansionDeg + velDeg, undefined, trailingSpeed, "vel Max Side Trailing");
+    vel = checkVel(assert, puff, trailingRadius + small, -(0.5 - small) * expansionDeg + velDeg, undefined, trailingSpeed, "vel Min Side Trailing");
+    
 });
 
 });
