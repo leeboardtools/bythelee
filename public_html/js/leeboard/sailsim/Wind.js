@@ -20,6 +20,9 @@ function(LBSailSim, LBUtil, LBMath, LBGeometry, LBRandom) {
     
 'use strict';
 
+//
+// TODO:
+
 /**
  * The wind manager.
  * @constructor
@@ -398,14 +401,135 @@ LBSailSim.Wind.prototype = {
  * @returns {LBSailSim.WindPuff}
  */
 LBSailSim.WindPuff = function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, distanceToTravel) {
-    this.setupPuff(leadingPosition, velocity, depth, leadingWidth, expansionDeg, distanceToTravel);
+    /**
+     * The position of the center of the leading edge.
+     * @readonly
+     * @member {LBGeometry.Vector2}
+     */
+    this.leadingPosition = new LBGeometry.Vector2();
     
+    /**
+     * The direction the puff is moving in.
+     * @readonly
+     * @member {LBGeometry.Vector2}
+     */
+    this.velDir = new LBGeometry.Vector2();
+    
+    /**
+     * The current untapered speed of the leading edge.
+     * @readonly
+     * @member {Number}
+     */
+    this.speedLeading = 0;
+    
+    /**
+     * The angle, in degrees, defining the arc at which the puff is expanding.
+     * @readonly
+     * @member {Number}
+     */
+    this.expansionDeg = 0;
+    
+    /**
+     * The current distance from {@link LBSailSim.WindPuff#centerPos} to the leading edge.
+     * @readonly
+     * @member {Number}
+     */
+    this.rLeading = 0;
+
+    /**
+     * The current distance from {@link LBSailSim.WindPuff#centerPos} to the trailing edge.
+     * @readonly
+     * @member {Number}
+     */
+    this.rTrailing = 0;
+    
+    /**
+     * The distance between {@link LBSailSim.WindPuff#rLeading} and {@link LBSailSim.WindPuff#rTrailing}.
+     * @readonly
+     * @member {Number}
+     */
+    this.depth = 0;
+    
+    /**
+     * The center of where the puff is theoretically flowing from.
+     * @readonly
+     * @member {LBGeometry.Vector2}
+     */
+    this.centerPos = new LBGeometry.Vector2();
+    
+    /**
+     * The total time the puff is to live.
+     * @readonly
+     * @member {Number}
+     */
+    this.totalTimeToLive = 0;
+    
+    /**
+     * The total time the puff has been alive.
+     * @readonly
+     * @member {Number}
+     */
+    this.timeAlive = 0;
+    
+    
+    /**
+     * A rectangle fully enclosing the puff, used for quick bounds checking.
+     * @readonly
+     * @member {LBGeometry.Rect}
+     */
+    this.boundsRect = new LBGeometry.Rect();
+    
+    /**
+     * The fraction of the radial distance from the leading edge, relative to 
+     * the difference between the leading and trailing radii at which to start 
+     * the tapering of the speed to 0 at the leading edge.
+     * @member {Number}
+     */
     this.taperRadialStartLeading = 0.1;
+
+    /**
+     * The fraction of the radial distance from the trailing edge, relative to 
+     * the difference between the leading and trailing radii at which to start 
+     * the tapering of the speed to 0 at the leading edge.
+     * @member {Number}
+     */
     this.taperRadialStartTrailing = 0.5;
+    
+    /**
+     * The fraction of the arc angle from the arc edges, relative to the expansion 
+     * degrees, at which to start the tapering of the speed to 0 at the arc edges.
+     * @member {Number}
+     */
     this.taperArcStart = 0.1;
+    
+    /**
+     * The fraction of the total time to live at which the startup taper ends.
+     * @member {Number}
+     */
+    this.taperStartupTime = 0.05;
+    
+    /**
+     * The fraction of the total time to live, measured from the end time, at which
+     * the shutdown taper ends.
+     * @member {Number}
+     */
+    this.taperShutdownTime = 0.05;
+    
+    /**
+     * The amount to attenuate the speed to account for the puff starting and shutting down.
+     * @readonly
+     * @member {Number}
+     */
+    this.speedAttenuationForTime = 1;
+    
+    this.setupPuff(leadingPosition, velocity, depth, leadingWidth, expansionDeg, distanceToTravel);
 };
 
+LBSailSim.WindPuff.MIN_EXPANSION_DEG = 0.1;
 LBSailSim.WindPuff.MIN_PUFF_SPEED_CUTOFF = 0.1;
+
+LBSailSim.WindPuff.nextPuffId = 0;
+LBSailSim.WindPuff.debugOutput = true;
 
 LBSailSim.WindPuff.prototype = {
     /**
@@ -415,26 +539,33 @@ LBSailSim.WindPuff.prototype = {
      * @param {Number} [depth=10]   The distance between the leading edge and the trailing edge.
      * @param {Number} [leadingWidth=30]    The arc length of the leading edge of the puff, this is meters.
      * @param {Number} [expansionDeg=10] The angular range by which the leading edge expands, in degrees, this must be &gt; 0.
-     * @param {Number} [distanceToTravel=1000]  The maximum distance the puff will travel. Beyond this distance
-     * the puff's speed becomes zero.
+     * @param {Number} [timeToLive=30]  The number of seconds the puff is to last.
      * @returns {LBSailSim.WindPuff}
      */
-    setupPuff: function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, distanceToTravel) {
-        this.leadingPosition = LBUtil.copyOrClone(this.leadingPosition, leadingPosition || new LBGeometry.Vector2());
-        this.velocity = LBUtil.copyOrClone(this.velocity, velocity || new LBGeometry.Vector2());
+    setupPuff: function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, timeToLive) {
+        this.leadingPosition.copy(leadingPosition || LBGeometry.ORIGIN);
+        velocity = velocity || LBGeometry.ORIGIN;
         this.depth = depth = depth || 10;
         leadingWidth = leadingWidth || 30;
-        this.expansionDeg = expansionDeg = expansionDeg || 10;
-        this.distanceToTravel = distanceToTravel = (distanceToTravel > 0) ? distanceToTravel : 1000;
         
-        this.speedLeading = this.velocity.length();
-        if (this.speedLeading <= LBSailSim.WindPuff.MIN_PUFF_SPEED_CUTOFF) {
+        expansionDeg = ((expansionDeg === undefined) || (expansionDeg === null)) ? LBSailSim.WindPuff.MIN_EXPANSION_DEG : expansionDeg;
+        this.expansionDeg = expansionDeg = Math.max(LBSailSim.WindPuff.MIN_EXPANSION_DEG, expansionDeg);
+        
+        timeToLive = ((timeToLive === undefined) || (timeToLive === null)) ? 30 : timeToLive;
+        this.totalTimeToLive = timeToLive = Math.max(0, timeToLive);
+        this.timeRemaining = this.totalTimeToLive;
+        this.timeAlive = 0;
+        this.timeStartupTaper = timeToLive * this.taperStartupTime;
+        this.timeShutdownTaper = timeToLive * (1 - this.taperShutdownTime);
+        
+        this.speedLeading = velocity.length();
+        if ((this.speedLeading <= LBSailSim.WindPuff.MIN_PUFF_SPEED_CUTOFF) || !this.timeRemaining) {
             this.speedLeading = 0;
-            this.timeDuration = 0;
         }
         else {
-            this.velDir = this.velDir || new LBGeometry.Vector2();
-            this.velDir.set(this.velocity.x / this.speedLeading, this.velocity.y / this.speedLeading);
+            this.puffId = LBSailSim.WindPuff.nextPuffId++;
+        
+            this.velDir.set(velocity.x / this.speedLeading, velocity.y / this.speedLeading);
             
             // Need to figure out the center point.
             // Since leadingWidth is arc-length, expansionDeg is the angular equivalent of arc-length,
@@ -445,7 +576,6 @@ LBSailSim.WindPuff.prototype = {
             
             // The center is just the leadingPosition moved in the negative velocity direction
             // by the radius.
-            this.centerPos = this.centerPos || new LBGeometry.Vector2();
             this.centerPos.copy(this.velDir)
                     .multiplyScalar(-this.rLeading)
                     .add(this.leadingPosition);
@@ -456,7 +586,9 @@ LBSailSim.WindPuff.prototype = {
             var expansionRad = expansionDeg * LBMath.DEG_TO_RAD;
             var edge0Rad = Math.atan2(this.velDir.y, this.velDir.x) - 0.5 * expansionRad;
             this.cosEdge0 = Math.cos(edge0Rad);
-            this.sinEdge0 = Math.sin(edge0Rad);            
+            this.sinEdge0 = Math.sin(edge0Rad);
+            this.edge0Deg = edge0Rad * LBMath.RAD_TO_DEG;
+            this.edge1Deg = this.edge0Deg + expansionDeg;
 
             // We can then do a quick angular bounds check, the point will be in the
             // puff if rTrailing &le; r &le; rLeading and
@@ -498,6 +630,11 @@ LBSailSim.WindPuff.prototype = {
             this.speedDecel = 0;
             
             this._leadingEdgeRadiusUpdated();
+
+            if (LBSailSim.WindPuff.debugOutput) {
+                console.log("New Puff: " + this.puffId + "  speed: " + this.speedLeading + "  dir: " + 0.5*(this.edge0Deg + this.edge1Deg)
+                        + "  leadingEdge: " + this.leadingPosition.x + "," + this.leadingPosition.y);
+            }
         }
         
         return this;
@@ -511,6 +648,45 @@ LBSailSim.WindPuff.prototype = {
         this.depth = this.rLeading - this.rTrailing;
         
         this.heightTaperPoint = 30 / this.speedLeading;
+        
+        // Figure out the boundary rectangle.
+        // If the edges of the outside of the puff cross the 0, 90, 180 or 270
+        // degree points, the outer limit is defined by the radius.
+        // this.edge0Deg is >= -180, and this.edge1Deg is >= this.edge0Deg.
+        var edge1Rad = this.edge1Deg * LBMath.DEG_TO_RAD;
+        var cosEdge1 = Math.cos(edge1Rad);
+        var sinEdge1 = Math.sin(edge1Rad);
+        
+        var edge0LeadingX = this.cosEdge0 * this.rLeading;
+        var edge0LeadingY = this.sinEdge0 * this.rLeading;
+        var edge0TrailingX = this.cosEdge0 * this.rTrailing;
+        var edge0TrailingY = this.sinEdge0 * this.rTrailing;
+        var edge1LeadingX = cosEdge1 * this.rLeading;
+        var edge1LeadingY = sinEdge1 * this.rLeading;
+        var edge1TrailingX = cosEdge1 * this.rTrailing;
+        var edge1TrailingY = sinEdge1 * this.rTrailing;
+        
+        this.boundsRect.makeEmpty();
+        this.boundsRect.extendToPoint(edge0LeadingX, edge0LeadingY);
+        this.boundsRect.extendToPoint(edge0TrailingX, edge0TrailingY);
+        this.boundsRect.extendToPoint(edge1LeadingX, edge1LeadingY);
+        this.boundsRect.extendToPoint(edge1TrailingX, edge1TrailingY);
+        
+        // Now handle any crossings of the axes...
+        if ((this.edge0Deg < -90) && (this.edge1Deg > -90)) {
+            this.boundsRect.minY = -this.rLeading;
+        }
+        if ((this.edge0Deg < 0) && (this.edge1Deg > 0)) {
+            this.boundsRect.maxX = this.rLeading;
+        }
+        if ((this.edge0Deg < 90) && (this.edge1Deg > 90)) {
+            this.boundsRect.maxY = this.rLeading;
+        }
+        if (this.edge1Deg > 180) {
+            this.boundsRect.minX = -this.rLeading;
+        }
+        
+        this.boundsRect.offset(this.centerPos.x, this.centerPos.y);
     },
         
     
@@ -528,7 +704,10 @@ LBSailSim.WindPuff.prototype = {
         if ((this.speedLeading <= 0) || ((z !== undefined) && (z <= 0))) {
             return vel;
         }
-        
+        if (!this.boundsRect.containsPoint(x, y)) {
+            return vel;
+        }
+       
         // First check, radius...
         var dx = x - this.centerPos.x;
         var dy = y - this.centerPos.y;
@@ -565,6 +744,8 @@ LBSailSim.WindPuff.prototype = {
             speed *= LBMath.smoothstep3(z / this.heightTaperPoint + 0.5);
         }
         
+        speed *= this.speedAttenuationForTime;
+        
         vel.multiplyScalar(speed);
         
         return vel;
@@ -578,6 +759,26 @@ LBSailSim.WindPuff.prototype = {
     update: function(dt) {
         if (this.speedLeading <= 0) {
             return;
+        }
+        
+        this.timeRemaining -= dt;
+        if (this.timeRemaining <= 0) {
+            if (LBSailSim.WindPuff.debugOutput) {
+                console.log("Puff ended: " + this.puffId);
+            }
+            this.speedLeading = 0;
+            return;
+        }
+        
+        this.timeAlive += dt;
+        if (this.timeAlive < this.timeStartupTaper) {
+            this.speedAttenuationForTime = LBMath.smoothstep3(this.timeAlive / this.timeStartupTaper);
+        }
+        else if (this.timeAlive > this.timeShutdownTaper) {
+            this.speedAttenuationForTime = LBMath.smoothstep3((this.totalTimeToLive - this.timeAlive) / this.timeShutdownTaper);
+        }
+        else {
+            this.speedAttenuationForTime = 1;
         }
         
         // The radial speed is really a function of the radius, since
@@ -599,13 +800,6 @@ LBSailSim.WindPuff.prototype = {
 
         var deltaRLeading = Math.max(newR - this.rLeading, 0);
         newSpeed = Math.max(newSpeed, 0);
-        
-        this.distanceToTravel -= deltaRLeading;
-        if (this.distanceToTravel <= 0) {
-            this.speedLeading = 0;
-            this.distanceToTravel = 0;
-            return;
-        }        
         
         this.rLeading += deltaRLeading;        
         this.speedLeading = newSpeed;

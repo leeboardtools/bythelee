@@ -168,7 +168,7 @@ LBGeometry.Rect.prototype = {
      * @param {LBGeometry.Vector2|Number} pt   The point to enclose, either a point or separate x and y coordinates.
      * @returns {LBGeometry.Rect}   this.
      */
-    extendToPoint: function() {
+    extendToPoint: function(pt) {
         var x;
         var y;
         if (arguments.length === 1) {
@@ -199,7 +199,7 @@ LBGeometry.Rect.prototype = {
      * @param {LBGeometry.Vector2|Number} pt   The point to test, either a point or separate x and y coordinates.
      * @returns {Boolean}   true if pt is within the rectangle.
      */
-    containsPoint: function() {
+    containsPoint: function(pt) {
         var x;
         var y;
         if (arguments.length === 1) {
