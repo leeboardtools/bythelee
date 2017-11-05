@@ -133,8 +133,6 @@ var _workingPos = new LBGeometry.Vector2();
 var _workingVel = new LBGeometry.Vector3();
 
 LBSailSim.Wind.prototype = {
-    constructor: LBSailSim.Wind,
-    
     
     /**
      * Sets the average speed of the wind using a Beaufort force value.
@@ -214,18 +212,19 @@ LBSailSim.Wind.prototype = {
         var headingRad = this.fromDegToHeadingRad(this.averageFromDeg);
         this.averageToDir.set(Math.cos(headingRad), Math.sin(headingRad));
 
-        this._speedRNG.mean = this.averageMPS;
-        this._speedRNG.stdev = this.averageMPS * this.gustFactor;
+        this._speedRNG.stdev = this.averageMPS * this.gustFactor * 0.6667;
         this.baseMPS = this.averageMPS - this._speedRNG.stdev;
+        this._speedRNG.mean = this.averageMPS - this.baseMPS;
         
         // The lighter the wind speed, the more angular deviation...
         this._dirRNG.mean = this.averageFromDeg;
-        this._dirRNG.stdev = 180 * this.gustFactor / (this.averageMPS + 1)
+        this._dirRNG.stdev = 180 * this.gustFactor / (2 * this.averageMPS + 1);
         
         this._timeRNG.mean = 10;
         
         // TEST!!!
         this._timeRNG.mean = 5;
+        
         this._timeRNG.stdev = this._timeRNG.mean / 3;
         
         this._calcNextPuffTime();
@@ -256,7 +255,7 @@ LBSailSim.Wind.prototype = {
         puff.nextPuff = this.firstPuff;
         this.firstPuff = puff;
         
-        var span = this.maxActivePosition.distanceTo(this.minActivePosition);
+        var span = this.maxActivePosition.distanceTo(this.minActivePosition) + this.activeMargin;
         var cx = 0.5 * (this.minActivePosition.x + this.maxActivePosition.x);
         var cy = 0.5 * (this.minActivePosition.y + this.maxActivePosition.y);
         
@@ -279,6 +278,20 @@ LBSailSim.Wind.prototype = {
     fromDegToHeadingRad: function(deg) {
         return (270 - deg) * LBMath.DEG_TO_RAD;
     },
+    
+    
+    /**
+     * Calls a function for each active puff.
+     * @param {Function} callback   The callback function, it takes one argument, the puff.
+     */
+    forEachPuff: function(callback) {
+        var puff = this.firstPuff;
+        while (puff) {
+            callback(puff);
+            puff = puff.nextPuff;
+        }
+    },
+    
     
     /**
      * Retrieves the wind velocity at a given point
@@ -377,7 +390,10 @@ LBSailSim.Wind.prototype = {
         this.maxActivePosition.set(-Number.MAX_VALUE, -Number.MAX_VALUE);
         
         return this;
-    }
+    },
+    
+    
+    constructor: LBSailSim.Wind
 };
 
 
@@ -396,11 +412,11 @@ LBSailSim.Wind.prototype = {
  * @param {Number} [depth=10]   The distance between the leading edge and the trailing edge.
  * @param {Number} [leadingWidth=30]    The arc length of the leading edge of the puff, this is meters.
  * @param {Number} [expansionDeg=10] The angular range by which the leading edge expands, in degrees, this must be &gt; 0.
- * @param {Number} [distanceToTravel=1000]  The maximum distance the puff will travel. Beyond this distance
+ * @param {Number} [timeToLive=30]  The number of seconds the puff is to last.
  * the puff's speed becomes zero.
  * @returns {LBSailSim.WindPuff}
  */
-LBSailSim.WindPuff = function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, distanceToTravel) {
+LBSailSim.WindPuff = function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, timeToLive) {
     /**
      * The position of the center of the leading edge.
      * @readonly
@@ -522,7 +538,7 @@ LBSailSim.WindPuff = function(leadingPosition, velocity, depth, leadingWidth, ex
      */
     this.speedAttenuationForTime = 1;
     
-    this.setupPuff(leadingPosition, velocity, depth, leadingWidth, expansionDeg, distanceToTravel);
+    this.setupPuff(leadingPosition, velocity, depth, leadingWidth, expansionDeg, timeToLive);
 };
 
 LBSailSim.WindPuff.MIN_EXPANSION_DEG = 0.1;
@@ -530,6 +546,7 @@ LBSailSim.WindPuff.MIN_PUFF_SPEED_CUTOFF = 0.1;
 
 LBSailSim.WindPuff.nextPuffId = 0;
 LBSailSim.WindPuff.debugOutput = true;
+//LBSailSim.WindPuff.debugOutput = false;
 
 LBSailSim.WindPuff.prototype = {
     /**
@@ -589,6 +606,9 @@ LBSailSim.WindPuff.prototype = {
             this.sinEdge0 = Math.sin(edge0Rad);
             this.edge0Deg = edge0Rad * LBMath.RAD_TO_DEG;
             this.edge1Deg = this.edge0Deg + expansionDeg;
+            
+            this.edge0Rad = edge0Rad;
+            this.edge1Rad = this.edge1Deg * LBMath.DEG_TO_RAD;
 
             // We can then do a quick angular bounds check, the point will be in the
             // puff if rTrailing &le; r &le; rLeading and
@@ -688,12 +708,44 @@ LBSailSim.WindPuff.prototype = {
         
         this.boundsRect.offset(this.centerPos.x, this.centerPos.y);
     },
+
+    
+    /**
+     * Determines if an x,y world coordinate is in the puff.
+     * @param {Number} x    The x coordinate of the point.
+     * @param {Number} y    The y coordinate of the point.
+     * @returns {Boolean}   true if the point is in the puff.
+     */
+    isPointInPuff: function(x, y) {
+        if ((this.speedLeading <= 0) || !this.boundsRect.containsPoint(x, y)) {
+            return false;
+        }
+       
+        // First check, radius...
+        var dx = x - this.centerPos.x;
+        var dy = y - this.centerPos.y;
+        var rSq = dx * dx + dy * dy;
+        if ((rSq < this.rTrailingSq) || (rSq > this.rLeadingSq)) {
+            return false;
+        }
         
+        // Next check, angular bounds.
+        // First we need to rotate to our coordinates.
+        var localX = dx * this.cosEdge0 + dy * this.sinEdge0;
+        var localY = -dx * this.sinEdge0 + dy * this.cosEdge0;
+        var tanTheta = localY / localX;
+        if ((tanTheta < 0) || (tanTheta > this.maxTanTheta)) {
+            return false;
+        }
+        
+        return true;
+    },
+    
     
     /**
      * Retrieves the flow velocity due to the puff at a given point.
      * @param {Number} x    The x coordinate of the point.
-     * @param {Number} y    THe y coordinate of the point.
+     * @param {Number} y    The y coordinate of the point.
      * @param {Number} [z=10]   The z coordinate of the point. If this is &le; 0 the velocity will be 0.
      * @param {LBGeometry.Vector3} [vel]    If defined the object to receive the velocity.
      * @returns {LBGeometry.Vector3}    The velocity.

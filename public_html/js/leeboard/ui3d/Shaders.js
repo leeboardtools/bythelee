@@ -23,11 +23,38 @@ var LBShaders = LBShaders || {};
  * Class that helps with managing shader based computations.
  * <p>
  * Very loosely based upon ThreeJS/examples/GPUComputationRenderer.js
+ * <p>
+ * The computer works by performing shader operations on a texture, the data to be
+ * computed and the result are stored in textures, which are basically a gridWidth X gridHeight
+ * set of 4 floats (RGBA values).
+ * <p>
+ * The typical compute operation is performed in a fragment shader. The fragment shader will
+ * normally declare a uniform sampler2D representing the input texture values. The output of
+ * the fragment shader is the output texture.
+ * <p>
+ * The computer maintains two {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderTarget}
+ * objects, a current one accessed via {@link LBShaders.Computer#getCurrentRenderTarget} and previous
+ * one accessed via {@link LBShaders.Computer#getPreviousRenderTarget}. The current render target
+ * is the one that receives the output of the shaders when the computations are performed.
+ * Often, the output of the computations serves as the input to the next round of computations,
+ * to simplify this {@link LBShaders.Computer#swapRenderTargets} can be called to swap the
+ * current and previous objects.
+ * <p>
+ * In order to actually do anything, shaders must be defined. 
+ * {@link https://threejs.org/docs/index.html#api/materials/ShaderMaterial} objects are used to 
+ * define the shaders.
+ * <p>
+ * To pass the previous render target's data (texture) to the shader, you need to assign
+ * the texture of the render target to the appropriate uniform used by the shader.
+ * Once the uniforms for the shader material have been set up, {@link LBShaders.Computer#applyShader} is
+ * called with the shader material passed in as the argument. After the call the output
+ * of the computation will be in the texture of the current render target.
+ * <p>
  * 
- * @param {type} gridWidth
- * @param {type} gridHeight
- * @param {type} renderer
- * @returns {Shaders_L18.LBShaders.Computer}
+ * @param {Number} gridWidth    The width of the compute grid.
+ * @param {Number} gridHeight   The height of the compute grid.
+ * @param {THREE.WebGLRenderer} [renderer]    The renderer to use.
+ * @returns {LBShaders.Computer}
  */
 LBShaders.Computer = function(gridWidth, gridHeight, renderer) {
     this.gridWidth = gridWidth;
@@ -74,6 +101,11 @@ LBShaders.Computer = function(gridWidth, gridHeight, renderer) {
 var _savedColor;
 
 LBShaders.Computer.prototype = {
+    /**
+     * Helper for creating an appropriately sized texture for use with the computer, the
+     * values of texture are initialized to 0,0,0,1.
+     * @returns {THREE.DataTexture} The texture.
+     */
     createShaderTexture: function() {
         var data = new Float32Array(this.gridWidth * this.gridHeight * 4);
         var texture = new THREE.DataTexture(data, this.gridWidth, this.gridHeight, THREE.RGBAFormat, THREE.FloatType);
@@ -93,6 +125,12 @@ LBShaders.Computer.prototype = {
         return texture;
     },
     
+    /**
+     * Creates up the uniforms used by the pass through shaders returned by
+     * {@link LBShaders.Computer#getPassThroughVertexShader} and {@link LBShaders.Computer#getPassThroughFragmentShader}.
+     * @param {Object} uniforms The uniforms to be set up.
+     * @returns {LBShaders.Computer}    this.
+     */
     setupUniforms: function(uniforms) {
         uniforms.gridSize = { value: new THREE.Vector2(this.gridWidth, this.gridHeight) };
         uniforms.gridNorm = { value: new THREE.Vector2(1 / (this.gridWidth - 1), 1 / (this.gridHeight - 1)) };
@@ -100,6 +138,10 @@ LBShaders.Computer.prototype = {
         return this;
     },
     
+    /**
+     * Swaps the current and previous render target objects.
+     * @returns {LBShaders.Computer}    this.
+     */
     swapRenderTargets : function() {
         var tmp = this.currentTarget;
         this.currentTarget = this.previousTarget;
@@ -107,6 +149,15 @@ LBShaders.Computer.prototype = {
         return this;
     },
     
+    /**
+     * Initializes the values of a compute texture to a single color and alpha value.
+     * @param {THREE.DataTexture} texture   The texture to initialize.
+     * @param {THREE.Color} [color]   The color to set each value to, if not defined
+     * the clear color of the computer's renderer will be used.
+     * @param {Number} [alpha]  If defined the alpha value to assign to each value, otherwise
+     * the clear alpha value of the computer's renderer will be used. Only used of color is defined.
+     * @returns {LBShaders.Computer}    this.
+     */
     clearTexture: function(texture, color, alpha) {
         var savedAlpha = this.renderer.getClearAlpha();
         if (alpha === undefined) {
@@ -123,8 +174,15 @@ LBShaders.Computer.prototype = {
         if (color !== undefined) {
             this.renderer.setClearColor(_savedColor, savedAlpha);
         }
+        return this;
     },
     
+    /**
+     * Helper for initializing the current render target's texture using the pass through
+     * shaders.
+     * @param {THREE.DataTexture} texture   The texture to assign.
+     * @returns {LBShaders.Computer}    this.
+     */
     applyTexture: function(texture) {
         this.passThroughMaterial.uniforms.texture.value = texture;
         this.renderer.render(this.scene, this.camera, this.currentTarget);
@@ -132,6 +190,13 @@ LBShaders.Computer.prototype = {
         return this;
     },
     
+    /**
+     * The main compute function, this renders a shader material to the current render target.
+     * @param {THREE.ShaderMaterial} shaderMaterial The shader material to be rendered. This
+     * material defines the shaders to be run. The uniforms for the shaders should be set up
+     * as required before this call.
+     * @returns {LBShaders.Computer}    this.
+     */
     applyShader: function(shaderMaterial) {
         this.passThroughMesh.material = shaderMaterial;
         this.renderer.render(this.scene, this.camera, this.currentTarget);
@@ -139,18 +204,33 @@ LBShaders.Computer.prototype = {
         return this;
     },
     
+    /**
+     * @returns {THREE.WebGLRenderTarget}   The current render target, this receives
+     * the output of the renderer calls in {@link LBShaders.Computer#applyShader} and
+     * {@linnk LBShaders.Computer#applyTexture}.
+     */
     getCurrentRenderTarget: function() {
         return this.currentTarget;
     },
     
+    
+    /**
+     * @returns {THREE.WebGLRenderTarget}   The previous render target.
+     */
     getPreviousRenderTarget: function() {
         return this.previousTarget;
     },
     
+    /**
+     * @returns {Array} The vertex shader code for our pass-through vertex shader.
+     */
     getPassThroughVertexShader: function() {
         return passThroughVertexShader;
     },
     
+    /**
+     * @returns {Array} The fragment shader code for our pass-through vertex shader.
+     */
     getPassThroughFragmentShader: function() {
         return passThroughFragmentShader;
     },
@@ -180,6 +260,11 @@ LBShaders.Computer.prototype = {
     constructor: LBShaders.Computer
 };
 
+/**
+ * Helper for determining if the shader computer is supported.
+ * @param {THREE.WebGLRenderer} [renderer]    The renderer.
+ * @returns {Boolean}   true if we think the computer will work.
+ */
 LBShaders.Computer.isSupported = function(renderer) {
     var renderer = renderer || new THREE.WebGLRenderer();
     if (!(renderer instanceof THREE.WebGLRenderer)) {
@@ -192,27 +277,29 @@ LBShaders.Computer.isSupported = function(renderer) {
 
     return true;
 };
+
+
 //
 // Some shader notes:
-// position is from -1 to 1
+// position is from -1 to 1, which corresponds to the 2x2 mesh used.
 // gl_Position is from -1 to 1, top right corner of display is 1,1
 // gl_FragCoord ranges from 0.5 to gridSize - 0.5.
-// coord ranges from 0 to 1
+// uvCoord ranges from 0 to 1
 
 var passThroughVertexShader = [
-    // From https://github.com/evanw/webgl-water/blob/master/water.js
-    'varying vec2 coord;',
+    // Adapted from https://github.com/evanw/webgl-water/blob/master/water.js
+    'varying vec2 uvCoord;',
     'void main() {',
-    '   coord = position.xy * 0.5 + 0.5;',
+    '   uvCoord = position.xy * 0.5 + 0.5;',
     '   gl_Position = vec4(position.xyz, 1.0);',
     '}'
 ].join('\n');
 
 var passThroughFragmentShader = [
     'uniform sampler2D texture;',
-    'varying vec2 coord;',
+    'varying vec2 uvCoord;',
     'void main() {',
-    '   gl_FragColor = texture2D(texture, coord);',
+    '   gl_FragColor = texture2D(texture, uvCoord);',
     '}'
     
 ].join('\n');
