@@ -89,11 +89,15 @@ LBSailSim.Wind = function() {
     
     this._firstFreePuff = null;
     
+    this._nextPuffTimeRNG = new LBRandom.NormalGenerator();
     this._positionRNG = new LBRandom.UniformGenerator();
     this._speedRNG = new LBRandom.NormalGenerator();
     this._dirRNG = new LBRandom.NormalGenerator();
-    this._timeRNG = new LBRandom.NormalGenerator();
-    
+    this._depthRNG = new LBRandom.NormalGenerator();
+    this._leadingWidthRNG = new LBRandom.NormalGenerator();
+    this._expansionDegRNG = new LBRandom.NormalGenerator();
+    this._timeToLiveRNG = new LBRandom.NormalGenerator();
+    // leadingPosition, velocity, depth, leadingWidth, expansionDeg, timeToLive
     this.setAverageForce(3);
 };
 
@@ -220,18 +224,30 @@ LBSailSim.Wind.prototype = {
         this._dirRNG.mean = this.averageFromDeg;
         this._dirRNG.stdev = 180 * this.gustFactor / (2 * this.averageMPS + 1);
         
-        this._timeRNG.mean = 10;
+        this._depthRNG.mean = 20;
+        this._depthRNG.stdev = 10;
+        
+        this._leadingWidthRNG.mean = 30;
+        this._leadingWidthRNG.stdev = 10;
+        
+        this._expansionDegRNG.mean = 2;
+        this._expansionDegRNG.stdev = 5;
+        
+        this._timeToLiveRNG.mean = 30;
+        this._timeToLiveRNG.stdev = 15;
+        
+        this._nextPuffTimeRNG.mean = 10;
         
         // TEST!!!
-        this._timeRNG.mean = 5;
+        this._nextPuffTimeRNG.mean = 5;
         
-        this._timeRNG.stdev = this._timeRNG.mean / 3;
+        this._nextPuffTimeRNG.stdev = this._nextPuffTimeRNG.mean / 3;
         
         this._calcNextPuffTime();
     },
     
     _calcNextPuffTime: function() {
-        var deltaTime = this._timeRNG.nextValue();
+        var deltaTime = this._nextPuffTimeRNG.nextValue();
         this.nextPuffTime = this.elapsedTime + deltaTime;
     },
     
@@ -264,15 +280,22 @@ LBSailSim.Wind.prototype = {
         this._positionRNG.upper = halfSpan;
         var px = this._positionRNG.nextValue();
         var py = this._positionRNG.nextValue();
-        _workingPos.set(cx - this.averageToDir.x * px, cy - this.averageToDir.y * py);
+        var x = this.averageToDir.x * px - this.averageToDir.y * py;
+        var y = this.averageToDir.y * px + this.averageToDir.x * py;
+        _workingPos.set(cx - x, cy - y);
         
         var speed = this._speedRNG.nextValue();
         var fromDeg = this._dirRNG.nextValue();
         var headingRad = this.fromDegToHeadingRad(fromDeg);
         _workingVel.set(speed * Math.cos(headingRad), speed * Math.sin(headingRad), 0);
+
+        this.puffOptions = this.puffOptions || {};
+        this.puffOptions.depth = Math.max(this._depthRNG.nextValue(), 1);
+        this.puffOptions.leadingWidth = Math.max(this._leadingWidthRNG.nextValue(), 10);
+        this.puffOptions.expansionDeg = Math.max(this._expansionDegRNG.nextValue(), 1);
+        this.puffOptions.timeToLive = Math.max(this._timeToLiveRNG.nextValue(), 5);
         
-        puff.setupPuff(_workingPos, _workingVel);
-        //setupPuff: function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, distanceToTravel) {
+        puff.setupPuff(_workingPos, _workingVel, this.puffOptions);
     },
     
     fromDegToHeadingRad: function(deg) {
@@ -409,14 +432,11 @@ LBSailSim.Wind.prototype = {
  * @constructor
  * @param {LBGeometry.Vector2} leadingPosition  The position of the center of the leading edge of the puff.
  * @param {LBGeometry.Vector2} velocity The velocity the puff is traveling.
- * @param {Number} [depth=10]   The distance between the leading edge and the trailing edge.
- * @param {Number} [leadingWidth=30]    The arc length of the leading edge of the puff, this is meters.
- * @param {Number} [expansionDeg=10] The angular range by which the leading edge expands, in degrees, this must be &gt; 0.
- * @param {Number} [timeToLive=30]  The number of seconds the puff is to last.
+ * @param {Object} [options] If defined the options such as depth, leadingWidth, expansionDeg, and timeToLive.
  * the puff's speed becomes zero.
  * @returns {LBSailSim.WindPuff}
  */
-LBSailSim.WindPuff = function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, timeToLive) {
+LBSailSim.WindPuff = function(leadingPosition, velocity, options) {
     /**
      * The position of the center of the leading edge.
      * @readonly
@@ -437,6 +457,13 @@ LBSailSim.WindPuff = function(leadingPosition, velocity, depth, leadingWidth, ex
      * @member {Number}
      */
     this.speedLeading = 0;
+    
+    /**
+     * The speed originally passed to {@link LBSailSim.WindPuff#setupPuff}.
+     * @readonly
+     * @member {Number}
+     */
+    this.refSpeed = 0;
     
     /**
      * The angle, in degrees, defining the arc at which the puff is expanding.
@@ -538,44 +565,46 @@ LBSailSim.WindPuff = function(leadingPosition, velocity, depth, leadingWidth, ex
      */
     this.speedAttenuationForTime = 1;
     
-    this.setupPuff(leadingPosition, velocity, depth, leadingWidth, expansionDeg, timeToLive);
+    this.setupPuff(leadingPosition, velocity, options);
 };
 
 LBSailSim.WindPuff.MIN_EXPANSION_DEG = 0.1;
 LBSailSim.WindPuff.MIN_PUFF_SPEED_CUTOFF = 0.1;
 
 LBSailSim.WindPuff.nextPuffId = 0;
-LBSailSim.WindPuff.debugOutput = true;
-//LBSailSim.WindPuff.debugOutput = false;
+//LBSailSim.WindPuff.debugOutput = true;
+LBSailSim.WindPuff.debugOutput = false;
 
 LBSailSim.WindPuff.prototype = {
     /**
      * Sets up the puff.
      * @param {LBGeometry.Vector2} leadingPosition  The position of the center of the leading edge of the puff.
      * @param {LBGeometry.Vector2} velocity The velocity the puff is traveling.
-     * @param {Number} [depth=10]   The distance between the leading edge and the trailing edge.
-     * @param {Number} [leadingWidth=30]    The arc length of the leading edge of the puff, this is meters.
-     * @param {Number} [expansionDeg=10] The angular range by which the leading edge expands, in degrees, this must be &gt; 0.
-     * @param {Number} [timeToLive=30]  The number of seconds the puff is to last.
+     * @param {Object} [options] If defined the options such as depth, leadingWidth, expansionDeg, and timeToLive.
      * @returns {LBSailSim.WindPuff}
      */
-    setupPuff: function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, timeToLive) {
+    setupPuff: function(leadingPosition, velocity, options) {
         this.leadingPosition.copy(leadingPosition || LBGeometry.ORIGIN);
         velocity = velocity || LBGeometry.ORIGIN;
-        this.depth = depth = depth || 10;
-        leadingWidth = leadingWidth || 30;
         
-        expansionDeg = ((expansionDeg === undefined) || (expansionDeg === null)) ? LBSailSim.WindPuff.MIN_EXPANSION_DEG : expansionDeg;
+        options = options || {};
+        var depth = options.depth || 10;
+        var leadingWidth = options.leadingWidth || 30;
+        var expansionDeg = (options.expansionDeg === undefined) || (options.expansionDeg === null)
+                ? LBSailSim.WindPuff.MIN_EXPANSION_DEG : options.expansionDeg;
+        var timeToLive = ((options.timeToLive === undefined) || (options.timeToLive === null)) ? 30 : options.timeToLive;;
+        
+        this.depth = depth;
         this.expansionDeg = expansionDeg = Math.max(LBSailSim.WindPuff.MIN_EXPANSION_DEG, expansionDeg);
-        
-        timeToLive = ((timeToLive === undefined) || (timeToLive === null)) ? 30 : timeToLive;
         this.totalTimeToLive = timeToLive = Math.max(0, timeToLive);
+        
         this.timeRemaining = this.totalTimeToLive;
         this.timeAlive = 0;
         this.timeStartupTaper = timeToLive * this.taperStartupTime;
         this.timeShutdownTaper = timeToLive * (1 - this.taperShutdownTime);
         
         this.speedLeading = velocity.length();
+        this.refSpeed = this.speedLeading;
         if ((this.speedLeading <= LBSailSim.WindPuff.MIN_PUFF_SPEED_CUTOFF) || !this.timeRemaining) {
             this.speedLeading = 0;
         }

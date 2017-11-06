@@ -17,10 +17,16 @@
 
 define(['lbsailsim', 'lbmath', 'three', 'lbshaders'],
 function(LBSailSim, LBMath, THREE, LBShaders) {
+    
+    
+// TODO
+// Need to figure out how to improve the pixel resolution of the puffs.
 
 LBSailSim.Water3D = function(scene3D, sailEnv) {
     this.scene3D = scene3D;
     this.sailEnv = sailEnv;
+    
+    this.puffsEnabled = true;
     
     if (!this.loadWater()) {
         var WIDTH = 64;    
@@ -88,10 +94,12 @@ LBSailSim.Water3D.prototype = {
         if (this.testPuff) {
             this.testPuff.update(dt);
             if (this.testPuff.speedLeading <= 0) {
-                this.testPuff.setupPuff(new THREE.Vector3(20, 0, 0), new THREE.Vector2(-2, 0), 
-                        10, 10, 
-                        2, 30);
-// LBSailSim.WindPuff = function(leadingPosition, velocity, depth, leadingWidth, expansionDeg, timeToLive) {
+                var puffOptions = {};
+                puffOptions.depth = Math.max(this._depthRNG.nextValue(), 1);
+                puffOptions.leadingWidth = Math.max(this._leadingWidthRNG.nextValue(), 10);
+                puffOptions.expansionDeg = Math.max(this._expansionDegRNG.nextValue(), 1);
+                puffOptions.timeToLive = Math.max(this._timeToLiveRNG.nextValue(), 5);
+                this.testPuff.setupPuff(new THREE.Vector3(20, 0, 0), new THREE.Vector2(-2, 0), puffOptions);
             }
             
             if (this.wasPointInPuff) {
@@ -400,7 +408,8 @@ LBSailSim.WaterShader.prototype.getPuffUniforms = function() {
         edge1Rad : { value: 0 },
         cosEdge0 : { value: 0 },
         sinEdge0 : { value: 0 },
-        maxTanTheta: { value: 0 }
+        maxTanTheta: { value: 0 },
+        refAlpha: { value: 1 }
     };
     
     this.puffComputer.setupUniforms(uniforms);
@@ -424,12 +433,13 @@ LBSailSim.WaterShader.prototype.getPuffFragmentShader = function() {
         'uniform float cosEdge0;',
         'uniform float sinEdge0;',
         'uniform float maxTanTheta;',
+        'uniform float refAlpha;',
         
         'varying vec2 uvCoord;',
         'void main() {',
         '   vec2 delta = uvCoord - puffCenter;',
         '   float radius = length(delta);',
-        '   float alpha = 1.;',
+        '   float alpha = refAlpha;',
         
         '   float taper = 0.1;',
         '   float rTrans = taper * (rLeading - rTrailing);',
@@ -453,6 +463,10 @@ LBSailSim.WaterShader.prototype.getPuffFragmentShader = function() {
 };
 
 LBSailSim.WaterShader.prototype._updatePuffs = function() {
+    if (!this.water3D.puffsEnabled) {
+        return;
+    }
+    
     this.puffComputer.applyTexture(this.puffInitialTexture).swapRenderTargets();
     
     // TEST!!!
@@ -476,6 +490,8 @@ var _workingPos = new THREE.Vector2();
 LBSailSim.WaterShader.prototype._applyPuff = function(puff) {
     
     var uniforms = this.puffShaderMaterial.uniforms;
+    
+    uniforms.refAlpha.value = puff.speedLeading / puff.refSpeed;
     
     uniforms.puffCenter.value.copy(puff.centerPos);
     this._worldToUVCoord(uniforms.puffCenter.value);

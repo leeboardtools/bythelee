@@ -17,6 +17,10 @@
 define(['three', 'lbutil'],
 function(THREE, LBUtil) {
     
+/**
+ * 
+ * @namespace LBShaders
+ */
 var LBShaders = LBShaders || {};
 
 /**
