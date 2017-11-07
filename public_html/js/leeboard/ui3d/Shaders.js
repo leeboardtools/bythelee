@@ -60,15 +60,20 @@ var LBShaders = LBShaders || {};
  * @param {THREE.WebGLRenderer} [renderer]    The renderer to use.
  * @returns {LBShaders.Computer}
  */
-LBShaders.Computer = function(gridWidth, gridHeight, renderer) {
+LBShaders.Computer = function(gridWidth, gridHeight, renderer, camera) {
     this.gridWidth = gridWidth;
     this.gridHeight = gridHeight;
     
     this.renderer = renderer || new THREE.WebGLRenderer();
     
     this.scene = new THREE.Scene();
-    this.camera = new THREE.Camera();
-    this.camera.position.z = 1;
+    if (camera) {
+        this.camera = camera;
+    }
+    else {
+        this.camera = new THREE.Camera();
+        this.camera.position.z = 1;
+    }
     
     var wrapS = THREE.ClampToEdgeWrapping;
     var wrapT = THREE.ClampToEdgeWrapping;

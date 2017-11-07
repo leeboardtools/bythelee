@@ -572,8 +572,8 @@ LBSailSim.WindPuff.MIN_EXPANSION_DEG = 0.1;
 LBSailSim.WindPuff.MIN_PUFF_SPEED_CUTOFF = 0.1;
 
 LBSailSim.WindPuff.nextPuffId = 0;
-//LBSailSim.WindPuff.debugOutput = true;
-LBSailSim.WindPuff.debugOutput = false;
+LBSailSim.WindPuff.debugOutput = true;
+//LBSailSim.WindPuff.debugOutput = false;
 
 LBSailSim.WindPuff.prototype = {
     /**
