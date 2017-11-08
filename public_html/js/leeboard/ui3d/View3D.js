@@ -180,6 +180,24 @@ LBUI3d.View3D.prototype.setRotateMode = function() {
 };
 
 /**
+ * Called from the owner {@link LBUI3d.App3D} every update cycle to have the view
+ * pre-render itself.
+ * @protected
+ * @param {Number} dt   The elapsed seconds since the last call call.
+ * @returns {undefined}
+ */
+LBUI3d.View3D.prototype.update = function(dt) {
+    if (!this.isEnabled) {
+        return;
+    }
+    
+    var activeController = this.activeCameraController;
+    this.cameraControllers.forEach(function(controller) {
+        controller.update(dt, controller === activeController);
+    });
+};
+
+/**
  * Called from the owner {@link LBUI3d.App3D} every render cycle to have the view
  * render itself.
  * @protected
@@ -190,11 +208,6 @@ LBUI3d.View3D.prototype.render = function(dt) {
     if (!this.isEnabled) {
         return;
     }
-    
-    var activeController = this.activeCameraController;
-    this.cameraControllers.forEach(function(controller) {
-        controller.update(dt, controller === activeController);
-    });
     
     this.renderer.render(this.scene3D.scene, this.camera);
 };

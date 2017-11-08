@@ -58,6 +58,7 @@ var LBShaders = LBShaders || {};
  * @param {Number} gridWidth    The width of the compute grid.
  * @param {Number} gridHeight   The height of the compute grid.
  * @param {THREE.WebGLRenderer} [renderer]    The renderer to use.
+ * @param {THREE.Camera}    [camera]    The camera to use.
  * @returns {LBShaders.Computer}
  */
 LBShaders.Computer = function(gridWidth, gridHeight, renderer, camera) {
@@ -287,6 +288,38 @@ LBShaders.Computer.isSupported = function(renderer) {
     return true;
 };
 
+/**
+ * A simple helper for copying the texture from one render target to another.
+ * @constructor
+ * @param {THREE.WebGLRenderer} renderer    The renderer.
+ * @returns {Shaders_L18.LBShaders.TargetCopier}
+ */
+LBShaders.TargetCopier = function(renderer) {
+    this.renderer = renderer;
+    
+    this.scene = new THREE.Scene();
+    this.material = new THREE.ShaderMaterial({
+        uniforms: {
+            texture: { value: null }
+        },
+        vertexShader: passThroughVertexShader,
+        fragmentShader: passThroughFragmentShader
+    });
+
+    this.mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry( 2, 2 ), this.material);
+    this.scene.add(this.mesh);
+
+    this.camera = new THREE.OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );
+};
+
+LBShaders.TargetCopier.prototype = {
+    copyTarget: function(srcTarget, dstTarget) {
+        this.material.uniforms.texture.value = srcTarget.texture;
+        this.renderer.render(this.scene, this.camera, dstTarget, true);
+    },
+    
+    constructor: LBShaders.TargetCopier
+};
 
 //
 // Some shader notes:
@@ -309,6 +342,9 @@ var passThroughFragmentShader = [
     'varying vec2 uvCoord;',
     'void main() {',
     '   gl_FragColor = texture2D(texture, uvCoord);',
+    
+'gl_FragColor.r = (uvCoord.x > 0.5) && (uvCoord.y < 0.51) ? 1. : gl_FragColor.r;',
+    
     '}'
     
 ].join('\n');

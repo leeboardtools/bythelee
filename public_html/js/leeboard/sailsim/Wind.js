@@ -92,7 +92,7 @@ LBSailSim.Wind = function() {
     this._nextPuffTimeRNG = new LBRandom.NormalGenerator();
     this._positionRNG = new LBRandom.UniformGenerator();
     this._speedRNG = new LBRandom.NormalGenerator();
-    this._dirRNG = new LBRandom.NormalGenerator();
+    this._dirDegRNG = new LBRandom.NormalGenerator();
     this._depthRNG = new LBRandom.NormalGenerator();
     this._leadingWidthRNG = new LBRandom.NormalGenerator();
     this._expansionDegRNG = new LBRandom.NormalGenerator();
@@ -221,8 +221,8 @@ LBSailSim.Wind.prototype = {
         this._speedRNG.mean = this.averageMPS - this.baseMPS;
         
         // The lighter the wind speed, the more angular deviation...
-        this._dirRNG.mean = this.averageFromDeg;
-        this._dirRNG.stdev = 180 * this.gustFactor / (2 * this.averageMPS + 1);
+        this._dirDegRNG.mean = this.averageFromDeg;
+        this._dirDegRNG.stdev = 180 * this.gustFactor / (2 * this.averageMPS + 1);
         
         this._depthRNG.mean = 20;
         this._depthRNG.stdev = 10;
@@ -285,7 +285,7 @@ LBSailSim.Wind.prototype = {
         _workingPos.set(cx - x, cy - y);
         
         var speed = this._speedRNG.nextValue();
-        var fromDeg = this._dirRNG.nextValue();
+        var fromDeg = this._dirDegRNG.nextValue();
         var headingRad = this.fromDegToHeadingRad(fromDeg);
         _workingVel.set(speed * Math.cos(headingRad), speed * Math.sin(headingRad), 0);
 
@@ -559,7 +559,7 @@ LBSailSim.WindPuff = function(leadingPosition, velocity, options) {
     this.taperShutdownTime = 0.05;
     
     /**
-     * The amount to attenuate the speed to account for the puff starting and shutting down.
+     * The current amount to attenuate the speed to account for the puff starting and shutting down.
      * @readonly
      * @member {Number}
      */
@@ -572,8 +572,8 @@ LBSailSim.WindPuff.MIN_EXPANSION_DEG = 0.1;
 LBSailSim.WindPuff.MIN_PUFF_SPEED_CUTOFF = 0.1;
 
 LBSailSim.WindPuff.nextPuffId = 0;
-LBSailSim.WindPuff.debugOutput = true;
-//LBSailSim.WindPuff.debugOutput = false;
+//LBSailSim.WindPuff.debugOutput = true;
+LBSailSim.WindPuff.debugOutput = false;
 
 LBSailSim.WindPuff.prototype = {
     /**
@@ -852,14 +852,12 @@ LBSailSim.WindPuff.prototype = {
         }
         
         this.timeAlive += dt;
-        if (this.timeAlive < this.timeStartupTaper) {
-            this.speedAttenuationForTime = LBMath.smoothstep3(this.timeAlive / this.timeStartupTaper);
-        }
-        else if (this.timeAlive > this.timeShutdownTaper) {
-            this.speedAttenuationForTime = LBMath.smoothstep3((this.totalTimeToLive - this.timeAlive) / this.timeShutdownTaper);
+        var timeAliveFraction = this.timeAlive / this.totalTimeToLive;
+        if (timeAliveFraction < this.taperStartupTime) {
+            this.speedAttenuationForTime = LBMath.smoothstep(0, this.taperStartupTime, timeAliveFraction);
         }
         else {
-            this.speedAttenuationForTime = 1;
+            this.speedAttenuationForTime = LBMath.smoothstep(0, this.taperShutdownTime, 1 - timeAliveFraction);
         }
         
         // The radial speed is really a function of the radius, since

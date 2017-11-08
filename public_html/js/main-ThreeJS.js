@@ -460,7 +460,7 @@ LBMyApp.prototype.onKeyPressEvent = function(event) {
  * @returns {undefined}
  */
 LBMyApp.prototype.update = function(dt) {
-    LBUI3d.App3D.prototype.update.call(this);
+    LBUI3d.App3D.prototype.update.call(this, dt);
     
     this.sailEnv.update(dt);
     

@@ -163,7 +163,7 @@ LBUI3d.App3D.prototype.runContinuous = function() {
  */
 LBUI3d.App3D.prototype.runSingleStep = function() {
     if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
-        this.enterPaused();
+        this.pause();
     }
     else {
         this._lastFrameTimeStamp = 0;
@@ -262,7 +262,9 @@ LBUI3d.App3D.prototype.toggleFullScreen = function(container) {
  * @param {Number} dt The number of milliseconds since the last call to this.
  */
 LBUI3d.App3D.prototype.update = function(dt) {
-    
+    this.views.forEach(function(view) {
+        view.update(dt);
+    });
 };
 
 /**
