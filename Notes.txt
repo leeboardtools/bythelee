@@ -29,12 +29,8 @@ TODO:
 Shut of wakes if FPS too low.
 Look into adjusting physics time step based on actual FPS.
 
-Water/Wake:
-Centered on the camera target.
-Have a list of vessels.
-Track the motion of the target, this will be an offset uniform for the n/s/e/w sump stuff.
-Add smoothstep for n/s/e/w to handle coordinates outside the main bounds.
-Add a velocity dampening factor.
+
+Angle the rudder to match the transom.
 
 
 Camera Controllers:
@@ -49,7 +45,14 @@ Wake: In Hull, maybe change the determining of the wakeEndPort, wakeEndStbd to l
 the points farthest from the center that are aft of the velocity perpendicular.
 
 
-Add Splash Screen
+Add credits link/page
+- ThreeJS
+- CannonJS
+- RequireJS
+- TweenJS
+
+
+Change wind indicators on boat to telltales?
 
 Add drop-down button for toggling force arrows.
 

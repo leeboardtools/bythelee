@@ -69,6 +69,58 @@ and open the template in the editor.
                 font-size: 2rem;
             }
             
+            #splash {
+                position: absolute;
+                top: 0px;
+                bottom: 0px;
+                left: 0px;
+                right: 0px;
+                
+                margin: 0px;
+                overflow: auto;
+            }
+            #splash_title_table {
+                margin: 0 auto;
+            }
+            #splash_byline {
+                text-align: left;
+                font-style: italic;
+                font-size: 1.5rem;
+            }
+            #splash_title {
+                text-align: center;
+                font-size: 8rem;
+            }
+            #splash_icons_heading {
+                padding-top: 10px;
+                text-align: center;
+                font-size: 1.8rem;
+                font-weight: bold;
+            }
+            #splash_icon_table {
+                margin: 0 auto;
+                font-size: 1.5rem;
+            }
+            #click_to_start {
+                margin-top: 3rem;
+                text-align: center;
+                font-size: 3rem;
+                color: blue;
+                cursor: pointer;
+                visibility: hidden;
+            }
+            
+            #credits {
+                padding-top: 2rem;
+                margin: 0 auto;
+                font-size: 1.5rem;
+            }
+            #credits_title {
+                font-weight: bold;
+            }
+            #credits_table {
+                margin: 0 auto;
+            }
             
             #container {
                 position: absolute;
@@ -78,6 +130,7 @@ and open the template in the editor.
                 right: 0px;
                 
                 margin: 0px;
+                visibility: hidden;
             }
             
             #main_view {
@@ -244,7 +297,7 @@ and open the template in the editor.
             }
             
             #hud_force {
-                top: 22rem;
+                top: 24rem;
             }
             
             /* A wind indicator, normally has a speed indicator and a dial */
@@ -583,13 +636,13 @@ and open the template in the editor.
 
                 <div id="menu_bar_top">
                     <div id="menu_full_screen" class="menu_button horiz_menu_button" onclick="myApp.toggleFullScreen(document.getElementById('container'))">
-                        <i class="material-icons">&#xE5D0;</i>
+                        <i class="material-icons">fullscreen</i>
                     </div>
                     <div id="menu_mouse_mode" class="menu_button horiz_menu_button" onclick="myApp.nextMouseMode()">
-                        <i class="material-icons">&#xE89F;</i>
+                        <i class="material-icons">open_with</i>
                     </div>
                     <div id="menu_run_pause" class="menu_button horiz_menu_button" onclick="myApp.toggleRunPause()">
-                        <i class="material-icons">&#xE034;</i>
+                        <i class="material-icons">pause</i>
                     </div>
                 </div>
                 
@@ -636,6 +689,12 @@ and open the template in the editor.
                             <td id="hud_wind_speed">000</td>
                             <td>kt</td>
                         </tr>
+                        <tr><td>&nbsp;</td><td></td><td></td></tr>
+                        <tr>
+                            <td>FPS</td>
+                            <td id="hud_fps">0</td>
+                            <td></td>
+                        </tr>
                     </table>
                 </div>
                 
@@ -672,12 +731,6 @@ and open the template in the editor.
                         <tr>
                             <td>ISL</td>
                             <td id="hud_f_induced_sail">000</td>
-                            <td></td>
-                        </tr>
-                        <tr><td>&nbsp;</td><td></td><td></td></tr>
-                        <tr>
-                            <td>FPS</td>
-                            <td id="hud_fps">0</td>
                             <td></td>
                         </tr>
                     </table>
@@ -720,15 +773,15 @@ and open the template in the editor.
             -->
 
             <div>
-                <div id="pip_map_btn" class="pip_btn" onclick="myApp.toggleMap()"><i class="material-icons">&#xE55B;</i></div>
+                <div id="pip_map_btn" class="pip_btn" onclick="myApp.toggleMap()"><i class="material-icons">map</i></div>
                 <div id="pip_map" class="pip_view_map"></div>
             </div>
             <div>
-                <div id="pip_lower_left_btn" class="pip_btn" onclick="myApp.togglePIPLowerLeft()"><i class="material-icons">&#xE5CC;</i></div>
+                <div id="pip_lower_left_btn" class="pip_btn" onclick="myApp.togglePIPLowerLeft()"><i class="material-icons">chevron_right</i></div>
                 <div id="pip_lower_left" class="pip_view_bottom pip_view_left"></div>
             </div>
             <div>
-                <div id="pip_lower_right_btn" class="pip_btn" onclick="myApp.togglePIPLowerRight()"><i class="material-icons">&#xE5CB;</i></div>
+                <div id="pip_lower_right_btn" class="pip_btn" onclick="myApp.togglePIPLowerRight()"><i class="material-icons">chevron_left</i></div>
                 <div id="pip_lower_right" class="pip_view_bottom pip_view_right"></div>
             </div>
             
@@ -858,11 +911,70 @@ and open the template in the editor.
                 <div id="fatal_error_msg2" class="fatal_error fatal_error_msg"></div>
             </div>
         </div>
+            
+        <div id="splash"  onclick="myApp.closeSplash(event)">
+            <table id='splash_title_table'>
+                <tr><td id="splash_byline">It's Albert's sailing simulator</td></tr>
+                <tr><td id="splash_title">By The Lee!</td></tr>
+            </table>
+            <div id="splash_icons_heading">What the icons mean:</div>
+            <table id="splash_icon_table">
+                <tr>
+                    <td class="wind_icon dropdown_btn">                        <!-- Wind Icon... -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -60 100 120">
+                            <path 
+                                d="M 0,0   70,0   c15,0 15,-30 0,-30 s-15,0 -15,15 
+                                   M 0,-20 25,-20 c15,0 15,-30 0,-30 s-15,0 -15,15 
+                                   M 0, 20 50, 20 c15,0 15,30  0,30  s-15,0  -15,-15" 
+                                fill="none" stroke="black" stroke-width="10px"/>
+                        </svg>
+                        <!-- End Wind Icon... -->
+                    </td>
+                    <td>Wind menu: change strength, direction</td>
+                </tr>
+                <tr>
+                    <td><i class="material-icons">settings_overscan</i></td>
+                    <td>View menu: standard views, in boat, at boat</td>
+                </tr>
+                <tr>
+                    <td><i class="material-icons">fullscreen</i></td>
+                    <td>Toggle full screen</td>
+                </tr>
+                <tr>
+                    <td><i class="material-icons">open_with</i></td>
+                    <td>Toggle rotate/pan view with drag</td>
+                </tr>
+                <tr>
+                    <td><i class="material-icons">pause</i></td>
+                    <td>Pause/run</td>
+                </tr>
+                <tr>
+                    <td><i class="material-icons">map</i></td>
+                    <td>Display map (not yet working)</td>
+                </tr>
+                <tr>
+                    <td><i class="material-icons">chevron_right</i></td>
+                    <td>Display Picture-in-Picture view, lower left</td>
+                </tr>
+                <tr>
+                    <td><i class="material-icons">chevron_left</i></td>
+                    <td>Display Picture-in-Picture view, lower right</td>
+                </tr>
+            </table>
+            <div id="click_to_start">Click to get started...</div>
+            <div id='credits'>
+                <table id='credits_table'>
+                    <tr><td id='credits_title'>Credits</td></tr>
+                    <tr><td>Open source, on GitHub at <a href="https://github.com/leeboardtools/bythelee" target='_blank'>https://github.com/leeboardtools/bythelee</a></td></tr>
+                    <tr><td>Uses <a href='https://threejs.org/' target='_blank'>three.js</a> for 3D rendering and geometry</td></tr>
+                    <tr><td>Uses <a href="https://github.com/schteppe/cannon.js/blob/master/README.markdown" target='_blank'>cannon.js</a> for the physics engine</td></tr>
+                    <tr><td>Uses <a href='http://requirejs.org/' target="_blank">RequireJS</a> for managing Javascript dependencies</td></tr>
+                    <tr><td>Uses <a href="https://github.com/tweenjs/tween.js/" target="_blank">tween.js</a> for tweening positions automatically</td></tr>
+                </table>
+            </div>
+        </div>
 
         <script>
-            // TODO:
-            // Put up a splash screen that we can hide when we're loaded.
-            // 
             // For now, hide these, they're made visible when appropriate.
             document.getElementById('throttle_slider').hidden = true;
             document.getElementById('jib_slider').hidden = true;

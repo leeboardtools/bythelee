@@ -91,9 +91,6 @@ function LBMyApp() {
     
     this.assetLoader = new LBAssets.Loader();
     
-    this.toggleHUDBoat();
-    this.toggleHUDWind();
-    
     // TODO Get rid of windDeg, windForce...
     this.windDeg = 0;
     this.windForce = 2;
@@ -250,6 +247,11 @@ LBMyApp.prototype.loadEnvCompleted = function() {
     this.views.forEach(function(view) {
         me.updateViewForMyBoat(view);
     });
+    
+    document.getElementById('click_to_start').style.visibility = "visible";
+    
+    // TEST!!!
+    //this.closeSplash();
 };
 
 LBMyApp.prototype.updateViewForMyBoat = function(view) {
@@ -263,6 +265,18 @@ LBMyApp.prototype.updateViewForMyBoat = function(view) {
         // TODO: Need to set the cockpit location from the boat's data...index
         view.localPOVCameraController.localPosition.set(3, 0, 1.0);
     }
+};
+
+LBMyApp.prototype.closeSplash = function(event) {
+    if (event.target && (event.target.nodeName === 'A')) {
+        return;
+    }
+    
+    document.getElementById('splash').hidden = true;
+    document.getElementById('container').style.visibility = "visible";
+
+    this.toggleHUDBoat();
+    this.toggleHUDWind();
 };
 
 /**
@@ -1136,6 +1150,8 @@ if ( ! Detector.webgl ) {
 else {
     // Putting myApp in window so it can be called from HTML event handlers.
     window.myApp = new LBMyApp();
+    
+    document.getElementById('container').style.visibility = "hidden";
     
     var startPaused = false;
     //startPaused = true;
