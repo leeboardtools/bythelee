@@ -61,6 +61,7 @@ LBSailSim.Water3D = function(scene3D, sailEnv) {
     }
 };
 
+        // 4000 seems to be small enough to get decent resolution at close zoom.
 LBSailSim.Water3D.MESH_SIZE = 4000;
 
 LBSailSim.Water3D.prototype = {
@@ -68,7 +69,6 @@ LBSailSim.Water3D.prototype = {
         var waterNormals = new THREE.TextureLoader().load( 'textures/three-js/waternormals.jpg' );
         waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
 
-        // 4000 seems to be small enough to get decent resolution at close zoom.
         var meshSize = LBSailSim.Water3D.MESH_SIZE;
         
         // TEST!!!
@@ -84,7 +84,7 @@ LBSailSim.Water3D.prototype = {
                 sunDirection: this.scene3D.mainLight.position.clone().normalize(),
                 sunColor: 0xffffff,
                 waterColor: 0x001e0f,
-                distortionScale: 5.0,
+                distortionScale: 3.0,
                 fog: this.scene3D.scene.fog !== undefined
         } );
         this.waterShader = waterShader;
@@ -456,7 +456,7 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
                     '	vec3 reflectionSample = fullSample.rgb;',
 
                     '	float theta = max( dot( eyeDirection, surfaceNormal ), 0.0 );',
-                    '	float rf0 = 0.3;',
+                    '	float rf0 = 0.2;',
                     '	float reflectance = rf0 + ( 1.0 - rf0 ) * pow( ( 1.0 - theta ), 5.0 );',
                     '	vec3 scatter = max( 0.0, dot( surfaceNormal, eyeDirection ) ) * waterColor;',
 

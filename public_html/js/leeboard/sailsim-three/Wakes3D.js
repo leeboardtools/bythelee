@@ -144,7 +144,7 @@ LBSailSim.ParticleWakes.prototype = {
             });
         }
         
-        this.particles.update(this.sailEnv.app3d.runMillisecs / 1000);
+        this.particles.update(this.sailEnv.app3D.runMillisecs / 1000);
     },
     
     _updateVesselWake: function(vessel, dt) {

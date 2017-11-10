@@ -634,7 +634,7 @@ LBGeometry.Vector3.prototype.isZero = function() {
 LBGeometry.loadVector2 = function(data, vec) {
     vec = vec || new LBGeometry.Vector2();
     if (!data) {
-        vec.zero();
+        vec.copy(LBGeometry.ORIGIN);
     }
     else {
         vec.x = data.x || 0;
@@ -656,7 +656,7 @@ LBGeometry.loadVector2 = function(data, vec) {
 LBGeometry.loadVector3 = function(data, vec) {
     vec = vec || new LBGeometry.Vector3();
     if (!data) {
-        vec.zero();
+        vec.copy(LBGeometry.ORIGIN);
     }
     else {
         vec.x = data.x || 0;
@@ -1561,16 +1561,19 @@ LBGeometry.Color.createFromData = function(data, defColor) {
 
 /**
  * Retrieves a numeric color value from a data object. This currently supports the
- * data object being a Number or a String parseable by {@link parseInt}. May some day
- * support parsing an object with r,g,b properties or other color formats.
+ * data object being a Number or a String parseable by {@link parseInt}. The result
+ * can be passed to {@link LBGeometry.Color}'s constructor.
  * @param {Object} data The data object.
- * @param {Number} defColor The value to return if data was not convertable.
+ * @param {Object} defColor The value to return if data is not defined or null.
  * @returns {Number}    The numeric value of the color.
  */
 LBGeometry.Color.colorValueFromData = function(data, defColor) {
+    if ((data === undefined) || (data === null)) {
+        return defColor;
+    }
     var value = parseInt(data);
     if (Number.isNaN(value)) {
-        return defColor;
+        return data;
     }
     return value;
 };

@@ -16,7 +16,8 @@
 
 
 /* global THREE, LBMath */
-define(['three'], function(THREE) {
+define(['three', 'lbgeometry'], 
+function(THREE, LBGeometry) {
 
     'use strict';
 
@@ -132,6 +133,64 @@ LBUI3d.Scene3D.prototype.loadJSONModel = function(url, onLoad, onProgress, onErr
     }, onProgress, onError);
 };
 
+LBUI3d.Scene3D.prototype.loadModelFromData = function(data, onLoad, onProgress, onError) {
+    if (data.threeModel) {
+        this.loadJSONModel(data.threeModel, onLoad, onProgress, onError);
+    }
+    else if (data.line3D) {
+        this.loadLine3D(data.line3D, onLoad, onProgress, onError);
+    }
+};
+
+LBUI3d.Scene3D.prototype.loadLine3D = function(data, onLoad, onProgress, onError) {
+    var me = this;
+    
+    var color = LBGeometry.Color.createFromData(data.color, "black");
+    if (!data.vertices) {
+        return;
+    }
+    
+    var vertexCount = data.vertices.length / 3;
+    var vertices;
+    var colors = [];
+    if (this.coordMapping === LBUI3d.DirectCoordMapping) {
+        vertices = data.vertices;
+        for (var i = 0; i < vertexCount; ++i) {
+            colors.push(color.r, color.g, color.b);
+        }
+    }
+    else {
+        vertices = [];
+        for (var i = 0; i < vertexCount; ++i) {
+            colors.push(color.r, color.g, color.b);
+            this.coordMapping.xyzToThreeJS(data.vertices, i * 3, vertices, i * 3);
+        }
+    }
+    
+    var geometry = new THREE.BufferGeometry();
+    var material = new THREE.LineBasicMaterial( {
+        vertexColors: color
+    });
+    
+    geometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    
+    var mesh = new THREE.Line(geometry, material);
+    if (onLoad) {
+        onLoad(mesh, me);
+    }
+    else {
+        me.add(mesh);
+    }
+};
+
+
+function setXYZ(x, y, z, outXYZ, outIndex) {
+    outXYZ[outIndex++] = x;
+    outXYZ[outIndex++] = y;
+    outXYZ[outIndex] = z;
+}
+
 
 /**
  * Provides a one-to-one coordinate mapping between our coordinate system and
@@ -143,6 +202,12 @@ LBUI3d.DirectCoordMapping = {
     },
     vector3FromThreeJS: function(vecThree, vec) {
         return vec.copy(vecThree);
+    },
+    xyzToThreeJS: function(inXYZ, inIndex, outXYZ, outIndex) {
+        setXYZ(inXYZ[inIndex++], inXYZ[inIndex++], inXYZ[inIndex], outXYZ, outIndex);
+    },
+    xyzFromThreeJS: function(inXYZ, inIndex, outXYZ, outIndex) {
+        setXYZ(inXYZ[inIndex++], inXYZ[inIndex++], inXYZ[inIndex], outXYZ, outIndex);
     },
     quaternionToThreeJS: function(quat, quatThree) {
         return quatThree.copy(quat);
@@ -168,6 +233,12 @@ LBUI3d.ZIsUpCoordMapping = {
     },
     vector3FromThreeJS: function(vecThree, vec) {
         return vec.set(vecThree.x, -vecThree.z, vecThree.y);
+    },
+    xyzToThreeJS: function(inXYZ, inIndex, outXYZ, outIndex) {
+        setXYZ(inXYZ[inIndex], inXYZ[inIndex+2], -inXYZ[inIndex+1], outXYZ, outIndex);
+    },
+    xyzFromThreeJS: function(inXYZ, inIndex, outXYZ, outIndex) {
+        setXYZ(inXYZ[inIndex], -inXYZ[inIndex+2], inXYZ[inIndex+1], outXYZ, outIndex);
     },
     quaternionToThreeJS: function(quat, quatThree) {
         return quatThree.set(quat.x, quat.z, -quat.y, quat.w);

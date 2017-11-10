@@ -69,6 +69,7 @@ var require = {
         'lbsky3d': 'leeboard/sailsim-three/Sky3D',
         'lbwakes3d': 'leeboard/sailsim-three/Wakes3D',
         'lbwater3d': 'leeboard/sailsim-three/Water3D',
+        'lbwind3d': 'leeboard/sailsim-three/Wind3D',
         
         'lbthreejs': 'leeboard/three-js/ThreeJSUtil',
         

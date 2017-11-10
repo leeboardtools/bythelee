@@ -97,19 +97,78 @@
                     "name": "portWindIndicator",
                     "mass": 0,
                     "obj3D": {
-                        "position" : { "x": 1.7, "y": -0.7, "z": 0.6 },
+                        "position" : { "x": 1.7429, "y": -0.656, "z": 2.0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
-                        },
+                    },
+                    "telltale3D": {
+                        "color": "PORT_COLOR"
+                    },
                     "threeModel": "models/tubby/port_wind_indicator.json"
                 },
                 {
                     "name": "stbdWindIndicator",
                     "mass": 0,
                     "obj3D": {
-                        "position" : { "x": 1.7, "y": 0.7, "z": 0.6 },
+                        "position" : { "x": 1.7429, "y": 0.656, "z": 2.0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
-                        },
+                    },
+                    "telltale3D": {
+                        "color": "STBD_COLOR"
+                    },
                     "threeModel": "models/tubby/stbd_wind_indicator.json"
+                },
+                {
+                    "name": "decWindIndicator",
+                    "mass": 0,
+                    "obj3D": {
+                        "position" : { "x": 2.0, "y": 0.0, "z": 0.55 },
+                        "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
+                    },
+                    "threeModel": "models/tubby/stbd_wind_indicator.json"
+                }
+            ],
+            "lines": [
+                {
+                    "name": "portShroud",
+                    "mass": 0,
+                    "obj3D": {
+                        "position": { "x": 0, "y": 0, "z": 0 }
+                    },
+                    "line3D": {
+                        "color": "lightslategray",
+                        "vertices": [
+                            1.8, -0.9, 0.5,
+                            1.6, -0.05, 5.75
+                        ]
+                    }
+                },
+                {
+                    "name": "stbdShroud",
+                    "mass": 0,
+                    "obj3D": {
+                        "position": { "x": 0, "y": 0, "z": 0 }
+                    },
+                    "line3D": {
+                        "color": "lightslategray",
+                        "vertices": [
+                            1.8, 0.9, 0.5,
+                            1.6, 0.05, 5.75
+                        ]
+                    }
+                },
+                {
+                    "name": "forestay",
+                    "mass": 0,
+                    "obj3D": {
+                        "position": { "x": 0, "y": 0, "z": 0 }
+                    },
+                    "line3D": {
+                        "color": "lightslategray",
+                        "vertices": [
+                            -0.35, 0.0, 0.6,
+                            1.55, 0.0, 6.5
+                        ]
+                    }
                 }
             ],
             "spars": [

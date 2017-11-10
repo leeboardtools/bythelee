@@ -272,9 +272,15 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
     /**
      * The array of wind indicators. Making them rigid bodies instead of
      * just LBGeometry.Object3D just to keep their management simple.
-     * @member {LbPhysics.RigidBody[]}
+     * @member {LBPhysics.RigidBody[]}
      */
     this.windIndicators = [];
+    
+    /**
+     * The array of lines.
+     * @member {LBPhysics.RigidBody[]}
+     */
+    this.lines = [];
     
     // Later:
     //this.crew = [];
@@ -341,6 +347,9 @@ LBSailSim.Vessel.prototype.destroy = function() {
         
         this.windIndicators.length = 0;
         this.windIndicators = null;
+        
+        this.lines.length = 0;
+        this.lines = null;
 
         this.jibsheetController = null;
         this.mainsheetController = null;
@@ -443,6 +452,17 @@ LBSailSim.Vessel.prototype.addBallast = function(ballast) {
 LBSailSim.Vessel.prototype.addWindIndicator = function(windIndidator) {
     this.windIndicators.push(windIndidator);
     this.addPart(windIndidator);
+    return this;
+};
+
+/**
+ * Adds a line to the vessel.
+ * @param {LBPhysics.RigidBody} line  The line.
+ * @returns {LBSailSim.Vessel}  this.
+ */
+LBSailSim.Vessel.prototype.addLine = function(line) {
+    this.lines.push(line);
+    this.addPart(line);
     return this;
 };
 
@@ -692,6 +712,45 @@ LBSailSim.Vessel.prototype._loadWindIndicators = function(data, loadCallback) {
     return this;
 };
 
+
+/**
+ * Called from {@link LBSailSim.Vessel#_loadLines} to create and load a line
+ * object from properties in a data object.
+ * @protected
+ * @param {object} data The data object.
+ * @returns {LBPhysics.RigidBody}   The line object.
+ */
+LBSailSim.Vessel.prototype._createAndLoadLine = function(data) {
+    return LBPhysics.RigidBody.createFromData(data);
+};
+
+/**
+ * Loads the array of line objects from properties of data objects in an
+ * array of data objects.
+ * @protected
+ * @param {Array} data  The array of data objects.
+ * @param {object} [loadCallback]   If defined, a callback object with functions that
+ * get called back after each component is loaded.
+ * @returns {LBSailSim.Vessel}  this.
+ */
+LBSailSim.Vessel.prototype._loadLines = function(data, loadCallback) {
+    if (!data) {
+        return this;
+    }
+    
+    for (var i = 0; i < data.length; ++i) {
+        var line = this._createAndLoadLine(data[i]);
+        if (line) {
+            if (loadCallback && loadCallback.lineLoaded) {
+                loadCallback.lineLoaded(this, line, data[i]);
+            }
+            this.addLine(line);
+        }
+    }
+    return this;
+};
+
+
 /**
  * Called from {@link LBSailSim.Vessel#_loadControllers} to create and load a controller 
  * object from properties in a data object.
@@ -762,6 +821,7 @@ LBSailSim.Vessel.prototype.load = function(data, loadCallback) {
     
     this._loadSpars(data.spars, loadCallback);
     this._loadBallasts(data.ballasts, loadCallback);
+    this._loadLines(data.lines, loadCallback);
     this._loadWindIndicators(data.windIndicators, loadCallback);
     this._loadPropulsors(data.propulsors, loadCallback);
     this._loadFoils(data.hydrofoils, this.hydrofoils, loadCallback);
@@ -837,9 +897,15 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
         this.addWorldResultant(this.hullResultant);
     }
     
+    var me = this;
     var appWindRad = (this.getApparentWindBearingDeg()) * LBMath.DEG_TO_RAD;
     this.windIndicators.forEach(function(indicator) {
-        indicator.obj3D.rotation.z = appWindRad;
+        if (indicator._lbTelltale) {
+            indicator._lbTelltale.update(me.apparentWind, dt);
+        }
+        else {
+            indicator.obj3D.rotation.z = appWindRad;
+        }
     });
     
     this.handleDebugFields();

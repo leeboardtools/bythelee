@@ -26,9 +26,18 @@ are both checked.
 
 TODO:
 
+Add scenery, range limits.
+
+Add time course.
+
+Add jib.
+
 Shut of wakes if FPS too low.
+
 Look into adjusting physics time step based on actual FPS.
 
+
+Get rid of the overloads of Vector2, Vector3 in Geometry-THREE.js?
 
 
 Camera Controllers:
@@ -45,8 +54,6 @@ the points farthest from the center that are aft of the velocity perpendicular.
 
 
 
-Change wind indicators on boat to telltales?
-
 Add drop-down button for toggling force arrows.
 
 Redo LED bar indicator into separate class, that has good, marginal, and bad ranges.
@@ -56,15 +63,6 @@ Buttons to add:
 HUD display buttons (Boat, Wind, Forces)
 Toggle Velocity Arrows
 Toggle Force Arrows
-
-Wind Menu (click on wind indicator???):
-    Increase
-    Decrease
-    Back
-    Veer
-    Steady
-    Gusty
-
 
 
 Add minimum angle for lift to sail foil.
@@ -103,23 +101,10 @@ Lateral hull resistance > longitudinal hull resistance
 Hull windage
 
 
-Rotate world:
-    Option to rotate world, rotate boat
-    Ability to shift center of view, re-center.
-
-
 Draggable controls:
 
 
-Add wake sprites
-
-Add optional traveled path (i.e. long wake)
-
-Add wind puffs on water.
-
 Animate water
-
-Wind manager
 
 Sailing boundaries
 

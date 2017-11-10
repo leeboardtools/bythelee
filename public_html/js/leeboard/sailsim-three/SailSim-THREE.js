@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets', 'lbui3d', 'lbwater3d', 'lbsky3d', 'lbwakes3d', 'tween'], 
-function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d, LBWater3D, LBSky3D, LBWakes3D, TWEEN) {
+define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets', 'lbui3d', 'lbwater3d', 'lbsky3d', 'lbwakes3d', 'lbwind3d', 'tween'], 
+function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d, LBWater3D, LBSky3D, LBWakes3D, LBWind3D, TWEEN) {
     
     'use strict';
 
@@ -25,16 +25,16 @@ function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d, LBWater3D, LB
  * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2} or Cannon physics.
  * This pretty much just ties together the physics link and the sailing environment.
  * @constructor
- * @param {LBApp3D} app3d   The app calling this.
+ * @param {LBApp3D} app3D   The app calling this.
  * @param {LBView3D} mainView   The main view of the app.
  * @param {LBSailSim.SailEnvTHREE.CANNON_PHYSICS} physicsType  The physics engine to use.
  * @param {LBAssets.Loader} [assetLoader]   The optional asset loader.
  * @returns {LBSailSim.SailEnvTHREE}
  */
-LBSailSim.SailEnvTHREE = function(app3d, mainView, physicsType, assetLoader) {
+LBSailSim.SailEnvTHREE = function(app3D, mainView, physicsType, assetLoader) {
     LBSailSim.Env.call(this, assetLoader);
     
-    this.app3d = app3d;
+    this.app3D = app3D;
     this.mainView = mainView;
     
     this.physicsType = physicsType;
@@ -46,18 +46,18 @@ LBSailSim.SailEnvTHREE = function(app3d, mainView, physicsType, assetLoader) {
             break;
     }
     
-    this.water3D = new LBSailSim.Water3D(app3d.mainScene, this);
-    this.wakes3D = new LBSailSim.Wakes3D(app3d.mainScene, this);
-    this.sky3D = new LBSailSim.Sky3D(app3d.mainScene, this);
+    this.water3D = new LBSailSim.Water3D(app3D.mainScene, this);
+    this.wakes3D = new LBSailSim.Wakes3D(app3D.mainScene, this);
+    this.sky3D = new LBSailSim.Sky3D(app3D.mainScene, this);
     
     // For testing...
     //this.water3D.waterMesh.visible = false;
     //this.sky3D.skyMesh.visible = false;
     
 //    this.envGroup = new THREE.Group();
-//    this.app3d.mainScene.add(this.envGroup);
+//    this.app3D.mainScene.add(this.envGroup);
 
-    this.envGroup = this.app3d.mainScene;
+    this.envGroup = this.app3D.mainScene;
 };
 
 
@@ -84,7 +84,7 @@ LBSailSim.SailEnvTHREE.prototype.floatingObjectLoaded = function(data, rigidBody
     
     var me = this;
     if (objectDef && objectDef.threeModel) {
-        this.app3d.mainScene.loadJSONModel(objectDef.threeModel, function(model) {
+        this.app3D.mainScene.loadJSONModel(objectDef.threeModel, function(model) {
             rigidBody._lbThreeModel = model;
             me.envGroup.add(model);            
             LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody(rigidBody);
@@ -101,32 +101,40 @@ LBSailSim.SailEnvTHREE.prototype._boatCheckedOut = function(boat, data) {
     
     var me = this;
     if (data.threeModel) {
-        this.app3d.mainScene.loadJSONModel(data.threeModel, function(model) {
+        this.app3D.mainScene.loadJSONModel(data.threeModel, function(model) {
             boat._lbThreeModel = model;
             me.envGroup.add(model);
             
-            loadVesselPartModel(boat.spars, model, me.app3d.mainScene);
-            loadVesselPartModel(boat.windIndicators, model, me.app3d.mainScene);
-            loadVesselPartModel(boat.hydrofoils, model, me.app3d.mainScene);
-            loadVesselPartModel(boat.airfoils, model, me.app3d.mainScene);
+            loadVesselPartModel(me, boat.spars, model, me.app3D.mainScene);
+            loadVesselPartModel(me, boat.lines, model, me.app3D.mainScene);
+            loadVesselPartModel(me, boat.windIndicators, model, me.app3D.mainScene);
+            loadVesselPartModel(me, boat.hydrofoils, model, me.app3D.mainScene);
+            loadVesselPartModel(me, boat.airfoils, model, me.app3D.mainScene);
         });
     }
     
     this.wakes3D.addVessel(boat);
 };
 
-function loadVesselPartModel(parts, parentModel, mainScene) {
+function loadVesselPartModel(sailEnv, parts, parentModel, mainScene) {
     parts.forEach(function(rigidBody) {
         var partData = rigidBody.loadData;
-        if (partData && partData.threeModel) {
-            mainScene.loadJSONModel(partData.threeModel, function(model) {
-                rigidBody._lbThreeModel = model;
-                parentModel.add(model);
-                
-                if (rigidBody.sailSurface) {
-                    mapSailSurfaceToModel(rigidBody.sailSurface, model);
-                }
-            });
+        if (partData) {
+            if (partData.telltale3D) {
+                rigidBody._lbTelltale = LBSailSim.Telltale3D.createFromData(sailEnv, partData.telltale3D);
+                rigidBody._lbThreeModel = rigidBody._lbTelltale;
+                parentModel.add(rigidBody._lbThreeModel);
+            }
+            else {
+                mainScene.loadModelFromData(partData, function(model) {
+                    rigidBody._lbThreeModel = model;
+                    parentModel.add(model);
+
+                    if (rigidBody.sailSurface) {
+                        mapSailSurfaceToModel(rigidBody.sailSurface, model);
+                    }
+                });
+            }
         }
     });
 };
@@ -186,7 +194,7 @@ LBSailSim.SailEnvTHREE.prototype.update = function(dt) {
     
     dt = this.physicsLink.timeStep();
     
-    TWEEN.update(this.app3d.runMillisecs);
+    TWEEN.update(this.app3D.runMillisecs);
     LBSailSim.Env.prototype.update.call(this, dt);
     
     this.physicsLink.update(dt);
@@ -216,7 +224,9 @@ LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody = function(rigidBody) {
         
         var obj3D = rigidBody.obj3D;
         LBSailSim.SailEnvTHREE.copyVectorToTHREE(obj3D.position, model.position);
-        LBSailSim.SailEnvTHREE.copyQuaternionToTHREE(obj3D.quaternion, model.quaternion);
+        if (!model.noLBOrientationCopy) {
+            LBSailSim.SailEnvTHREE.copyQuaternionToTHREE(obj3D.quaternion, model.quaternion);
+        }
         model.updateMatrixWorld(true);
     }
     
