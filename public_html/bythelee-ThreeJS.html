@@ -101,13 +101,12 @@ and open the template in the editor.
                 margin: 0 auto;
                 font-size: 1.5rem;
             }
-            #click_to_start {
+            #splash_loading {
                 margin-top: 3rem;
                 text-align: center;
                 font-size: 3rem;
                 color: blue;
                 cursor: pointer;
-                visibility: hidden;
             }
             
             #credits {
@@ -117,9 +116,14 @@ and open the template in the editor.
             }
             #credits_title {
                 font-weight: bold;
+                text-align: center;
             }
             #credits_table {
                 margin: 0 auto;
+                visibility: hidden;
+            }
+            #credits:hover #credits_table {
+                visibility: visible;
             }
             
             #container {
@@ -961,17 +965,19 @@ and open the template in the editor.
                     <td>Display Picture-in-Picture view, lower right</td>
                 </tr>
             </table>
-            <div id="click_to_start">Click to get started...</div>
-            <div id='credits'>
+            <div id="splash_loading">Just a second while I load...</div>
+            <table id='credits'>
+                <tr><td id='credits_title'>Credits...</td></tr>
+                <tr><td>
                 <table id='credits_table'>
-                    <tr><td id='credits_title'>Credits</td></tr>
                     <tr><td>Open source, on GitHub at <a href="https://github.com/leeboardtools/bythelee" target='_blank'>https://github.com/leeboardtools/bythelee</a></td></tr>
                     <tr><td>Uses <a href='https://threejs.org/' target='_blank'>three.js</a> for 3D rendering and geometry</td></tr>
                     <tr><td>Uses <a href="https://github.com/schteppe/cannon.js/blob/master/README.markdown" target='_blank'>cannon.js</a> for the physics engine</td></tr>
                     <tr><td>Uses <a href='http://requirejs.org/' target="_blank">RequireJS</a> for managing Javascript dependencies</td></tr>
                     <tr><td>Uses <a href="https://github.com/tweenjs/tween.js/" target="_blank">tween.js</a> for tweening positions automatically</td></tr>
                 </table>
-            </div>
+                </td></tr>
+            </table>
         </div>
 
         <script>

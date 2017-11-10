@@ -98,7 +98,7 @@ LBSailSim.RudderController.prototype._loadRudders = function() {
  */
 LBSailSim.RudderController.prototype.setRudderAngleDeg = function(deg) {
     this.rudders.forEach(function(rudder) {
-            rudder.setZRotationDeg(deg + rudder.rotationOffsetDegs[2]);
+            rudder.obj3D.rotation.z = (deg + rudder.rotationOffsetDegs[2]) * LBMath.DEG_TO_RAD;
         },
         deg);
 };

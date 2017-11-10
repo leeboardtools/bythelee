@@ -248,7 +248,10 @@ LBMyApp.prototype.loadEnvCompleted = function() {
         me.updateViewForMyBoat(view);
     });
     
-    document.getElementById('click_to_start').style.visibility = "visible";
+    var status = document.getElementById('splash_loading');
+    status.innerHTML = "Ready - Click anywhere to start!";
+    
+    this.loadCompleted = true;
     
     // TEST!!!
     //this.closeSplash();
@@ -268,6 +271,10 @@ LBMyApp.prototype.updateViewForMyBoat = function(view) {
 };
 
 LBMyApp.prototype.closeSplash = function(event) {
+    if (!this.loadCompleted) {
+        return;
+    }
+    
     if (event.target && (event.target.nodeName === 'A')) {
         return;
     }
@@ -277,6 +284,9 @@ LBMyApp.prototype.closeSplash = function(event) {
 
     this.toggleHUDBoat();
     this.toggleHUDWind();
+    
+    this.sailEnv.wind.setAverageForce(4);
+
 };
 
 /**

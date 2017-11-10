@@ -32,9 +32,11 @@ LBCannon.CannonPhysicsLink = function() {
     
     this.cWorld = new CANNON.World();
     this.cWorld.broadphase = new CANNON.NaiveBroadphase();
-    this.cWorld.defaultContactMaterial.restitution = 0;
+    this.cWorld.defaultContactMaterial.restitution = 0.01;
+    this.cWorld.defaultContactMaterial.contactEquationStiffness = 1e4;
+    this.cWorld.defaultContactMaterial.contactEquationRelaxation = 3;
     
-   this.dt = 1/60;
+    this.dt = 1/60;
 };
 
 LBCannon.CannonPhysicsLink._workingVec3 = new CANNON.Vec3();

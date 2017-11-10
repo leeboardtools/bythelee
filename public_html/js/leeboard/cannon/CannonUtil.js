@@ -218,7 +218,7 @@ LBCannon.updateBodyCenterOfMass = function(body, centerOfMass, mass, inertia) {
         var I = body.inertia;
         I.x = LBPhysics.getInertiaXX(inertia);
         I.y = LBPhysics.getInertiaYY(inertia);
-        I.z = LBPhysics.getInertiaXZ(inertia);
+        I.z = LBPhysics.getInertiaZZ(inertia);
         body.invInertia.set(
             I.x > 0 ? 1.0 / I.x : 0,
             I.y > 0 ? 1.0 / I.y : 0,
@@ -245,7 +245,7 @@ LBCannon.addRigidBodyVolumesToBody = function(body, rigidBody) {
         LBCannon.addVolumesToBody(body, part.volumes, xfrm);
     });
 */    
-    LBCannon.updateBodyCenterOfMass(body, rigidBody.centerOfMass, rigidBody.mass);//, rigidBody.momentInertia);    
+    LBCannon.updateBodyCenterOfMass(body, rigidBody.centerOfMass, rigidBody.mass, rigidBody.momentInertia);    
 };
 
 LBCannon.updateBodyFromRigidBodyVolumes = function(body, rigidBody) {

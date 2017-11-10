@@ -97,8 +97,6 @@ LBSailSim.Wind = function() {
     this._leadingWidthRNG = new LBRandom.NormalGenerator();
     this._expansionDegRNG = new LBRandom.NormalGenerator();
     this._timeToLiveRNG = new LBRandom.NormalGenerator();
-    // leadingPosition, velocity, depth, leadingWidth, expansionDeg, timeToLive
-    this.setAverageForce(3);
 };
 
 LBSailSim.Wind.BEAUFORT_UPPER_BOUNDARY_KTS = [

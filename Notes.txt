@@ -30,8 +30,6 @@ Shut of wakes if FPS too low.
 Look into adjusting physics time step based on actual FPS.
 
 
-Angle the rudder to match the transom.
-
 
 Camera Controllers:
 Fix ChaseCameraController elevation limit.
@@ -45,11 +43,6 @@ Wake: In Hull, maybe change the determining of the wakeEndPort, wakeEndStbd to l
 the points farthest from the center that are aft of the velocity perpendicular.
 
 
-Add credits link/page
-- ThreeJS
-- CannonJS
-- RequireJS
-- TweenJS
 
 
 Change wind indicators on boat to telltales?

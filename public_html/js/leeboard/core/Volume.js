@@ -31,9 +31,11 @@ var LBVolume = LBVolume || {};
  * @constructor
  * @param {String} typeName The type name of the volume class.
  * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
+ * @param {Number} [massDistribution=1] Additional factor used by {@link LBVolume.allocateMassToVolumes}
+ * to control mass distribution.
  * @returns {LBVolume.Volume}
  */
-LBVolume.Volume = function(typeName, mass) {
+LBVolume.Volume = function(typeName, mass, massDistribution) {
     /**
      * The type name of the volume, used to describe it in messages.
      */
@@ -50,6 +52,13 @@ LBVolume.Volume = function(typeName, mass) {
      * @type Number
      */
     this.mass = LBUtil.isVar(mass) ? mass : Number.NaN;
+    
+    /**
+     * Additional factor used by {@link LBVolume.allocateMassToVolumes} to control mass distribution.
+     * This is basically a normalized density value.
+     * @type Number
+     */
+    this.massDistribution = massDistribution || 1;
 };
 
 LBVolume.Volume._workingCenterOfMassResult;
@@ -305,16 +314,30 @@ LBVolume.Volume.allocateMassToVolumes = function(volumes, totalMass, startIndex,
     }
     else {
         var volValues = [];
-        var totalVol = 0;
+        var distributionValues = [];
+        var totalDistribution = 0;
         for (var i = startIndex; i < endIndex; ++i) {
             var vol = volumes[i].getVolume();
-            volValues.push(vol);
-            totalVol += vol;
+            volValues[i] = vol;
+            
+            var distribution = volumes[i].massDistribution || 1;
+            distributionValues[i] = distribution;
+            totalDistribution += distribution;
+        }
+
+        var totalVol = 0;
+        for (var i = startIndex; i < endIndex; ++i) {
+            volValues[i] *= distributionValues[i];
+            totalVol += volValues[i];
         }
         
         var massVol = (LBMath.isLikeZero(totalVol)) ? 0 : totalMass / totalVol;
         for (var i = startIndex; i < endIndex; ++i) {
             volumes[i].mass = volValues[i] * massVol;
+            var equivalentTetras = volumes[i].equivalentTetras();
+            if (equivalentTetras !== volumes) {
+                LBVolume.Volume.allocateMassToVolumes(equivalentTetras, volumes[i].mass);
+            }
         }
     }
 };
@@ -423,12 +446,15 @@ LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
         var item = data.indices[i];
         var indices;
         var mass;
+        var massDistribution;
         if (!Array.isArray(item)) {
             mass = LBUtil.isVar(item.mass) ? item.mass : Number.NaN;
+            massDistribution = item.massDistribution || 1;
             indices = item.indices;
         }
         else {
             mass = Number.NaN;
+            massDistribution = 1;
             indices = item;
         }
         
@@ -458,6 +484,8 @@ LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
                 console.warn("LBVolume.Volume.loadVolumesFromData: " + indices.length + " indices not supported, data.indices[" + i + "]");
                 break;
         }
+        
+        volumes[volumes.length - 1].massDistribution = massDistribution;
         
         if (!Number.isNaN(mass)) {
             LBVolume.Volume.allocateMassToVolumes(volumes, mass, startIndex, volumes.length);
@@ -530,10 +558,12 @@ LBVolume.Volume.loadXYOutlineFromData = function(data, vertices, outlineVertices
  * @param {Number} [mass=Number.NaN] If defined the mass assigned to the volume.
  * @param {Number[]} [indices]  If defined an array of the indices of the four vertices
  * in vertices of the tetra.
+ * @param {Number} [massDistribution=1] Additional factor used by {@link LBVolume.allocateMassToVolumes}
+ * to control mass distribution.
  * @returns {LBVolume.Tetra}
  */
-LBVolume.Tetra = function(vertices, mass, indices) {
-    LBVolume.Volume.call(this, LBVolume.Tetra.TYPE_NAME, mass);
+LBVolume.Tetra = function(vertices, mass, indices, massDistribution) {
+    LBVolume.Volume.call(this, LBVolume.Tetra.TYPE_NAME, mass, massDistribution);
     
     this._faces = LBVolume.Tetra._facesCCW;
     
@@ -657,7 +687,7 @@ LBVolume.Tetra.prototype.cloneMirrored = function(plane) {
     vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[2]));
     vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[1]));
     vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[3]));
-    return new LBVolume.Tetra(vertices, this.mass);
+    return new LBVolume.Tetra(vertices, this.mass, undefined, this.massDistribution);
 };
 
 /**
@@ -1032,10 +1062,12 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
  * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
  * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
  * vertices identifiying the vertices, the ordering must be as described above.
+ * @param {Number} [massDistribution=1] Additional factor used by {@link LBVolume.allocateMassToVolumes}
+ * to control mass distribution.
  * @returns {LBVolume.TriBiPyramid}
  */
-LBVolume.TriBiPyramid = function(vertices, mass, indices) {
-    LBVolume.Volume.call(this, LBVolume.TriBiPyramid.TYPE_NAME, mass);
+LBVolume.TriBiPyramid = function(vertices, mass, indices, massDistribution) {
+    LBVolume.Volume.call(this, LBVolume.TriBiPyramid.TYPE_NAME, mass, massDistribution);
     
     this._faces = [];
     if (vertices) {
@@ -1093,7 +1125,7 @@ LBVolume.TriBiPyramid.prototype.equivalentTetras = function() {
 // @inheritdoc...
 LBVolume.TriBiPyramid.prototype.cloneMirrored = function(plane) {
     var vertices = LBGeometry.mirrorPointArrayAboutPlane(plane, this.vertices, LBVolume.TriBiPyramid._workingVertices);
-    return new LBVolume.TriBiPyramid(vertices, this.mass);
+    return new LBVolume.TriBiPyramid(vertices, this.mass, undefined, this.massDistribution);
 };
 LBVolume.TriBiPyramid._workingVertices = [];
 
@@ -1178,10 +1210,12 @@ LBVolume.TriBiPyramid.toTetras = function(vertexIndices, vertexArray, tetras, fa
  * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
  * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
  * vertices identifiying the vertices, the ordering must be as described above.
+ * @param {Number} [massDistribution=1] Additional factor used by {@link LBVolume.allocateMassToVolumes}
+ * to control mass distribution.
  * @returns {LBVolume.TriPrism}
  */
-LBVolume.TriPrism = function(vertices, mass, indices) {
-    LBVolume.Volume.call(this, LBVolume.TriPrism.TYPE_NAME, mass);
+LBVolume.TriPrism = function(vertices, mass, indices, massDistribution) {
+    LBVolume.Volume.call(this, LBVolume.TriPrism.TYPE_NAME, mass, massDistribution);
     
     if (vertices) {
         if (!indices) {
@@ -1242,7 +1276,7 @@ LBVolume.TriPrism.prototype.equivalentTetras = function() {
 // @inheritdoc...
 LBVolume.TriPrism.prototype.cloneMirrored = function(plane) {
     var vertices = LBGeometry.mirrorPointArrayAboutPlane(plane, this.vertices, LBVolume.TriPrism._workingVertexArray);
-    return new LBVolume.TriPrism(vertices, this.mass);
+    return new LBVolume.TriPrism(vertices, this.mass, undefined, this.massDistribution);
 };
 LBVolume.TriPrism._workingVertexArray = [];
 
@@ -1343,10 +1377,12 @@ LBVolume.TriPrism.toTetras = function(vertexIndices, vertexArray, tetras, faces)
  * be ordered CCW (right-hand rule), while the second set of indices is such that v[4] is
  * jointed to v[0], v[5] is joined to v[1], v[6] is joined to v[2], v[7] is joined to
  * v[3].
+ * @param {Number} [massDistribution=1] Additional factor used by {@link LBVolume.allocateMassToVolumes}
+ * to control mass distribution.
  * @returns {LBVolume.Cuboid}
  */
-LBVolume.Cuboid = function(vertices, mass, indices) {
-    LBVolume.Volume.call(this, LBVolume.Cuboid.TYPE_NAME, mass);
+LBVolume.Cuboid = function(vertices, mass, indices, massDistribution) {
+    LBVolume.Volume.call(this, LBVolume.Cuboid.TYPE_NAME, mass, massDistribution);
     
     if (vertices) {
         if (!indices) {
@@ -1408,7 +1444,7 @@ LBVolume.Cuboid.prototype.equivalentTetras = function() {
 // @inheritdoc...
 LBVolume.Cuboid.prototype.cloneMirrored = function(plane) {
     var vertices = LBGeometry.mirrorPointArrayAboutPlane(plane, this.vertices, LBVolume.Cuboid._workingVertexArray);
-    return new LBVolume.Cuboid(vertices, this.mass);
+    return new LBVolume.Cuboid(vertices, this.mass, undefined, this.massDistribution);
 };
 LBVolume.Cuboid._workingVertexArray = [];
 
