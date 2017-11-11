@@ -508,7 +508,7 @@ LBGeometry.Vector3.prototype.clone = function() {
 
 /**
  * Applies only the rotation portion of a Matrix4 to the vector.
- * @param {type} m  The matrix to apply.
+ * @param {LBGeometry.Matrix4} m  The matrix to apply.
  * @returns {LBGeometry.Vector3} this.
  */
 LBGeometry.Vector3.prototype.applyMatrix4Rotation = function(m) {

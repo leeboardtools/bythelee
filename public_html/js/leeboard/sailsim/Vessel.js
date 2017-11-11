@@ -222,7 +222,7 @@ LBSailSim.ThrottleController.prototype.setThrottlePosition = function(value) {
  * @constructor
  * @extends LBPhysics.RigidBody
  * @param {object} sailEnv  The sailing environment.
- * @param {type} obj3D
+ * @param {LBGeometry.Object3D} obj3D
  * @returns {LBSailSim.Vessel}
  */
 LBSailSim.Vessel = function(sailEnv, obj3D) {

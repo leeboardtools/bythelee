@@ -44,9 +44,9 @@ LBPhysics.calcMoment = function(force, position, store) {
 /**
  * A 3D resultant force, which is a force vector, a moment vector, and an application point.
  * @constructor
- * @param {type} force  The force vector.
- * @param {type} moment The moment vector.
- * @param {type} position   The application point.
+ * @param {LBGeometry.Vector3} force  The force vector.
+ * @param {LBGeometry.Vector3} moment The moment vector.
+ * @param {LBGeometry.Vector3} position   The application point.
  * @returns {LBPhysics.Resultant3D}  The resultant.
  */
 LBPhysics.Resultant3D = function(force, moment, position) {
@@ -132,7 +132,7 @@ LBPhysics.Resultant3D.prototype = {
     
     /**
      * Moves the application point of the resultant, the moment is adjusted accordingly.
-     * @param {type} position   The new application point.
+     * @param {LBGeometry.Vector3} position   The new application point.
      * @returns {LBPhysics.Resultant3D} this.
      */
     moveApplPoint: function(position) {

@@ -202,8 +202,8 @@ LBMath.DegRange.prototype = {
     
     /**
      * Sets the range from a lower and an upper limit.
-     * @param {type} limitA
-     * @param {type} limitB
+     * @param {Number} limitA
+     * @param {Number} limitB
      * @returns {LBMath.DegRange}   this.
      */
     setRangeFromLimits: function(limitA, limitB) {
@@ -367,10 +367,10 @@ LBMath.smoothstep7 = function(x) {
 
 /**
  * Transitions between two values by applying a function.
- * @param {type} x  The transition value to pass to smoothFunc
- * @param {type} ya The output for x &le; 0.
- * @param {type} yb The output for x &ge; 1.
- * @param {type} smoothFunc The smoothing function, should smoothly transition
+ * @param {Number} x  The transition value to pass to smoothFunc
+ * @param {Number} ya The output for x &le; 0.
+ * @param {Number} yb The output for x &ge; 1.
+ * @param {Number} smoothFunc The smoothing function, should smoothly transition
  * between 0 when x is 0 and 1 when x is 1, see one of the smoothstep functions.
  * @returns {Number}    The y value smoothly transitioning between ya and yb.
  */

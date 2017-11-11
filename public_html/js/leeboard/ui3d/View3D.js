@@ -32,7 +32,7 @@ function(THREE, LBUI3d, LBCamera) {
  * @param {LBUI3d.Scene3D} scene3D  The scene being viewed.
  * @param {Object} container    The DOM container to be displayed in.
  * @param {LBCamera.Camera} [camera]  If defined, the camera for the view. 
- * @param {type} [renderer] If defined, the renderer to use.
+ * @param {THREE.Renderer} [renderer] If defined, the renderer to use.
  * @returns {LBUI3d.View3D}
  */
 LBUI3d.View3D = function(scene3D, container, camera, renderer) {

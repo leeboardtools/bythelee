@@ -96,8 +96,8 @@ LBDebug.DataLogField.prototype = {
 
 /**
  * A {@link LBDebug.DataLogField} that holds other fields.
- * @param {type} fieldName
- * @param {type} valueSetter
+ * @param {String} fieldName
+ * @param {Function} valueSetter
  * @return {LBDebug.FieldsDataLogField}
  */
 LBDebug.FieldsDataLogField = function(fieldName, valueSetter) {
@@ -317,7 +317,7 @@ LBDebug.FieldsDataLogField.prototype.setValue = function(value) {
  * @param {String|String[]} fieldName   The name of the field if a single string, or
  * an array of strings containing the names of the sub-field hierarchy.
  * If the sub-field is not found nothing happens.
- * @param {type} value  The value to assign.
+ * @param {Object} value  The value to assign.
  * @return {undefined}
  */
 LBDebug.FieldsDataLogField.prototype.setSubFieldValue = function(fieldName, value) {
@@ -347,7 +347,6 @@ LBDebug.FieldsDataLogField.prototype.clearValue = function() {
 /**
  * Utility for writing out a set of values repeatedly to {@link console.log}.
  * The data is written when {@link LBDebug.DataLog.output} is called.
- * @type {type}
  */
 LBDebug.DataLog = {
     /**

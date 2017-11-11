@@ -23,7 +23,7 @@ require( ['three', 'lbsailsim', 'lbui3d', 'lbutil', 'lbmath', 'lbgeometry', 'lba
     
 /**
  * 
- * @param {type} slider
+ * @param {Element} slider
  * @returns {unresolved}
  */    
 function setupSlider(slider) {
@@ -107,8 +107,8 @@ LBMyApp.prototype.constructor = LBMyApp;
 
 /**
  * 
- * @param {type} view
- * @param {type} standardView
+ * @param {LBUI3d.View3D} view
+ * @param {Number} standardView
  * @returns {undefined}
  */
 LBMyApp.prototype.addNormalView = function(view, standardView) {
@@ -149,7 +149,7 @@ LBMyApp.prototype.addNormalView = function(view, standardView) {
 /**
  * The main initialization function.
  * @override
- * @param {type} mainContainer
+ * @param {Element} mainContainer
  * @returns {undefined}
  */
 LBMyApp.prototype.init = function(mainContainer) {
@@ -197,7 +197,7 @@ LBMyApp.prototype.initSailEnv = function() {
 
 /**
  * Loads a perticular environment for the sailing environment.
- * @param {type} name
+ * @param {String} name
  * @returns {undefined}
  */
 LBMyApp.prototype.loadEnvironment = function(name) {
@@ -291,8 +291,8 @@ LBMyApp.prototype.closeSplash = function(event) {
 
 /**
  * Updates a slider control's value from the current value of a controller.
- * @param {type} controller
- * @param {type} control
+ * @param {LBControls.Controller} controller
+ * @param {Element} control
  * @returns {undefined}
  */
 LBMyApp.updateControlFromController = function(controller, control) {
@@ -314,11 +314,11 @@ LBMyApp.updateControlFromController = function(controller, control) {
 
 /**
  * Updates a controller's value from a slider's value.
- * @param {type} control
- * @param {type} value
- * @param {type} min
- * @param {type} max
- * @param {type} controller
+ * @param {Element} control
+ * @param {Number} value
+ * @param {Number} min
+ * @param {Number} max
+ * @param {LBControls.Controller} controller
  * @returns {undefined}
  */
 LBMyApp.updateControllerFromControl = function(control, value, min, max, controller) {
@@ -337,10 +337,10 @@ LBMyApp.updateControllerFromControl = function(control, value, min, max, control
 
 /**
  * Handles moving the control value of a controller based upon a key.
- * @param {type} controller
- * @param {type} key
- * @param {type} isDecrease
- * @param {type} control
+ * @param {LBControls.Controller} controller
+ * @param {Number} key
+ * @param {Boolean} isDecrease
+ * @param {Element} control
  * @returns {undefined}
  */
 LBMyApp.moveControllerWithKey = function(controller, key, isDecrease, control) {
@@ -366,7 +366,7 @@ LBMyApp.moveControllerWithKey = function(controller, key, isDecrease, control) {
 
 /**
  * 
- * @param {type} event
+ * @param {KeyboardEvent} event
  * @returns {undefined}
  */
 LBMyApp.prototype.onKeyDownEvent = function(event) {
@@ -461,7 +461,7 @@ LBMyApp.prototype.onKeyDownEvent = function(event) {
 
 /**
  * 
- * @param {type} event
+ * @param {KeyboardEvent} event
  * @returns {undefined}
  */
 LBMyApp.prototype.onKeyPressEvent = function(event) {
@@ -480,7 +480,7 @@ LBMyApp.prototype.onKeyPressEvent = function(event) {
 /**
  * The main update function.
  * @override
- * @param {type} dt
+ * @param {Number} dt
  * @returns {undefined}
  */
 LBMyApp.prototype.update = function(dt) {
@@ -617,8 +617,8 @@ LBMyApp.prototype.onWindowResize = function() {
 
 /**
  * 
- * @param {type} color
- * @param {type} alpha
+ * @param {String} color
+ * @param {Number} alpha
  * @returns {String}
  */
 function setColorFunctionAlpha(color, alpha) {
@@ -635,7 +635,7 @@ function setColorFunctionAlpha(color, alpha) {
 
 /**
  * 
- * @param {type} force
+ * @param {Number} force
  * @returns {undefined}
  */
 LBMyApp.prototype.setWindForce = function(force) {
@@ -666,7 +666,7 @@ LBMyApp.prototype.windDecrease = function() {
 
 /**
  * 
- * @param {type} dirDeg
+ * @param {Number} dirDeg
  * @returns {undefined}
  */
 LBMyApp.prototype.setWindDirDeg = function(dirDeg) {
@@ -693,7 +693,7 @@ LBMyApp.prototype.windVeer = function() {
 
 
 /**
- * @param {type} dir One of the LBUI3d.CameraController.VIEW_ constants.
+ * @param {Number} dir One of the LBUI3d.CameraController.VIEW_ constants.
  * @returns {undefined}
  */
 LBMyApp.prototype.setCameraView = function(dir) {
@@ -852,9 +852,9 @@ LBMyApp.prototype.toggleWindArrows = function() {
 
 /**
  * 
- * @param {type} element
- * @param {type} property
- * @param {type} onOffset
+ * @param {Element} element
+ * @param {String} property
+ * @param {Number} onOffset
  * @returns {Boolean}
  */
 function toggleByWidth(element, property, onOffset) {
@@ -870,9 +870,9 @@ function toggleByWidth(element, property, onOffset) {
 
 /**
  * 
- * @param {type} element
- * @param {type} property
- * @param {type} onOffset
+ * @param {Element} element
+ * @param {String} property
+ * @param {Number} onOffset
  * @returns {Boolean}
  */
 function toggleByHeight(element, property, onOffset) {
@@ -955,8 +955,8 @@ LBMyApp.prototype.toggleMap = function() {
 
 /**
  * 
- * @param {type} pipElement
- * @param {type} standardView
+ * @param {Element} pipElement
+ * @param {Number} standardView
  * @returns {LBUI3d.View3D}
  */
 LBMyApp.prototype.createPIPView = function(pipElement, standardView) {
@@ -1021,7 +1021,7 @@ LBMyApp.prototype.togglePIPLowerRight = function() {
 
 /**
  * 
- * @param {type} container
+ * @param {Element} container
  * @returns {undefined}
  */
 LBMyApp.prototype.toggleFullScreen = function(container) {

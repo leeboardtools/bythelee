@@ -26,7 +26,7 @@ var LBUtil = LBUtil || {};
 
 /**
  * Converts meters per second to knots.
- * @param {type} mps    The meters/sec to convert.
+ * @param {Number} mps    The meters/sec to convert.
  * @returns {Number} The value in knots.
  */
 LBUtil.mps2kt = function(mps) {
@@ -35,7 +35,7 @@ LBUtil.mps2kt = function(mps) {
 
 /**
  * Converts knots to meters per second.
- * @param {type} knots  The knots to convert.
+ * @param {Number} knots  The knots to convert.
  * @returns {Number} The value in meters/sec.
  */
 LBUtil.kt2mps = function(knots) {
@@ -125,7 +125,7 @@ LBUtil.copyObject = function(dst, src) {
 
 /**
  * Determines if a value is both defined and not null.
- * @param {type} v  The value to check.
+ * @param {Number} v  The value to check.
  * @returns {Boolean}   true if v is defined and not null.
  */
 LBUtil.isVar = function(v) {
