@@ -20,8 +20,8 @@ function(LBGeometry, THREE) {
     'use strict';
     
 /**
- * 
- * @namespace LBParticles
+ * Stuff for working with particles (lots of little items to be 3D rendered).
+ * @exports LBParticles
  */
 var LBParticles = LBParticles || {};
 
@@ -29,18 +29,18 @@ var LBParticles = LBParticles || {};
  * A cache of reusable particles, the particles all share the same material and belong
  * to the same scene/group.
  * <p>
- * Particles are retrieved by calling {@link LBParticles.Cache#getParticle}, the object
+ * Particles are retrieved by calling {@link module:LBParticles.Cache#getParticle}, the object
  * will have its visible property set to false so should be positioned as desired and
  * then have the visible property set to true. The object will already be part of the scene/group.
  * <p>
  * When done with a particle, it should be returned to the cache by calling
- * {@link LBParticles.Cache#returnParticle}. The particle will have its visible property
- * set to false and be made available for the next call to {@link LBParticles.Cache#getParticle}.
+ * {@link module:LBParticles.Cache#returnParticle}. The particle will have its visible property
+ * set to false and be made available for the next call to {@link module:LBParticles.Cache#getParticle}.
  * @constructor
  * @param {LBUI3d.Scene3D|THREE.Group} scene    The scene or group to which the particles
  * are added..
  * @param {THREE.SpriteMaterial} material   The material for the particle sprites.
- * @returns {LBParticles.Cache}
+ * @returns {module:LBParticles.Cache}
  */
 LBParticles.Cache = function(scene, material) {
     this.scene = scene;
@@ -112,11 +112,11 @@ LBParticles.Cache.prototype = {
 
 
 /**
- * GPU based paraticle system based upon ThreeJS' examples/GPUParticleSystem.js.
+ * GPU based paraticle system based upon ThreeJS' {@link https://github.com/mrdoob/three.js/blob/dev/examples/js/GPUParticleSystem.js|examples/GPUParticleSystem.js}.
  * This class exists primarily to set the paths to the default textures...
  * @constructor
  * @param {Object} options
- * @returns {LBParticles.ParticleSystem}
+ * @returns {module:LBParticles.ParticleSystem}
  */
 LBParticles.ParticleSystem = function(options) {
     options = options || {};

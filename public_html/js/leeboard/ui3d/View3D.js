@@ -17,7 +17,7 @@
 
 /* global THREE, LBUI3d */
 define(['three', 'lbscene3d', 'lbcamera', 'lbcameracontrollers'], 
-function(THREE, LBUI3d, LBCamera) {
+function(THREE, LBUI3d, LBCamera, LBCameraControllers) {
 
     'use strict';
 
@@ -26,7 +26,7 @@ function(THREE, LBUI3d, LBCamera) {
  * A view on a scene. The view provides the association between a DOM element to display 
  * the view of a scene into, and a camera to view through.
  * <p>
- * Views also provide support for one or more {@link LBUI3d.CameraController}s, which are
+ * Views also provide support for one or more {@link module:LBCameraControllers.Controller}s, which are
  * used to control the camera within the view.
  * @constructor
  * @param {LBUI3d.Scene3D} scene3D  The scene being viewed.
@@ -62,7 +62,7 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     
     /**
      * The camera controllers.
-     * @member {LBUI3d.CameraController[]}
+     * @member {module:LBCameraControllers.Controller[]}
      */
     this.cameraControllers = [];
     
@@ -108,8 +108,8 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     this.setRotateMode();
 };
 
-LBUI3d.View3D.MOUSE_ROTATE_MODE = LBUI3d.CameraController.MOUSE_ROTATE_MODE;
-LBUI3d.View3D.MOUSE_PAN_MODE = LBUI3d.CameraController.MOUSE_PAN_MODE;
+LBUI3d.View3D.MOUSE_ROTATE_MODE = LBCameraControllers.Controller.MOUSE_ROTATE_MODE;
+LBUI3d.View3D.MOUSE_PAN_MODE = LBCameraControllers.Controller.MOUSE_PAN_MODE;
 
 LBUI3d.View3D.prototype = {
     constructor: LBUI3d.View3D
@@ -118,7 +118,7 @@ LBUI3d.View3D.prototype = {
 
 /**
  * Adds a camera controller to the view.
- * @param {LBUI3d.CameraController} controller  The controller to add.
+ * @param {module:LBCameraControllers.Controller} controller  The controller to add.
  * @returns {LBUI3d.View3D} this.
  */
 LBUI3d.View3D.prototype.addCameraController = function(controller) {
@@ -133,7 +133,7 @@ LBUI3d.View3D.prototype.addCameraController = function(controller) {
 /**
  * Sets the active camera controller. The active camera controller has its event
  * handlers installed in the DOM container.
- * @param {LBUI3d.CameraController} controller  The controller, may be null or undefined.
+ * @param {module:LBCameraControllers.Controller} controller  The controller, may be null or undefined.
  */
 LBUI3d.View3D.prototype.setActiveCameraController = function(controller) {
     if (this.activeCameraController !== controller) {

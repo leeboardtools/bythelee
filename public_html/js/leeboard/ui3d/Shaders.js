@@ -18,15 +18,15 @@ define(['three', 'lbutil'],
 function(THREE, LBUtil) {
     
 /**
- * 
- * @namespace LBShaders
+ * Stuff for working with GPB shaders
+ * @exports LBShaders
  */
 var LBShaders = LBShaders || {};
 
 /**
  * Class that helps with managing shader based computations.
  * <p>
- * Very loosely based upon ThreeJS/examples/GPUComputationRenderer.js
+ * Originally based upon ThreeJS' {@link https://github.com/mrdoob/three.js/blob/dev/examples/js/GPUComputationRenderer.js|examples/GPUComputationRenderer.js}
  * <p>
  * The computer works by performing shader operations on a texture, the data to be
  * computed and the result are stored in textures, which are basically a gridWidth X gridHeight
@@ -37,11 +37,11 @@ var LBShaders = LBShaders || {};
  * the fragment shader is the output texture.
  * <p>
  * The computer maintains two {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderTarget|THREE.WebGLRenderTarget}
- * objects, a current one accessed via {@link LBShaders.Computer#getCurrentRenderTarget} and previous
- * one accessed via {@link LBShaders.Computer#getPreviousRenderTarget}. The current render target
+ * objects, a current one accessed via {@link module:LBShaders.Computer#getCurrentRenderTarget} and previous
+ * one accessed via {@link module:LBShaders.Computer#getPreviousRenderTarget}. The current render target
  * is the one that receives the output of the shaders when the computations are performed.
  * Often, the output of the computations serves as the input to the next round of computations,
- * to simplify this {@link LBShaders.Computer#swapRenderTargets} can be called to swap the
+ * to simplify this {@link module:LBShaders.Computer#swapRenderTargets} can be called to swap the
  * current and previous objects.
  * <p>
  * In order to actually do anything, shaders must be defined. 
@@ -50,7 +50,7 @@ var LBShaders = LBShaders || {};
  * <p>
  * To pass the previous render target's data (texture) to the shader, you need to assign
  * the texture of the render target to the appropriate uniform used by the shader.
- * Once the uniforms for the shader material have been set up, {@link LBShaders.Computer#applyShader} is
+ * Once the uniforms for the shader material have been set up, {@link module:LBShaders.Computer#applyShader} is
  * called with the shader material passed in as the argument. After the call the output
  * of the computation will be in the texture of the current render target.
  * <p>
@@ -59,7 +59,7 @@ var LBShaders = LBShaders || {};
  * @param {Number} gridHeight   The height of the compute grid.
  * @param {THREE.WebGLRenderer} [renderer]    The {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderer|THREE.WebGLRenderer} renderer to use.
  * @param {THREE.Camera}    [camera]    The camera to use.
- * @returns {LBShaders.Computer}
+ * @returns {module:LBShaders.Computer}
  */
 LBShaders.Computer = function(gridWidth, gridHeight, renderer, camera) {
     this.gridWidth = gridWidth;
@@ -137,9 +137,9 @@ LBShaders.Computer.prototype = {
     
     /**
      * Creates up the uniforms used by the pass through shaders returned by
-     * {@link LBShaders.Computer#getPassThroughVertexShader} and {@link LBShaders.Computer#getPassThroughFragmentShader}.
+     * {@link module:LBShaders.Computer#getPassThroughVertexShader} and {@link module:LBShaders.Computer#getPassThroughFragmentShader}.
      * @param {Object} uniforms The uniforms to be set up.
-     * @returns {LBShaders.Computer}    this.
+     * @returns {module:LBShaders.Computer}    this.
      */
     setupUniforms: function(uniforms) {
         uniforms.gridSize = { value: new THREE.Vector2(this.gridWidth, this.gridHeight) };
@@ -150,7 +150,7 @@ LBShaders.Computer.prototype = {
     
     /**
      * Swaps the current and previous render target objects.
-     * @returns {LBShaders.Computer}    this.
+     * @returns {module:LBShaders.Computer}    this.
      */
     swapRenderTargets : function() {
         var tmp = this.currentTarget;
@@ -166,7 +166,7 @@ LBShaders.Computer.prototype = {
      * the clear color of the computer's renderer will be used.
      * @param {Number} [alpha]  If defined the alpha value to assign to each value, otherwise
      * the clear alpha value of the computer's renderer will be used. Only used of color is defined.
-     * @returns {LBShaders.Computer}    this.
+     * @returns {module:LBShaders.Computer}    this.
      */
     clearTexture: function(texture, color, alpha) {
         var savedAlpha = this.renderer.getClearAlpha();
@@ -191,7 +191,7 @@ LBShaders.Computer.prototype = {
      * Helper for initializing the current render target's texture using the pass through
      * shaders.
      * @param {THREE.DataTexture} texture   The {@link https://threejs.org/docs/index.html#api/texture/DataTexture|THREE.DataTexture} texture to assign.
-     * @returns {LBShaders.Computer}    this.
+     * @returns {module:LBShaders.Computer}    this.
      */
     applyTexture: function(texture) {
         this.passThroughMaterial.uniforms.texture.value = texture;
@@ -205,7 +205,7 @@ LBShaders.Computer.prototype = {
      * @param {THREE.ShaderMaterial} shaderMaterial The {@link https://threejs.org/docs/index.html#api/materials/ShaderMaterial|THREE.ShaderMaterial} shader material to be rendered. This
      * material defines the shaders to be run. The uniforms for the shaders should be set up
      * as required before this call.
-     * @returns {LBShaders.Computer}    this.
+     * @returns {module:LBShaders.Computer}    this.
      */
     applyShader: function(shaderMaterial) {
         this.passThroughMesh.material = shaderMaterial;
@@ -216,7 +216,7 @@ LBShaders.Computer.prototype = {
     
     /**
      * @returns {THREE.WebGLRenderTarget}   The current {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderTarget|THREE.WebGLRenderTarget} render target, this receives
-     * the output of the renderer calls in {@link LBShaders.Computer#applyShader} and
+     * the output of the renderer calls in {@link module:LBShaders.Computer#applyShader} and
      * {@linnk LBShaders.Computer#applyTexture}.
      */
     getCurrentRenderTarget: function() {
@@ -292,7 +292,7 @@ LBShaders.Computer.isSupported = function(renderer) {
  * A simple helper for copying the texture from one render target to another.
  * @constructor
  * @param {THREE.WebGLRenderer} renderer    The {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderer|THREE.WebGLRenderer} renderer.
- * @returns {LBShaders.TargetCopier}
+ * @returns {module:LBShaders.TargetCopier}
  */
 LBShaders.TargetCopier = function(renderer) {
     this.renderer = renderer;

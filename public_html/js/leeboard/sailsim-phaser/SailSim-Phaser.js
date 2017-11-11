@@ -16,7 +16,7 @@
 
 
 define(['lbsailsim', 'lbcannonphysicslink', 'lbphaser'], 
-function(LBSailSim, LBCannonUtil, LBPhaser) {
+function(LBSailSim, LBCannonPhysicsLink, LBPhaser) {
 
     'use strict';
 

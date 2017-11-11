@@ -18,14 +18,20 @@ define(['lbcamera', 'lbscene3d', 'lbgeometry', 'lbmath', 'lbutil', 'lbspherical'
 function(LBCamera, LBUI3d, LBGeometry, LBMath, LBUtil, LBSpherical, LBTracking) {
 
     'use strict';
+    
+/**
+ * Stuff for controlling a camera in a view.
+ * @exports LBCameraControllers 
+ */
+var LBCameraControllers = LBCameraControllers || {};
 
 
 /**
  * Object that defines camera limits.
  * @constructor
- * @returns {LBUI3d.CameraLimits}
+ * @returns {module:LBCameraControllers.Limits}
  */
-LBUI3d.CameraLimits = function() {
+LBCameraControllers.Limits = function() {
     /**
      * The minimum allowed position.
      * @member {module:LBGeometry.Vector3}
@@ -49,8 +55,8 @@ LBUI3d.CameraLimits = function() {
      * 90 and -90 degrees, which become degenerate.
      * @member {module:LBMath.DegRange}
      */
-    this.elevationRange = new LBMath.DegRange(LBUI3d.CameraLimits.LOWER_ELEVATION_DEG_LIMIT, 
-            LBUI3d.CameraLimits.UPPER_ELEVATION_DEG_LIMIT - LBUI3d.CameraLimits.LOWER_ELEVATION_DEG_LIMIT);
+    this.elevationRange = new LBMath.DegRange(LBCameraControllers.Limits.LOWER_ELEVATION_DEG_LIMIT, 
+            LBCameraControllers.Limits.UPPER_ELEVATION_DEG_LIMIT - LBCameraControllers.Limits.LOWER_ELEVATION_DEG_LIMIT);
     
     /**
      * The allowed range for rotation degrees.
@@ -63,15 +69,15 @@ LBUI3d.CameraLimits = function() {
  * The recommended and default upper limit for the elevation angle, in degrees.
  * @constant
  */
-LBUI3d.CameraLimits.UPPER_ELEVATION_DEG_LIMIT = 89.99;
+LBCameraControllers.Limits.UPPER_ELEVATION_DEG_LIMIT = 89.99;
 
 /**
  * The recommended and default lower limit for the elevation angle, in degrees.
  * @constant
  */
-LBUI3d.CameraLimits.LOWER_ELEVATION_DEG_LIMIT = -89.99;
+LBCameraControllers.Limits.LOWER_ELEVATION_DEG_LIMIT = -89.99;
 
-LBUI3d.CameraLimits.prototype = {
+LBCameraControllers.Limits.prototype = {
     /**
      * Applies the camera limits to a position and spherical orientation.
      * srcPosition and srcOrientation are not modified unless they are the same as
@@ -96,7 +102,7 @@ LBUI3d.CameraLimits.prototype = {
      * @param {module:LBGeometry.Vector3} srcPosition  The position to be limited if necessary. This
      * is not modified unless it is the same object as dstPosition.
      * @param {module:LBGeometry.Vector3} dstPosition  Set to srcPosition, limited as necessary.
-     * @returns {LBUI3d.CameraLimits}   this.
+     * @returns {module:LBCameraControllers.Limits}   this.
      */
     applyPositionLimits: function(srcPosition, dstPosition) {
         dstPosition.set(
@@ -111,7 +117,7 @@ LBUI3d.CameraLimits.prototype = {
      * @param {module:LBSpherical.Orientation} srcOrientation  The orientation to be limited if necessary. This
      * is not modified unless it is the same object as dstOrientation.
      * @param {module:LBSpherical.Orientation} dstOrientation  Set to srcOrientation, limited if necessary.
-     * @returns {LBUI3d.CameraLimits}   this.
+     * @returns {module:LBCameraControllers.Limits}   this.
      */
     applyOrientationLimits: function(srcOrientation, dstOrientation) {
         dstOrientation.azimuthDeg = this.azimuthRange.clampToRange(srcOrientation.azimuthDeg);
@@ -120,7 +126,7 @@ LBUI3d.CameraLimits.prototype = {
         return this;
     },
 
-    constructor: LBUI3d.CameraLimits
+    constructor: LBCameraControllers.Limits
 };
 
 
@@ -140,22 +146,22 @@ var _workingMatrix4 = new LBGeometry.Matrix4();
  * The camera controllers are loosely based upon the camera controllers found in ThreeJS's 
  * examples/js/controls folder, such as OrbitControls.js and FirstPersonControls.js.
  * @constructor
- * @param {LBUI3d.CameraLimits} [worldLimits]   Optional limits on the world camera position.
- * @param {LBUI3d.CameraLimits} [localLimits]   Optional limits on the local camera position.
- * @returns {LBUI3d.CameraController}
+ * @param {module:LBCameraControllers.Limits} [worldLimits]   Optional limits on the world camera position.
+ * @param {module:LBCameraControllers.Limits} [localLimits]   Optional limits on the local camera position.
+ * @returns {module:LBCameraControllers.Controller}
  */
-LBUI3d.CameraController = function(worldLimits, localLimits) {
+LBCameraControllers.Controller = function(worldLimits, localLimits) {
     /**
      * The world limits applied to the camera position.
-     * @member {LBUI3d.CameraLimits}
+     * @member {module:LBCameraControllers.Limits}
      */
-    this.worldLimits = worldLimits || new LBUI3d.CameraLimits();
+    this.worldLimits = worldLimits || new LBCameraControllers.Limits();
 
     /**
      * The local limits applied to the camera position.
-     * @member {LBUI3d.CameraLimits}
+     * @member {module:LBCameraControllers.Limits}
      */
-    this.localLimits = localLimits || new LBUI3d.CameraLimits();
+    this.localLimits = localLimits || new LBCameraControllers.Limits();
     
     /**
      * The current camera position in world coordinates.
@@ -171,7 +177,7 @@ LBUI3d.CameraController = function(worldLimits, localLimits) {
     
     /**
      * The current mouse mode.
-     * @member {LBUI3d.CameraController.MOUSE_PAN_MODE|LBUI3d.CameraController.MOUSE_ROTATE_MODE}
+     * @member {module:LBCameraControllers.Controller.MOUSE_PAN_MODE|LBCameraControllers.Controller.MOUSE_ROTATE_MODE}
      */
     this.mouseMode = -1;
     
@@ -201,47 +207,47 @@ LBUI3d.CameraController = function(worldLimits, localLimits) {
     
     /**
      * The current tracking state.
-     * @member {LBUI3d.CameraController.TRACKING_STATE_IDLE|LBUI3d.CameraController.TRACKING_STATE_PAN|LBUI3d.CameraController.TRACKING_STATE_ROTATE|LBUI3d.CameraController.TRACKING_STATE_ZOOM}
+     * @member {module:LBCameraControllers.Controller.TRACKING_STATE_IDLE|LBCameraControllers.Controller.TRACKING_STATE_PAN|LBCameraControllers.Controller.TRACKING_STATE_ROTATE|LBCameraControllers.Controller.TRACKING_STATE_ZOOM}
      */
-    this.trackingState = LBUI3d.CameraController.TRACKING_STATE_IDLE;
+    this.trackingState = LBCameraControllers.Controller.TRACKING_STATE_IDLE;
 };
 
-LBUI3d.CameraController.prototype = {
-    constructor: LBUI3d.CameraController
+LBCameraControllers.Controller.prototype = {
+    constructor: LBCameraControllers.Controller
 };
 
 /**
  * Sets the target for the controller.
  * @param {module:LBGeometry.Object3D} target  The target.
  */
-LBUI3d.CameraController.prototype.setTarget = function(target) {
+LBCameraControllers.Controller.prototype.setTarget = function(target) {
     this.target = target;
 };
 
-LBUI3d.CameraController.MOUSE_PAN_MODE = 0;
-LBUI3d.CameraController.MOUSE_ROTATE_MODE = 1;
+LBCameraControllers.Controller.MOUSE_PAN_MODE = 0;
+LBCameraControllers.Controller.MOUSE_ROTATE_MODE = 1;
 
-LBUI3d.CameraController.TRACKING_STATE_IDLE = 0;
-LBUI3d.CameraController.TRACKING_STATE_PAN = 1;
-LBUI3d.CameraController.TRACKING_STATE_ROTATE = 2;
-LBUI3d.CameraController.TRACKING_STATE_ZOOM = 3;
+LBCameraControllers.Controller.TRACKING_STATE_IDLE = 0;
+LBCameraControllers.Controller.TRACKING_STATE_PAN = 1;
+LBCameraControllers.Controller.TRACKING_STATE_ROTATE = 2;
+LBCameraControllers.Controller.TRACKING_STATE_ZOOM = 3;
 
-LBUI3d.CameraController.VIEW_FWD            = 0;
-LBUI3d.CameraController.VIEW_FWD_STBD       = 1;
-LBUI3d.CameraController.VIEW_STBD           = 2;
-LBUI3d.CameraController.VIEW_AFT_STBD       = 3;
-LBUI3d.CameraController.VIEW_AFT            = 4;
-LBUI3d.CameraController.VIEW_AFT_PORT       = 5;
-LBUI3d.CameraController.VIEW_PORT           = 6;
-LBUI3d.CameraController.VIEW_FWD_PORT       = 7;
-LBUI3d.CameraController.VIEW_UP             = 8;
-LBUI3d.CameraController.VIEW_DOWN           = 9;
+LBCameraControllers.Controller.VIEW_FWD            = 0;
+LBCameraControllers.Controller.VIEW_FWD_STBD       = 1;
+LBCameraControllers.Controller.VIEW_STBD           = 2;
+LBCameraControllers.Controller.VIEW_AFT_STBD       = 3;
+LBCameraControllers.Controller.VIEW_AFT            = 4;
+LBCameraControllers.Controller.VIEW_AFT_PORT       = 5;
+LBCameraControllers.Controller.VIEW_PORT           = 6;
+LBCameraControllers.Controller.VIEW_FWD_PORT       = 7;
+LBCameraControllers.Controller.VIEW_UP             = 8;
+LBCameraControllers.Controller.VIEW_DOWN           = 9;
 
 /**
  * Sets whether the camera mouse event handlers apply a rotation or a panning.
- * @param {LBUI3d.CameraController.MOUSE_PAN_MODE|LBUI3d.CameraController.MOUSE_ROTATE_MODE} mode The mouse mode.
+ * @param {module:LBCameraControllers.Controller.MOUSE_PAN_MODE|LBCameraControllers.Controller.MOUSE_ROTATE_MODE} mode The mouse mode.
  */
-LBUI3d.CameraController.prototype.setMouseMode = function(mode) {
+LBCameraControllers.Controller.prototype.setMouseMode = function(mode) {
     if (this.mouseMode !== mode) {
         this.mouseMode = mode;
     }
@@ -249,9 +255,9 @@ LBUI3d.CameraController.prototype.setMouseMode = function(mode) {
 
 /**
  * Sets one of the standard views.
- * @param {Number} view One of the LBUI3d.CameraController.VIEW_x values.
+ * @param {Number} view One of the LBCameraControllers.Controller.VIEW_x values.
  */
-LBUI3d.CameraController.prototype.setStandardView = function(view) {
+LBCameraControllers.Controller.prototype.setStandardView = function(view) {
 };
 
 /**
@@ -259,7 +265,7 @@ LBUI3d.CameraController.prototype.setStandardView = function(view) {
  * @param {Number} horzDeg  The number of degrees to rotate horizontally.
  * @param {Number} vertDeg  The number of degrees to rotate vertically.
  */
-LBUI3d.CameraController.prototype.rotatePOVDeg = function(horzDeg, vertDeg) {
+LBCameraControllers.Controller.prototype.rotatePOVDeg = function(horzDeg, vertDeg) {
     
 };
 
@@ -268,16 +274,16 @@ LBUI3d.CameraController.prototype.rotatePOVDeg = function(horzDeg, vertDeg) {
  * @param {Number} dx   The amount to pan horizontally.
  * @param {Number} dy   The amount to pan vertically.
  */
-LBUI3d.CameraController.prototype.panPOV = function(dx, dy) {
+LBCameraControllers.Controller.prototype.panPOV = function(dx, dy) {
     
 };
 
 /**
  * Installs event handlers for the controller in a DOM element. The handlers can be
- * uninstalled by calling {@link LBUI3d.CameraController.prototype.uninstallEventHandlers}.
+ * uninstalled by calling {@link module:LBCameraControllers.Controller.prototype.uninstallEventHandlers}.
  * @param {Object} domElement   The DOM element to install the handlers into.
  */
-LBUI3d.CameraController.prototype.installEventHandlers = function(domElement) {
+LBCameraControllers.Controller.prototype.installEventHandlers = function(domElement) {
     if (this.domElement !== domElement) {
         if (this.domElement) {
             this.uninstallEventHandlers();
@@ -317,9 +323,9 @@ LBUI3d.CameraController.prototype.installEventHandlers = function(domElement) {
 
 /**
  * Uninstalls any event handlers that were installed by a call to 
- * {@link LBUI3d.CameraController.prototype.installEventHandlers}.
+ * {@link module:LBCameraControllers.Controller.prototype.installEventHandlers}.
  */
-LBUI3d.CameraController.prototype.uninstallEventHandlers = function() {
+LBCameraControllers.Controller.prototype.uninstallEventHandlers = function() {
     this.endTracking();
     
     if (this.domElement) {
@@ -338,7 +344,7 @@ LBUI3d.CameraController.prototype.uninstallEventHandlers = function() {
  * used to cancel mouse tracking via say the ESC key.
  * @param {Boolean} isCancel    If true tracking should be cancelled.
  */
-LBUI3d.CameraController.prototype.endTracking = function(isCancel) {
+LBCameraControllers.Controller.prototype.endTracking = function(isCancel) {
     if (this.onMouseUpFunction) {
         document.removeEventListener('mouseup', this.onMouseUpFunction, false);
         this.onMouseUpFunction = null;
@@ -349,20 +355,20 @@ LBUI3d.CameraController.prototype.endTracking = function(isCancel) {
     }
 
     switch (this.trackingState) {
-        case LBUI3d.CameraController.TRACKING_STATE_PAN :
+        case LBCameraControllers.Controller.TRACKING_STATE_PAN :
             this.finishPan(isCancel);
             break;
             
-        case LBUI3d.CameraController.TRACKING_STATE_ROTATE:
+        case LBCameraControllers.Controller.TRACKING_STATE_ROTATE:
             this.finishRotate(isCancel);
             break;
             
-        case LBUI3d.CameraController.TRACKING_STATE_ZOOM :
+        case LBCameraControllers.Controller.TRACKING_STATE_ZOOM :
             this.finishZoom(isCancel);
             break;
     }
     
-    this.trackingState = LBUI3d.CameraController.TRACKING_STATE_IDLE;
+    this.trackingState = LBCameraControllers.Controller.TRACKING_STATE_IDLE;
 };
 
 /**
@@ -370,11 +376,11 @@ LBUI3d.CameraController.prototype.endTracking = function(isCancel) {
  * @param {Number} x    The x coordinate to start tracking at.
  * @param {Number} y    The y coordinate to start tracking at.
  * @param {Number} timeStamp    The event time stamp.
- * @param {LBUI3d.CameraController.TRACKING_STATE_PAN|LBUI3d.CameraController.TRACKING_STATE_ROTATE} trackingState  The tracking
+ * @param {module:LBCameraControllers.Controller.TRACKING_STATE_PAN|LBCameraControllers.Controller.TRACKING_STATE_ROTATE} trackingState  The tracking
  * state to enter.
  * @returns {undefined}
  */
-LBUI3d.CameraController.prototype.startTracking = function(x, y, timeStamp, trackingState) {
+LBCameraControllers.Controller.prototype.startTracking = function(x, y, timeStamp, trackingState) {
     this.startX = x;
     this.startY = y;
 
@@ -389,15 +395,15 @@ LBUI3d.CameraController.prototype.startTracking = function(x, y, timeStamp, trac
     this.trackingState = trackingState;
     
     switch (trackingState) {
-        case LBUI3d.CameraController.TRACKING_STATE_PAN :
+        case LBCameraControllers.Controller.TRACKING_STATE_PAN :
             this.startPan();
             break;
 
-        case LBUI3d.CameraController.TRACKING_STATE_ROTATE :
+        case LBCameraControllers.Controller.TRACKING_STATE_ROTATE :
             this.startRotate();
             break;
             
-        case LBUI3d.CameraController.TRACKING_STATE_ZOOM :
+        case LBCameraControllers.Controller.TRACKING_STATE_ZOOM :
             this.startZoom();
             break;
     }
@@ -410,21 +416,21 @@ LBUI3d.CameraController.prototype.startTracking = function(x, y, timeStamp, trac
  * @param {Number} timeStamp    The event time stamp.
  * @returns {undefined}
  */
-LBUI3d.CameraController.prototype.performTrack = function(x, y, timeStamp) {
+LBCameraControllers.Controller.prototype.performTrack = function(x, y, timeStamp) {
     this.deltaX = x - this.lastX;
     this.deltaY = y - this.lastY;
     this.deltaT = (timeStamp - this.lastT) / 1000;
 
     switch (this.trackingState) {
-        case LBUI3d.CameraController.TRACKING_STATE_PAN :
+        case LBCameraControllers.Controller.TRACKING_STATE_PAN :
             this.trackPan(x, y, timeStamp);
             break;
 
-        case LBUI3d.CameraController.TRACKING_STATE_ROTATE :
+        case LBCameraControllers.Controller.TRACKING_STATE_ROTATE :
             this.trackRotate(x, y, timeStamp);
             break;
             
-        case LBUI3d.CameraController.TRACKING_STATE_ZOOM :
+        case LBCameraControllers.Controller.TRACKING_STATE_ZOOM :
             this.trackZoom(x, y, timeStamp);
             break;
     }
@@ -440,7 +446,7 @@ LBUI3d.CameraController.prototype.performTrack = function(x, y, timeStamp) {
  * @protected
  * @param {WheelEvent} event   The mouse wheel event.
  */
-LBUI3d.CameraController.prototype.onMouseWheel = function(event) {
+LBCameraControllers.Controller.prototype.onMouseWheel = function(event) {
     if (this.zoomEnabled) {
         event.preventDefault();
         event.stopPropagation();
@@ -454,7 +460,7 @@ LBUI3d.CameraController.prototype.onMouseWheel = function(event) {
  * @protected
  * @param {type} event
  */
-LBUI3d.CameraController.prototype.onMouseDown = function(event) {
+LBCameraControllers.Controller.prototype.onMouseDown = function(event) {
     event.preventDefault();
     
     if (event.button === 0) {
@@ -479,12 +485,12 @@ LBUI3d.CameraController.prototype.onMouseDown = function(event) {
         }
         
         switch (this.mouseMode) {
-            case LBUI3d.CameraController.MOUSE_PAN_MODE :
-                this.startTracking(event.clientX, event.clientY, event.timeStamp, LBUI3d.CameraController.TRACKING_STATE_PAN);
+            case LBCameraControllers.Controller.MOUSE_PAN_MODE :
+                this.startTracking(event.clientX, event.clientY, event.timeStamp, LBCameraControllers.Controller.TRACKING_STATE_PAN);
                 break;
 
-            case LBUI3d.CameraController.MOUSE_ROTATE_MODE :
-                this.startTracking(event.clientX, event.clientY, event.timeStamp, LBUI3d.CameraController.TRACKING_STATE_ROTATE);
+            case LBCameraControllers.Controller.MOUSE_ROTATE_MODE :
+                this.startTracking(event.clientX, event.clientY, event.timeStamp, LBCameraControllers.Controller.TRACKING_STATE_ROTATE);
                 break;
         }
     }
@@ -495,12 +501,12 @@ LBUI3d.CameraController.prototype.onMouseDown = function(event) {
  * @protected
  * @param {MouseEvent} event    The mouse event.
  */
-LBUI3d.CameraController.prototype.onMouseMove = function(event) {
+LBCameraControllers.Controller.prototype.onMouseMove = function(event) {
     event.preventDefault();
     
-    if ((this.trackingState === LBUI3d.CameraController.TRACKING_STATE_PAN)
-     || (this.trackingState === LBUI3d.CameraController.TRACKING_STATE_ROTATE)
-     || (this.trackingState === LBUI3d.CameraController.TRACKING_STATE_ZOOM)) {
+    if ((this.trackingState === LBCameraControllers.Controller.TRACKING_STATE_PAN)
+     || (this.trackingState === LBCameraControllers.Controller.TRACKING_STATE_ROTATE)
+     || (this.trackingState === LBCameraControllers.Controller.TRACKING_STATE_ZOOM)) {
         this.performTrack(event.clientX, event.clientY, event.timeStamp);
     }
 };
@@ -510,7 +516,7 @@ LBUI3d.CameraController.prototype.onMouseMove = function(event) {
  * @protected
  * @param {MouseEvent} event    The mouse event.
  */
-LBUI3d.CameraController.prototype.onMouseUp = function(event) {
+LBCameraControllers.Controller.prototype.onMouseUp = function(event) {
     event.preventDefault();
 
     this.endTracking(false);
@@ -527,22 +533,22 @@ function touchDistance(event) {
  * @protected
  * @param {TouchEvent} event    The touch event.
  */
-LBUI3d.CameraController.prototype.onTouchStart = function(event) {
+LBCameraControllers.Controller.prototype.onTouchStart = function(event) {
     //event.preventDefault();
     
     switch (event.touches.length) {
         case 1 :
             this.startTracking(event.touches[0].pageX, event.touches[0].pageY, event.timeStamp, 
-                LBUI3d.CameraController.TRACKING_STATE_ROTATE);
+                LBCameraControllers.Controller.TRACKING_STATE_ROTATE);
             break;
             
         case 2 :
-            this.startTracking(touchDistance(event), 0, event.timeStamp, LBUI3d.CameraController.TRACKING_STATE_ZOOM);
+            this.startTracking(touchDistance(event), 0, event.timeStamp, LBCameraControllers.Controller.TRACKING_STATE_ZOOM);
             break;
             
         case 3 :
             this.startTracking(event.touches[0].pageX, event.touches[0].pageY, event.timeStamp, 
-                LBUI3d.CameraController.TRACKING_STATE_PAN);
+                LBCameraControllers.Controller.TRACKING_STATE_PAN);
             break;
     }
 };
@@ -552,7 +558,7 @@ LBUI3d.CameraController.prototype.onTouchStart = function(event) {
  * @protected
  * @param {TouchEvent} event    The touch event.
  */
-LBUI3d.CameraController.prototype.onTouchMove = function(event) {
+LBCameraControllers.Controller.prototype.onTouchMove = function(event) {
     event.preventDefault();
     event.stopPropagation();
     
@@ -573,7 +579,7 @@ LBUI3d.CameraController.prototype.onTouchMove = function(event) {
  * @protected
  * @param {TouchEvent} event    The touch event.
  */
-LBUI3d.CameraController.prototype.onTouchEnd = function(event) {
+LBCameraControllers.Controller.prototype.onTouchEnd = function(event) {
     event.preventDefault();
     
     this.endTracking(false);
@@ -585,7 +591,7 @@ LBUI3d.CameraController.prototype.onTouchEnd = function(event) {
  * @protected
  * @param {WheelEvent} event    The wheel event.
  */
-LBUI3d.CameraController.prototype.handleMouseWheel = function(event) {
+LBCameraControllers.Controller.prototype.handleMouseWheel = function(event) {
     if (event.deltaY < 0) {
         this.setZoom(this.zoomScale * 0.75);
     }
@@ -598,7 +604,7 @@ LBUI3d.CameraController.prototype.handleMouseWheel = function(event) {
  * Changes the zoom of the camera.
  * @param {Number} zoom The zoom scale.
  */
-LBUI3d.CameraController.prototype.setZoom = function(zoom) {
+LBCameraControllers.Controller.prototype.setZoom = function(zoom) {
     zoom = LBMath.clamp(zoom, this.minZoomScale, this.maxZoomScale);
     if (zoom !== this.zoomScale) {
         if (this.camera.isPerspectiveCamera) {
@@ -615,7 +621,7 @@ LBUI3d.CameraController.prototype.setZoom = function(zoom) {
  * Called to start zooming.
  * @protected
  */
-LBUI3d.CameraController.prototype.startZoom = function() {
+LBCameraControllers.Controller.prototype.startZoom = function() {
     this.startZoomScale = this.zoomScale;
 };
 
@@ -626,7 +632,7 @@ LBUI3d.CameraController.prototype.startZoom = function() {
  * @param {Number} y    The tracked y coordinate.
  * @param {Number} timeStamp    The track event time stamp.
  */
-LBUI3d.CameraController.prototype.trackZoom = function(x, y, timeStamp) {
+LBCameraControllers.Controller.prototype.trackZoom = function(x, y, timeStamp) {
     this.setZoom(this.startZoomScale * x / this.startX);
 };
 
@@ -635,7 +641,7 @@ LBUI3d.CameraController.prototype.trackZoom = function(x, y, timeStamp) {
  * @protected
  * @param {Boolean} isCancel    If true the zoom should be cancelled.
  */
-LBUI3d.CameraController.prototype.finishZoom = function(isCancel) {
+LBCameraControllers.Controller.prototype.finishZoom = function(isCancel) {
     if (isCancel) {
         this.setZoom(this.startZoomScale);
         return;
@@ -647,7 +653,7 @@ LBUI3d.CameraController.prototype.finishZoom = function(isCancel) {
  * Called to start panning.
  * @protected
  */
-LBUI3d.CameraController.prototype.startPan = function() {
+LBCameraControllers.Controller.prototype.startPan = function() {
     
 };
 
@@ -658,7 +664,7 @@ LBUI3d.CameraController.prototype.startPan = function() {
  * @param {Number} y    The tracked y coordinate.
  * @param {Number} timeStamp    The track event time stamp.
  */
-LBUI3d.CameraController.prototype.trackPan = function(x, y, timeStamp) {
+LBCameraControllers.Controller.prototype.trackPan = function(x, y, timeStamp) {
     
 };
 
@@ -667,7 +673,7 @@ LBUI3d.CameraController.prototype.trackPan = function(x, y, timeStamp) {
  * @protected
  * @param {Boolean} isCancel    If true the pan should be cancelled.
  */
-LBUI3d.CameraController.prototype.finishPan = function(isCancel) {
+LBCameraControllers.Controller.prototype.finishPan = function(isCancel) {
     
 };
 
@@ -675,7 +681,7 @@ LBUI3d.CameraController.prototype.finishPan = function(isCancel) {
  * Called to start rotating.
  * @protected
  */
-LBUI3d.CameraController.prototype.startRotate = function() {
+LBCameraControllers.Controller.prototype.startRotate = function() {
     
 };
 
@@ -686,7 +692,7 @@ LBUI3d.CameraController.prototype.startRotate = function() {
  * @param {Number} y    The tracked y coordinate.
  * @param {Number} timeStamp    The track event time stamp.
  */
-LBUI3d.CameraController.prototype.trackRotate = function(x, y, timeStamp) {
+LBCameraControllers.Controller.prototype.trackRotate = function(x, y, timeStamp) {
     
 };
 
@@ -695,7 +701,7 @@ LBUI3d.CameraController.prototype.trackRotate = function(x, y, timeStamp) {
  * @protected
  * @param {Boolean} isCancel    If true the pan should be cancelled.
  */
-LBUI3d.CameraController.prototype.finishRotate = function(isCancel) {
+LBCameraControllers.Controller.prototype.finishRotate = function(isCancel) {
     
 };
 
@@ -705,7 +711,7 @@ LBUI3d.CameraController.prototype.finishRotate = function(isCancel) {
  * This currently only supports {@link module:LBCamera.PerspectiveCamera}s.
  * @returns {Number}    The distance, 0 if not supported.
  */
-LBUI3d.CameraController.prototype.calcScreenDistance = function() {
+LBCameraControllers.Controller.prototype.calcScreenDistance = function() {
     if (this.camera.isPerspectiveCamera) {
         if (this.view.container) {
             return this.view.container.clientHeight / (2 * Math.tan(this.camera.fov * LBMath.DEG_TO_RAD * 0.5));
@@ -717,14 +723,14 @@ LBUI3d.CameraController.prototype.calcScreenDistance = function() {
 
 /**
  * Calculates the spherical orientation from the camera POV to a point on the screen.
- * Presumes {@link LBUI3d.LocalPOVCameraController#screenDistance} has been set to a valid distance.
+ * Presumes {@link module:LBCameraControllers.LocalPOVController#screenDistance} has been set to a valid distance.
  * @param {Number} x    The x coordinate of the point on the screen in the view container's client coordinates.
  * @param {Number} y    The y coordinate of the point on the screen in the view container's client coordinates.
  * @param {Number} screenDistance   The screen distance.
  * @param {module:LBSpherical.Orientation} [store] If defined the object to store the orientation into.
  * @returns {module:LBSpherical.Orientation}   The spherical orientation
  */
-LBUI3d.CameraController.prototype.calcOrientationFromScreenPos = function(x, y, screenDistance, store) {
+LBCameraControllers.Controller.prototype.calcOrientationFromScreenPos = function(x, y, screenDistance, store) {
     store = store || new LBSpherical.Orientation();
     
     if (screenDistance > 0) {
@@ -748,7 +754,7 @@ LBUI3d.CameraController.prototype.calcOrientationFromScreenPos = function(x, y, 
  * @protected
  * @param {module:LBGeometry.Matrix4} mat  The rotation matrix to be adjusted.
  */
-LBUI3d.CameraController.adjustMatForCameraAxis = function(mat) {
+LBCameraControllers.Controller.adjustMatForCameraAxis = function(mat) {
     // The camera view is along its y axis, so we need to rotate the y axis by 90 degrees about
     // the local z axis to align the camera's y axis with  the spherical orientation's x axis. 
     // We can do that by hand, since the rotation matrix is simple:
@@ -776,11 +782,11 @@ LBUI3d.CameraController.adjustMatForCameraAxis = function(mat) {
  * @param {module:LBGeometry.Quaternion} worldQuaternion   Set to the quaternion representing the orientation in world coordinates.
  * @returns {undefined}
  */
-LBUI3d.CameraController.prototype.localPosOrientationToWorldPosQuaternion = function(localPos, localOrientation, worldPos, worldQuaternion) {
+LBCameraControllers.Controller.prototype.localPosOrientationToWorldPosQuaternion = function(localPos, localOrientation, worldPos, worldQuaternion) {
     this.localLimits.applyLimits(localPos, localOrientation, _workingPosition, _workingOrientation);
     
     var mat = _workingOrientation.toMatrix4(_workingMatrix4);
-    LBUI3d.CameraController.adjustMatForCameraAxis(mat);
+    LBCameraControllers.Controller.adjustMatForCameraAxis(mat);
     mat.setPosition(_workingPosition);
 
     if (this.target) {
@@ -799,11 +805,11 @@ LBUI3d.CameraController.prototype.localPosOrientationToWorldPosQuaternion = func
  * @param {module:LBGeometry.Quaternion} worldQuaternion   Set to the quaternion representing the orientation in world coordinates.
  * @returns {undefined}
  */
-LBUI3d.CameraController.prototype.worldOrientationToWorldQuaternion = function(worldOrientation, worldQuaternion) {
+LBCameraControllers.Controller.prototype.worldOrientationToWorldQuaternion = function(worldOrientation, worldQuaternion) {
     this.worldLimits.applyOrientationLimits(worldOrientation, _workingOrientation);
     
     var mat = _workingOrientation.toMatrix4(_workingMatrix4);
-    LBUI3d.CameraController.adjustMatForCameraAxis(mat);
+    LBCameraControllers.Controller.adjustMatForCameraAxis(mat);
     
     mat.decompose(_workingPosition, worldQuaternion, _workingVector3);
 };
@@ -817,7 +823,7 @@ LBUI3d.CameraController.prototype.worldOrientationToWorldQuaternion = function(w
  * is just background tracking.
  * @returns {undefined}
  */
-LBUI3d.CameraController.prototype.update = function(dt, updateCamera) {
+LBCameraControllers.Controller.prototype.update = function(dt, updateCamera) {
     this.updateCameraPosition(dt, this.currentPosition, this.currentQuaternion);
 
     if (updateCamera) {
@@ -829,14 +835,14 @@ LBUI3d.CameraController.prototype.update = function(dt, updateCamera) {
 
 
 /**
- * Called by {@link LBUI3d.CameraController#update} to update the current camera position
+ * Called by {@link module:LBCameraControllers.Controller#update} to update the current camera position
  * @protected
  * @param {Number}  dt  The time step in milliseconds.
  * @param {module:LBGeometry.Vector3} position The camera world coordinates position to be updated.
  * @param {module:LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
  * @returns {undefined}
  */
-LBUI3d.CameraController.prototype.updateCameraPosition = function(dt, position, quaternion) {
+LBCameraControllers.Controller.prototype.updateCameraPosition = function(dt, position, quaternion) {
     
 };
 
@@ -846,11 +852,11 @@ LBUI3d.CameraController.prototype.updateCameraPosition = function(dt, position, 
  * A camera controller that sets itself to a local position and orientation
  * on a target. Basically a first person point of view.
  * @constructor
- * @param {LBUI3d.CameraLimits} [localLimits]   Optional limits on the local camera position.
- * @returns {LBUI3d.LocalPOVCameraController}
+ * @param {module:LBCameraControllers.Limits} [localLimits]   Optional limits on the local camera position.
+ * @returns {module:LBCameraControllers.LocalPOVController}
  */
-LBUI3d.LocalPOVCameraController = function(localLimits) {
-    LBUI3d.CameraController.call(this, null, localLimits);
+LBCameraControllers.LocalPOVController = function(localLimits) {
+    LBCameraControllers.Controller.call(this, null, localLimits);
     
     /**
      * The current local camera position.
@@ -898,8 +904,8 @@ LBUI3d.LocalPOVCameraController = function(localLimits) {
     this.currentDecelerationTime = 0;
 };
 
-LBUI3d.LocalPOVCameraController.prototype = Object.create(LBUI3d.CameraController.prototype);
-LBUI3d.LocalPOVCameraController.prototype.constructor = LBUI3d.LocalPOVCameraController;
+LBCameraControllers.LocalPOVController.prototype = Object.create(LBCameraControllers.Controller.prototype);
+LBCameraControllers.LocalPOVController.prototype.constructor = LBCameraControllers.LocalPOVController;
 
 /**
  * Updates a velocity value for decelerating to zero velocity.
@@ -944,7 +950,7 @@ function calcDecelRateForTime(vel, time) {
 
 
 /**
- * Called by {@link LBUI3d.CameraController#update} to update the current camera position
+ * Called by {@link module:LBCameraControllers.Controller#update} to update the current camera position
  * @protected
  * @override
  * @param {Number}  dt  The time step in milliseconds.
@@ -952,7 +958,7 @@ function calcDecelRateForTime(vel, time) {
  * @param {module:LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
  * @returns {undefined}
  */
-LBUI3d.LocalPOVCameraController.prototype.updateCameraPosition = function(dt, position, quaternion) {
+LBCameraControllers.LocalPOVController.prototype.updateCameraPosition = function(dt, position, quaternion) {
     if (this.target) {
         if (this.currentDecelerationTime > 0) {
             dt = Math.min(dt, this.currentDecelerationTime);
@@ -983,7 +989,7 @@ LBUI3d.LocalPOVCameraController.prototype.updateCameraPosition = function(dt, po
  * @param {module:LBSpherical.Orientation} sphericalOrientation    The spherical orientation.
  * @returns {undefined}
  */
-LBUI3d.LocalPOVCameraController.prototype.setLocalCameraPOV = function(position, sphericalOrientation) {
+LBCameraControllers.LocalPOVController.prototype.setLocalCameraPOV = function(position, sphericalOrientation) {
     this.localPosition.copy(position);
     this.localOrientation.copy(sphericalOrientation);
 };
@@ -994,7 +1000,7 @@ LBUI3d.LocalPOVCameraController.prototype.setLocalCameraPOV = function(position,
  * @param {module:LBSpherical.Orientation} orientationVel    The spherical orientation velocity.
  * @returns {undefined}
  */
-LBUI3d.LocalPOVCameraController.prototype.requestLocalCameraPOVDeceleration = function(positionVel, orientationVel) {
+LBCameraControllers.LocalPOVController.prototype.requestLocalCameraPOVDeceleration = function(positionVel, orientationVel) {
     // Figure out the longest time to decel to zero.
     // Then figure out the deceleration rates to take that time to zero.
     var dt = calcDecelTimeToZero(positionVel.x, this.positionDecel);
@@ -1025,38 +1031,38 @@ LBUI3d.LocalPOVCameraController.prototype.requestLocalCameraPOVDeceleration = fu
 /**
  * Sets one of the standard views.
  * @override
- * @param {Number} view One of the LBUI3d.CameraController.VIEW_x values.
+ * @param {Number} view One of the LBCameraControllers.Controller.VIEW_x values.
  */
-LBUI3d.LocalPOVCameraController.prototype.setStandardView = function(view) {
+LBCameraControllers.LocalPOVController.prototype.setStandardView = function(view) {
     var azimuthDeg = 0;
     this.localOrientation.elevationDeg = 0;
     
     switch (view) {
-        case LBUI3d.CameraController.VIEW_FWD :
+        case LBCameraControllers.Controller.VIEW_FWD :
             azimuthDeg = 0;
             break;
-        case LBUI3d.CameraController.VIEW_FWD_STBD :
+        case LBCameraControllers.Controller.VIEW_FWD_STBD :
             azimuthDeg = -45;
             break;
-        case LBUI3d.CameraController.VIEW_STBD :
+        case LBCameraControllers.Controller.VIEW_STBD :
             azimuthDeg = -90;
             break;
-        case LBUI3d.CameraController.VIEW_AFT_STBD :
+        case LBCameraControllers.Controller.VIEW_AFT_STBD :
             azimuthDeg = -135;
             break;
-        case LBUI3d.CameraController.VIEW_AFT :
+        case LBCameraControllers.Controller.VIEW_AFT :
             azimuthDeg = 180;
             break;
-        case LBUI3d.CameraController.VIEW_AFT_PORT :
+        case LBCameraControllers.Controller.VIEW_AFT_PORT :
             azimuthDeg = 135;
             break;
-        case LBUI3d.CameraController.VIEW_PORT :
+        case LBCameraControllers.Controller.VIEW_PORT :
             azimuthDeg = 90;
             break;
-        case LBUI3d.CameraController.VIEW_FWD_PORT :
+        case LBCameraControllers.Controller.VIEW_FWD_PORT :
             azimuthDeg = 45;
             break;
-        case LBUI3d.CameraController.VIEW_UP :
+        case LBCameraControllers.Controller.VIEW_UP :
             azimuthDeg = this.localOrientation.azimuthDeg - this.forwardAzimuthDeg;
             this.localOrientation.elevationDeg = 89;
             break;
@@ -1076,7 +1082,7 @@ LBUI3d.LocalPOVCameraController.prototype.setStandardView = function(view) {
  * @param {Number} horzDeg  The number of degrees to rotate horizontally.
  * @param {Number} vertDeg  The number of degrees to rotate vertically.
  */
-LBUI3d.LocalPOVCameraController.prototype.rotatePOVDeg = function(horzDeg, vertDeg) {
+LBCameraControllers.LocalPOVController.prototype.rotatePOVDeg = function(horzDeg, vertDeg) {
     this.localOrientation.azimuthDeg += horzDeg;
     this.localOrientation.elevationDeg += vertDeg;
     this.setLocalCameraPOV(this.localPosition, this.localOrientation);
@@ -1088,7 +1094,7 @@ LBUI3d.LocalPOVCameraController.prototype.rotatePOVDeg = function(horzDeg, vertD
  * @param {Number} dx   The amount to pan horizontally.
  * @param {Number} dy   The amount to pan vertically.
  */
-LBUI3d.LocalPOVCameraController.prototype.panPOV = function(dx, dy) {
+LBCameraControllers.LocalPOVController.prototype.panPOV = function(dx, dy) {
     this.localPosition.x += dx;
     this.localPosition.y += dy;
     this.setLocalCameraPOV(this.localPosition, this.localOrientation);
@@ -1100,7 +1106,7 @@ LBUI3d.LocalPOVCameraController.prototype.panPOV = function(dx, dy) {
  * @override
  * @protected
  */
-LBUI3d.LocalPOVCameraController.prototype.startPan = function() {
+LBCameraControllers.LocalPOVController.prototype.startPan = function() {
     this.originalLocalPosition = LBUtil.copyOrClone(this.originalLocalPosition, this.localPosition);
     this.originalLocalOrientation = LBUtil.copyOrClone(this.originalLocalOrientation, 
         this.localOrientation);
@@ -1117,7 +1123,7 @@ LBUI3d.LocalPOVCameraController.prototype.startPan = function() {
  * @param {Number} y    The tracked y coordinate.
  * @param {Number} timeStamp    The track event time stamp.
  */
-LBUI3d.LocalPOVCameraController.prototype.trackPan = function(x, y, timeStamp) {
+LBCameraControllers.LocalPOVController.prototype.trackPan = function(x, y, timeStamp) {
 };
 
 
@@ -1127,7 +1133,7 @@ LBUI3d.LocalPOVCameraController.prototype.trackPan = function(x, y, timeStamp) {
  * @override
  * @param {Boolean} isCancel    If true the pan should be cancelled.
  */
-LBUI3d.LocalPOVCameraController.prototype.finishPan = function(isCancel) {
+LBCameraControllers.LocalPOVController.prototype.finishPan = function(isCancel) {
     if (isCancel) {
         this.localPosition.copy(this.originalLocalPosition);
         this.localOrientation.copy(this.originalLocalOrientation);
@@ -1142,7 +1148,7 @@ LBUI3d.LocalPOVCameraController.prototype.finishPan = function(isCancel) {
  * @override
  * @protected
  */
-LBUI3d.LocalPOVCameraController.prototype.startRotate = function() {
+LBCameraControllers.LocalPOVController.prototype.startRotate = function() {
     this.currentDecelerationTime = 0;
     
     this.originalLocalPosition = LBUtil.copyOrClone(this.originalLocalPosition, this.localPosition);
@@ -1165,7 +1171,7 @@ LBUI3d.LocalPOVCameraController.prototype.startRotate = function() {
  * @param {Number} y    The tracked y coordinate.
  * @param {Number} timeStamp    The track event time stamp.
  */
-LBUI3d.LocalPOVCameraController.prototype.trackRotate = function(x, y, timeStamp) {
+LBCameraControllers.LocalPOVController.prototype.trackRotate = function(x, y, timeStamp) {
     if (!this.screenDistance) {
         return;
     }
@@ -1189,7 +1195,7 @@ LBUI3d.LocalPOVCameraController.prototype.trackRotate = function(x, y, timeStamp
  * @override
  * @param {Boolean} isCancel    If true the pan should be cancelled.
  */
-LBUI3d.LocalPOVCameraController.prototype.finishRotate = function(isCancel) {
+LBCameraControllers.LocalPOVController.prototype.finishRotate = function(isCancel) {
     if (isCancel) {
         this.localOrientation.copy(this.originalLocalOrientation);
         this.setLocalCameraPOV(this.localPosition, this.localOrientation);
@@ -1211,30 +1217,30 @@ LBUI3d.LocalPOVCameraController.prototype.finishRotate = function(isCancel) {
 
 /**
  * A camera controller that acts as a chase, it follows the target at a given location relative to the
- * target's local coordinate system. This differs from {@link LBUI3d.LocalPOVCameraController} in that for this
+ * target's local coordinate system. This differs from {@link module:LBCameraControllers.LocalPOVController} in that for this
  * the camera is looking towards the target, whereas for the first person controller the
  * camera is looking from the target.
  * <p>
  * How the controller updates the camera's position and orientation is determined by the
  * chase mode.
  * <p>
- * For {@link LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL}, the controller tries to
+ * For {@link module:LBCameraControllers.ChaseController.CHASE_MODE_LOCAL}, the controller tries to
  * update the camera such that the target stays fixed relative to the camera. The location
- * of the camera is specified relative to the target via {@link LBUI3d.ChaseCameraController#desiredCoordinates},
+ * of the camera is specified relative to the target via {@link module:LBCameraControllers.ChaseController#desiredCoordinates},
  * which is a {@link module:LBSpherical.CoordinatesRAA}. The reference orientation of the camera
  * is based upon a local reference orientation frame relative to the target's local
  * coordinates where the x axis points to the target and the z axis is in the same direction
  * as the target's z axis when the elevation and azimuth angles are zero. 
- * {@link LBUI3d.ChaseCameraController#desiredOrientation} is then added to this local
+ * {@link module:LBCameraControllers.ChaseController#desiredOrientation} is then added to this local
  * reference orientation to obtain the camera's orientation in the target's local
  * coordinate system.
  * <p>
- * For {@link LBUI3d.ChaseCameraController.CHASE_MODE_WORLD}, the controller tries to
+ * For {@link module:LBCameraControllers.ChaseController.CHASE_MODE_WORLD}, the controller tries to
  * update the camera such that the camera maintains a fixed world height, but in the horizontal
  * plane stays at the same azimuth angle relative to the target's local coordinates.
  * The reference orientation of the camera is based upon a reference orientation frame
  * that is pointed at the target. This reference frame is in world coordinates.
- * {@link LBUI3d.ChaseCameraController#desiredOrientation} is then added to this 
+ * {@link module:LBCameraControllers.ChaseController#desiredOrientation} is then added to this 
  * orientation reference frame to obtain the camera's orientation in world coordinates.
  * <p>
  * Rotation/zoom have the effect of moving the location of the camera relative to the target's
@@ -1242,23 +1248,23 @@ LBUI3d.LocalPOVCameraController.prototype.finishRotate = function(isCancel) {
  * within its local orientation frame.
  * @constructor
  * @param {Number} [distance]   The distance from the target to set up the camera at.
- * @param {LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL|LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL} 
- * [chaseMode=LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL]  The orientation mode, determines how
+ * @param {module:LBCameraControllers.ChaseController.CHASE_MODE_LOCAL|LBCameraControllers.ChaseController.CHASE_MODE_LOCAL} 
+ * [chaseMode=LBCameraControllers.ChaseController.CHASE_MODE_LOCAL]  The orientation mode, determines how
  * the camera's orientation is changed as the camera tracks the target.
- * @param {LBUI3d.CameraLimits} [globalLimits]   Optional limits on the global camera position.
- * @returns {LBUI3d.LocalPOVCameraController}
+ * @param {module:LBCameraControllers.Limits} [globalLimits]   Optional limits on the global camera position.
+ * @returns {module:LBCameraControllers.LocalPOVController}
  */
-LBUI3d.ChaseCameraController = function(distance, chaseMode, globalLimits) {
+LBCameraControllers.ChaseController = function(distance, chaseMode, globalLimits) {
     distance = distance || 10;
     
-    LBUI3d.CameraController.call(this, globalLimits);
+    LBCameraControllers.Controller.call(this, globalLimits);
     
     /**
      * The chase mode, how the camera's orientation is updated as the target is
      * tracked.
-     * @member {LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL|LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL} 
+     * @member {module:LBCameraControllers.ChaseController.CHASE_MODE_LOCAL|LBCameraControllers.ChaseController.CHASE_MODE_LOCAL} 
      */
-    this.chaseMode = chaseMode || LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL;
+    this.chaseMode = chaseMode || LBCameraControllers.ChaseController.CHASE_MODE_LOCAL;
     
     /**
      * The desired position of the camera relative to the target's local coordinate system, in
@@ -1323,22 +1329,22 @@ var _chaseWorkingOrientation;
  * Chase mode where the camera's orientation follows that of the target.
  * @constant
  */
-LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL = 0;
+LBCameraControllers.ChaseController.CHASE_MODE_LOCAL = 0;
 
 /**
  * Chase mode where the camera's orientation maintains its world orientation except
  * for pointing at the target.
  * @constant
  */
-LBUI3d.ChaseCameraController.CHASE_MODE_WORLD = 1;
+LBCameraControllers.ChaseController.CHASE_MODE_WORLD = 1;
 
-LBUI3d.ChaseCameraController.prototype = Object.create(LBUI3d.CameraController.prototype);
-LBUI3d.ChaseCameraController.prototype.constructor = LBUI3d.ChaseCameraController;
+LBCameraControllers.ChaseController.prototype = Object.create(LBCameraControllers.Controller.prototype);
+LBCameraControllers.ChaseController.prototype.constructor = LBCameraControllers.ChaseController;
 
 
 
 /**
- * Called by {@link LBUI3d.CameraController#update} to update the current camera position
+ * Called by {@link module:LBCameraControllers.Controller#update} to update the current camera position
  * @protected
  * @override
  * @param {Number}  dt  The time step in milliseconds.
@@ -1346,7 +1352,7 @@ LBUI3d.ChaseCameraController.prototype.constructor = LBUI3d.ChaseCameraControlle
  * @param {module:LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
  * @returns {undefined}
  */
-LBUI3d.ChaseCameraController.prototype.updateCameraPosition = function(dt, position, quaternion) {
+LBCameraControllers.ChaseController.prototype.updateCameraPosition = function(dt, position, quaternion) {
     if (this.target) {
         if (this.currentDecelerationTime > 0) {
             // The current transition is for decelerating via the desired coordinate and orientation
@@ -1375,11 +1381,11 @@ LBUI3d.ChaseCameraController.prototype.updateCameraPosition = function(dt, posit
         }
         
         switch (this.chaseMode) {
-            case LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL :
+            case LBCameraControllers.ChaseController.CHASE_MODE_LOCAL :
                 this.handleLocalChaseMode(position, quaternion);
                 break;
                 
-            case LBUI3d.ChaseCameraController.CHASE_MODE_WORLD :
+            case LBCameraControllers.ChaseController.CHASE_MODE_WORLD :
                 this.handleWorldChaseMode(position, quaternion);
                 break;
         }
@@ -1394,7 +1400,7 @@ LBUI3d.ChaseCameraController.prototype.updateCameraPosition = function(dt, posit
  * @param {module:LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
  * @returns {undefined}
  */
-LBUI3d.ChaseCameraController.prototype.handleLocalChaseMode = function(position, quaternion) {
+LBCameraControllers.ChaseController.prototype.handleLocalChaseMode = function(position, quaternion) {
 
     // Now update the desired world position/quaternion
     // We figure out the position in the target's local coordinates.
@@ -1422,7 +1428,7 @@ LBUI3d.ChaseCameraController.prototype.handleLocalChaseMode = function(position,
  * @param {module:LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
  * @returns {undefined}
  */
-LBUI3d.ChaseCameraController.prototype.handleWorldChaseMode = function(position, quaternion) {
+LBCameraControllers.ChaseController.prototype.handleWorldChaseMode = function(position, quaternion) {
     // The azimuth of the desired coordinates is relative to the target's azimuth, but
     // the elevation and radial distance are in world coordinates.
     _chaseWorldCoordinates = LBUtil.copyOrClone(_chaseWorldCoordinates, this.desiredCoordinates);
@@ -1470,7 +1476,7 @@ LBUI3d.ChaseCameraController.prototype.handleWorldChaseMode = function(position,
 };
 
 
-LBUI3d.ChaseCameraController.prototype.decelerateToZero = function(coordinatesVel, orientationVel) {
+LBCameraControllers.ChaseController.prototype.decelerateToZero = function(coordinatesVel, orientationVel) {
     // Figure out the longest time to decel to zero.
     // Then figure out the deceleration rates to take that time to zero.
     var dt = calcDecelTimeToZero(coordinatesVel.azimuthDeg, this.coordinatesDecel);
@@ -1498,7 +1504,7 @@ LBUI3d.ChaseCameraController.prototype.decelerateToZero = function(coordinatesVe
 
 };
 
-LBUI3d.ChaseCameraController.prototype.desiredCameraPositionUpdated = function() {
+LBCameraControllers.ChaseController.prototype.desiredCameraPositionUpdated = function() {
     this.currentDecelerationTime = 0;
 };
 
@@ -1506,39 +1512,39 @@ LBUI3d.ChaseCameraController.prototype.desiredCameraPositionUpdated = function()
 /**
  * Sets one of the standard views.
  * @override
- * @param {Number} view One of the LBUI3d.CameraController.VIEW_x values.
+ * @param {Number} view One of the LBCameraControllers.Controller.VIEW_x values.
  */
-LBUI3d.ChaseCameraController.prototype.setStandardView = function(view) {
+LBCameraControllers.ChaseController.prototype.setStandardView = function(view) {
     var azimuthDeg = 0;
     this.desiredCoordinates.elevationDeg = 30;
     this.desiredOrientation.zero();
     
     switch (view) {
-        case LBUI3d.CameraController.VIEW_FWD :
+        case LBCameraControllers.Controller.VIEW_FWD :
             azimuthDeg = 0;
             break;
-        case LBUI3d.CameraController.VIEW_FWD_STBD :
+        case LBCameraControllers.Controller.VIEW_FWD_STBD :
             azimuthDeg = -45;
             break;
-        case LBUI3d.CameraController.VIEW_STBD :
+        case LBCameraControllers.Controller.VIEW_STBD :
             azimuthDeg = -90;
             break;
-        case LBUI3d.CameraController.VIEW_AFT_STBD :
+        case LBCameraControllers.Controller.VIEW_AFT_STBD :
             azimuthDeg = -135;
             break;
-        case LBUI3d.CameraController.VIEW_AFT :
+        case LBCameraControllers.Controller.VIEW_AFT :
             azimuthDeg = 180;
             break;
-        case LBUI3d.CameraController.VIEW_AFT_PORT :
+        case LBCameraControllers.Controller.VIEW_AFT_PORT :
             azimuthDeg = 135;
             break;
-        case LBUI3d.CameraController.VIEW_PORT :
+        case LBCameraControllers.Controller.VIEW_PORT :
             azimuthDeg = 90;
             break;
-        case LBUI3d.CameraController.VIEW_FWD_PORT :
+        case LBCameraControllers.Controller.VIEW_FWD_PORT :
             azimuthDeg = 45;
             break;
-        case LBUI3d.CameraController.VIEW_UP :
+        case LBCameraControllers.Controller.VIEW_UP :
             azimuthDeg = this.desiredCoordinates.azimuthDeg - this.forwardAzimuthDeg;
             this.desiredCoordinates.elevationDeg = 89;
             break;
@@ -1559,7 +1565,7 @@ LBUI3d.ChaseCameraController.prototype.setStandardView = function(view) {
  * @param {Number} horzDeg  The number of degrees to rotate horizontally.
  * @param {Number} vertDeg  The number of degrees to rotate vertically.
  */
-LBUI3d.ChaseCameraController.prototype.rotatePOVDeg = function(horzDeg, vertDeg) {
+LBCameraControllers.ChaseController.prototype.rotatePOVDeg = function(horzDeg, vertDeg) {
     this.desiredCoordinates.azimuthDeg += horzDeg;
     this.desiredCoordinates.elevationDeg += vertDeg;
     this.desiredCameraPositionUpdated();
@@ -1572,13 +1578,13 @@ LBUI3d.ChaseCameraController.prototype.rotatePOVDeg = function(horzDeg, vertDeg)
  * @param {Number} dx   The amount to pan horizontally.
  * @param {Number} dy   The amount to pan vertically.
  */
-LBUI3d.ChaseCameraController.prototype.panPOV = function(dx, dy) {
+LBCameraControllers.ChaseController.prototype.panPOV = function(dx, dy) {
     this.desiredOrientation.azimuthDeg += dx;
     this.desiredOrientation.elevationDeg.y += dy;
     this.desiredCameraPositionUpdated();
 };
 
-LBUI3d.ChaseCameraController.prototype.setZoom = function(zoom) {
+LBCameraControllers.ChaseController.prototype.setZoom = function(zoom) {
     zoom = LBMath.clamp(zoom, this.minZoomScale, this.maxZoomScale);
     if (zoom !== this.zoomScale) {
         this.zoomScale = zoom;
@@ -1593,7 +1599,7 @@ LBUI3d.ChaseCameraController.prototype.setZoom = function(zoom) {
  * @override
  * @protected
  */
-LBUI3d.ChaseCameraController.prototype.startPan = function() {
+LBCameraControllers.ChaseController.prototype.startPan = function() {
     this.currentDecelerationTime = 0;
 
     this.originalDesiredOrientation = LBUtil.copyOrClone(this.originalDesiredOrientation, this.desiredOrientation);
@@ -1611,7 +1617,7 @@ LBUI3d.ChaseCameraController.prototype.startPan = function() {
  * @param {Number} y    The tracked y coordinate.
  * @param {Number} timeStamp    The track event time stamp.
  */
-LBUI3d.ChaseCameraController.prototype.trackPan = function(x, y, timeStamp) {
+LBCameraControllers.ChaseController.prototype.trackPan = function(x, y, timeStamp) {
     if (!this.screenDistance) {
         return;
     }
@@ -1633,7 +1639,7 @@ LBUI3d.ChaseCameraController.prototype.trackPan = function(x, y, timeStamp) {
  * @override
  * @param {Boolean} isCancel    If true the pan should be cancelled.
  */
-LBUI3d.ChaseCameraController.prototype.finishPan = function(isCancel) {
+LBCameraControllers.ChaseController.prototype.finishPan = function(isCancel) {
     if (isCancel) {
         this.desiredOrientation.copy(this.originalDesiredOrientation);
         this.desiredCameraPositionUpdated();
@@ -1658,7 +1664,7 @@ LBUI3d.ChaseCameraController.prototype.finishPan = function(isCancel) {
  * @override
  * @protected
  */
-LBUI3d.ChaseCameraController.prototype.startRotate = function() {
+LBCameraControllers.ChaseController.prototype.startRotate = function() {
     this.currentDecelerationTime = 0;
     
     this.originalCoordinates = LBUtil.copyOrClone(this.originalCoordinates, this.desiredCoordinates);
@@ -1676,7 +1682,7 @@ LBUI3d.ChaseCameraController.prototype.startRotate = function() {
  * @param {Number} y    The tracked y coordinate.
  * @param {Number} timeStamp    The track event time stamp.
  */
-LBUI3d.ChaseCameraController.prototype.trackRotate = function(x, y, timeStamp) {
+LBCameraControllers.ChaseController.prototype.trackRotate = function(x, y, timeStamp) {
     if (!this.screenDistance) {
         return;
     }
@@ -1699,7 +1705,7 @@ LBUI3d.ChaseCameraController.prototype.trackRotate = function(x, y, timeStamp) {
  * @override
  * @param {Boolean} isCancel    If true the pan should be cancelled.
  */
-LBUI3d.ChaseCameraController.prototype.finishRotate = function(isCancel) {
+LBCameraControllers.ChaseController.prototype.finishRotate = function(isCancel) {
     if (isCancel) {
         this.desiredCoordinates.copy(this.originalDesiredCoordinates);
         this.setLocalCameraPOV(this.localPosition, this.localOrientation);
@@ -1717,5 +1723,5 @@ LBUI3d.ChaseCameraController.prototype.finishRotate = function(isCancel) {
     }
 };
 
-return LBUI3d;
+return LBCameraControllers;
 });
