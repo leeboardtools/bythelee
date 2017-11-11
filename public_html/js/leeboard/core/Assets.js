@@ -28,7 +28,7 @@ var LBAssets = LBAssets || {};
 /**
  * This is our basic asset loader, it asynchronously loads and caches assets.
  * @constructor
- * @returns {Assets_L18.LBAssets.Loader}
+ * @returns {LBAssets.Loader}
  */
 LBAssets.Loader = function() {
     this.jsonAssets = {};
@@ -105,7 +105,7 @@ LBAssets.Loader.prototype.getJSON = function(assetName) {
  *      coordinator.endLoadCalls();
  * 
  * @constructor
- * @returns {Assets_L18.LBAssets.MultiLoadCoordinator}
+ * @returns {LBAssets.MultiLoadCoordinator}
  */
 LBAssets.MultiLoadCoordinator = function() {
     this._loaderCount = 0;

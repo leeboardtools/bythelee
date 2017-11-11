@@ -40,7 +40,7 @@ var _workingEuler = new LBGeometry.Euler();
  * @param {Number} [azimuthDeg=0]   The azimuth in degrees.
  * @param {Number} [elevationDeg=0]   The elevation in degrees.
  * @param {Number} [rotationDeg=0]   The rotation in degrees.
- * @returns {CameraControllers_L18.LBSpherical.Orientation}
+ * @returns {LBSpherical.Orientation}
  */
 LBSpherical.Orientation = function(azimuthDeg, elevationDeg, rotationDeg) {
     /**

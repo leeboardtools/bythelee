@@ -38,7 +38,7 @@ function(THREE, LBUI3d, LBCamera) {
 LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     /**
      * The scene this views.
-     * @member {@link LBUI3d.Scene3D}
+     * @member {LBUI3d.Scene3D}
      */
     this.scene3D = scene3D;
     
@@ -54,7 +54,7 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     
     /**
      * The camera used to view the scene.
-     * @member {@link LBCamera.Camera}
+     * @member {LBCamera.Camera}
      */
     this.camera = camera;
     
@@ -62,7 +62,7 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     
     /**
      * The camera controllers.
-     * @member {@link LBUI3d.CameraController[]}
+     * @member {LBUI3d.CameraController[]}
      */
     this.cameraControllers = [];
     

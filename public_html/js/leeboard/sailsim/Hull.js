@@ -161,7 +161,7 @@ LBSailSim.Hull = function(vessel) {
     
     /**
      * The resistance force in world coordinates.
-     * @member {LBGeometry.Vector3}.
+     * @member {LBGeometry.Vector3}
      */
     this.resistanceForce = new LBGeometry.Vector3();
 };

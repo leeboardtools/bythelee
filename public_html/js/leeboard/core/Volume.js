@@ -1570,7 +1570,7 @@ LBVolume.Cuboid.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
  * @param {Number} cy   The y dimension of the center of the box.
  * @param {Number} cz   The z dimension of the center of the box.
  * @param {Number} [mass]   The optional mass for the box.
- * @returns {Volume_L18.createBox.box|Volume_L18.LBVolume.Cuboid}
+ * @returns {LBVolume.Cuboid}
  */
 LBVolume.createBox = function(dx, dy, dz, cx, cy, cz, mass) {
     var box = new LBVolume.Cuboid();
@@ -1599,7 +1599,7 @@ LBVolume.createBox = function(dx, dy, dz, cx, cy, cz, mass) {
  * <li>[rotation]: See {@link LBGeometry.loadEuler} If specified, the rotation to apply to the
  * box.
  * @param {Number} [mass=undefined] The mass of the box.
- * @returns {Volume_L18.createBox.box|Volume_L18.LBVolume.Cuboid|Volume_L18.loadBoxFromData.box}
+ * @returns {LBVolume.Cuboid}
  */
 LBVolume.loadBoxFromData = function(data, mass) {
     var center = LBGeometry.loadVector3(data.center);

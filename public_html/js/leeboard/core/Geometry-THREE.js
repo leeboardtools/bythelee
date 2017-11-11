@@ -70,7 +70,7 @@ LBGeometry.normalToTangentXY = function(normal, store) {
 /**
  * A basic 2D rectangle represented as minimum and maximum x and y values.
  * @constructor
- * @returns {Geometry-THREE_L18.LBGeometry.Rect}
+ * @returns {LBGeometry.Rect}
  */
 LBGeometry.Rect = function() {
     if (arguments.length === 4) {

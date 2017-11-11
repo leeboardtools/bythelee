@@ -292,7 +292,7 @@ LBShaders.Computer.isSupported = function(renderer) {
  * A simple helper for copying the texture from one render target to another.
  * @constructor
  * @param {THREE.WebGLRenderer} renderer    The renderer.
- * @returns {Shaders_L18.LBShaders.TargetCopier}
+ * @returns {LBShaders.TargetCopier}
  */
 LBShaders.TargetCopier = function(renderer) {
     this.renderer = renderer;
