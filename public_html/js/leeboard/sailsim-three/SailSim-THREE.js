@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsim', 'lbcannon', 'three', 'lbgeometry', 'lbassets', 'lbui3d', 'lbwater3d', 'lbsky3d', 'lbwakes3d', 'lbwind3d', 'tween'], 
-function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d, LBWater3D, LBSky3D, LBWakes3D, LBWind3D, TWEEN) {
+define(['lbsailsim', 'lbcannonphysicslink', 'three', 'lbgeometry', 'lbassets', 'lbui3d', 'lbwater3d', 'lbsky3d', 'lbwakes3d', 'lbwind3d', 'tween'], 
+function(LBSailSim, LBCannonPhysicsLink, THREE, LBGeometry, LBAssets, LBUI3d, LBWater3D, LBSky3D, LBWakes3D, LBWind3D, TWEEN) {
     
     'use strict';
 
@@ -43,7 +43,7 @@ LBSailSim.SailEnvTHREE = function(app3D, mainView, physicsType, assetLoader) {
     switch (physicsType) {
         case LBSailSim.SailEnvTHREE.CANNON_PHYSICS :
         case undefined :
-            this.physicsLink = new LBCannon.CannonPhysicsLink();
+            this.physicsLink = new LBCannonPhysicsLink.Link();
             break;
     }
     
@@ -65,7 +65,7 @@ LBSailSim.SailEnvTHREE = function(app3D, mainView, physicsType, assetLoader) {
 /**
  * Value to pass to {@link LBSailSim.SailEnvTHREE}'s contructor to use the Cannon JS physics engine.
  * @constant
- * @type Number
+ * @type {Number}
  */
 LBSailSim.SailEnvTHREE.CANNON_PHYSICS = 0;
 

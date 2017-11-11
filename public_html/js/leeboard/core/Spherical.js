@@ -68,7 +68,7 @@ LBSpherical.Orientation = function(azimuthDeg, elevationDeg, rotationDeg) {
 /**
  * A {@link module:LBSpherical.Orientation} that's all 0.
  * @constant
- * @type module:LBSpherical.Orientation
+ * @type {module:LBSpherical.Orientation}
  */
 LBSpherical.Orientation.ZERO = new LBSpherical.Orientation();
 
@@ -172,7 +172,7 @@ LBSpherical.Orientation.prototype = {
  * @param {Number} [radius=0]   The radius
  * @param {Number} [azimuthDeg=0]   The azimuth in degrees.
  * @param {Number} [elevationDeg=0]  The elevation in degrees.
- * @returns {module:LBSpherical.OrientationPoint}
+ * @returns {module:LBSpherical.CoordinatesRAA}
  */
 LBSpherical.CoordinatesRAA = function(radius, azimuthDeg, elevationDeg) {
     this.radius = radius || 0;
@@ -184,7 +184,7 @@ LBSpherical.CoordinatesRAA = function(radius, azimuthDeg, elevationDeg) {
 /**
  * An {@link module:LBSpherical.CoordinatesRAA} that's all zero.
  * @constant
- * @type module:LBSpherical.CoordinatesRAA
+ * @type {module:LBSpherical.CoordinatesRAA}
  */
 LBSpherical.CoordinatesRAA.ZERO = new LBSpherical.CoordinatesRAA();
 

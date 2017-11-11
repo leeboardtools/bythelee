@@ -35,7 +35,7 @@ LBDebug.DataLogField = function(fieldName) {
     
     /**
      * Enable flag, if false the field is not output.
-     * @type Boolean
+     * @member {Boolean}
      */
     this.isEnabled = true;
 
@@ -354,20 +354,20 @@ LBDebug.FieldsDataLogField.prototype.clearValue = function() {
 LBDebug.DataLog = {
     /**
      * Enable flag, if false text is neither buffered nor output.
-     * @type Boolean
+     * @member {Boolean}
      */
     isEnabled: true,
     
     /**
      * The field implementation.
      * @private
-     * @type {module:LBDebug.FieldsDataLogField}
+     * @member {module:LBDebug.FieldsDataLogField}
      */
     fields: new LBDebug.FieldsDataLogField(""),
 
     /**
      * Counter for each line output.
-     * @type Number
+     * @member {Number}
      */
     outputCount: 0
 };

@@ -582,7 +582,7 @@ LBMath.finiteDiffBackFirst = function(dt, f0, fm1, fm2, fm3, fm4) {
 
 /**
  * The maximum number of terms supported by {@link module:LBMath.finiteDiffBackFirst}.
- * @type Number
+ * @type {Number}
  */
 LBMath.finiteDiffBackFirst.MAX_TERMS = 5;
 

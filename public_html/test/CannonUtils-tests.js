@@ -15,9 +15,9 @@
  */
 
 
-/* global QUnit, LBGeometry, LBCannon, LBVolume, CANNON */
+/* global QUnit, LBGeometry, LBCannonUtil, LBVolume, CANNON */
 
-define(['lbgeometry', 'lbcannon', 'lbvolume', 'cannon'], function (LBGeometry, LBCannon, LBVolume, CANNON) {
+define(['lbgeometry', 'lbcannonutil', 'lbvolume', 'cannon'], function (LBGeometry, LBCannonUtil, LBVolume, CANNON) {
 
 var checkVector3 = require('test/Geometry-tests.js').checkVector3;
 
@@ -32,7 +32,7 @@ checkCannonVec3 = function(assert, vec3, vector3, msg) {
 
 QUnit.test( "Vec3Proxy", function( assert ) {
     var vector3 = new LBGeometry.Vector3(1,2,3);
-    var vec3 = new LBCannon.Vec3Proxy(vector3);
+    var vec3 = new LBCannonUtil.Vec3Proxy(vector3);
     
     checkCannonVec3(assert, vec3, vector3, "Constructor");
     
@@ -68,10 +68,10 @@ QUnit.test( "addTetrasToBody", function( assert ) {
     var centerOfMassResults = LBVolume.Volume.totalCenterOfMass(tetras);
     
     var body = new CANNON.Body();
-    LBCannon.addVolumesToBody(body, tetras);
+    LBCannonUtil.addVolumesToBody(body, tetras);
     assert.equal(body.shapes.length, tetras.length, "Shape Count");
     
-    LBCannon.updateBodyCenterOfMass(body, centerOfMassResults.position);
+    LBCannonUtil.updateBodyCenterOfMass(body, centerOfMassResults.position);
     assert.nearEqual(body.position.x, 1, "COM-x");
     assert.nearEqual(body.position.y, 0.5, "COM-y");
     assert.nearEqual(body.position.z, 1.5, "COM-z");

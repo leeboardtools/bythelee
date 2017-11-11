@@ -149,38 +149,38 @@ Phaser.Point.prototype.copy = function(src) {
 LBPhaser.ArrowStyle = function(color, arrowLengthScaler, alpha, width, arrowSize) {
     /**
      * The RGB color of the arrow.
-     * @type number
+     * @member {Number}
      */
     this.color = color;
     
     /**
      * The pixel width of the arrow.
-     * @type number
+     * @member {Number}
      */
     this.width = width || 2;
     
     /**
      * The maximum size of the arrowhead in pixels.
-     * @type number
+     * @member {Number}
      */
     this.arrowSize = arrowSize || 20;
     
     /**
      * The alpha opacity to apply when drawing the arrow.
-     * @type number
+     * @member {Number}
      */
     this.alpha = alpha || 1;
     
     /**
      * The function used to scale the arrow length to modeling units (modeling units
      * are what are passed to {@link LBPhaser.Env#toPixelsX} and {@link LBPhaser.Env#toPixelsY}.
-     * @type function
+     * @member {Function}
      */
     this.arrowLengthScaler = arrowLengthScaler || LBPhaser.ArrowStyle.DEF_ARROW_LENGTH_SCALER;
     
     /**
      * Style visibility flag, can be used to hide all arrows that use this style.
-     * @type boolean
+     * @member {Boolean}
      */
     this.isVisible = true;
 };
@@ -335,7 +335,7 @@ LBPhaser.ArrowStyle.prototype = {
 
 /**
  * The default {@link LBPhaser.Arrow} style.
- * @type LBPhaser.ArrowStyle
+ * @type {LBPhaser.ArrowStyle}
  */
 LBPhaser.ArrowStyle.DEFAULT = new LBPhaser.ArrowStyle();
 
@@ -352,26 +352,26 @@ LBPhaser.ArrowStyle.DEFAULT = new LBPhaser.ArrowStyle();
 LBPhaser.Arrow = function(env, group, style) {
     /**
      * The Phaser environment.
-     * @type LBPhaser.Env
+     * @member {LBPhaser.Env}
      */
     this.env = env;
     
     /**
      * The graphics object used to draw the arrow.
-     * @type Phaser.Graphics
+     * @member {Phaser.Graphics}
      */
     this.graphics = env.game.add.graphics(0, 0, group);
     
     /**
      * The arrow's style.
-     * @type LBPhaser.ArrowStyle
+     * @member {LBPhaser.ArrowStyle}
      */
     this.style = style || LBPhaser.ArrowStyle.DEFAULT;
     
     /**
      * The local visibility flag for the arrow, the arrow is only drawn
      * if both this and the style's visibility flags are true.
-     * @type boolean
+     * @member {boolean}
      */
     this.isVisible = true;
 };

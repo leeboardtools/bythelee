@@ -857,19 +857,19 @@ LBPhysics.getInertiaZZ = function(inertia) {
 LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     /**
      * A name for the rigid body.
-     * @type String
+     * @member {String}
      */
     this.name = "";
     
     /**
      * The mass.
-     * @type number
+     * @member {number}
      */
     this.mass = mass;
     
     /**
      * The moment of inertia tensor.
-     * @type LBGeometry.Matrix3
+     * @member {module:LBGeometry.Matrix3}
      */
     this.momentInertia = new LBGeometry.Matrix3();
     if (momentInertia) {
@@ -881,26 +881,26 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     
     /**
      * The center of mass in local coordinates relative to the origin.
-     * @type LBGeometry.Vector3
+     * @member {module:LBGeometry.Vector3}
      */
     this.centerOfMass = centerOfMass || new LBGeometry.Vector3();
     
     /**
      * A radius associated with the mass, used as essentially a region of interest
      * around the center of mass.
-     * @type number
+     * @member {number}
      */
     this.massRadius = 0;
     
     /**
      * The Object3D used to define the 3D properties of the body.
-     * @type LBGeometry.Object3D
+     * @member {module:LBGeometry.Object3D}
      */
     this.obj3D = obj3D || new LBGeometry.Object3D();
     
     /**
      * Array of {@link module:LBVolume.Tetra}s that define the volume of the body.
-     * @type LBVolume.Tetra
+     * @member {module:LBVolume.Tetra}
      */
     this.volumes = [];
     
@@ -919,7 +919,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     /**
      * The coordinate system state used to track changes in the location of the
      * local coordinate system in the world space. Primarily used to track velocity.
-     * @type LBPhysics.CoordSystemState
+     * @member {module:LBPhysics.CoordSystemState}
      */
     this.coordSystem = new LBPhysics.CoordSystemState();
     this.coordSystemResults = {
@@ -929,13 +929,13 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     
     /**
      * The current linear velocity of the body in the world coordinate system.
-     * @type LBGeometry.Vector3
+     * @member {module:LBGeometry.Vector3}
      */
     this.worldLinearVelocity = this.coordSystemResults.worldVel;
 
     /**
      * The current linear velocity of the body in the local coordinate system.
-     * @type LBGeometry.Vector3
+     * @member {module:LBGeometry.Vector3}
      */
     this.localLinearVelocity = this.coordSystemResults.localVel;
     
@@ -948,7 +948,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
      * <p>
      * Parts should be added and removed using {@link module:LBPhysics.RigidBody#addPart} and
      * {@link module:LBPhysics.RigidBody#removePart}.
-     * @type LBPhysics.RigidBody[]
+     * @member {module:LBPhysics.RigidBody[]}
      */
     this.parts = [];
     if (base) {
@@ -973,7 +973,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     /**
      * If defined this is the object from which the rigid body was loaded, the object
      * passed to {@link module:LBPhysics.RigidBody#load} ({@link module:LBPhysics.RigidBody#loadBase} really).
-     * @type Object
+     * @member {Object}
      */
     this.loadData = undefined;
 };

@@ -16,18 +16,25 @@
 
 
 define(['lbcannonutil', 'lbgeometry', 'lbphysics', 'cannon', 'lbphysicslink'],
-function(LBCannon, LBGeometry, LBPhysics, CANNON, LBPhysicsLink) {
+function(LBCannonUtil, LBGeometry, LBPhysics, CANNON, LBPhysicsLink) {
 
     'use strict';
+
+/**
+ * An implementation of {@link module:LBPhysicsLink.Link} for working with the 
+ * {@link http://schteppe.github.io/cannon.js|cannon.js} physics engine.
+ * @exports LBCannonPhysicsLink
+ */
+var LBCannonPhysicsLink = LBCannonPhysicsLink || {};
 
 /**
  * Manages linking a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}
  * with a {@link module:LBPhysics.RigidBody}.
  * @constructor
  * @extends module:LBPhysicsLink.Link
- * @returns {LBCannon.CannonPhysicsLink}
+ * @returns {module:LBCannonPhysicsLink.Link}
  */
-LBCannon.CannonPhysicsLink = function() {
+LBCannonPhysicsLink.Link = function() {
     LBPhysicsLink.Link.call(this);
     
     this.cWorld = new CANNON.World();
@@ -39,34 +46,34 @@ LBCannon.CannonPhysicsLink = function() {
     this.dt = 1/60;
 };
 
-LBCannon.CannonPhysicsLink._workingVec3 = new CANNON.Vec3();
-LBCannon.CannonPhysicsLink._workingVector3 = new LBGeometry.Vector3();
+LBCannonPhysicsLink.Link._workingVec3 = new CANNON.Vec3();
+LBCannonPhysicsLink.Link._workingVector3 = new LBGeometry.Vector3();
 
-LBCannon.CannonPhysicsLink.prototype = Object.create(LBPhysicsLink.Link.prototype);
-LBCannon.CannonPhysicsLink.prototype.constructor = LBCannon.CannonPhysicsLink;
+LBCannonPhysicsLink.Link.prototype = Object.create(LBPhysicsLink.Link.prototype);
+LBCannonPhysicsLink.Link.prototype.constructor = LBCannonPhysicsLink.Link;
 
 
 // @inheritdoc..
-LBCannon.CannonPhysicsLink.prototype.addFixedObject = function(rigidBody) {
+LBCannonPhysicsLink.Link.prototype.addFixedObject = function(rigidBody) {
     return this._addCannonRigidBody(rigidBody, CANNON.Body.STATIC);
 };
 
 // @inheritdoc...
-LBCannon.CannonPhysicsLink.prototype._rigidBodyAdded = function(rigidBody, data) {
+LBCannonPhysicsLink.Link.prototype._rigidBodyAdded = function(rigidBody, data) {
     return this._addCannonRigidBody(rigidBody, CANNON.Body.DYNAMIC);
 };
 
-LBCannon.CannonPhysicsLink.prototype._addCannonRigidBody = function(rigidBody, cannonType) {
+LBCannonPhysicsLink.Link.prototype._addCannonRigidBody = function(rigidBody, cannonType) {
     var body = new CANNON.Body();
     body.type = cannonType;
     
-    LBCannon.addRigidBodyVolumesToBody(body, rigidBody);
+    LBCannonUtil.addRigidBodyVolumesToBody(body, rigidBody);
     
     this.cWorld.add(body);
     
     rigidBody._lbCannonBody = body;
     
-    var pos = LBCannon.CannonPhysicsLink._workingVector3.copy(rigidBody.centerOfMass);
+    var pos = LBCannonPhysicsLink.Link._workingVector3.copy(rigidBody.centerOfMass);
     pos.applyMatrix4(rigidBody.obj3D.matrixWorld);
     
     body.position.copy(pos);
@@ -77,7 +84,7 @@ LBCannon.CannonPhysicsLink.prototype._addCannonRigidBody = function(rigidBody, c
 
 
 // @inheritdoc..
-LBCannon.CannonPhysicsLink.prototype._rigidBodyRemoved = function(rigidBody) {
+LBCannonPhysicsLink.Link.prototype._rigidBodyRemoved = function(rigidBody) {
     if (rigidBody._lbCannonBody) {
         this.cWorld.removeBody(rigidBody._lbCannonBody);
         rigidBody._lbCannonBody = undefined;
@@ -85,12 +92,12 @@ LBCannon.CannonPhysicsLink.prototype._rigidBodyRemoved = function(rigidBody) {
 };
 
 // @inheritdoc..
-LBCannon.CannonPhysicsLink.prototype.timeStep = function() {
+LBCannonPhysicsLink.Link.prototype.timeStep = function() {
     return this.dt;
 };
 
 // @inheritdoc..
-LBCannon.CannonPhysicsLink.prototype.update = function(dt) {
+LBCannonPhysicsLink.Link.prototype.update = function(dt) {
     if (this.updateCount === 0) {
         // Gotta sync up first time through...
         this.rigidBodies.forEach(this._updateFromSimStep, this);
@@ -112,18 +119,18 @@ LBCannon.CannonPhysicsLink.prototype.update = function(dt) {
 };
 
 /**
- * Called by {@link LBCannon.CannonPhysicsLink#update} for each rigid body to let the rigid body
+ * Called by {@link module:LBCannonPhysicsLink.Link#update} for each rigid body to let the rigid body
  * update the forces applied to it and then assign them to the Cannon body.
  * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body.
  * @returns {undefined}
  */
-LBCannon.CannonPhysicsLink.prototype._applyRigidBodyForces = function(rigidBody) {
+LBCannonPhysicsLink.Link.prototype._applyRigidBodyForces = function(rigidBody) {
     var body = rigidBody._lbCannonBody;
     if (!body) {
         return;
     }
 
-    LBCannon.updateBodyFromRigidBodyVolumes(body, rigidBody);
+    LBCannonUtil.updateBodyFromRigidBodyVolumes(body, rigidBody);
     
     if (rigidBody.updateForces) {
         rigidBody.updateForces(this.dtCurrent);
@@ -136,25 +143,25 @@ LBCannon.CannonPhysicsLink.prototype._applyRigidBodyForces = function(rigidBody)
     resultant.moment.x = resultant.moment.y = 0;
   */ 
     
-        body.applyForce(resultant.force, LBCannon.CannonPhysicsLink._workingVec3.copy(resultant.applPoint));
+        body.applyForce(resultant.force, LBCannonPhysicsLink.Link._workingVec3.copy(resultant.applPoint));
         body.torque.vadd(resultant.moment, body.torque);
     }
 };
 
 /**
- * Called by {@link LBCannon.CannonPhysicsLink#update} for each rigid body after the physics have
+ * Called by {@link module:LBCannonPhysicsLink.Link#update} for each rigid body after the physics have
  * been stepped, this updates the rigid body from the Cannon body's position and orientation
  * and also updates the Phaser drawing object associated with the rigid body, if any.
  * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body.
  * @returns {undefined}
  */
-LBCannon.CannonPhysicsLink.prototype._updateFromSimStep = function(rigidBody) {
+LBCannonPhysicsLink.Link.prototype._updateFromSimStep = function(rigidBody) {
     var body = rigidBody._lbCannonBody;
     if (!body) {
         return;
     }
     
-    var pos = LBCannon.CannonPhysicsLink._workingVec3.copy(rigidBody.centerOfMass);
+    var pos = LBCannonPhysicsLink.Link._workingVec3.copy(rigidBody.centerOfMass);
     pos.negate(pos);
     body.pointToWorldFrame(pos, pos);
     
@@ -165,9 +172,9 @@ LBCannon.CannonPhysicsLink.prototype._updateFromSimStep = function(rigidBody) {
     rigidBody.obj3D.updateMatrixWorld(true);
 };
 
-LBCannon.CannonPhysicsLink.getCannonBody = function(rigidBody) {
+LBCannonPhysicsLink.Link.getCannonBody = function(rigidBody) {
     return rigidBody._lbCannonBody;
 };
 
-return LBCannon;
+return LBCannonPhysicsLink;
 });

@@ -25,7 +25,6 @@ var require = {
         
         'lbcannonutil': 'leeboard/cannon/CannonUtil',
         'lbcannonphysicslink': 'leeboard/cannon/CannonPhysicsLink',
-        'lbcannon': 'leeboard/cannon/LBCannon',
         
         'lbassets': 'leeboard/core/Assets',
         'lbcamera': 'leeboard/core/Camera-THREE',

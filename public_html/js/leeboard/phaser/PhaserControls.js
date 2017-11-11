@@ -54,40 +54,40 @@ LBPhaser.Slider = function(game, lowerValue, lowerValuePixel, upperValue, upperV
     /**
      * One limit of the controlled value.
      * @readonly
-     * @type Number
+     * @member {Number}
      */
     this.lowerValue = lowerValue;
     
     /**
      * The thumb pixel position corresponding to {@link LBPhaser.Slider#lowerValue}.
      * @readonly
-     * @type Number
+     * @member {Number}
      */
     this.lowerValuePixel = lowerValuePixel;
 
     /**
      * Another limit of the controlled value.
      * @readonly
-     * @type Number
+     * @member {Number}
      */
     this.upperValue = upperValue;
 
     /**
      * The thumb pixel position corresponding to {@link LBPhaser.Slider#upperValue}.
      * @readonly
-     * @type Number
+     * @member {Number}
      */
     this.upperValuePixel = upperValuePixel;
     
     /**
      * The group of the control, position or rotate this to move or rotate the control.
-     * @type Phaser.Group
+     * @member {Phaser.Group}
      */
     this.group = game.add.group();
 
     /**
      * The sprite representing the thumb.
-     * @type Phaser.Sprite
+     * @member {Phaser.Sprite}
      */
     this.thumbSprite = thumbSprite;
     
@@ -322,7 +322,7 @@ LBPhaser.Dial = function(game, lowerValue, lowerDeg, upperValue, upperDeg, thumb
     /**
      * One limit of the controlled value.
      * @readonly
-     * @type Number
+     * @member {Number}
      */
     this.lowerValue = lowerValue;
     
@@ -330,7 +330,7 @@ LBPhaser.Dial = function(game, lowerValue, lowerDeg, upperValue, upperDeg, thumb
      * The rotation of the thumb sprite, in degrees, corresponding to a controlled
      * value of {@link LBPhaser.Dial#lowerValue}.
      * @readonly
-     * @type Number
+     * @member {Number}
      */
     this.lowerDeg = lowerDeg;
     
@@ -338,7 +338,7 @@ LBPhaser.Dial = function(game, lowerValue, lowerDeg, upperValue, upperDeg, thumb
     /**
      * The other limit of the controlled value.
      * @readonly
-     * @type Number
+     * @member {Number}
      */
     this.upperValue = upperValue;
     
@@ -346,20 +346,20 @@ LBPhaser.Dial = function(game, lowerValue, lowerDeg, upperValue, upperDeg, thumb
      * The rotation of the thumb sprite, in degrees, corresponding to a controlled
      * value of {@link LBPhaser.Dial#upperValue}.
      * @readonly
-     * @type Number
+     * @member {Number}
      */
     this.upperDeg = upperDeg;
     
 
     /**
      * The group of the control, position or rotate this to move or rotate the control.
-     * @type Phaser.Group
+     * @member {Phaser.Group}
      */
     this.group = game.add.group();
 
     /**
      * The sprite representing the thumb.
-     * @type Phaser.Sprite
+     * @member {Phaser.Sprite}
      */
     this.thumbSprite = thumbSprite;
     

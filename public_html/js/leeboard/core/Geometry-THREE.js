@@ -1581,56 +1581,56 @@ LBGeometry.Color.colorValueFromData = function(data, defColor) {
 /**
  * The 3D point (0, 0, 0)
  * @constant
- * @type LBGeometry.Vector3
+ * @member {module:LBGeometry.Vector3}
  */
 LBGeometry.ORIGIN = new LBGeometry.Vector3();
 
 /**
  * The 3D point (0, 0, 0)
  * @constant
- * @type LBGeometry.Vector3
+ * @member {module:LBGeometry.Vector3}
  */
 LBGeometry.ZERO = LBGeometry.ORIGIN;
 
 /**
  * A vector representing the x-axis.
  * @constant
- * @type LBGeometry.Vector3
+ * @member {module:LBGeometry.Vector3}
  */
 LBGeometry.X_AXIS = new LBGeometry.Vector3(1, 0, 0);
 
 /**
  * A vector representing the y-axis.
  * @constant
- * @type LBGeometry.Vector3
+ * @member {module:LBGeometry.Vector3}
  */
 LBGeometry.Y_AXIS = new LBGeometry.Vector3(0, 1, 0);
 
 /**
  * A vector representing the z-axis.
  * @constant
- * @type LBGeometry.Vector3
+ * @member {module:LBGeometry.Vector3}
  */
 LBGeometry.Z_AXIS = new LBGeometry.Vector3(0, 0, 1);
 
 /**
  * A plane representing the x-y plane passing through the origin.
  * @constant
- * @type LBGeometry.Plane
+ * @member {module:LBGeometry.Plane}
  */
 LBGeometry.XY_PLANE = new LBGeometry.Plane(LBGeometry.Z_AXIS, 0);
 
 /**
  * A plane representing the z-x plane passing through the origin.
  * @constant
- * @type LBGeometry.Plane
+ * @member {module:LBGeometry.Plane}
  */
 LBGeometry.ZX_PLANE = new LBGeometry.Plane(LBGeometry.Y_AXIS, 0);
 
 /**
  * A plane representing the y-z plane passing through the origin.
  * @constant
- * @type LBGeometry.Plane
+ * @member {module:LBGeometry.Plane}
  */
 LBGeometry.YZ_PLANE = new LBGeometry.Plane(LBGeometry.X_AXIS, 0);
 

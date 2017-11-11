@@ -43,20 +43,20 @@ LBVolume.Volume = function(typeName, mass, massDistribution) {
 
     /**
      * The array of vertices of the tetra.
-     * @type LBGeometry.Vector3
+     * @member {module:LBGeometry.Vector3}
      */
     this.vertices = [];    
     
     /**
      * Mass associated with the volume, set to {@link Number.NaN} if a mass is not assigned.
-     * @type Number
+     * @member {module:Number}
      */
     this.mass = LBUtil.isVar(mass) ? mass : Number.NaN;
     
     /**
      * Additional factor used by {@link module:LBVolume.allocateMassToVolumes} to control mass distribution.
      * This is basically a normalized density value.
-     * @type Number
+     * @member {Number}
      */
     this.massDistribution = massDistribution || 1;
 };
@@ -599,7 +599,7 @@ LBVolume.Tetra = function(vertices, mass, indices, massDistribution) {
 /**
  * The tetra type name, the value of {@link module:LBVolume.Volume#typeName} for tetras.
  * @constant
- * @type String
+ * @type {String}
  */
 LBVolume.Tetra.TYPE_NAME = "Tetra";
 
@@ -1090,7 +1090,7 @@ LBVolume.TriBiPyramid = function(vertices, mass, indices, massDistribution) {
 /**
  * The triangular bipyramid type name, the value of {@link module:LBVolume.Volume#typeName} for cuboids.
  * @constant
- * @type String
+ * @type {String}
  */
 LBVolume.TriBiPyramid.TYPE_NAME = "TriBiPyramid";
 
@@ -1240,7 +1240,7 @@ LBVolume.TriPrism = function(vertices, mass, indices, massDistribution) {
 /**
  * The triangular bipyramid type name, the value of {@link module:LBVolume.Volume#typeName} for cuboids.
  * @constant
- * @type String
+ * @type {String}
  */
 LBVolume.TriPrism.TYPE_NAME = "TriPrism";
 
@@ -1409,7 +1409,7 @@ LBVolume.Cuboid = function(vertices, mass, indices, massDistribution) {
 /**
  * The cuboid type name, the value of {@link module:LBVolume.Volume#typeName} for cuboids.
  * @constant
- * @type String
+ * @type {String}
  */
 LBVolume.Cuboid.TYPE_NAME = "Cuboid";
 
