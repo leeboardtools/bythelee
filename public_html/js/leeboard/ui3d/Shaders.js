@@ -36,7 +36,7 @@ var LBShaders = LBShaders || {};
  * normally declare a uniform sampler2D representing the input texture values. The output of
  * the fragment shader is the output texture.
  * <p>
- * The computer maintains two {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderTarget}
+ * The computer maintains two {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderTarget|THREE.WebGLRenderTarget}
  * objects, a current one accessed via {@link LBShaders.Computer#getCurrentRenderTarget} and previous
  * one accessed via {@link LBShaders.Computer#getPreviousRenderTarget}. The current render target
  * is the one that receives the output of the shaders when the computations are performed.
@@ -45,7 +45,7 @@ var LBShaders = LBShaders || {};
  * current and previous objects.
  * <p>
  * In order to actually do anything, shaders must be defined. 
- * {@link https://threejs.org/docs/index.html#api/materials/ShaderMaterial} objects are used to 
+ * {@link https://threejs.org/docs/index.html#api/materials/ShaderMaterial|THREE.ShaderMaterial} objects are used to 
  * define the shaders.
  * <p>
  * To pass the previous render target's data (texture) to the shader, you need to assign
@@ -54,10 +54,10 @@ var LBShaders = LBShaders || {};
  * called with the shader material passed in as the argument. After the call the output
  * of the computation will be in the texture of the current render target.
  * <p>
- * 
+ * @constructor
  * @param {Number} gridWidth    The width of the compute grid.
  * @param {Number} gridHeight   The height of the compute grid.
- * @param {THREE.WebGLRenderer} [renderer]    The renderer to use.
+ * @param {THREE.WebGLRenderer} [renderer]    The {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderer|THREE.WebGLRenderer} renderer to use.
  * @param {THREE.Camera}    [camera]    The camera to use.
  * @returns {LBShaders.Computer}
  */
@@ -114,7 +114,7 @@ LBShaders.Computer.prototype = {
     /**
      * Helper for creating an appropriately sized texture for use with the computer, the
      * values of texture are initialized to 0,0,0,1.
-     * @returns {THREE.DataTexture} The texture.
+     * @returns {THREE.DataTexture} The {@link https://threejs.org/docs/index.html#api/textures/DataTexture|THREE.DataTexture} texture.
      */
     createShaderTexture: function() {
         var data = new Float32Array(this.gridWidth * this.gridHeight * 4);
@@ -161,7 +161,7 @@ LBShaders.Computer.prototype = {
     
     /**
      * Initializes the values of a compute texture to a single color and alpha value.
-     * @param {THREE.DataTexture} texture   The texture to initialize.
+     * @param {THREE.DataTexture} texture   The {@link https://threejs.org/docs/index.html#api/texture/DataTexture|THREE.DataTexture} texture to initialize.
      * @param {THREE.Color} [color]   The color to set each value to, if not defined
      * the clear color of the computer's renderer will be used.
      * @param {Number} [alpha]  If defined the alpha value to assign to each value, otherwise
@@ -190,7 +190,7 @@ LBShaders.Computer.prototype = {
     /**
      * Helper for initializing the current render target's texture using the pass through
      * shaders.
-     * @param {THREE.DataTexture} texture   The texture to assign.
+     * @param {THREE.DataTexture} texture   The {@link https://threejs.org/docs/index.html#api/texture/DataTexture|THREE.DataTexture} texture to assign.
      * @returns {LBShaders.Computer}    this.
      */
     applyTexture: function(texture) {
@@ -202,7 +202,7 @@ LBShaders.Computer.prototype = {
     
     /**
      * The main compute function, this renders a shader material to the current render target.
-     * @param {THREE.ShaderMaterial} shaderMaterial The shader material to be rendered. This
+     * @param {THREE.ShaderMaterial} shaderMaterial The {@link https://threejs.org/docs/index.html#api/materials/ShaderMaterial|THREE.ShaderMaterial} shader material to be rendered. This
      * material defines the shaders to be run. The uniforms for the shaders should be set up
      * as required before this call.
      * @returns {LBShaders.Computer}    this.
@@ -215,7 +215,7 @@ LBShaders.Computer.prototype = {
     },
     
     /**
-     * @returns {THREE.WebGLRenderTarget}   The current render target, this receives
+     * @returns {THREE.WebGLRenderTarget}   The current {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderTarget|THREE.WebGLRenderTarget} render target, this receives
      * the output of the renderer calls in {@link LBShaders.Computer#applyShader} and
      * {@linnk LBShaders.Computer#applyTexture}.
      */
@@ -225,7 +225,7 @@ LBShaders.Computer.prototype = {
     
     
     /**
-     * @returns {THREE.WebGLRenderTarget}   The previous render target.
+     * @returns {THREE.WebGLRenderTarget}   The previous {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderTarget|THREE.WebGLRenderTarget} render target.
      */
     getPreviousRenderTarget: function() {
         return this.previousTarget;
@@ -272,7 +272,7 @@ LBShaders.Computer.prototype = {
 
 /**
  * Helper for determining if the shader computer is supported.
- * @param {THREE.WebGLRenderer} [renderer]    The renderer.
+ * @param {THREE.WebGLRenderer} [renderer]    The {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderer|THREE.WebGLRenderer} renderer.
  * @returns {Boolean}   true if we think the computer will work.
  */
 LBShaders.Computer.isSupported = function(renderer) {
@@ -291,7 +291,7 @@ LBShaders.Computer.isSupported = function(renderer) {
 /**
  * A simple helper for copying the texture from one render target to another.
  * @constructor
- * @param {THREE.WebGLRenderer} renderer    The renderer.
+ * @param {THREE.WebGLRenderer} renderer    The {@link https://threejs.org/docs/index.html#api/renderers/WebGLRenderer|THREE.WebGLRenderer} renderer.
  * @returns {LBShaders.TargetCopier}
  */
 LBShaders.TargetCopier = function(renderer) {

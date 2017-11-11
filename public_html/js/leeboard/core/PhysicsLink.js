@@ -20,7 +20,6 @@ function(LBPhysics) {
 
     'use strict';
     
-
 /**
  * Base class that manages linking a {@link LBPhysics.RigidBody} to a physics engine.
  * @constructor
@@ -61,7 +60,7 @@ LBPhysics.PhysicsLink.prototype = {
      * Adds a top-level {@link LBPhysics.RigidBody} to the manager as a fixed object.
      * This rigid body should not be a part of any other rigid body.
      * @param {LBPhysics.RigidBody} rigidBody The rigid body.
-     * @returns {LBPhaser.P2Link}   this.
+     * @returns {LBPhysics.PhysicsLink}   this.
      */
     addFixedObject: function(rigidBody) {
         throw 'addFixedObject not implemented';
