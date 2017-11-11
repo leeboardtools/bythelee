@@ -23,7 +23,7 @@ function(LBUtil, LBMath, LBGeometry, LBPhysics, LBFoils, LBSailSim, LBAssets) {
 /**
  * The main sailing environment, basically the sailing world.
  * @class SailEnv
- * @param {LBAssets.Loader} [assetLoader]   The optional asset loader.
+ * @param {module:LBAssets.Loader} [assetLoader]   The optional asset loader.
  * @constructor
  * @returns {LBSailSim.Env}
  */
@@ -237,7 +237,7 @@ LBSailSim.Env.prototype = {
     /**
      * Called when a floating object has been loaded to provide optional further proessing.
      * @param {Object} data The data object used to load the floating object.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body floating object.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body floating object.
      * @param {Object} objectDef    The definition object.
      */
     floatingObjectLoaded: function(data, rigidBody, objectDef) {
@@ -262,7 +262,7 @@ LBSailSim.Env.prototype = {
     //
     
     /**
-     * Loads {@link LBFoils.ClCdCurve} from a data object.
+     * Loads {@link module:LBFoils.ClCdCurve} from a data object.
      * @param {object} data The array of data objects for the ClCd curves.
      * @returns {LBSailSim.Env} this.
      */
@@ -279,7 +279,7 @@ LBSailSim.Env.prototype = {
     
     
     /**
-     * Retrieves a loaded {@link LBFoils.ClCdCurve}.
+     * Retrieves a loaded {@link module:LBFoils.ClCdCurve}.
      * @param {object} name The name of the ClCd curve.
      * @returns {object}    The ClCd curve, undefined if there isn't one with the name.
      */

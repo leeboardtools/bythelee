@@ -22,13 +22,13 @@ function(LBCannon, LBGeometry, LBPhysics, CANNON, LBPhysicsLink) {
 
 /**
  * Manages linking a {@link http://schteppe.github.io/cannon.js/docs/classes/Body.html|CANNON.Body}
- * with a {@link LBPhysics.RigidBody}.
+ * with a {@link module:LBPhysics.RigidBody}.
  * @constructor
- * @extends LBPhysics.PhysicsLink
+ * @extends module:LBPhysicsLink.Link
  * @returns {LBCannon.CannonPhysicsLink}
  */
 LBCannon.CannonPhysicsLink = function() {
-    LBPhysics.PhysicsLink.call(this);
+    LBPhysicsLink.Link.call(this);
     
     this.cWorld = new CANNON.World();
     this.cWorld.broadphase = new CANNON.NaiveBroadphase();
@@ -42,7 +42,7 @@ LBCannon.CannonPhysicsLink = function() {
 LBCannon.CannonPhysicsLink._workingVec3 = new CANNON.Vec3();
 LBCannon.CannonPhysicsLink._workingVector3 = new LBGeometry.Vector3();
 
-LBCannon.CannonPhysicsLink.prototype = Object.create(LBPhysics.PhysicsLink.prototype);
+LBCannon.CannonPhysicsLink.prototype = Object.create(LBPhysicsLink.Link.prototype);
 LBCannon.CannonPhysicsLink.prototype.constructor = LBCannon.CannonPhysicsLink;
 
 
@@ -114,7 +114,7 @@ LBCannon.CannonPhysicsLink.prototype.update = function(dt) {
 /**
  * Called by {@link LBCannon.CannonPhysicsLink#update} for each rigid body to let the rigid body
  * update the forces applied to it and then assign them to the Cannon body.
- * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+ * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body.
  * @returns {undefined}
  */
 LBCannon.CannonPhysicsLink.prototype._applyRigidBodyForces = function(rigidBody) {
@@ -145,7 +145,7 @@ LBCannon.CannonPhysicsLink.prototype._applyRigidBodyForces = function(rigidBody)
  * Called by {@link LBCannon.CannonPhysicsLink#update} for each rigid body after the physics have
  * been stepped, this updates the rigid body from the Cannon body's position and orientation
  * and also updates the Phaser drawing object associated with the rigid body, if any.
- * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+ * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body.
  * @returns {undefined}
  */
 LBCannon.CannonPhysicsLink.prototype._updateFromSimStep = function(rigidBody) {

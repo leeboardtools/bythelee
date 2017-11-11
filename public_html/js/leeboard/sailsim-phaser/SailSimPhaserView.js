@@ -135,7 +135,7 @@ LBSailSim.PhaserView.prototype._loadDisplayObjectForHull = function(boat) {
 /**
  * Called by {@link LBSailSim.PhaserView#onBoatCheckedOut} to handle loading the display
  * objects for a spar.
- * @param {LBPhysics.RigidBody} rigidBody    The spar to load for.
+ * @param {module:LBPhysics.RigidBody} rigidBody    The spar to load for.
  * @returns {undefined}
  */
 LBSailSim.PhaserView.prototype._loadDisplayObjectForSpar = function(rigidBody) {
@@ -262,8 +262,8 @@ LBSailSim.PhaserView.prototype._loadObj3DSprite = function(object, data) {
  * Rigid body callback function assigned using {@link LBPhaser.PhysicsView#setBodyCallback}
  * and called after the rigid body display objects have been updated, this is where we handle
  * flipping the sail.
- * @param {LBPhysics.RigidBody} topRigidBody    The top-level rigid body.
- * @param {LBPhysics.RigidBody} rigidBody   The rigid body with the callback assigned to it.
+ * @param {module:LBPhysics.RigidBody} topRigidBody    The top-level rigid body.
+ * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body with the callback assigned to it.
  * @returns {undefined}
  */
 LBSailSim.PhaserView.prototype.onDisplayObjectsUpdated = function(topRigidBody, rigidBody) {
@@ -340,7 +340,7 @@ LBSailSim.Phaser2DView.prototype._loadDisplayObjectForAirfoil = function(rigidBo
  * @extends LBSailSim.PhaserView
  * @param {LBSailSim.Env} sailEnv   The sailing environment.
  * @param {Phaser.Group} worldGroup The parent group for all display objects.
- * @param {LBCamera.Camera} [camera]    If defined the camera for the 3D projection.
+ * @param {module:LBCamera.Camera} [camera]    If defined the camera for the 3D projection.
  * @returns {LBSailSim.Phaser2DView}
  */
 LBSailSim.Phaser3DView = function(sailEnv, worldGroup, camera) {

@@ -19,7 +19,8 @@ define(function() {
     'use strict';
     
 /**
- * @namespace LBUtil
+ * Stuff that I didn't want to create a new module for...
+ * @exports LBUtil
  */
 var LBUtil = LBUtil || {};
 
@@ -49,7 +50,7 @@ LBUtil.kt2mps = function(knots) {
  * No check is made.
  * @param {Number} value    The value to locate.
  * @returns {Number}    The index of the first element in array that is &le; value, if
- * value is &lt array[0] then -1 is returned.
+ * value is &lt; array[0] then -1 is returned.
  */
 LBUtil.bsearch = function(array, value) {
     var lastIndex = array.length - 1;
@@ -80,7 +81,7 @@ LBUtil.bsearch = function(array, value) {
  * Copies properties that are common to two objects from one object to another.
  * @param {object} dst  The object to copy to.
  * @param {object} src  The obejct to copyf from.
- * @param {object} [filter] If defined, a filter function that should return true
+ * @param {Function} [filter] If defined, a filter function that should return true
  * if a property should be copied. The function has the call signature of
  * func(propName, dst, src).
  * @returns {object}    dst.
@@ -112,6 +113,14 @@ LBUtil.copyCommonProperties = function(dst, src, filter) {
     return dst;
 };
 
+/**
+ * Attempts to copy one object to another using a copy() method. If dst is an object,
+ * and it has a copy function, dst.copy is called and dst is returned, otherwise
+ * src is returned.
+ * @param {object} dst  The destination.
+ * @param {object} src  The source object.
+ * @returns {objectd}   dst if dst is an object with a copy function, src otherwise.
+ */
 LBUtil.copyObject = function(dst, src) {
     if (typeof dst === "object") {
         if (typeof dst.copy === "function") {
@@ -136,8 +145,8 @@ LBUtil.isVar = function(v) {
 /**
  * Looks through the elements of an array for the first one with a property called 'name'
  * whose value matches a given name.
- * @param {object} array    The array to search.
- * @param {object} name The name to look for.
+ * @param {object[]} array    The array to search.
+ * @param {String} name The name to look for.
  * @param {object} [defValue=undefined]   The value to return if an element is not found.
  * @returns {object}    The object, defValue if no element found.
  */
@@ -149,6 +158,7 @@ LBUtil.findArrayElementWithName = function(array, name, defValue) {
     }
     return defValue;
 };
+
 
 /**
  * Copies the contents of an array, followed by the same contents except in reverse order,
@@ -188,8 +198,8 @@ LBUtil.copyOrClone = function(dst, src) {
 
 
 /**
- * Registers an object as a namespace with LBUtil so it can be accessed by {@link LBUtil.stringToFunction}
- * and {@link LBUtil.newClassInstanceFromData}.
+ * Registers an object as a namespace with LBUtil so it can be accessed by {@link module:LBUtil.stringToFunction}
+ * and {@link module:LBUtil.newClassInstanceFromData}.
  * @param {String} name The namespace name.
  * @param {Object} namespace    The object representing the namespace.
  * @returns {LBUtil}    LBUtil.
@@ -252,12 +262,13 @@ LBUtil.newClassInstanceFromData = function(data) {
 
 /**
  * A rolling indexable buffer with a maximum size, the oldest element is always
- * at index 0, the newest at index {@link LBUtil.RollingBuffer#getCurrentSize}.
- * Elements are added to the end of the buffer via {@link LBUtil.RollingBuffer#push},
- * removed from the end of the buffer via {@link LBUtil.RollingBuffer#pop_newest},
- * and removed from the front of the buffer via {@link LBUtil.RollingBuffer#pop_oldest}.
+ * at index 0, the newest at index {@link module:LBUtil.RollingBuffer#getCurrentSize}.
+ * Elements are added to the end of the buffer via {@link module:LBUtil.RollingBuffer#push},
+ * removed from the end of the buffer via {@link module:LBUtil.RollingBuffer#pop_newest},
+ * and removed from the front of the buffer via {@link module:LBUtil.RollingBuffer#pop_oldest}.
+ * @constructor
  * @param {Number} maxSize  The maximum number of elements to hold in the buffer.
- * @returns {LBUtil.RollingBuffer}
+ * @returns {module:LBUtil.RollingBuffer}
  */
 LBUtil.RollingBuffer = function(maxSize) {
     this._buffer = [];
@@ -377,7 +388,7 @@ LBUtil.RollingBuffer.prototype = {
     },
     
     /**
-     * Retrieves the object at a given index. Index values are &ge; 0 and &lt; {@link LBUtil.RollingBuffer#getCurrentSize()},
+     * Retrieves the object at a given index. Index values are &ge; 0 and &lt; {@link module:LBUtil.RollingBuffer#getCurrentSize()},
      * with the value at index 0 the oldest value in the buffer.
      * @param {Number} index    The index of interest.
      * @returns {Object}    The object at the index.
@@ -387,7 +398,7 @@ LBUtil.RollingBuffer.prototype = {
     },
     
     /**
-     * Sets the object at a given index. Index values are &ge; 0 and &lt; {@link LBUtil.RollingBuffer#getCurrentSize()},
+     * Sets the object at a given index. Index values are &ge; 0 and &lt; {@link module:LBUtil.RollingBuffer#getCurrentSize()},
      * with the value at index 0 the oldest value in the buffer.
      * @param {Number} index    The index of interest.
      * @param {Object} value    The value to assign to the index.
@@ -411,7 +422,7 @@ LBUtil.RollingBuffer.prototype = {
 
 /**
  * Helper for toggling full-screen mode.
- * @param {Object} element  The DOM element to use.
+ * @param {Element} element  The DOM element to use.
  * @returns {Boolean}   true if full screen mode is entered.
  */
 LBUtil.toggleFullScreen = function(element) {

@@ -202,8 +202,8 @@ LBPhaser.ArrowStyle.prototype = {
      * graphics object with the arrow.
      * @param {LBPhaser.Env} env    Our Phaser environment.
      * @param {Phaser.Graphics} g   The Phaser graphics object that draws the arrow.
-     * @param {LBGeometry.Vector2} base The base of the arrow.
-     * @param {LBGeometry.Vector2} tip   The tip of the arrow.
+     * @param {module:LBGeometry.Vector2} base The base of the arrow.
+     * @param {module:LBGeometry.Vector2} tip   The tip of the arrow.
      * @returns {undefined}
      */
     setupArrowGraphics: function(env, g, base, tip) {
@@ -381,8 +381,8 @@ LBPhaser.Arrow.prototype = {
     /**
      * Sets the arrow from a point defining the base and a vector defining the
      * length and direction of the arrow from the base.
-     * @param {LBGeometry.Vector2} base The base of the arrow.
-     * @param {LBGeometry.Vector2} vector   The vector describing the length and direction of the
+     * @param {module:LBGeometry.Vector2} base The base of the arrow.
+     * @param {module:LBGeometry.Vector2} vector   The vector describing the length and direction of the
      * arrow from base. A 2D or 3D vector.
      * @returns {undefined}
      */
@@ -398,8 +398,8 @@ LBPhaser.Arrow.prototype = {
     /**
      * Sets the arrow from a point defining the base and a vector defining the
      * length and direction of the arrow from the base to the tip.
-     * @param {LBGeometry.Vector2} tip The tip of the arrow.
-     * @param {LBGeometry.Vector2} vector   The vector describing the length and direction of the
+     * @param {module:LBGeometry.Vector2} tip The tip of the arrow.
+     * @param {module:LBGeometry.Vector2} vector   The vector describing the length and direction of the
      * arrow from base. A 2D or 3D vector.
      * @returns {undefined}
      */

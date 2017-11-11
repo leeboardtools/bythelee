@@ -23,7 +23,7 @@ function(LBSailSim, LBSail, LBHull, LBPropulsor, LBControls, LBPhysics, LBUtil, 
  * A controller for rudders. This supports controlling more than one rudder, though
  * it only has a single rudder angle.
  * @constructor
- * @extends LBControls.SmoothController
+ * @extends module:LBControls.SmoothController
  * @param {LBSailSim.Vessel} [vessel] The vessel this belongs to.
  * @returns {LBSailSim.RudderController}
  */
@@ -107,7 +107,7 @@ LBSailSim.RudderController.prototype.setRudderAngleDeg = function(deg) {
 /**
  * A controller for propulsors.
  * @constructor
- * @extends LBControls.SmoothController
+ * @extends module:LBControls.SmoothController
  * @param {LBSailSim.Vessel} vessel The vessel to which this belongs.
  * @returns {LBSailSim.ThrottleController}
  */
@@ -214,15 +214,15 @@ LBSailSim.ThrottleController.prototype.setThrottlePosition = function(value) {
  * <li>airfoils, which are {@link LBSailSim.FoilInstance} based objects that are driven by the atmosphere.
  * <li>hydrofoils,which are {@link LBSailSim.FoilInstance} based objects that are driven by the water.
  * <li>Propulsors, which are {@link LBSailSim.Propulsor} based objects.
- * <li>Ballasts, which are {@link LBPhysics.RigidBody} based objects.
+ * <li>Ballasts, which are {@link module:LBPhysics.RigidBody} based objects.
  * <p>
  * For boats, the local coordinate system is presumed to line up the longitudinal
  * axis with the x-axis, the forward end of the waterline at x = 0, and the aft
  * end in the positive x direction.
  * @constructor
- * @extends LBPhysics.RigidBody
+ * @extends module:LBPhysics.RigidBody
  * @param {object} sailEnv  The sailing environment.
- * @param {LBGeometry.Object3D} obj3D
+ * @param {module:LBGeometry.Object3D} obj3D
  * @returns {LBSailSim.Vessel}
  */
 LBSailSim.Vessel = function(sailEnv, obj3D) {
@@ -253,13 +253,13 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
     this.propulsors = [];
     
     /**
-     * The array of spars {@link LBPhysics.RigidBody}.
+     * The array of spars {@link module:LBPhysics.RigidBody}.
      */
     this.spars = [];
     
     /**
-     * The array of ballasts {@link LBPhysics.RigidBody}.
-     * @member {LBPhysics.RigidBody[]}
+     * The array of ballasts {@link module:LBPhysics.RigidBody}.
+     * @member {module:LBPhysics.RigidBody[]}
      */
     this.ballasts = [];
     
@@ -272,13 +272,13 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
     /**
      * The array of wind indicators. Making them rigid bodies instead of
      * just LBGeometry.Object3D just to keep their management simple.
-     * @member {LBPhysics.RigidBody[]}
+     * @member {module:LBPhysics.RigidBody[]}
      */
     this.windIndicators = [];
     
     /**
      * The array of lines.
-     * @member {LBPhysics.RigidBody[]}
+     * @member {module:LBPhysics.RigidBody[]}
      */
     this.lines = [];
     
@@ -287,19 +287,19 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
     
     /**
      * Stores the true wind velocity.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.trueWind = new LBGeometry.Vector3();
     
     /**
      * Stores the current apparent wind.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.apparentWind = new LBGeometry.Vector3();
     
     /**
      * Stores the current apparent velocity through the water.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.apparentCurrent = new LBGeometry.Vector3();
     
@@ -318,7 +318,7 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
     
     /**
      * The locatio of the center of the cockpit, used for positioning the in-boat view.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.cockpitCenter = null;
 
@@ -424,7 +424,7 @@ LBSailSim.Vessel.prototype.addPropulsor = function(propulsor) {
 
 /**
  * Adds a spar to the vessel.
- * @param {LBPhysics.RigidBody} spar    The spar.
+ * @param {module:LBPhysics.RigidBody} spar    The spar.
  * @returns {LBSailSim.Vessel}  this.
  */
 LBSailSim.Vessel.prototype.addSpar = function(spar) {
@@ -435,7 +435,7 @@ LBSailSim.Vessel.prototype.addSpar = function(spar) {
 
 /**
  * Adds ballast to the vessel.
- * @param {LBPhysics.RigidBody} ballast  The ballast.
+ * @param {module:LBPhysics.RigidBody} ballast  The ballast.
  * @returns {LBSailSim.Vessel}  this.
  */
 LBSailSim.Vessel.prototype.addBallast = function(ballast) {
@@ -446,7 +446,7 @@ LBSailSim.Vessel.prototype.addBallast = function(ballast) {
 
 /**
  * Adds a wind indicator to the vessel.
- * @param {LBPhysics.RigidBody} windIndidator  The wind indicator.
+ * @param {module:LBPhysics.RigidBody} windIndidator  The wind indicator.
  * @returns {LBSailSim.Vessel}  this.
  */
 LBSailSim.Vessel.prototype.addWindIndicator = function(windIndidator) {
@@ -457,7 +457,7 @@ LBSailSim.Vessel.prototype.addWindIndicator = function(windIndidator) {
 
 /**
  * Adds a line to the vessel.
- * @param {LBPhysics.RigidBody} line  The line.
+ * @param {module:LBPhysics.RigidBody} line  The line.
  * @returns {LBSailSim.Vessel}  this.
  */
 LBSailSim.Vessel.prototype.addLine = function(line) {
@@ -503,8 +503,8 @@ LBSailSim.Vessel.prototype._removeParts = function(foils) {
  * @returns {LBSailSim.FoilInstance}    The foil instance.
  */
 LBSailSim.Vessel.prototype._createAndLoadFoilInstance = function(data, isSail) {
-    // We're not using {@link LBPhysics.RigidBody#createFromData() because we need to pass
-    // sailEnv to {@link LBFoils.Foil#load()}.
+    // We're not using {@link module:LBPhysics.RigidBody#createFromData() because we need to pass
+    // sailEnv to {@link module:LBFoils.Foil#load()}.
     var foilInstance;
     if (data.className) {
         if (data.className === 'undefined') {
@@ -604,7 +604,7 @@ LBSailSim.Vessel.prototype._loadPropulsors = function(data, loadCallback) {
  * object from properties in a data object.
  * @protected
  * @param {object} data The data object.
- * @returns {LBPhysics.RigidBody}   The spar object.
+ * @returns {module:LBPhysics.RigidBody}   The spar object.
  */
 LBSailSim.Vessel.prototype._createAndLoadSpar = function(data) {
     return LBPhysics.RigidBody.createFromData(data);
@@ -642,7 +642,7 @@ LBSailSim.Vessel.prototype._loadSpars = function(data, loadCallback) {
  * object from properties in a data object.
  * @protected
  * @param {object} data The data object.
- * @returns {LBPhysics.RigidBody}   The ballast object.
+ * @returns {module:LBPhysics.RigidBody}   The ballast object.
  */
 LBSailSim.Vessel.prototype._createAndLoadBallast = function(data) {
     return LBPhysics.RigidBody.createFromData(data);
@@ -680,7 +680,7 @@ LBSailSim.Vessel.prototype._loadBallasts = function(data, loadCallback) {
  * object from properties in a data object.
  * @protected
  * @param {object} data The data object.
- * @returns {LBPhysics.RigidBody}   The wind indicator object.
+ * @returns {module:LBPhysics.RigidBody}   The wind indicator object.
  */
 LBSailSim.Vessel.prototype._createAndLoadWindIndicator = function(data) {
     return LBPhysics.RigidBody.createFromData(data);
@@ -718,7 +718,7 @@ LBSailSim.Vessel.prototype._loadWindIndicators = function(data, loadCallback) {
  * object from properties in a data object.
  * @protected
  * @param {object} data The data object.
- * @returns {LBPhysics.RigidBody}   The line object.
+ * @returns {module:LBPhysics.RigidBody}   The line object.
  */
 LBSailSim.Vessel.prototype._createAndLoadLine = function(data) {
     return LBPhysics.RigidBody.createFromData(data);
@@ -1091,7 +1091,7 @@ LBSailSim.Vessel.prototype.getPosition = function() {
 
 /**
  * Retrieves the linear velocity of the center of the vessel in m/s.
- * @returns {LBGeometry.Vector2}    The velocity.
+ * @returns {module:LBGeometry.Vector2}    The velocity.
  */
 LBSailSim.Vessel.prototype.getVelocityMPS = function() {
     return this.worldLinearVelocity;
@@ -1143,7 +1143,7 @@ LBSailSim.Vessel.prototype.getLeewayDeg = function(isRound) {
 
 /**
  * Retrieves the true wind velocity at the vessel's location.
- * @returns {LBGeometry.Vector3}
+ * @returns {module:LBGeometry.Vector3}
  */
 LBSailSim.Vessel.prototype.getTrueWindVelocityMPS = function() {
     return this.trueWind;
@@ -1176,7 +1176,7 @@ LBSailSim.Vessel.prototype.getApparentWindBearingDeg = function(isRound) {
 
 /**
  * Retrieves the apparent wind velocity vector in m/s.
- * @returns {LBGeometry.Vector3}    The apparent wind velocity.
+ * @returns {module:LBGeometry.Vector3}    The apparent wind velocity.
  */
 LBSailSim.Vessel.prototype.getApparentWindVelocityMPS = function() {
     return this.apparentWind;

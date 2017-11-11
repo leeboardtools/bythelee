@@ -15,6 +15,11 @@ Delete the docs directory.
 Run:
     jsdoc public_html/js/leeboard -r -d docs
 
+Last know version of jsdoc being used 3.5.5
+
+Docs notes:
+Singleton: See LBDebug.DataLog in core/Debug.js
+
 
 
 Exporting Blender to JSON model:

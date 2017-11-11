@@ -21,7 +21,10 @@ function(LBUtil, LBMath) {
     'use strict';
 
 /**
- * @namespace LBControls
+ * This module contains classes that can be used to control something. The controller
+ * classes have a setValue() and a getValue() method, the setValue() method is used to
+ * control the controller.
+ * @exports LBControls
  */
 var LBControls = LBControls || {};
 LBUtil.registerNamespace('LBControls', LBControls);
@@ -34,7 +37,7 @@ LBUtil.registerNamespace('LBControls', LBControls);
  * @param {Number} [maxValue=100]   The maximum value allowed.
  * @param {Number} [initialValue=minValue]  The initial value.
  * @param {Function} controllee The function called whenever the controller's value is changed.
- * @returns {LBControls.SmoothController}
+ * @returns {module:LBControls.SmoothController}
  */
 LBControls.SmoothController = function(name, minValue, maxValue, initialValue, controllee) {
     this.name = name || "";
@@ -85,7 +88,7 @@ LBControls.SmoothController.prototype = {
      * @param {Number} value    The new value.
      * @param {Boolean} isOffset    If true value is an offset to be added to the
      * current value of the controller.
-     * @returns {LBControls.SmoothController} this.
+     * @returns {module:LBControls.SmoothController} this.
      */
     setValue: function(value, isOffset) {
         if (isOffset) {
@@ -109,9 +112,9 @@ LBControls.SmoothController.prototype = {
      * Sets the value for the controller based upon a value between a lower
      * and an upper value that are mapped to the range limits of the controller.
      * @param {Number} value    The value.
-     * @param {Number} minValue   The value of value mapped to the controller's {@link LBControls.SmoothController#minValue}..
-     * @param {Number} maxValue   The value of value mapped to the controller's {@link LBControls.SmoothController#maxValue}..
-     * @returns {LBControls.SmoothController} this.
+     * @param {Number} minValue   The value of value mapped to the controller's {@link module:LBControls.SmoothController#minValue}..
+     * @param {Number} maxValue   The value of value mapped to the controller's {@link module:LBControls.SmoothController#maxValue}..
+     * @returns {module:LBControls.SmoothController} this.
      */
     setMappedValue: function(value, minValue, maxValue) {
         if ((minValue !== undefined) && (maxValue !== undefined) && (minValue !== maxValue)) {
@@ -124,7 +127,7 @@ LBControls.SmoothController.prototype = {
      * Loads the controller from properties in a data object.
      * @param {object} data The data object.
      * @param {object} owner    An object for use by derived implementations.
-     * @returns {LBControls.SmoothController} this.
+     * @returns {module:LBControls.SmoothController} this.
      */
     load: function(data, owner) {
         if (!data) {
@@ -172,12 +175,12 @@ LBControls.SmoothController.prototype = {
 };
 
 /**
- * A mapper object for use as the {@link LBControls.SmoothController#offsetValueMapper} that uses
- * a simple cubic spline via {@link LBMath.CSpline}.
+ * A mapper object for use as the {@link module:LBControls.SmoothController#offsetValueMapper} that uses
+ * a simple cubic spline via {@link module:LBMath.CSpline}.
  * @constructor
  * @param {object} splineData   The spline data, this should be an object containing two properties,
  * 'xs' and 'ys', each an array of values defining the spline values.
- * @returns {LBControls.CSplineValueMapper}
+ * @returns {module:LBControls.CSplineValueMapper}
  */
 LBControls.CSplineValueMapper = function(splineData) {
     this.cSpline = new LBMath.CSpline(splineData);
@@ -219,7 +222,7 @@ LBControls.CSplineValueMapper.prototype = {
  * @param {Number} [initialValue=0] The initial value of the controller.
  * @param {Function} [controllee]   The function called whenever the current value of the controller
  * is changed.
- * @returns {LBControls.SteppedController}
+ * @returns {module:LBControls.SteppedController}
  */
 LBControls.SteppedController = function(name, steps, initialValue, controllee) {
     /**
@@ -280,7 +283,7 @@ LBControls.SteppedController.prototype = {
     /**
      * Changes the current value.
      * @param {Number} value    The current value, which is an index.
-     * @returns {LBControls.SteppedController}  this.
+     * @returns {module:LBControls.SteppedController}  this.
      */
     setValue: function(value) {
         value = LBMath.clamp(Math.round(value), 0, this.steps.length - 1);
@@ -299,7 +302,7 @@ LBControls.SteppedController.prototype = {
      * Loads the controller from properties in a data object.
      * @param {object} data The data object.
      * @param {object} owner    An object for use by derived implementations.
-     * @returns {LBControls.SmoothController} this.
+     * @returns {module:LBControls.SmoothController} this.
      */
     load: function(data, owner) {
         if (!data) {

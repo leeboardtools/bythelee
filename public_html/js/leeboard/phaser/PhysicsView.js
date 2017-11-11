@@ -22,8 +22,8 @@ function(LBPhaser, LBUtil, LBMath, LBGeometry, Phaser) {
 
 
 /**
- * A Phaser view onto physics objects represented via a {@link LBPhysics.PhysicsLink}.
- * @param {LBPhysics.PhysicsLink} physicsLink    The physics link containing the physics objects.
+ * A Phaser view onto physics objects represented via a {@link module:LBPhysicsLink.Link}.
+ * @param {module:LBPhysicsLink.Link} physicsLink    The physics link containing the physics objects.
  * @param {Phaser.Group}    [worldGroup]    If defined, the group to which all display
  * objects loaded by this are added.
  * @returns {LBPhaser.PhysicsView}
@@ -50,7 +50,7 @@ LBPhaser.PhysicsView.prototype = {
      * Retrieves the object used to hold information specific to this view for a
      * given rigid body.
      * @protected
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body of interest.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body of interest.
      * @returns {Object}    The obejct containing the information.
      */
     _getRigidBodyEntry: function(rigidBody) {
@@ -66,7 +66,7 @@ LBPhaser.PhysicsView.prototype = {
     /**
      * Retrieves the Phaser {@link https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject|DisplayObject} 
      * associated with a rigid body.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body.
      * @returns {Phaser.Sprite} The display object associated with rigidBody, may be undefined.
      */
     getRigidBodyDisplayObject: function(rigidBody) {
@@ -76,7 +76,7 @@ LBPhaser.PhysicsView.prototype = {
     /**
      * Associates a Phaser {@link https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject|DisplayObject} 
      * with a rigid body. A rigid body can only have one display object associated with it.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body.
      * @param {Object} drawingObject    The drawing object to associate.
      * @returns {undefined}
      */
@@ -87,7 +87,7 @@ LBPhaser.PhysicsView.prototype = {
     /**
      * Destroys the Phaser {@link https://photonstorm.github.io/phaser-ce/global.html#Phaser.DisplayObject|DisplayObject} 
      * associated with a rigid body, if any.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body.
      * @returns {undefined}
      */
     destroyRigidBodyDisplayObject: function(rigidBody) {
@@ -101,7 +101,7 @@ LBPhaser.PhysicsView.prototype = {
 
     /**
      * Retrieves the force arrow associated with a rigid body.
-     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
+     * @param {module:LBPhysics.RigidBody} rigidBody The rigid body.
      * @returns {LBPhaser.Arrow}    The force arrow, may be undefined.
      */
     getRigidBodyForceArrow: function(rigidBody) {
@@ -110,7 +110,7 @@ LBPhaser.PhysicsView.prototype = {
     
     /**
      * Sets the force arrow associated with a rigid body.
-     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
+     * @param {module:LBPhysics.RigidBody} rigidBody The rigid body.
      * @param {LBPhaser.Arrow} forceArrow   The force arrow.
      * @returns {undefined}
      */
@@ -120,7 +120,7 @@ LBPhaser.PhysicsView.prototype = {
     
     /**
      * Destroys the force arrow associated with a rigid body, if any.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body.
      * @returns {undefined}
      */
     destroyRigidBodyForceArrow: function(rigidBody) {
@@ -134,7 +134,7 @@ LBPhaser.PhysicsView.prototype = {
     
     /**
      * Retrieves the callback object associated with a rigid body.
-     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
+     * @param {module:LBPhysics.RigidBody} rigidBody The rigid body.
      * @returns {Object}    The callback object, may be undefined.
      */
     getBodyCallback: function(rigidBody) {
@@ -145,7 +145,7 @@ LBPhaser.PhysicsView.prototype = {
      * Sets the callback object associated with a rigid body. The callback has the
      * following optional functions:
      * <li>onDisplayObjectsUpdated = function(topRigidBody, rigidBody);
-     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
+     * @param {module:LBPhysics.RigidBody} rigidBody The rigid body.
      * @param {Object}  callback    The callback object.
      */
     setBodyCallback: function(rigidBody, callback) {
@@ -154,10 +154,10 @@ LBPhaser.PhysicsView.prototype = {
     
 
     /**
-     * Called by {@link LBPhysics.PhysicsLink} when a rigid body is added to the physics
+     * Called by {@link module:LBPhysicsLink.Link} when a rigid body is added to the physics
      * link or when this view is first added to the physics link.
      * @protected
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body to process.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body to process.
      * @returns {undefined}
      */
     rigidBodyAdded: function(rigidBody) {
@@ -165,10 +165,10 @@ LBPhaser.PhysicsView.prototype = {
     },
     
     /**
-     * Called by {@link LBPhysics.PhysicsLink} when a rigid body is removed from the
+     * Called by {@link module:LBPhysicsLink.Link} when a rigid body is removed from the
      * physics link or when this view is removed from the physics link.
      * @protected
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body to process.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body to process.
      * @returns {undefined}
      */
     rigidBodyRemoved: function(rigidBody) {
@@ -177,7 +177,7 @@ LBPhaser.PhysicsView.prototype = {
     },
     
     /**
-     * Called by {@link LBPhysics.PhysicsLink} before it starts calling {@link LBPhaser.PhysicsView#updateRigidBodyDisplayObjects}
+     * Called by {@link module:LBPhysicsLink.Link} before it starts calling {@link LBPhaser.PhysicsView#updateRigidBodyDisplayObjects}
      * for each rigid body.
      * @returns {undefined}
      */
@@ -186,7 +186,7 @@ LBPhaser.PhysicsView.prototype = {
     },
     
     /**
-     * Called by {@link LBPhysics.PhysicsLink} after it has finished calling {@link LBPhaser.PhysicsView#updateRigidBodyDisplayObjects}
+     * Called by {@link module:LBPhysicsLink.Link} after it has finished calling {@link LBPhaser.PhysicsView#updateRigidBodyDisplayObjects}
      * for each rigid body.
      * @returns {undefined}
      */
@@ -195,10 +195,10 @@ LBPhaser.PhysicsView.prototype = {
     },
 
     /**
-     * Called by {@link LBPhysics.PhysicsLink} to have the view update from the current
+     * Called by {@link module:LBPhysicsLink.Link} to have the view update from the current
      * state of a rigid body.
      * @protected
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body to process.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body to process.
      * @returns {undefined}
      */
     updateRigidBodyDisplayObjects: function(rigidBody) {
@@ -211,7 +211,7 @@ LBPhaser.PhysicsView.prototype = {
      * Called by {@link LBPhaser.PhysicsView#updateRigidbodyDisplayObject} and recursively
      * from here for each part of a rigid body to handle updating the display objects
      * for a rigid body.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body whose objects are to be updated.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body whose objects are to be updated.
      * @returns {undefined}
      */
     _updateDisplayObjects: function(rigidBody) {
@@ -236,8 +236,8 @@ LBPhaser.PhysicsView.prototype = {
     /**
      * Updates a sprite from a rigid body.
      * <p>
-     * This is automatically called as a result of calling {@link LBPhysics.PhysicsLink#updateDisplayObjects}.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * This is automatically called as a result of calling {@link module:LBPhysicsLink.Link#updateDisplayObjects}.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body.
      * @param {Phaser.Image} sprite   The sprite to be updated.
      * @returns {undefined}
      */
@@ -266,15 +266,15 @@ LBPhaser.PhysicsView.prototype = {
     /**
      * Updates a force arrow from a rigid body's resultant. If the rigid body has
      * a 'getForceArrowResultant' member function defined, that will be called
-     * to obtain the resultant, otherwise the rigid body's {@link LBPhysics.RigidBody#getResultant} method will
+     * to obtain the resultant, otherwise the rigid body's {@link module:LBPhysics.RigidBody#getResultant} method will
      * be called.
      * <p>
-     * This is automatically called as a result of calling {@link LBPhysics.PhysicsLink#updateDisplayObjects}.
+     * This is automatically called as a result of calling {@link module:LBPhysicsLink.Link#updateDisplayObjects}.
      * <p>
      * The getForceArrowResultant function has the same function signature as 
-     * {@link LBPhysics.RigidBody#getResultant} excluding the convertToWrench argument
+     * {@link module:LBPhysics.RigidBody#getResultant} excluding the convertToWrench argument
      * (the first argument).
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @param {module:LBPhysics.RigidBody} rigidBody   The rigid body.
      * @param {LBPhaser.Arrow} forceArrow   The arrow object.
      * @returns {undefined}
      */

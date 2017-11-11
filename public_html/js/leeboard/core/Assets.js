@@ -20,15 +20,16 @@ define(function() {
     'use strict';
 
 /**
- * 
- * @namespace LBAssets
+ * This module contains classes for managing assets, in particular the loading and
+ * caching of assets.
+ * @exports LBAssets
  */
 var LBAssets = LBAssets || {};
 
 /**
  * This is our basic asset loader, it asynchronously loads and caches assets.
  * @constructor
- * @returns {LBAssets.Loader}
+ * @returns {module:LBAssets.Loader}
  */
 LBAssets.Loader = function() {
     this.jsonAssets = {};
@@ -46,7 +47,7 @@ LBAssets.Loader.prototype = {
  * loaded, the JSON object is passed as the argument.
  * @param {Function} [onProgress]   Optional progress function.
  * @param {Function} [onError]  Optional error function.
- * @returns {LBAssets.Loader}   this.
+ * @returns {module:LBAssets.Loader}   this.
  */
 LBAssets.Loader.prototype.loadJSON = function(assetName, fileName, onLoad, onProgress, onError) {
     if (this.jsonAssets[assetName]) {
@@ -105,7 +106,7 @@ LBAssets.Loader.prototype.getJSON = function(assetName) {
  *      coordinator.endLoadCalls();
  * 
  * @constructor
- * @returns {LBAssets.MultiLoadCoordinator}
+ * @returns {module:LBAssets.MultiLoadCoordinator}
  */
 LBAssets.MultiLoadCoordinator = function() {
     this._loaderCount = 0;
@@ -219,7 +220,7 @@ LBAssets.MultiLoadCoordinator.prototype = {
     
     /**
      * Finishes up the loading, this is where the onComplete and onError functions
-     * passed to {@link LBAssets.MultiLoadCoordinator#setup} are called.
+     * passed to {@link module:LBAssets.MultiLoadCoordinator#setup} are called.
      * @private
      * @returns {undefined}
      */

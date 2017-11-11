@@ -55,7 +55,7 @@ LBSailSim.Wind = function() {
     
     /**
      * The direction the wind is blowing towards in vector form.
-     * @member {LBGeometry.Vector2}
+     * @member {module:LBGeometry.Vector2}
      */
     this.averageToDir = new LBGeometry.Vector2(-1, 0);
     
@@ -428,8 +428,8 @@ LBSailSim.Wind.prototype = {
  * default there is more tapering applied towards the trailing edge.
  * 
  * @constructor
- * @param {LBGeometry.Vector2} leadingPosition  The position of the center of the leading edge of the puff.
- * @param {LBGeometry.Vector2} velocity The velocity the puff is traveling.
+ * @param {module:LBGeometry.Vector2} leadingPosition  The position of the center of the leading edge of the puff.
+ * @param {module:LBGeometry.Vector2} velocity The velocity the puff is traveling.
  * @param {Object} [options] If defined the options such as depth, leadingWidth, expansionDeg, and timeToLive.
  * the puff's speed becomes zero.
  * @returns {LBSailSim.WindPuff}
@@ -438,14 +438,14 @@ LBSailSim.WindPuff = function(leadingPosition, velocity, options) {
     /**
      * The position of the center of the leading edge.
      * @readonly
-     * @member {LBGeometry.Vector2}
+     * @member {module:LBGeometry.Vector2}
      */
     this.leadingPosition = new LBGeometry.Vector2();
     
     /**
      * The direction the puff is moving in.
      * @readonly
-     * @member {LBGeometry.Vector2}
+     * @member {module:LBGeometry.Vector2}
      */
     this.velDir = new LBGeometry.Vector2();
     
@@ -494,7 +494,7 @@ LBSailSim.WindPuff = function(leadingPosition, velocity, options) {
     /**
      * The center of where the puff is theoretically flowing from.
      * @readonly
-     * @member {LBGeometry.Vector2}
+     * @member {module:LBGeometry.Vector2}
      */
     this.centerPos = new LBGeometry.Vector2();
     
@@ -516,7 +516,7 @@ LBSailSim.WindPuff = function(leadingPosition, velocity, options) {
     /**
      * A rectangle fully enclosing the puff, used for quick bounds checking.
      * @readonly
-     * @member {LBGeometry.Rect}
+     * @member {module:LBGeometry.Rect}
      */
     this.boundsRect = new LBGeometry.Rect();
     
@@ -576,8 +576,8 @@ LBSailSim.WindPuff.debugOutput = false;
 LBSailSim.WindPuff.prototype = {
     /**
      * Sets up the puff.
-     * @param {LBGeometry.Vector2} leadingPosition  The position of the center of the leading edge of the puff.
-     * @param {LBGeometry.Vector2} velocity The velocity the puff is traveling.
+     * @param {module:LBGeometry.Vector2} leadingPosition  The position of the center of the leading edge of the puff.
+     * @param {module:LBGeometry.Vector2} velocity The velocity the puff is traveling.
      * @param {Object} [options] If defined the options such as depth, leadingWidth, expansionDeg, and timeToLive.
      * @returns {LBSailSim.WindPuff}
      */
@@ -774,8 +774,8 @@ LBSailSim.WindPuff.prototype = {
      * @param {Number} x    The x coordinate of the point.
      * @param {Number} y    The y coordinate of the point.
      * @param {Number} [z=10]   The z coordinate of the point. If this is &le; 0 the velocity will be 0.
-     * @param {LBGeometry.Vector3} [vel]    If defined the object to receive the velocity.
-     * @returns {LBGeometry.Vector3}    The velocity.
+     * @param {module:LBGeometry.Vector3} [vel]    If defined the object to receive the velocity.
+     * @returns {module:LBGeometry.Vector3}    The velocity.
      */
     getFlowVelocity: function(x, y, z, vel) {
         vel = vel ? vel.set(0, 0, 0) : new LBGeometry.Vector3();

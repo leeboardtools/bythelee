@@ -22,17 +22,17 @@ function(LBPhaser, LBUtil, LBGeometry, LBPhysics, Phaser, LBPhysicsLink) {
 
 
 /**
- * Manages linking a {@link https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body|Phaser.Physics.P2.Body} and a {@link LBPhysics.RigidBody}, updating
+ * Manages linking a {@link https://photonstorm.github.io/phaser-ce/Phaser.Physics.P2.Body|Phaser.Physics.P2.Body} and a {@link module:LBPhysics.RigidBody}, updating
  * the position/rotation of the rigid body from the P2 body and applying the forces
  * from the rigid body to the P2 body. This also supports displaying an arrow representing
  * the resultant force on rigid bodies.
  * @constructor
- * @extends LBPhysics.PhysicsLink
+ * @extends module:LBPhysicsLink.Link
  * @param {LBPhaser.Env} phaserEnv The Phaser environment we're running under.
  * @returns {LBPhaser.P2Link}
  */
 LBPhaser.P2Link = function(phaserEnv) {
-    LBPhysics.PhysicsLink.call(this);
+    LBPhysicsLink.Link.call(this);
     this.phaserEnv = phaserEnv;
     this.game = phaserEnv.game;
     
@@ -44,7 +44,7 @@ LBPhaser.P2Link = function(phaserEnv) {
 };
 
 
-LBPhaser.P2Link.prototype = Object.create(LBPhysics.PhysicsLink.prototype);
+LBPhaser.P2Link.prototype = Object.create(LBPhysicsLink.Link.prototype);
 LBPhaser.P2Link.prototype.constructor = LBPhaser.P2Link;
 
 LBPhaser.P2Link.prototype.addFixedPhaserObject = function(object) {
@@ -59,7 +59,7 @@ LBPhaser.P2Link.prototype.addFixedPhaserObject = function(object) {
 
 // @inheritdoc..
 LBPhaser.P2Link.prototype.addRigidBody = function(rigidBody, data) {
-    LBPhysics.PhysicsLink.prototype.addRigidBody.call(this, rigidBody);
+    LBPhysicsLink.Link.prototype.addRigidBody.call(this, rigidBody);
     
     var p2Body = LBPhaser.P2Link.createP2BodyFromData(this.game, data.phaser);
     rigidBody._lbP2Body = p2Body;
@@ -235,7 +235,7 @@ LBPhaser.P2Link.createP2BodyFromData = function(game, data) {
 
 /**
  * Helper that retrieves the P2 body associated with a rigid body object.
- * @param {LBPhysics.RigidBody} object  The rigid body object.
+ * @param {module:LBPhysics.RigidBody} object  The rigid body object.
  * @returns {Phaser.Physics.P2.Body}    The P2 body, undefined if none assigned.
  */
 LBPhaser.P2Link.getP2Body = function(object) {

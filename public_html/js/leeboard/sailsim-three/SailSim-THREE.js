@@ -29,7 +29,7 @@ function(LBSailSim, LBCannon, THREE, LBGeometry, LBAssets, LBUI3d, LBWater3D, LB
  * @param {LBUI3d.App3D} app3D   The app calling this.
  * @param {LBUI3d.View3D} mainView   The main view of the app.
  * @param {LBSailSim.SailEnvTHREE.CANNON_PHYSICS} physicsType  The physics engine to use.
- * @param {LBAssets.Loader} [assetLoader]   The optional asset loader.
+ * @param {module:LBAssets.Loader} [assetLoader]   The optional asset loader.
  * @returns {LBSailSim.SailEnvTHREE}
  */
 LBSailSim.SailEnvTHREE = function(app3D, mainView, physicsType, assetLoader) {

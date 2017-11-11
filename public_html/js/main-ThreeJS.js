@@ -291,7 +291,7 @@ LBMyApp.prototype.closeSplash = function(event) {
 
 /**
  * Updates a slider control's value from the current value of a controller.
- * @param {LBControls.Controller} controller
+ * @param {module:LBControls.Controller} controller
  * @param {Element} control
  * @returns {undefined}
  */
@@ -318,7 +318,7 @@ LBMyApp.updateControlFromController = function(controller, control) {
  * @param {Number} value
  * @param {Number} min
  * @param {Number} max
- * @param {LBControls.Controller} controller
+ * @param {module:LBControls.Controller} controller
  * @returns {undefined}
  */
 LBMyApp.updateControllerFromControl = function(control, value, min, max, controller) {
@@ -337,7 +337,7 @@ LBMyApp.updateControllerFromControl = function(control, value, min, max, control
 
 /**
  * Handles moving the control value of a controller based upon a key.
- * @param {LBControls.Controller} controller
+ * @param {module:LBControls.Controller} controller
  * @param {Number} key
  * @param {Boolean} isDecrease
  * @param {Element} control

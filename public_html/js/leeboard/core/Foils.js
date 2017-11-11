@@ -21,7 +21,8 @@ function(LBUtil, LBMath, LBGeometry, LBPhysics) {
 
 
 /**
- * @namespace LBFoils
+ * This module contains all the stuff related to 2D fluid based foil force modeling.
+ * @exports LBFoils
  */
 var LBFoils = LBFoils || {};
 
@@ -31,7 +32,7 @@ var LBFoils = LBFoils || {};
  * @param {Number} cl The lift coefficient.
  * @param {Number} cd The drag coefficient.
  * @param {Number} cm The moment coefficient.
- * @returns {LBFoils.ClCd} 
+ * @returns {module:LBFoils.ClCd} 
  */
 LBFoils.ClCd = function(cl, cd, cm) {
     /**
@@ -60,12 +61,12 @@ LBFoils.ClCd = function(cl, cd, cm) {
     this.cmIsChordFraction = false;
 };
 
-LBFoils.ClCd._workingVector3A;
-LBFoils.ClCd._workingVector3B;
-LBFoils.ClCd._workingLine3A;
+var _workingVector3A;
+var _workingVector3B;
+var _workingLine3A;
 /**
  * Calculates the lift and drag forces and the moment from the coefficients.
- * @param {object} coefs    The lift/drag coefficients.
+ * @param {module:LBFoils.ClCd} coefs    The lift/drag coefficients.
  * @param {Number} rho    The density.
  * @param {Number} area   The area.
  * @param {Number} qInfSpeed   The magnitude of the free stream velocity.
@@ -87,19 +88,19 @@ LBFoils.ClCd.calcLiftDragMoment = function(coefs, rho, area, qInfSpeed, qInfLoca
         store.moment = 0;
     }
     else if (coefs.cmIsChordFraction) {
-        var force = LBFoils.ClCd._workingVector3A = LBFoils.ClCd._workingVector3A || new LBGeometry.Vector3();
+        var force = _workingVector3A = _workingVector3A || new LBGeometry.Vector3();
         var cosAlpha = qInfLocal.x / qInfSpeed;
         var sinAlpha = qInfLocal.y / qInfSpeed;
         force.set(store.drag * cosAlpha - store.lift * sinAlpha, store.drag * sinAlpha + store.lift * cosAlpha, 0);
 
-        var line = LBFoils.ClCd._workingLine3A = LBFoils.ClCd._workingLine3A || new LBGeometry.Line3();
+        var line = _workingLine3A = _workingLine3A || new LBGeometry.Line3();
         
         // We use |coefs.cm| because the sign is handled by the lift/drag and qInfLocal direction.
         line.start.set(Math.abs(coefs.cm) * chordLength, 0, 0);
         line.end.copy(line.start);
         line.end.add(force);
 
-        var applPoint = LBFoils.ClCd._workingVector3B = LBFoils.ClCd._workingVector3B || new LBGeometry.Vector3();
+        var applPoint = _workingVector3B = _workingVector3B || new LBGeometry.Vector3();
         line.closestPointToPoint(LBGeometry.ORIGIN, false, applPoint);        
         applPoint.z = 0;
         
@@ -176,7 +177,7 @@ LBFoils.calcCmForClCd = function(degrees, cl, cd, chordFraction) {
  * @param {Number}  cl45Deg The Cl value at 45 degrees angle of attack.
  * @param {Number}  cd45Deg The Cd value at 45 degrees angle of attack.
  * @param {Number}  cd90Deg The Cd value at 90 degrees angle of attachk.
- * @returns {LBFoils.ClCdStall}
+ * @returns {module:LBFoils.ClCdStall}
  */
 LBFoils.ClCdStall = function(cl45Deg, cd45Deg, cd90Deg) {
     /**
@@ -204,7 +205,7 @@ LBFoils.ClCdStall.prototype = {
     /**
      * Loader method.
      * @param {object} data   The data, typically loaded from a JSON file.
-     * @returns {object} this.
+     * @returns {module:LBFoils.ClCdStall} this.
      */
     load: function(data) {
         this.cl45Deg = data.cl45Deg || this.cl45Deg;
@@ -216,8 +217,8 @@ LBFoils.ClCdStall.prototype = {
     /**
      * Calculates the coefficients of lift, drag and moment for a given angle of attack in degrees.
      * @param {Number} deg    The angle of attack in degrees.
-     * @param {object} store  If not undefined, the object to store the coefficients in.
-     * @returns {object}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
+     * @param {module:LBFoils.ClCd} store  If not undefined, the object to store the coefficients in.
+     * @returns {module:LBFoils.ClCd}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
      */
     calcCoefsDeg: function(deg, store) {        
         store = store || new LBFoils.ClCd();
@@ -253,9 +254,9 @@ LBFoils.ClCdStall.prototype = {
 };
 
 /**
- * Creates and load a {@link LBFoils.ClCdStall} object from properties in a data object.
+ * Creates and load a {@link module:LBFoils.ClCdStall} object from properties in a data object.
  * @param {object} data The data object.
- * @returns {object}    The loaded object, undefined if data is undefined.
+ * @returns {module:LBFoils.ClCdStall}    The loaded object, undefined if data is undefined.
  */
 LBFoils.ClCdStall.createFromData = function(data) {
     if (!data) {
@@ -277,7 +278,7 @@ LBFoils.ClCdStall.createFromData = function(data) {
 /**
  * Interpolator based Cl/Cd/Cm calculator.
  * @constructor
- * @returns {LBFoils.ClCdInterp}
+ * @returns {module:LBFoils.ClCdInterp}
  */
 LBFoils.ClCdInterp = function() {    
     this.alphas = [];
@@ -297,9 +298,9 @@ LBFoils.ClCdInterp.prototype = {
      * Loads the interpolation data. Note that this stores the coefficient arrays
      * by reference, not as copies, unless there are symmetries involved.
      * @param {object} data   The data, typically loaded from a JSON file.
-     * @param {object} isForeAftSymmetric   If true the data is presumed to be symmetric
+     * @param {boolean} isForeAftSymmetric   If true the data is presumed to be symmetric
      * about the 90 degrees point.
-     * @returns {object} this.
+     * @returns {module:LBFoils.ClCdInterp} this.
      */
     load: function(data, isForeAftSymmetric) {
         this.alphas = data.alphas;
@@ -334,8 +335,8 @@ LBFoils.ClCdInterp.prototype = {
     /**
      * Calculates the coefficients of lift, drag and moment for a given angle of attack in degrees.
      * @param {Number} deg    The angle of attack in degrees.
-     * @param {object} store  If not undefined, the object to store the coefficients in.
-     * @returns {object}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
+     * @param {module:LBFoils.ClCd} store  If not undefined, the object to store the coefficients in.
+     * @returns {module:LBFoils.ClCd}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
      */
     calcCoefsDeg: function(deg, store) {
         store = store || new LBFoils.ClCd();
@@ -366,7 +367,7 @@ LBFoils.ClCdInterp.prototype = {
  * A Cl/Cd curve calculates lift (Cl), drag (Cd), and moment (Cm) coeffiecients given an angle
  * of attack.
  * @constructor
- * @returns {LBFoils.ClCdCurve}
+ * @returns {module:LBFoils.ClCdCurve}
  */
 LBFoils.ClCdCurve = function() {
     this.name = "";
@@ -390,7 +391,7 @@ LBFoils.ClCdCurve.prototype = {
     /**
      * The main loading method.
      * @param {object} data   The data, typically loaded from a JSON file.
-     * @return {object} this.
+     * @return {module:LBFoils.ClCdCurve} this.
      */
     load: function(data) {
         if (!data) {
@@ -426,8 +427,8 @@ LBFoils.ClCdCurve.prototype = {
     /**
      * Calculates the coefficients of lift, drag and moment for a given angle of attack in degrees.
      * @param {Number} degrees    The angle of attack in degrees.
-     * @param {object} store  If not undefined, the object to store the coefficients in.
-     * @returns {object}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
+     * @param {module:LBFoils.ClCd} store  If not undefined, the object to store the coefficients in.
+     * @returns {module:LBFoils.ClCd}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
      */
     calcCoefsDeg: function(degrees, store) {
         var sign;
@@ -529,13 +530,13 @@ LBFoils.ClCdCurve.prototype = {
  * its local z coordinate will be the same as the z coordinate of the 2D slice in the
  * local coordinate system.
  * @constructor
- * @returns {LBFoils.Foil}
+ * @returns {module:LBFoils.Foil}
  */
 LBFoils.Foil = function() {
     /**
      * A line describing the chord, with the chord.start treated as the
      * leading edge of the chord. This is used to resolve the angle of attack.
-     * @member {object}
+     * @member {module:LBGeometry.Line2}
      */
     this.chordLine = new LBGeometry.Line2();
     
@@ -559,12 +560,12 @@ LBFoils.Foil = function() {
     
     /**
      * The coefficient of lift/drag/moment curve.
-     * @member {LBFoils.ClCdCurve}
+     * @member {module:LBFoils.ClCdCurve}
      */
     this.clCdCurve = new LBFoils.ClCdCurve();
     
     /**
-     * This is used by {@link LBFoils.Foil#calcWorldForce} to control the weighting
+     * This is used by {@link module:LBFoils.Foil#calcWorldForce} to control the weighting
      * of the velocities of the start and end points of the chord when determining
      * the overall velocity of the foil.
      * @member {Number}
@@ -588,7 +589,7 @@ LBFoils.Foil.prototype = {
      * @param {object} data   The data, typically loaded from a JSON file.
      * @param {object} curveLib The optional curve library used to obtain pre-loaded
      * ClCdCurves, used for 'libClCdCurve' properties.
-     * @return {object} this.
+     * @return {module:LBFoils.Foil} this.
      */
     load: function(data, curveLib) {
         this.chordLine = LBUtil.copyCommonProperties(this.chordLine, data.chordLine);
@@ -613,7 +614,7 @@ LBFoils.Foil.prototype = {
      * Calculates the lift and drag forces, and the moment, all in local coordinates.
      * The moment is about the leading edge, or this.chordLine.start.
      * @param {Number} rho  The fluid density.
-     * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
+     * @param {module:LBGeometry.Vector2} qInfLocal    The free stream velocity in the local x-y plane.
      * @param {object} [details]  If defined, an object to receive details about the calculation.
      * @param {object} [store]  If defined, the object to receive the forces and moment.
      * @returns {object}    The object containing the forces and moment.
@@ -647,11 +648,11 @@ LBFoils.Foil.prototype = {
      * Calculates the forces and moment in the local x-y plane coordinates.
      * The moment is about the leading edge, or this.chordLine.start.
      * @param {Number} rho  The fluid density.
-     * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
+     * @param {module:LBGeometry.Vector2} qInfLocal    The free stream velocity in the local x-y plane.
      * @param {object} [details]   If defined, an object that will receive details such
      * as lift, drag, induced drag, moment.
-     * @param {object} [resultant]  If defined, the object set to the resultant force.
-     * @returns {LBPhysics.Resultant3D}  The resultant force in local coordinates.
+     * @param {module:LBPhysics.Resultant3D} [resultant]  If defined, the object set to the resultant force.
+     * @returns {module:LBPhysics.Resultant3D}  The resultant force in local coordinates.
      */
     calcLocalForce: function(rho, qInfLocal, details, resultant) {
         details = this.calcLocalLiftDragMoment(rho, qInfLocal, details, details);
@@ -686,13 +687,13 @@ LBFoils.Foil.prototype = {
      * the foil as a 2D slice, we end up projecting the apparent wind onto the local
      * x-y plane. Cross wind effects are ignored for now.
      * @param {Number} rho    The fluid density.
-     * @param {object} qInfWorld  The free stream velocity in world coordinates.
-     * @param {LBPhysics.CoordSystemState} coordSystemState   The coordinate system state, this defines the
+     * @param {module:LBGeometry.Vector2} qInfWorld  The free stream velocity in world coordinates.
+     * @param {module:LBPhysics.CoordSystemState} coordSystemState   The coordinate system state, this defines the
      *  world-local transformations as well as the change in world position/orientation.
      * @param {object} [details]  If defined, an object that will receive details such
      * as lift, drag, induced drag, moment.
-     * @param {object} [resultant]  If defined, the object set to the resultant force.
-     * @returns {LBPhysics.Resultant3D}  The resultant force in world coordinates.
+     * @param {module:LBPhysics.Resultant3D} [resultant]  If defined, the object set to the resultant force.
+     * @returns {module:LBPhysics.Resultant3D}  The resultant force in world coordinates.
      */
     calcWorldForce: function(rho, qInfWorld, coordSystemState, details, resultant) {
         var appVel = LBFoils.Foil._workingVel;
@@ -767,10 +768,10 @@ LBFoils.Foil.prototype = {
  * @param {object} data The data to load from.
  * @param {object} curveLib The optional curve library used to obtain pre-loaded
  * ClCdCurves, used for 'libClCdCurve' properties.
- * @param {object} [defCreatorFunc] If defined the function used to create the foil if the
+ * @param {function} [defCreatorFunc] If defined the function used to create the foil if the
  * data object does not contain a construct property, or data is not defined. The argument
  * passed to this function is the data argument.
- * @returns {object}    The foil object, undefined if both data and defCreatorFunc are not defined.
+ * @returns {module:LBFoils.Foil}    The foil object, undefined if both data and defCreatorFunc are not defined.
  */
 LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
     if (!data) {

@@ -30,9 +30,9 @@ var LBThreeJS = LBThreeJS || {};
 
 /**
  * Converts a vector from LBPhysics coordinates (z-up) to ThreeJS coordinates (y-up).
- * @param {LBGeometry.Vector3} vec  The vector to be converted.
- * @param {LBGeometry.Vector3} [store]    If defined the vector to store into.
- * @returns {LBGeometry.Vector3}    The ThreeJS coordinate version of vec.
+ * @param {module:LBGeometry.Vector3} vec  The vector to be converted.
+ * @param {module:LBGeometry.Vector3} [store]    If defined the vector to store into.
+ * @returns {module:LBGeometry.Vector3}    The ThreeJS coordinate version of vec.
  */
 LBThreeJS.toPhysicsVector3 = function(vec, store) {
     store = store || new LBGeometry.Vector3();
@@ -41,9 +41,9 @@ LBThreeJS.toPhysicsVector3 = function(vec, store) {
 
 /**
  * Converts a vector from ThreeJS coordinates (y-up) to LBPhysics coordinates (z-up).
- * @param {LBGeometry.Vector3} vec  The vector to be converted.
- * @param {LBGeometry.Vector3} [store]    If defined the vector to store into.
- * @returns {LBGeometry.Vector3}    The LBPhysics coordinate version of vec.
+ * @param {module:LBGeometry.Vector3} vec  The vector to be converted.
+ * @param {module:LBGeometry.Vector3} [store]    If defined the vector to store into.
+ * @returns {module:LBGeometry.Vector3}    The LBPhysics coordinate version of vec.
  */
 LBThreeJS.toTHREEVector3 = function(vec, store) {
     store = store || new LBGeometry.Vector3();

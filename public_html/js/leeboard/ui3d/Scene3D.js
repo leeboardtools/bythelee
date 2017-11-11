@@ -52,7 +52,7 @@ LBUI3d.Scene3D = function() {
 LBUI3d.Scene3D.prototype = {
     /**
      * Adds one or more 3D objects to the scene.
-     * @param {LBGeometry.Object3D} object3D    The object(s) to add.
+     * @param {module:LBGeometry.Object3D} object3D    The object(s) to add.
      * @returns {LBUI3d.Scene3D}    this.
      */
     add: function(object3D) {

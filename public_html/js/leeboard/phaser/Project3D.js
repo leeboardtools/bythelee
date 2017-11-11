@@ -30,7 +30,7 @@ function(LBPhaser, LBMath, LBUtil, LBCamera, LBGeometry, Phaser) {
  * @param {LBPhaser.PhaserEnv} env  The Phaser environment
  * @param {Phaser.Group} [group]    Optional group to which the projection display object
  * will be attached.
- * @param {LBCamera.Camer} [camera] If defined the camera to use, otherwise a camera pointing
+ * @param {module:LBCamera.Camer} [camera] If defined the camera to use, otherwise a camera pointing
  * down along the z-axis will be configured.
  * @returns {LBPhaser.Project3D}
  */
@@ -113,10 +113,10 @@ LBPhaser.Project3D.prototype = {
      * @param {Number} [fillColor]  If defined the color to fill with, otherwise the panel is not filled.
      * @param {Number} [alpha=1]    If defined the alpha value for the frame and fill, otherwise
      * the defaults for {@link Phaser.Graphics} will be used.
-     * @param {LBGeometry.Vector3[]} vertices   The array of vertices.
+     * @param {module:LBGeometry.Vector3[]} vertices   The array of vertices.
      * @param {Number[]} [indices]  Optional array of the indices of the points in vertices to use for drawing,
      * otherwise vertices is presumed to be in the desired order of the vertices.
-     * @param {LBGeometry.Matrix4} [toWorldXfrm]    If defined the transform used to convert
+     * @param {module:LBGeometry.Matrix4} [toWorldXfrm]    If defined the transform used to convert
      * the vertices to world coordinates.
      * @param {Boolean} [doubleSided=false] If true the panel is treated as having two
      * sides.
@@ -265,7 +265,7 @@ LBPhaser.Project3D.prototype = {
  * Helper class that holds a group of panels that share the same drawing properties 
  * such as colors.
  * @constructor
- * @param {LBGeometry.Vector3[]} [vertices] If defined an array of vertices for the
+ * @param {module:LBGeometry.Vector3[]} [vertices] If defined an array of vertices for the
  * first panel.
  * @param {Number[]} [indices]  If defined the indices of the points in vertices forming
  * the panel.
@@ -297,7 +297,7 @@ LBPhaser.Project3DPanels.prototype = {
     
     /**
      * Adds a set of vertices defining a pnael.
-     * @param {LBGeometry.Vector3[]} vertices   The array of vertices for the panel.
+     * @param {module:LBGeometry.Vector3[]} vertices   The array of vertices for the panel.
      * @param {Number[]} [indices]  If defined the indices of the points in vertices
      * defining the panel's vertices, otherwise vertices directly defines the panel's
      * vertices.
@@ -323,7 +323,7 @@ LBPhaser.Project3DPanels.prototype = {
      * Projects the panels using a {@link LBPhaser.Project3D}. {@link LBPhaser.Project3D#start}
      * should already have been called.
      * @param {LBPhaser.Project3D} project3D    The projection object.
-     * @param {LBGeometry.Matrix4} [toWorldXfrm]    Optional transform matrix to transform the
+     * @param {module:LBGeometry.Matrix4} [toWorldXfrm]    Optional transform matrix to transform the
      * panel vertex coordinates to world coordinates.
      * @returns {LBPhaser.Project3DPanels}  this.
      */
@@ -356,7 +356,7 @@ LBPhaser.Project3DPanels.prototype = {
 /**
  * Creates a {@link LBPhaser.Project3DPanels} and loads the panels from an object containing
  * indices of faces in volumes.
- * @param {LBVolume.Volume[]} volumes   The array of volumes.
+ * @param {module:LBVolume.Volume[]} volumes   The array of volumes.
  * @param {Object} data The object containing the load information. The following properties
  * are supported:
  *  <li>frameColor: Number | Hex String
@@ -366,7 +366,7 @@ LBPhaser.Project3DPanels.prototype = {
  *  <li>fillColor: Number | Hex String
  *  <li>volFaces: Array of number pairs, with the first value of each pair the index of the volume
  *  in volumes and the second value the index of the face of the volume as returned
- *  by {@link LBVolume.Volume#faces}.
+ *  by {@link module:LBVolume.Volume#faces}.
  * @returns {LBPhaser.Project3D.createPanelsFromVolumesData.projectPanels|LBPhaser.Project3DPanels}
  */
 LBPhaser.Project3D.createPanelsFromVolumesData = function(volumes, data) {
@@ -400,7 +400,7 @@ LBPhaser.Project3D.createPanelsFromVolumesData = function(volumes, data) {
  * <p>
  * The main purpose for supporting an array of {@link LBPhaser.Project3DPanels} is to support
  * having different drawing properties for different faces of a group of volumes.
- * @param {LBVolume.Volume[]} volumes   The array of volumes.
+ * @param {module:LBVolume.Volume[]} volumes   The array of volumes.
  * @param {Array} data  An array of objects that can be passed to {@link LBPhaser.Project3D.createPanelsFromVolumesData}.
  * @returns {LBPhaser.Project3DPanels[]}    The array of panels.
  */
@@ -452,7 +452,7 @@ LBPhaser.Project3D.loadVolumePanels = function(volumes, data) {
  * @param {LBPhaser.Project3D} [project3D]    The projection object, if undefined nothing is done.
  * @param {LBPhaser.Project3DPanels[]} [panelsArray]   The array panels objects to be
  * project, may be undefined.
- * @param {LBGeometry.Matrix4} [toWorldXfrm]    Optional transform matrix to transform the
+ * @param {module:LBGeometry.Matrix4} [toWorldXfrm]    Optional transform matrix to transform the
  * panel vertex coordinates to world coordinates.
  * @returns {undefined}
  */

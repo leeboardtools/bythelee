@@ -20,20 +20,20 @@ function(LBUtil, LBMath, LBGeometry) {
     'use strict';
 
 /**
- * 
- * @namespace LBVolume
+ * A bunch of volume related classes and functions.
+ * @exports LBVolume
  */
 var LBVolume = LBVolume || {};
 
 /**
  * Base class for volumes. A volume has a set of vertices and faces, and can be
- * broken down into a set of tetrahedra via {@link LBVolume.Volume#equivalentTetras}.
+ * broken down into a set of tetrahedra via {@link module:LBVolume.Volume#equivalentTetras}.
  * @constructor
  * @param {String} typeName The type name of the volume class.
  * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
- * @param {Number} [massDistribution=1] Additional factor used by {@link LBVolume.allocateMassToVolumes}
+ * @param {Number} [massDistribution=1] Additional factor used by {@link module:LBVolume.allocateMassToVolumes}
  * to control mass distribution.
- * @returns {LBVolume.Volume}
+ * @returns {module:LBVolume.Volume}
  */
 LBVolume.Volume = function(typeName, mass, massDistribution) {
     /**
@@ -54,7 +54,7 @@ LBVolume.Volume = function(typeName, mass, massDistribution) {
     this.mass = LBUtil.isVar(mass) ? mass : Number.NaN;
     
     /**
-     * Additional factor used by {@link LBVolume.allocateMassToVolumes} to control mass distribution.
+     * Additional factor used by {@link module:LBVolume.allocateMassToVolumes} to control mass distribution.
      * This is basically a normalized density value.
      * @type Number
      */
@@ -71,7 +71,7 @@ LBVolume.Volume.prototype = {
     /**
      * Creates a shallow copy of the volume.
      * @abstract
-     * @returns {LBVolume.Tetra}    The shallow copy.
+     * @returns {module:LBVolume.Tetra}    The shallow copy.
      */
     clone: function() {
         throw 'clone() not implemented by ' + this.typeName;
@@ -80,8 +80,8 @@ LBVolume.Volume.prototype = {
     /**
      * Creates a clone of the volume mirrored about a plane.
      * @abstract
-     * @param {LBGeometry.Plane} plane  The plane to mirror about.
-     * @returns {LBVolume.Volume}   The clone.
+     * @param {module:LBGeometry.Plane} plane  The plane to mirror about.
+     * @returns {module:LBVolume.Volume}   The clone.
      */
     cloneMirrored: function(plane) {
         throw 'cloneMirrored() not implemented by ' + this.cloneMirrored;
@@ -89,7 +89,7 @@ LBVolume.Volume.prototype = {
     
     /**
      * Makes the vertices of the volume unique by cloning them.
-     * @returns {LBVolume.Volume}   this.
+     * @returns {module:LBVolume.Volume}   this.
      */
     makeVerticesUnique: function() {
         for (var i = 0; i < this.vertices.length; ++i) {
@@ -112,8 +112,8 @@ LBVolume.Volume.prototype = {
     /**
      * Retrieves the normal vector of a face.
      * @param {Number} f    The face index.
-     * @param {LBGeometry.Vector3} [store]  If defined set to the normal.
-     * @returns {LBGeometry.Vector3}    The normal.
+     * @param {module:LBGeometry.Vector3} [store]  If defined set to the normal.
+     * @returns {module:LBGeometry.Vector3}    The normal.
      */
     getFaceNormal: function(f, store) {
         var face = this.getFaces()[f];
@@ -130,8 +130,8 @@ LBVolume.Volume.prototype = {
     
     /**
      * Computes the centroid of the volume.
-     * @param {LBGeometry.Vector3} [store] If defined the object to store the centroid into.
-     * @returns {LBGeometry.Vector3}    The centroid.
+     * @param {module:LBGeometry.Vector3} [store] If defined the object to store the centroid into.
+     * @returns {module:LBGeometry.Vector3}    The centroid.
      */
     getCentroid: function(store) {
         var tetras = this.equivalentTetras();
@@ -153,14 +153,14 @@ LBVolume.Volume.prototype = {
     },
     
     /**
-     * Retrieves an array of {@link LBVolume.Tetra} objects that make up the volume.
-     * For the case of {@link LBVolume.Tetra} this is a one element array containing
+     * Retrieves an array of {@link module:LBVolume.Tetra} objects that make up the volume.
+     * For the case of {@link module:LBVolume.Tetra} this is a one element array containing
      * the tetra.
      * <p>
      * Note that the tetras returned should be considered to be owned by this volume,
      * and should not be modified directly.
      * @abstract
-     * @returns {LBVolume.Tetra[]}  The array of tetras.
+     * @returns {module:LBVolume.Tetra[]}  The array of tetras.
      */
     equivalentTetras: function() {
         throw 'equivalentTetras() not implemented by ' + this.typeName;
@@ -169,8 +169,8 @@ LBVolume.Volume.prototype = {
     
     /**
      * Applies a rotation defined by Euler angles to all at the vertices.
-     * @param {LBGeometry.Euler}  rotation  The rotation in Euler angles.
-     * @returns {LBVolume.Volume}   this.
+     * @param {module:LBGeometry.Euler}  rotation  The rotation in Euler angles.
+     * @returns {module:LBVolume.Volume}   this.
      */
     applyEuler: function(rotation) {
         var quaternion = new LBGeometry.Quaternion();
@@ -180,8 +180,8 @@ LBVolume.Volume.prototype = {
     
     /**
      * Applies a rotation defined by a quaternion to all at the vertices.
-     * @param {LBGeometry.Quaternion}  quaternion  The quaternion to apply
-     * @returns {LBVolume.Volume}   this.
+     * @param {module:LBGeometry.Quaternion}  quaternion  The quaternion to apply
+     * @returns {module:LBVolume.Volume}   this.
      */
     applyQuaternion: function(quaternion) {
         this.vertices.forEach(function(vertex) {
@@ -194,7 +194,7 @@ LBVolume.Volume.prototype = {
      * Helper that applies a rotation based upon a data object to the vertices of the volume.
      * @param {Object} data The data object, if it has a rotation property then that is
      * used to define the rotation.
-     * @returns {LBVolume.Volume}   this.
+     * @returns {module:LBVolume.Volume}   this.
      */
     loadRotation: function(data) {
         if (data.rotation) {
@@ -231,7 +231,7 @@ LBVolume.Volume.prototype = {
 
 /**
  * Returns the total volume of the volumes in an array.
- * @param {LBVolume.Volume[]} volumes    The array of volumes.
+ * @param {module:LBVolume.Volume[]} volumes    The array of volumes.
  * @returns {Number}    The total volume.
  */
 LBVolume.Volume.totalVolume = function(volumes) {
@@ -248,9 +248,9 @@ LBVolume.Volume.totalVolume = function(volumes) {
  * Note that if a volume does not have a mass assigned, it's volume is used, so to
  * ensure consistency the volumes should either have all their masses defined (use 0
  * to ignore a volume) or not have a mass defined at all.
- * @param {LBVolume.Volume[]} volume    The array of volumes.
+ * @param {module:LBVolume.Volume[]} volume    The array of volumes.
  * @param {Object} [store]  If defined the object to store the results into.
- * @returns {Object}    The results, the position property is compatible with {@link LBGeometry.Vector3}
+ * @returns {Object}    The results, the position property is compatible with {@link module:LBGeometry.Vector3}
  * and contains the coordinates of the center of mass, the mass property is the total mass.
  */
 LBVolume.Volume.totalCenterOfMass = function(volume, store) {
@@ -294,7 +294,7 @@ LBVolume.Volume.totalCenterOfMass = function(volume, store) {
 /**
  * Allocates a mass amongst all the volumes in an array based upon the volume
  * of the individual volumes.
- * @param {LBVolume.Volume[]} volumes    The array of volumes.
+ * @param {module:LBVolume.Volume[]} volumes    The array of volumes.
  * @param {Number} totalMass    The total mass to assign, may be {@link Number.NaN}.
  * @param {Number} [startIndex=0] If specified the index in volumes at which to start.
  * @param {Number} [endIndex=tetras.length] If specified the index after the last index
@@ -346,11 +346,11 @@ LBVolume.Volume.allocateMassToVolumes = function(volumes, totalMass, startIndex,
 /**
  * Calculates the inertia tensor from the volumes in a array of volumes. The tensor
  * is relative to the overal centroid of the volumes.
- * @param {LBVolume.Volume[]} volumes    The array of volumes.
- * @param {LBGeometry.Matrix3} [tensor] If defined the 3x3 matrix to receive the tensor.
- * @param {LBGeometry.Vector3} [totalCentroid] If defined this is set to the overall centroid
+ * @param {module:LBVolume.Volume[]} volumes    The array of volumes.
+ * @param {module:LBGeometry.Matrix3} [tensor] If defined the 3x3 matrix to receive the tensor.
+ * @param {module:LBGeometry.Vector3} [totalCentroid] If defined this is set to the overall centroid
  * of all the volumes.
- * @returns {LBGeometry.Matrix3}    The tensor.
+ * @returns {module:LBGeometry.Matrix3}    The tensor.
  */
 LBVolume.Volume.overallInertiaTensor = function(volumes, tensor, totalCentroid) {
     tensor = tensor || new LBGeometry.Matrix3();
@@ -428,11 +428,11 @@ LBVolume.Volume.overallInertiaTensor = function(volumes, tensor, totalCentroid) 
 /**
  * Loads an array of arbitrary volumes from properties in a data object.
  * @param {Object} data The data object.
- * @param {LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
+ * @param {module:LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
  * otherwise data should have a vertices property.
- * @param {LBVolume.Volume[]} [volumes] If defined, the array to store the volumes into.
+ * @param {module:LBVolume.Volume[]} [volumes] If defined, the array to store the volumes into.
  * This is NOT cleared.
- * @returns {LBVolume.Volume[]} The array of volumes.
+ * @returns {module:LBVolume.Volume[]} The array of volumes.
  */
 LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
     if (!vertices) {
@@ -512,9 +512,9 @@ LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
 /**
  * Loads an array of vertices representing the outline of a volume in the x-y plane
  * from properties in a data object. The data object is typically the same as that passed
- * to {@link LBVolume.Volume.loadVolumesFromData}.
+ * to {@link module:LBVolume.Volume.loadVolumesFromData}.
  * @param {Object} data The data object.
- * @param {LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
+ * @param {module:LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
  * otherwise data should have a vertices property.
  * @param {Array} [outlineVertices] If defined the array to store the vertices into.
  * @returns {Array} The array of outline vertices.
@@ -551,16 +551,16 @@ LBVolume.Volume.loadXYOutlineFromData = function(data, vertices, outlineVertices
 /**
  * Represents a tetrahedron.
  * @constructor
- * @extends LBVolume.Volume
- * @param {LBGeometry.Vector3[]} [vertices]    If defined, an array containing the
+ * @extends module:LBVolume.Volume
+ * @param {module:LBGeometry.Vector3[]} [vertices]    If defined, an array containing the
  * four vertices for the tetrahedron. References to the vertices are used, they are not copied.
- * If not defined the vertices are all set to new instances of {@link LBGeometry.Vector3}.
+ * If not defined the vertices are all set to new instances of {@link module:LBGeometry.Vector3}.
  * @param {Number} [mass=Number.NaN] If defined the mass assigned to the volume.
  * @param {Number[]} [indices]  If defined an array of the indices of the four vertices
  * in vertices of the tetra.
- * @param {Number} [massDistribution=1] Additional factor used by {@link LBVolume.allocateMassToVolumes}
+ * @param {Number} [massDistribution=1] Additional factor used by {@link module:LBVolume.allocateMassToVolumes}
  * to control mass distribution.
- * @returns {LBVolume.Tetra}
+ * @returns {module:LBVolume.Tetra}
  */
 LBVolume.Tetra = function(vertices, mass, indices, massDistribution) {
     LBVolume.Volume.call(this, LBVolume.Tetra.TYPE_NAME, mass, massDistribution);
@@ -597,7 +597,7 @@ LBVolume.Tetra = function(vertices, mass, indices, massDistribution) {
 };
 
 /**
- * The tetra type name, the value of {@link LBVolume.Volume#typeName} for tetras.
+ * The tetra type name, the value of {@link module:LBVolume.Volume#typeName} for tetras.
  * @constant
  * @type String
  */
@@ -618,7 +618,7 @@ LBVolume.Tetra.prototype.constructor = LBVolume.Tetra;
 
 /**
  * Creates a shallow copy of the tetra.
- * @returns {LBVolume.Tetra}    The shallow copy.
+ * @returns {module:LBVolume.Tetra}    The shallow copy.
  */
 LBVolume.Tetra.prototype.clone = function() {
     return new LBVolume.Tetra(this.vertices, this.mass);
@@ -693,8 +693,8 @@ LBVolume.Tetra.prototype.cloneMirrored = function(plane) {
 /**
  * Calculates the inertia tensor matrix for the tetrahedron using the formulas given in:
  * {@link http://thescipub.com/PDF/jmssp.2005.8.11.pdf}
- * @param {LBGeometry.Matrix3} [tensor] If defined the object to store the tensor into.
- * @returns {LBGeometry.Matrix3}    The inertia tensor.
+ * @param {module:LBGeometry.Matrix3} [tensor] If defined the object to store the tensor into.
+ * @returns {module:LBGeometry.Matrix3}    The inertia tensor.
  */
 LBVolume.Tetra.prototype.tetraInertiaTensor = function(tensor) {
     tensor = tensor || new LBGeometry.Matrix3();
@@ -741,8 +741,8 @@ LBVolume.Tetra.prototype.tetraInertiaTensor = function(tensor) {
 /**
  * Determines where a plane slices a tetra, and if it does slice the tetra this
  * generates the tetras representing the volumes on each side of the plane.
- * @param {LBVolume.Tetra} tetra    The tetra of interest.
- * @param {LBGeometry.Plane} plane  The slicing plane.
+ * @param {module:LBVolume.Tetra} tetra    The tetra of interest.
+ * @param {module:LBGeometry.Plane} plane  The slicing plane.
  * @param {Boolean} [positiveDir=true]    If true then tetras are generated to represent
  * the volume on the side of the plane to which the normal points.
  * @param {Boolean} [negativeDir=true]    If true then tetras are generated to represent
@@ -968,11 +968,11 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
 /**
  * Loads an array of tetras from properties in a data object.
  * @param {Object} data The data object.
- * @param {LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
+ * @param {module:LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
  * otherwise data should have a vertices property.
- * @param {LBVolume.Tetra[]} [tetras] If defined, the array to store the tetras into.
+ * @param {module:LBVolume.Tetra[]} [tetras] If defined, the array to store the tetras into.
  * This is NOT cleared.
- * @returns {LBVolume.Tetra[]} The array of tetras.
+ * @returns {module:LBVolume.Tetra[]} The array of tetras.
  */
 LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
     if (!vertices) {
@@ -1055,16 +1055,16 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
  * v[1]-v[2]-v[3]-v[4] defines the other tetra (v[1]-v[2]-v[3] defines the shared
  * face, with the vertices v[0], v[1], v[2] ordered CCW (right hand rule).
  * @constructor
- * @extends LBVolume.Volume
- * @param {LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
+ * @extends module:LBVolume.Volume
+ * @param {module:LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
  * volume is set to so each vertex is approximately 0.5 from the center, and the center
  * is at 0,0,0.
  * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
  * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
  * vertices identifiying the vertices, the ordering must be as described above.
- * @param {Number} [massDistribution=1] Additional factor used by {@link LBVolume.allocateMassToVolumes}
+ * @param {Number} [massDistribution=1] Additional factor used by {@link module:LBVolume.allocateMassToVolumes}
  * to control mass distribution.
- * @returns {LBVolume.TriBiPyramid}
+ * @returns {module:LBVolume.TriBiPyramid}
  */
 LBVolume.TriBiPyramid = function(vertices, mass, indices, massDistribution) {
     LBVolume.Volume.call(this, LBVolume.TriBiPyramid.TYPE_NAME, mass, massDistribution);
@@ -1088,7 +1088,7 @@ LBVolume.TriBiPyramid = function(vertices, mass, indices, massDistribution) {
 };
 
 /**
- * The triangular bipyramid type name, the value of {@link LBVolume.Volume#typeName} for cuboids.
+ * The triangular bipyramid type name, the value of {@link module:LBVolume.Volume#typeName} for cuboids.
  * @constant
  * @type String
  */
@@ -1141,10 +1141,10 @@ LBVolume.TriBiPyramid._workingVertices = [];
  * and the last four vertices describe the other tetrahedron (the face v[1], v[2], v[3] is
  * internal and does not exist).
  * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
- * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
- * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
+ * @param {module:LBGeometry.Vector3[]} vertexArray   The array of vertices.
+ * @param {module:LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
  * @param {Number[][]} [faces]  If defined an array that is set to the arrays of vertices for each outside face.
- * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
+ * @returns {module:LBVolume.Tetra[]} The array of the tetrahedra.
  */
 LBVolume.TriBiPyramid.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
     if (!tetras) {
@@ -1203,16 +1203,16 @@ LBVolume.TriBiPyramid.toTetras = function(vertexIndices, vertexArray, tetras, fa
  * triangular face, with v[3] connected to v[0], v[4] connected to v[1], and v[5]
  * connected to v[2] (these vertices are therefore ordered CW looking into the prism).
  * @constructor
- * @extends LBVolume.Volume
- * @param {LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
+ * @extends module:LBVolume.Volume
+ * @param {module:LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
  * volume is set to so each vertex on the triangular face is 0.5 from the center of
  * that face, and each face is positioned 0.5 on each side of the origin.
  * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
  * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
  * vertices identifiying the vertices, the ordering must be as described above.
- * @param {Number} [massDistribution=1] Additional factor used by {@link LBVolume.allocateMassToVolumes}
+ * @param {Number} [massDistribution=1] Additional factor used by {@link module:LBVolume.allocateMassToVolumes}
  * to control mass distribution.
- * @returns {LBVolume.TriPrism}
+ * @returns {module:LBVolume.TriPrism}
  */
 LBVolume.TriPrism = function(vertices, mass, indices, massDistribution) {
     LBVolume.Volume.call(this, LBVolume.TriPrism.TYPE_NAME, mass, massDistribution);
@@ -1238,7 +1238,7 @@ LBVolume.TriPrism = function(vertices, mass, indices, massDistribution) {
 };
 
 /**
- * The triangular bipyramid type name, the value of {@link LBVolume.Volume#typeName} for cuboids.
+ * The triangular bipyramid type name, the value of {@link module:LBVolume.Volume#typeName} for cuboids.
  * @constant
  * @type String
  */
@@ -1293,10 +1293,10 @@ LBVolume.TriPrism._workingVertexArray = [];
  * face and the second 3 vertices the other triangular face, and v[0] is connected to v[3],
  * v[1] is connected to v[4], and v[2] is connected to v[5].
  * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
- * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
- * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
+ * @param {module:LBGeometry.Vector3[]} vertexArray   The array of vertices.
+ * @param {module:LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
  * @param {Number[][]} [faces]  If defined an array that is set to the arrays of vertices for each outside face.
- * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
+ * @returns {module:LBVolume.Tetra[]} The array of the tetrahedra.
  */
 LBVolume.TriPrism.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
     if (!tetras) {
@@ -1368,8 +1368,8 @@ LBVolume.TriPrism.toTetras = function(vertexIndices, vertexArray, tetras, faces)
  * A cuboid volume. A cuboid is a six sided convex polyhedron with each of the
  * sides a quadrilateral (having four edges).
  * @constructor
- * @extends LBVolume.Volume
- * @param {LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
+ * @extends module:LBVolume.Volume
+ * @param {module:LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
  * cuboid is set to a unit cube (each side is length 1) centered at 0,0,0.
  * @param {Number} [mass=Number.NaN] If defined the mass assigned to the volume.
  * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
@@ -1377,9 +1377,9 @@ LBVolume.TriPrism.toTetras = function(vertexIndices, vertexArray, tetras, faces)
  * be ordered CCW (right-hand rule), while the second set of indices is such that v[4] is
  * jointed to v[0], v[5] is joined to v[1], v[6] is joined to v[2], v[7] is joined to
  * v[3].
- * @param {Number} [massDistribution=1] Additional factor used by {@link LBVolume.allocateMassToVolumes}
+ * @param {Number} [massDistribution=1] Additional factor used by {@link module:LBVolume.allocateMassToVolumes}
  * to control mass distribution.
- * @returns {LBVolume.Cuboid}
+ * @returns {module:LBVolume.Cuboid}
  */
 LBVolume.Cuboid = function(vertices, mass, indices, massDistribution) {
     LBVolume.Volume.call(this, LBVolume.Cuboid.TYPE_NAME, mass, massDistribution);
@@ -1407,7 +1407,7 @@ LBVolume.Cuboid = function(vertices, mass, indices, massDistribution) {
 };
 
 /**
- * The cuboid type name, the value of {@link LBVolume.Volume#typeName} for cuboids.
+ * The cuboid type name, the value of {@link module:LBVolume.Volume#typeName} for cuboids.
  * @constant
  * @type String
  */
@@ -1461,10 +1461,10 @@ LBVolume.Cuboid._workingVertexArray = [];
  * opposite face, with the opposite order so that v[4] is connected to v[0], v[5] to v[1],
  * v[6] to v[2], and v[7] to v[3].
  * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
- * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
- * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
+ * @param {module:LBGeometry.Vector3[]} vertexArray   The array of vertices.
+ * @param {module:LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
  * @param {Number[][]} [faces]  If defined an array that is set to the arrays of vertices for each outside face.
- * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
+ * @returns {module:LBVolume.Tetra[]} The array of the tetrahedra.
  */
 LBVolume.Cuboid.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
     if (!tetras) {
@@ -1570,7 +1570,7 @@ LBVolume.Cuboid.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
  * @param {Number} cy   The y dimension of the center of the box.
  * @param {Number} cz   The z dimension of the center of the box.
  * @param {Number} [mass]   The optional mass for the box.
- * @returns {LBVolume.Cuboid}
+ * @returns {module:LBVolume.Cuboid}
  */
 LBVolume.createBox = function(dx, dy, dz, cx, cy, cz, mass) {
     var box = new LBVolume.Cuboid();
@@ -1596,10 +1596,10 @@ LBVolume.createBox = function(dx, dy, dz, cx, cy, cz, mass) {
  * @param {Object} data The data object. This should contain the following properties:
  * <li>[center]: {"x":x, "y":y, "z":z}    The center of the box, if missing 0,0,0 will be used.
  * <li>size: {"x":x, "y":y, "z":z}  The dimensions of the box.
- * <li>[rotation]: See {@link LBGeometry.loadEuler} If specified, the rotation to apply to the
+ * <li>[rotation]: See {@link module:LBGeometry.loadEuler} If specified, the rotation to apply to the
  * box.
  * @param {Number} [mass=undefined] The mass of the box.
- * @returns {LBVolume.Cuboid}
+ * @returns {module:LBVolume.Cuboid}
  */
 LBVolume.loadBoxFromData = function(data, mass) {
     var center = LBGeometry.loadVector3(data.center);
@@ -1613,18 +1613,18 @@ LBVolume.loadBoxFromData = function(data, mass) {
 
 /**
  * Loads a cylindrical volume from properties in a data object. For now it simply
- * loads it as a {@link LBVolume.Cuboid}.
+ * loads it as a {@link module:LBVolume.Cuboid}.
  * @param {Object} data The data object. This should contain the following properties:
  * <li>base: {"x":x, "y":y, "z":z}  The base of the cylinder, it will be extruded in the
  * +z direction.
  * <li>size: {"x":dx, "y": dy, "z": length} The dimensions of the cylinder. dx is the diameter
  * along the x-axis, dy is the diameter along the y-axis, length is the length of the cylinder,
  * which is along the +z axis.
- * <li>[pos]: See {@link LBGeometry.loadVector3}
- * <li>[rotation]: See {@link LBGeometry.loadEuler} If specified, the rotation to apply to the
+ * <li>[pos]: See {@link module:LBGeometry.loadVector3}
+ * <li>[rotation]: See {@link module:LBGeometry.loadEuler} If specified, the rotation to apply to the
  * vertices.
  * @param {Number} [mass=undefined] The mass of the cylinder.
- * @returns {LBVolume.Cuboid|undefined}
+ * @returns {module:LBVolume.Cuboid|undefined}
  */
 LBVolume.loadCylinderFromData = function(data, mass) {
     if (!data.size) {

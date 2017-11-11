@@ -21,7 +21,7 @@ function(LBSailSim, LBUtil, LBMath, LBGeometry, LBCurve, LBControls, LBPhysics, 
     
 
 /**
- * Implementation of {@link LBFoils.Foil} for sails, will support reefing and flatness factors.
+ * Implementation of {@link module:LBFoils.Foil} for sails, will support reefing and flatness factors.
  * @constructor
  * @param {LBSailSim.SailInstance} sailInstance The sail instance that owns this.
  * @returns {LBSailSim.SailFoil}
@@ -96,7 +96,7 @@ LBSailSim.SailSlice = function(slicePos, surfaceLength, pointCount, camberScale)
     
     /**
      * The array of 3D points on the slice. The first point is at the reference leading edge.
-     * @member {LBGeometry.Vector3[]}
+     * @member {module:LBGeometry.Vector3[]}
      */
     this.points = [];
     for (var i = 0; i < pointCount; ++i) {
@@ -227,14 +227,14 @@ LBSailSim.SailInstance = function() {
     
     /**
      * The anchor point of the sheet on the sail in local coordinates.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.sheetAnchorSail = new LBGeometry.Vector3();
     
     /**
      * The anchor point of the sheet on the boat, in sail local coordinates.
      * TODO Need a little clarification here, how is this really used?!?
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.sheetAnchorBoat = new LBGeometry.Vector3();
     
@@ -282,7 +282,7 @@ LBSailSim.SailInstance = function() {
     
     /**
      * The spars associated with this sail.
-     * @member {LBPhysics.RigidBody[]}
+     * @member {module:LBPhysics.RigidBody[]}
      */
     this.spars = [];
     
@@ -640,7 +640,7 @@ LBSailSim.SailCamberCurve = function() {
     
     /**
      * The curve used to compute the actual points.
-     * @member {LBCurve.QuadraticBezier2}
+     * @member {module:LBCurve.QuadraticBezier2}
      */
     this.curve = new LBCurve.QuadraticBezier2();
     
@@ -672,9 +672,9 @@ LBSailSim.SailCamberCurve.prototype = {
      * Calculates a point along the surface of the cambered curve.
      * @param {Number} surfacePos   The position along the surface to be computed,
      * as a fraction of the total surface length, should be &ge; 0 and &le; 1.
-     * @param {LBGeometry.Vector2} [store]  If defined the object to store the result in. 
+     * @param {module:LBGeometry.Vector2} [store]  If defined the object to store the result in. 
      * @param {Number} [surfaceLength=1]    If defined the length of the surface of the curve.
-     * @returns {LBGeometry.Vector2}    The point at the desired position.
+     * @returns {module:LBGeometry.Vector2}    The point at the desired position.
      */
     calcXY: function(surfacePos, store, surfaceLength) {
         store = this.curve.calcPoint(surfacePos, store);        

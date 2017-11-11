@@ -52,7 +52,7 @@ LBParticles.Cache = function(scene, material) {
 LBParticles.Cache.prototype = {
     /**
      * Retrieves a particle from the cache, creating one if needed.
-     * @returns {LBGeometry.Object3D}   A particle. The particle is already
+     * @returns {module:LBGeometry.Object3D}   A particle. The particle is already
      * part of the scene and will have its visible property set to false.
      */
     getParticle: function() {
@@ -68,7 +68,7 @@ LBParticles.Cache.prototype = {
     /**
      * Returns a particle to the cache. The particle should no longer be used
      * outside the cache. It's visible property will be set to false.
-     * @param {LBGeometry.Object3D} particle    The particle to return.
+     * @param {module:LBGeometry.Object3D} particle    The particle to return.
      * @returns {undefined}
      */
     returnParticle: function(particle) {
@@ -79,7 +79,7 @@ LBParticles.Cache.prototype = {
     
     /**
      * Called to create a new particle. The particle is added to the scene.
-     * @returns {LBGeometry.Object3D}   The new particle.
+     * @returns {module:LBGeometry.Object3D}   The new particle.
      */
     _createParticle: function() {
         var particle = new THREE.Sprite(this.material);

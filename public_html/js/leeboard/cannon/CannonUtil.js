@@ -29,14 +29,14 @@ LBCannon._workingVector3 = new LBGeometry.Vector3();
 
 /**
  * A proxy for {@link http://schteppe.github.io/cannon.js/docs/classes/Vec3.html|CANNON.Vec3} that
- * links it to a {@link LBGeometry.Vector3} and utilizes the {@link LBGeometry.Vector3} as the
+ * links it to a {@link module:LBGeometry.Vector3} and utilizes the {@link module:LBGeometry.Vector3} as the
  * underlying storage object.
  * <p>
- * Note that for any given {@link LBGeometry.Vector3} there should be only one proxy.
+ * Note that for any given {@link module:LBGeometry.Vector3} there should be only one proxy.
  * @private
  * @constructor
- * @param {LBGeometry.Vector3} [vector3=new LBGeometry.Vector3()]    The underlying {@link LBGeometry.Vector3} object.
- * @param {LBGeometry.Vector3} [offset=LBGeometry.ORIGIN]  The underlying offset added 
+ * @param {module:LBGeometry.Vector3} [vector3=new LBGeometry.Vector3()]    The underlying {@link module:LBGeometry.Vector3} object.
+ * @param {module:LBGeometry.Vector3} [offset=LBGeometry.ORIGIN]  The underlying offset added 
  * to the underlying vector3 to get the Cannon coordinates.
  * @returns {LBCannon.Vec3Proxy}
  */
@@ -48,7 +48,7 @@ LBCannon.Vec3Proxy = function(vector3, offset) {
     CANNON.Vec3.call(this, this.vector3.x, this.vector3.y, this.vector3.z);
 
     /**
-     * The underlying {@link LBGeometry.Vector3}.
+     * The underlying {@link module:LBGeometry.Vector3}.
      */
     this.vector3 = vector3 || new LBGeometry.Vector3();
 
@@ -90,7 +90,7 @@ Object.defineProperty(LBCannon.Vec3Proxy.prototype, 'z', {
 
 /**
  * Applies a 4x4 transform matrix to the point.
- * @param {LBGeometry.Matrix4} xfrm The transform matrix.
+ * @param {module:LBGeometry.Matrix4} xfrm The transform matrix.
  * @returns {undefined}
  */
 LBCannon.Vec3Proxy.prototype.transformProxy = function(xfrm) {
@@ -110,10 +110,10 @@ LBCannon.Vec3Proxy.prototype.destroy = function() {
 
 
 /**
- * Retrieves the proxy associated with an {@link LBGeometry.Vector3}, creating one
+ * Retrieves the proxy associated with an {@link module:LBGeometry.Vector3}, creating one
  * if necessary.
- * @param {LBGeometry.Vector3} vector3  The vector3 object, may be undefined.
- * @param {LBGeometry.Vector3} [offset=LBGeometry.ORIGIN]  The underlying offset added 
+ * @param {module:LBGeometry.Vector3} vector3  The vector3 object, may be undefined.
+ * @param {module:LBGeometry.Vector3} [offset=LBGeometry.ORIGIN]  The underlying offset added 
  * to the underlying vector3 to get the Cannon coordinates.
  * @returns {undefined|LBCannon.Vec3Proxy}  The proxy, undefined if vector3 is undefined.
  */
@@ -136,8 +136,8 @@ LBCannon._workingMatrix4B = new LBGeometry.Matrix4();
  * Once volumes have been added to a body, {@link LBCannon.updateBodyCenterOfMass} should be called
  * to properly align the body's center of mass with the origin.
  * @param {CANNON.Body} body    The body to add the tetras to.
- * @param {LBVolume.Volume[]} volumes The array of tetras to be added.
- * @param {LBGeometry.Matrix4}  [volToBodyXfrm] If defined the transform to apply to
+ * @param {module:LBVolume.Volume[]} volumes The array of tetras to be added.
+ * @param {module:LBGeometry.Matrix4}  [volToBodyXfrm] If defined the transform to apply to
  * each vertex to bring it to the coordinate system of the body.
  * @returns {CANNON.Body}   body.
  */
@@ -187,9 +187,9 @@ LBCannon.addVolumesToBody = function(body, volumes, volToBodyXfrm) {
 /**
  * Updates the center of mass of a body. The local origin of the body is the center of mass.
  * @param {CANNON.Body} body    The Cannon body.
- * @param {LBGeometry.Vector3} centerOfMass The position of the center of mass.
+ * @param {module:LBGeometry.Vector3} centerOfMass The position of the center of mass.
  * @param {Number}  [mass]  The mass, if undefined the mass will not be modified.
- * @param {LBGeometry.Matrix3}  [inertia]   The inertia, if undefined the inertia computed
+ * @param {module:LBGeometry.Matrix3}  [inertia]   The inertia, if undefined the inertia computed
  * by the Cannon body will be used.
  * @returns {CANNON.Body}   body.
  */

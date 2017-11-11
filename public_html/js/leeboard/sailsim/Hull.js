@@ -24,7 +24,7 @@ function(LBSailSim, LBUtil, LBMath, LBGeometry, LBVolume, LBPhysics, LBDelft, LB
 /**
  * Spline used for calculating the friction coefficient Cf given the roughness
  * ratio, eyeballed from Fossati pg. 16.
- * @type {LBMath.CSpline}
+ * @type {module:LBMath.CSpline}
  */
 LBSailSim.CFVsRoughnessRatio = new LBMath.CSpline();
 LBSailSim.CFVsRoughnessRatio.setup(
@@ -45,7 +45,7 @@ LBSailSim.Hull = function(vessel) {
     /**
      * The center of buoyancy in local coordinates. This is actively updated if
      * volumes have been specified for the vessel.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.centerOfBuoyancy = new LBGeometry.Vector3();
     
@@ -141,14 +141,14 @@ LBSailSim.Hull = function(vessel) {
     /**
      * The center of buoyancy in world coordinates.
      * @readonly
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.worldCenterOfBuoyancy = new LBGeometry.Vector3();
     
     /**
      * The center of resistance (where the hull resistance is applied) in world coordinates.
      * @readonly
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.worldCenterOfResistance = new LBGeometry.Vector3();
 
@@ -161,7 +161,7 @@ LBSailSim.Hull = function(vessel) {
     
     /**
      * The resistance force in world coordinates.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.resistanceForce = new LBGeometry.Vector3();
 };
@@ -317,8 +317,8 @@ LBSailSim.Hull.prototype = {
     /**
      * Calculates the forces due to the hull, returning it as a resultant.
      * @param {Number} dt   The simulation time step.
-     * @param {LBPhysics.Resultant} [resultant] If defined the resultant to store the results into.
-     * @return {LBPhysics.Resultant3D}  The resultant.
+     * @param {module:LBPhysics.Resultant} [resultant] If defined the resultant to store the results into.
+     * @return {module:LBPhysics.Resultant3D}  The resultant.
      */
     updateForces: function(dt, resultant) {
         resultant = resultant || new LBPhysics.Resultant3D();
@@ -489,7 +489,7 @@ LBSailSim.Hull.calcCB = function(delC, lwl, bwl, tc) {
 /**
  * Handles recording debug field data if necessary.
  * @protected
- * @param {LBPhysics.Resultant} resultant   The force resultant.
+ * @param {module:LBPhysics.Resultant} resultant   The force resultant.
  * @returns {undefined}
  */
 LBSailSim.Hull.prototype.handleDebugFields = function(resultant) {
@@ -518,7 +518,7 @@ LBSailSim.Hull.prototype.handleDebugFields = function(resultant) {
 };
 
 /**
- * Helper that adds fields for a given hull instance name to {@link LBDebug.DataLog}.
+ * Helper that adds fields for a given hull instance name to {@link module:LBDebug.DataLog}.
  * @param {String} name The foil instance name to debug.
  * @returns {undefined}
  */

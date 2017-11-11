@@ -18,7 +18,12 @@
 define(['lbutil', 'lbmath'],
 function(LBUtil, LBMath) {
     "use strict";
-    
+
+
+/**
+ * This module contains stuff for tracking something that's changing.
+ * @exports LBTracking
+ */
 var LBTracking = LBTracking || {};
 
 
@@ -30,8 +35,9 @@ var LBTracking = LBTracking || {};
  * towards. The target value is updated when the value being followed is outside
  * the slack range surrounding the target value.
  * <p>
+ * @constructor
  * @param {Object} options
- * @returns {Tracking_L19.LBTracking.ValueFollower}
+ * @returns {module:LBTracking.ValueFollower}
  */
 LBTracking.ValueFollower = function(options) {
     options = options || {};
@@ -75,7 +81,7 @@ LBTracking.ValueFollower.prototype = {
     /**
      * Sets the value and the target value.
      * @param {Number} value    The value to set to.
-     * @returns {LBTracking.ValueFollower}  this.
+     * @returns {module:LBTracking.ValueFollower}  this.
      */
     setValue: function(value) {
         this.target = this.value = value;

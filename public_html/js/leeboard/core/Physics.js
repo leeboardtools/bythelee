@@ -21,16 +21,17 @@ function(LBUtil, LBMath, LBGeometry, LBVolume) {
     
 
 /**
- * @namespace   LBPhysics
+ * This module contains various physics related classes and helpers.
+ * @exports   LBPhysics
  */
 var LBPhysics = LBPhysics || {};
 
 /**
  * Calculates the moment about the origin of a force applied at a position.
- * @param {LBGeometry.Vector3} force  The force.
- * @param {LBGeometry.Vector3} position   The application point of the force.
- * @param {LBGeometry.Vector3} [store]  If defined the 3D vector to receive the cross product.
- * @returns {LBGeometry.Vector3} Vector representing the moment about the origin from 
+ * @param {module:LBGeometry.Vector3} force  The force.
+ * @param {module:LBGeometry.Vector3} position   The application point of the force.
+ * @param {module:LBGeometry.Vector3} [store]  If defined the 3D vector to receive the cross product.
+ * @returns {module:LBGeometry.Vector3} Vector representing the moment about the origin from 
  * force being applied at position.
  */
 LBPhysics.calcMoment = function(force, position, store) {
@@ -44,27 +45,27 @@ LBPhysics.calcMoment = function(force, position, store) {
 /**
  * A 3D resultant force, which is a force vector, a moment vector, and an application point.
  * @constructor
- * @param {LBGeometry.Vector3} force  The force vector.
- * @param {LBGeometry.Vector3} moment The moment vector.
- * @param {LBGeometry.Vector3} position   The application point.
- * @returns {LBPhysics.Resultant3D}  The resultant.
+ * @param {module:LBGeometry.Vector3} force  The force vector.
+ * @param {module:LBGeometry.Vector3} moment The moment vector.
+ * @param {module:LBGeometry.Vector3} position   The application point.
+ * @returns {module:LBPhysics.Resultant3D}  The resultant.
  */
 LBPhysics.Resultant3D = function(force, moment, position) {
     /**
      * The force vector.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.force = LBUtil.copyCommonProperties(new LBGeometry.Vector3(), force);
 
     /**
      * The moment vector.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.moment = LBUtil.copyCommonProperties(new LBGeometry.Vector3(), moment);
 
     /**
      * The force application point.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.applPoint = LBUtil.copyCommonProperties(new LBGeometry.Vector3(), position);
 };
@@ -75,7 +76,7 @@ LBPhysics.Resultant3D._workingPos = new LBGeometry.Vector3();
 LBPhysics.Resultant3D.prototype = {
     /**
      * Creates a copy of the resultant.
-     * @returns {LBPhysics.Resultant3D}
+     * @returns {module:LBPhysics.Resultant3D}
      */
     clone: function() {
         return new LBPhysics.Resultant3D(this.force, this.moment, this.applPoint);
@@ -84,8 +85,8 @@ LBPhysics.Resultant3D.prototype = {
     
     /**
      * Sets this resultant to match the settings of another.
-     * @param {LBPhysics.Resultant3D} toCopy   The resultant to copy.
-     * @returns {LBPhysics.Resultant3D}  this.
+     * @param {module:LBPhysics.Resultant3D} toCopy   The resultant to copy.
+     * @returns {module:LBPhysics.Resultant3D}  this.
      */
     copy: function(toCopy) {
         if (this !== toCopy) {
@@ -99,9 +100,9 @@ LBPhysics.Resultant3D.prototype = {
     /**
      * Adds a force applied at a position to the resultant. The application point of the
      * resultant is not changed.
-     * @param {LBGeometry.Vector3} force  The force to add.
-     * @param {LBGeometry.Vector3} position   The position at which the force is added.
-     * @returns {LBPhysics.Resultant3D} this.
+     * @param {module:LBGeometry.Vector3} force  The force to add.
+     * @param {module:LBGeometry.Vector3} position   The position at which the force is added.
+     * @returns {module:LBPhysics.Resultant3D} this.
      */
     addForce: function(force, position) {
         if (!this.applPoint.equals(position)) {
@@ -117,8 +118,8 @@ LBPhysics.Resultant3D.prototype = {
     /**
      * Adds a resultant to this resultant. The application point of this resultant is
      * not changed.
-     * @param {LBPhysics.Resultant3D} other    The resultant to be added.
-     * @returns {LBPhysics.Resultant3D} this.
+     * @param {module:LBPhysics.Resultant3D} other    The resultant to be added.
+     * @returns {module:LBPhysics.Resultant3D} this.
      */
     addResultant: function(other) {
         var deltaPos = LBGeometry.subVectors3(other.applPoint, this.applPoint);
@@ -132,8 +133,8 @@ LBPhysics.Resultant3D.prototype = {
     
     /**
      * Moves the application point of the resultant, the moment is adjusted accordingly.
-     * @param {LBGeometry.Vector3} position   The new application point.
-     * @returns {LBPhysics.Resultant3D} this.
+     * @param {module:LBGeometry.Vector3} position   The new application point.
+     * @returns {module:LBPhysics.Resultant3D} this.
      */
     moveApplPoint: function(position) {
         if (!this.applPoint.equals(position)) {
@@ -149,17 +150,17 @@ LBPhysics.Resultant3D.prototype = {
     /**
      * Moves the application point such that the moment vector is parallel to the
      * force vector. The application point and moment may be modified, the force vector is not.
-     * @param {LBGeometry.Plane} [plane] If defined the plane where the application point
+     * @param {module:LBGeometry.Plane} [plane] If defined the plane where the application point
      * should be in, if possible.
-     * @param {LBGeometry.Sphere} [planeBoundsSphere] If both this and plane are defined, this
+     * @param {module:LBGeometry.Sphere} [planeBoundsSphere] If both this and plane are defined, this
      * is a sphere within which the plane application point must be for the application point
      * to be moved to the plane. This prevents the application point from shooting far away
      * when the force direction is near the same direction as the plane.
-     * @param {LBGeometry.Plane} [secondaryPlane]   If defined, a secondary plane, which is
+     * @param {module:LBGeometry.Plane} [secondaryPlane]   If defined, a secondary plane, which is
      * used instead of plane if the intersection point is outside of planeBoundSphere.
      * planeBoundSphere must be defined for this to be used. This should be orthogonal
      * to plane.
-     * @returns {LBPhysics.Resultant3D}  this.
+     * @returns {module:LBPhysics.Resultant3D}  this.
      */
     convertToWrench: function(plane, planeBoundsSphere, secondaryPlane) {
         var forceMagSq = this.force.lengthSq();
@@ -212,8 +213,8 @@ LBPhysics.Resultant3D.prototype = {
     
     /**
      * Rotates the force and moment vectors by applying a quaternion.
-     * @param {LBGeomtery.Quaternion} quaternion The quaternion defining the rotation.
-     * @returns {LBPhysics.Resultant3D}  this.
+     * @param {module:LBGeometery.Quaternion} quaternion The quaternion defining the rotation.
+     * @returns {module:LBPhysics.Resultant3D}  this.
      */
     applyQuaternion: function(quaternion) {
         this.force.applyQuaternion(quaternion);
@@ -226,8 +227,8 @@ LBPhysics.Resultant3D.prototype = {
      * Applies a 4x4 matrix represnting a transformation to the resultant. The
      * force and monent vectors are rotated, while the application point is tranlsated
      * and rotated.
-     * @param {LBGeometry.Matrix4} mat  The 4x4 matrix to apply.
-     * @returns {LBPhysics.Resultant3D}  this.
+     * @param {module:LBGeometry.Matrix4} mat  The 4x4 matrix to apply.
+     * @returns {module:LBPhysics.Resultant3D}  this.
      */
     applyMatrix4: function(mat) {
         this.force.applyMatrix4Rotation(mat);
@@ -241,7 +242,7 @@ LBPhysics.Resultant3D.prototype = {
      * Applies a scale to all the distance related components of the resultant,
      * used for changing distance units.
      * @param {Number} scale    The scale to apply.
-     * @returns {LBPhysics.Resultant3D} this.
+     * @returns {module:LBPhysics.Resultant3D} this.
      */
     applyDistanceScale: function(scale) {
         this.force.multiplyScalar(scale);
@@ -262,7 +263,7 @@ LBPhysics.Resultant3D.prototype = {
     
     /**
      * Sets all the terms of the resultant to all zeroes.
-     * @returns {LBPhysics.Resultant3D}  this.
+     * @returns {module:LBPhysics.Resultant3D}  this.
      */
     zero: function() {
         this.force.zero();
@@ -289,12 +290,12 @@ LBPhysics._calcVector3VelocityWorkingArray = [];
 /**
  * Given an array of positions, calculates the velocity using backward finite difference.
  * @param {Number} dt   The time step.
- * @param {LBGeometry.Vector3[]} positions  The array of positions, positions[0] is the latest,
+ * @param {module:LBGeometry.Vector3[]} positions  The array of positions, positions[0] is the latest,
  *  positions[1] is at t - dt, positions[2] is at t - 2*dt, etc.
- * @param {LBGeometry.Vector3} store    If defined the vector to store the velocity into.
+ * @param {module:LBGeometry.Vector3} store    If defined the vector to store the velocity into.
  * @param {Number} [positionCount]  If defined the number of positions in positions to use, otherwise
  *  all the positions are considered.
- * @returns {LBGeometry.Vector3}    The velocity vector.
+ * @returns {module:LBGeometry.Vector3}    The velocity vector.
  */
 LBPhysics.calcVector3Velocity = function(dt, positions, store, positionCount) {
     store = store || new LBGeometry.Vector3();    
@@ -328,19 +329,20 @@ LBPhysics.calcVector3Velocity = function(dt, positions, store, positionCount) {
 
 /**
  * Holds a pair of transforms for converting between a world coordinate system and a
- * local coordinate system. Used by [@link LBPhysics.CoordSystemState}.
- * @returns {LBPhysics.CoordTransforms}
+ * local coordinate system. Used by [@link module:LBPhysics.CoordSystemState}.
+ * @constructor
+ * @returns {module:LBPhysics.CoordTransforms}
  */
 LBPhysics.CoordTransforms = function() {
     /**
      * The matrix transforming from local to world coordinates.
-     * @member {LBGeometry.Matrix4}
+     * @member {module:LBGeometry.Matrix4}
      */
     this.worldXfrm = new LBGeometry.Matrix4();
 
     /**
      * The matrix transforming from world to local coordinates.
-     * @member {LBGeometry.Matrix4}
+     * @member {module:LBGeometry.Matrix4}
      */
     this.localXfrm = new LBGeometry.Matrix4();
 };
@@ -350,9 +352,9 @@ LBPhysics.CoordTransforms.prototype = {
      * Sets the world and local transforms. If either Xfrm matrix is not defined it is obtained by inverting the
      * other matrix, if both are not defined then the matrices are set to the identity
      * matrix.
-     * @param {LBGeometry.Matrix4} [worldXfrm]    If defined, the 4x4 matrix for transforming from local to world coordinaes.
-     * @param {LBGeometry.Matrix4} [localXfrm]    If defined, the 4x4 matrix for transforming from world to local coordinates.
-     * @returns {LBPhysics.CoordTransforms} this.
+     * @param {module:LBGeometry.Matrix4} [worldXfrm]    If defined, the 4x4 matrix for transforming from local to world coordinaes.
+     * @param {module:LBGeometry.Matrix4} [localXfrm]    If defined, the 4x4 matrix for transforming from world to local coordinates.
+     * @returns {module:LBPhysics.CoordTransforms} this.
      */
     setXfrms: function(worldXfrm, localXfrm) {        
         if (!localXfrm){
@@ -380,8 +382,8 @@ LBPhysics.CoordTransforms.prototype = {
     
     /**
      * Sets this to match another.
-     * @param {LBPhysics.CoordTransforms} other The transforms to be copied.
-     * @returns {LBPhysics.CoordTransforms} this.
+     * @param {module:LBPhysics.CoordTransforms} other The transforms to be copied.
+     * @returns {module:LBPhysics.CoordTransforms} this.
      */
     copy: function(other) {
         this.worldXfrm.copy(other.worldXfrm);
@@ -392,10 +394,10 @@ LBPhysics.CoordTransforms.prototype = {
     
     /**
      * Converts a vector from local to world coordinates.
-     * @param {LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
-     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
+     * @param {module:LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
+     * @param {module:LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
      * may be the same as vector.
-     * @returns {LBGeometry.Vector3}    The vector containing the world coordinates.
+     * @returns {module:LBGeometry.Vector3}    The vector containing the world coordinates.
      */
     vector3ToWorld: function(vector, store) {
         if (!store) {
@@ -411,10 +413,10 @@ LBPhysics.CoordTransforms.prototype = {
     
     /**
      * Converts a vector from world to local coordinates.
-     * @param {LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
-     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
+     * @param {module:LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
+     * @param {module:LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
      * may be the same as vector.
-     * @returns {LBGeometry.Vector3}    The vector containing the local coordinates.
+     * @returns {module:LBGeometry.Vector3}    The vector containing the local coordinates.
      */
     vector3ToLocal: function(vector, store) {
         if (!store) {
@@ -430,10 +432,10 @@ LBPhysics.CoordTransforms.prototype = {
     
     /**
      * Applies the local to world rotation to a vector.
-     * @param {LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
-     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
+     * @param {module:LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
+     * @param {module:LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
      * may be the same as vector.
-     * @returns {LBGeometry.Vector3}    The vector containing the world coordinates.
+     * @returns {module:LBGeometry.Vector3}    The vector containing the world coordinates.
      */
     vector3ToWorldRotation: function(vector, store) {
         if (!store) {
@@ -449,10 +451,10 @@ LBPhysics.CoordTransforms.prototype = {
     
     /**
      * Applies the world to local rotation to a vector.
-     * @param {LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
-     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
+     * @param {module:LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
+     * @param {module:LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
      * may be the same as vector.
-     * @returns {LBGeometry.Vector3}    The vector containing the local coordinates.
+     * @returns {module:LBGeometry.Vector3}    The vector containing the local coordinates.
      */
     vector3ToLocalRotation: function(vector, store) {
         if (!store) {
@@ -489,7 +491,7 @@ LBPhysics.CoordTransforms.prototype = {
  * @constructor
  * @param {Number} [velTerms=2]   The number of terms to use for the finite difference
  * velocity calculation, must be at least 2.
- * @returns {LBPhysics.CoordSystemState}
+ * @returns {module:LBPhysics.CoordSystemState}
  */
 LBPhysics.CoordSystemState = function(velTerms) {
     if (velTerms === undefined) {
@@ -508,7 +510,7 @@ LBPhysics.CoordSystemState = function(velTerms) {
     this.xfrmsBuffer = new LBUtil.RollingBuffer(velTerms);
     
     /**
-     * The time step passed to {@link LBPhysics.CoordSystemState#setXfrms}.
+     * The time step passed to {@link module:LBPhysics.CoordSystemState#setXfrms}.
      * @member {Number}
      */
     this.dt = 0;
@@ -528,11 +530,11 @@ LBPhysics.CoordSystemState.prototype = {
      * process. If either Xfrm matrix is not defined it is obtained by inverting the
      * other matrix, if both are not defined then the matrices are set to the identity
      * matrix.
-     * @param {LBGeometry.Matrix4} [worldXfrm]    If defined, the 4x4 matrix for transforming from local to world coordinaes.
+     * @param {module:LBGeometry.Matrix4} [worldXfrm]    If defined, the 4x4 matrix for transforming from local to world coordinaes.
      * @param {Number} [dt]   The simulation time change from the last call to this, used
      * to compute velocity.
-     * @param {LBGeometry.Matrix4} [localXfrm]    If defined, the 4x4 matrix for transforming from world to local coordinates.
-     * @returns {LBPhysics.CoordSystemState} this.
+     * @param {module:LBGeometry.Matrix4} [localXfrm]    If defined, the 4x4 matrix for transforming from world to local coordinates.
+     * @returns {module:LBPhysics.CoordSystemState} this.
      */
     setXfrms: function(worldXfrm, dt, localXfrm) {
         // Need to use LBUtil.isVar() because dt is numeric.
@@ -566,10 +568,10 @@ LBPhysics.CoordSystemState.prototype = {
     
     /**
      * Converts a vector from local to world coordinates.
-     * @param {LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
-     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
+     * @param {module:LBGeometry.Vector3} vector   The vector in local coordinates to be transformed.
+     * @param {module:LBGeometry.Vector3} [store]  If defined, the vector to store the world coordinates into,
      * may be the same as vector.
-     * @returns {LBGeometry.Vector3}    The vector containing the world coordinates.
+     * @returns {module:LBGeometry.Vector3}    The vector containing the world coordinates.
      */
     vector3ToWorld: function(vector, store) {
         return this.xfrmsBuffer.getNewest().vector3ToWorld(vector, store);
@@ -577,10 +579,10 @@ LBPhysics.CoordSystemState.prototype = {
     
     /**
      * Converts a vector from world to local coordinates.
-     * @param {LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
-     * @param {LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
+     * @param {module:LBGeometry.Vector3} vector   The vector in world coordinates to be transformed.
+     * @param {module:LBGeometry.Vector3} [store]  If defined, the vector to store the local coordinates into,
      * may be the same as vector.
-     * @returns {LBGeometry.Vector3}    The vector containing the local coordinates.
+     * @returns {module:LBGeometry.Vector3}    The vector containing the local coordinates.
      */
     vector3ToLocal: function(vector, store) {
         return this.xfrmsBuffer.getNewest().vector3ToLocal(vector, store);
@@ -599,7 +601,7 @@ LBPhysics.CoordSystemState.prototype = {
     /**
      * Calculates world position, world velocity, and local velocity for a given local
      * point.
-     * @param {LBGeometry.Vector3} localPos The local coordinates of the point of interest.
+     * @param {module:LBGeometry.Vector3} localPos The local coordinates of the point of interest.
      * @param {object} results  The object to receive the results. Results are stored
      * in keys, and are only computed if the key exists:
      *      <li>worldPos: The world coordinates of localPos.
@@ -608,9 +610,9 @@ LBPhysics.CoordSystemState.prototype = {
      *      the world velocity rotated into local coordinates, it is not the velocity
      *      of the position relative to the local coordinate system (if that were the case
      *      then this would always be 0 if prevLocalPos were not defined).
-     * @param {LBGeometry.Vector3} [prevLocalPos] If defined, the previous local position, used for velocity calculation,
+     * @param {module:LBGeometry.Vector3} [prevLocalPos] If defined, the previous local position, used for velocity calculation,
      * if not defined then the previous position is presumed to be localPos.
-     * @returns {LBPhysics.CoordSystemState} this.
+     * @returns {module:LBPhysics.CoordSystemState} this.
      */
     calcVectorLocalToWorld: function(localPos, results, prevLocalPos) {
         var worldPos = results.worldPos || LBPhysics.CoordSystemState._workingPosA;
@@ -701,7 +703,7 @@ LBPhysics.CoordSystemState.prototype = {
     /**
      * Calculates the angular velocity about an axis in the local coordinate system
      * based upon the current and past transforms.
-     * @param {LBGeometry.Vector3} rotAxis   The axis, this must be normalized.
+     * @param {module:LBGeometry.Vector3} rotAxis   The axis, this must be normalized.
      * @returns {Number}    The angular velocity in radians/sec.
      */
     calcAngularVelocityAboutLocalAxis: function(rotAxis) {
@@ -766,8 +768,8 @@ LBPhysics.CoordSystemState.prototype = {
 /**
  * Loads a moment of inertia tensor from properties in a data object
  * @param {object} data The data object to load from.
- * @param {LBGeometry.Matrix3} [store]  If defined the object to load the tensor into.
- * @returns {LBGeometry.Matrix3}    The moment of inertia tensor.
+ * @param {module:LBGeometry.Matrix3} [store]  If defined the object to load the tensor into.
+ * @returns {module:LBGeometry.Matrix3}    The moment of inertia tensor.
  */
 LBPhysics.loadMomentInertia = function(data, store) {
     store = store || new LBGeometry.Matrix3();
@@ -784,7 +786,7 @@ LBPhysics.loadMomentInertia = function(data, store) {
 
 /**
  * Returns the Ixx term of an inertia tensor.
- * @param {LBGeometry.Matrix3} inertia The inertia tensor.
+ * @param {module:LBGeometry.Matrix3} inertia The inertia tensor.
  * @returns {Number}    The Ixx term.
  */
 LBPhysics.getInertiaXX = function(inertia) {
@@ -793,7 +795,7 @@ LBPhysics.getInertiaXX = function(inertia) {
 
 /**
  * Returns the Ixy term of an inertia tensor.
- * @param {LBGeometry.Matrix3} inertia The inertia tensor.
+ * @param {module:LBGeometry.Matrix3} inertia The inertia tensor.
  * @returns {Number}    The Ixy term.
  */
 LBPhysics.getInertiaXY = function(inertia) {
@@ -802,7 +804,7 @@ LBPhysics.getInertiaXY = function(inertia) {
 
 /**
  * Returns the Ixz term of an inertia tensor.
- * @param {LBGeometry.Matrix3} inertia The inertia tensor.
+ * @param {module:LBGeometry.Matrix3} inertia The inertia tensor.
  * @returns {Number}    The Ixz term.
  */
 LBPhysics.getInertiaXZ = function(inertia) {
@@ -811,7 +813,7 @@ LBPhysics.getInertiaXZ = function(inertia) {
 
 /**
  * Returns the Iyy term of an inertia tensor.
- * @param {LBGeometry.Matrix3} inertia The inertia tensor.
+ * @param {module:LBGeometry.Matrix3} inertia The inertia tensor.
  * @returns {Number}    The Iyy term.
  */
 LBPhysics.getInertiaYY = function(inertia) {
@@ -820,7 +822,7 @@ LBPhysics.getInertiaYY = function(inertia) {
 
 /**
  * Returns the Iyz term of an inertia tensor.
- * @param {LBGeometry.Matrix3} inertia The inertia tensor.
+ * @param {module:LBGeometry.Matrix3} inertia The inertia tensor.
  * @returns {Number}    The Iyz term.
  */
 LBPhysics.getInertiaYZ = function(inertia) {
@@ -829,7 +831,7 @@ LBPhysics.getInertiaYZ = function(inertia) {
 
 /**
  * Returns the Izz term of an inertia tensor.
- * @param {LBGeometry.Matrix3} inertia The inertia tensor.
+ * @param {module:LBGeometry.Matrix3} inertia The inertia tensor.
  * @returns {Number}    The Izz term.
  */
 LBPhysics.getInertiaZZ = function(inertia) {
@@ -840,15 +842,15 @@ LBPhysics.getInertiaZZ = function(inertia) {
  * A rigid body for purposes of force calculations. A rigid body has mass, a position
  * and orientation, and may have additional rigid body parts attached to it.
  * @constructor
- * @param {LBGeometry.Object3D} [obj3D]    The object defining the location and orientation of the
+ * @param {module:LBGeometry.Object3D} [obj3D]    The object defining the location and orientation of the
  * rigid body, a reference to this object is kept, the object is expected to change
  * position and orientation during a simulation. This presumes that the object's world
  * reference frame is the same as the base's world reference frame.
  * @param {Number} [mass] The mass of the body, may be 0.
- * @param {LBGeometry.Vector3} [centerOfMass] The center of mass relative to the local reference 
+ * @param {module:LBGeometry.Vector3} [centerOfMass] The center of mass relative to the local reference 
  * frame, if not defined it will be set to {0,0,0}.
- * @param {LBGeometry.Matrix3} [momentInertia]    The moment of inertia tensor, not yet fully supported.
- * @param {LBPhysics.RigidBody} [base] If defined, the rigid body to which this is attached, and which
+ * @param {module:LBGeometry.Matrix3} [momentInertia]    The moment of inertia tensor, not yet fully supported.
+ * @param {module:LBPhysics.RigidBody} [base] If defined, the rigid body to which this is attached, and which
  * is the base of this rigid body. The coordinates of this rigid body are then in the
  * local coordinates of the base.
  */
@@ -897,18 +899,20 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     this.obj3D = obj3D || new LBGeometry.Object3D();
     
     /**
-     * Array of {@link LBVolume.Tetra}s that define the volume of the body.
+     * Array of {@link module:LBVolume.Tetra}s that define the volume of the body.
      * @type LBVolume.Tetra
      */
     this.volumes = [];
     
     /**
      * Dampling to apply to the linear velocity, 0 &le; damping &ge; 1
+     * @member {Number}
      */
     this.linearDamping = 0.01;
     
     /**
      * Dampling to apply to the angular velocity, 0 &le; damping &ge; 1
+     * @member {Number}
      */
     this.angularDamping = 0.01;
     
@@ -942,8 +946,8 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
      * parts have their local coordinate systems specified relative to this rigid
      * body's local coordinate system.
      * <p>
-     * Parts should be added and removed using {@link LBPhysics.RigidBody#addPart} and
-     * {@link LBPhysics.RigidBody#removePart}.
+     * Parts should be added and removed using {@link module:LBPhysics.RigidBody#addPart} and
+     * {@link module:LBPhysics.RigidBody#removePart}.
      * @type LBPhysics.RigidBody[]
      */
     this.parts = [];
@@ -968,7 +972,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     
     /**
      * If defined this is the object from which the rigid body was loaded, the object
-     * passed to {@link LBPhysics.RigidBody#load} ({@link LBPhysics.RigidBody#loadBase} really).
+     * passed to {@link module:LBPhysics.RigidBody#load} ({@link module:LBPhysics.RigidBody#loadBase} really).
      * @type Object
      */
     this.loadData = undefined;
@@ -985,7 +989,7 @@ LBPhysics.RigidBody.prototype = {
      * This currently does not load the parts of the rigid body, though it may in
      * the future.
      * @param {object} data The data object to load from.
-     * @returns {LBPhysics.RigidBody}    this.
+     * @returns {module:LBPhysics.RigidBody}    this.
      */
     load: function(data) {
         this.loadBase(data);
@@ -1000,7 +1004,7 @@ LBPhysics.RigidBody.prototype = {
      * Loads only the basic settings of the rigid body from a data object. The 3D
      * object and the parts are not loaded.
      * @param {object} data The data object to load from.
-     * @returns {LBPhysics.RigidBody}    this.
+     * @returns {module:LBPhysics.RigidBody}    this.
      */
     loadBase: function(data) {
         this.name = data.name || this.name;
@@ -1066,8 +1070,8 @@ LBPhysics.RigidBody.prototype = {
     /**
      * Adds a part to the rigid body. If the part is part of another rigid
      * body it is removed from that other rigid body.
-     * @param {LBPhysics.RigidBody} part The part to add.
-     * @returns {LBPhysics.RigidBody} this.
+     * @param {module:LBPhysics.RigidBody} part The part to add.
+     * @returns {module:LBPhysics.RigidBody} this.
      */
     addPart: function(part) {
         if (part.base) {
@@ -1087,8 +1091,8 @@ LBPhysics.RigidBody.prototype = {
     
     /**
      * Removes a part from the rigid body if it is part of the rigid body.
-     * @param {LBPhysics.RigidBody} part The part to remove.
-     * @returns {LBPhysics.RigidBody}    this.
+     * @param {module:LBPhysics.RigidBody} part The part to remove.
+     * @returns {module:LBPhysics.RigidBody}    this.
      */
     removePart: function(part) {
         if (part.base === this) {
@@ -1136,7 +1140,7 @@ LBPhysics.RigidBody.prototype = {
     /**
      * Retrieves a part of this rigid body by name.
      * @param {String} name The name of the part.
-     * @returns {LBPhysics.RigidBody|undefined} The part, undefined if not found.
+     * @returns {module:LBPhysics.RigidBody|undefined} The part, undefined if not found.
      */
     getPartWithName: function(name) {
         for (var i = 0; i < this.parts.length; ++i) {
@@ -1150,9 +1154,9 @@ LBPhysics.RigidBody.prototype = {
     /**
      * Sets both the position and the rotation of the rigid body, using a quaternion for
      * the rotation.
-     * @param {LBGeometry.Vector3} pos  The position.
-     * @param {LBGeometry.Quaternion} quaternion    The quaternion.
-     * @returns {LBPhysics.RigidBody}   this.
+     * @param {module:LBGeometry.Vector3} pos  The position.
+     * @param {module:LBGeometry.Quaternion} quaternion    The quaternion.
+     * @returns {module:LBPhysics.RigidBody}   this.
      */
     setPositionAndQuaternion: function(pos, quaternion) {
         this.obj3D.position.copy(pos);
@@ -1167,7 +1171,7 @@ LBPhysics.RigidBody.prototype = {
      * @param {Number} x    The x-coordinate.
      * @param {Number} y    The y-coordinate.
      * @param {Number} z    The z-coordinate.
-     * @returns {LBPhysics.RigidBody}    this.
+     * @returns {module:LBPhysics.RigidBody}    this.
      */
     setXYZ: function(x, y, z) {
         this.obj3D.position.set(x, y, z);
@@ -1180,7 +1184,7 @@ LBPhysics.RigidBody.prototype = {
      * is absolute with respect to the base's coordinate system.
      * @param {Boolean} [keepOtherRotations=false]  If true the rotations about the
      * x and y axes are kept.
-     * @returns {LBPhysics.RigidBody}   this.
+     * @returns {module:LBPhysics.RigidBody}   this.
      */
     setZRotationRad: function(rad, keepOtherRotations) {
         if (keepOtherRotations) {
@@ -1201,7 +1205,7 @@ LBPhysics.RigidBody.prototype = {
      * is absolute with respect to the base's coordinate system.
      * @param {Boolean} [keepOtherRotations=false]  If true the rotations about the
      * x and y axes are kept.
-     * @returns {LBPhysics.RigidBody}   this.
+     * @returns {module:LBPhysics.RigidBody}   this.
      */
     setZRotationDeg: function(deg, keepOtherRotations) {
         return this.setZRotationRad(deg * LBMath.DEG_TO_RAD, keepOtherRotations);
@@ -1210,7 +1214,7 @@ LBPhysics.RigidBody.prototype = {
     /**
      * Zeros the resultant of this rigid body and of all rigid bodies that are
      * part of it.
-     * @returns {LBPhysics.RigidBody}    this.
+     * @returns {module:LBPhysics.RigidBody}    this.
      */
     clearForces: function() {
         this.resultant.zero();
@@ -1227,7 +1231,7 @@ LBPhysics.RigidBody.prototype = {
      * of parts of this rigid body.
      * @param {Number} dt   The simulation time since the last time the coordinates
      * was updated, passed to the coordinate system state.
-     * @returns {LBPhysics.RigidBody}    this.
+     * @returns {module:LBPhysics.RigidBody}    this.
      */
     updateCoords: function(dt) {
         this.physicalPropertiesDirty = true;
@@ -1244,10 +1248,10 @@ LBPhysics.RigidBody.prototype = {
     
     /**
      * Adds a force in world coordinates to the rigid body's resultant.
-     * @param {LBGeometry.Vector3} force    The force to add.
-     * @param {LBGeometry.Vector3} worldPos The position on the rigid body where the force is
+     * @param {module:LBGeometry.Vector3} force    The force to add.
+     * @param {module:LBGeometry.Vector3} worldPos The position on the rigid body where the force is
      * applied.
-     * @returns {LBPhysics.RigidBody}    this.
+     * @returns {module:LBPhysics.RigidBody}    this.
      */
     addWorldForce: function(force, worldPos) {
         this.resultant.addForce(force, worldPos);
@@ -1256,8 +1260,8 @@ LBPhysics.RigidBody.prototype = {
     
     /**
      * Adds a resultant in world coordinates to the rigid body's resultant.
-     * @param {LBPhysics.RigidBody} resultant The resultant to add, in world coordinates.
-     * @returns {LBPhysics.RigidBody}    this.
+     * @param {module:LBPhysics.RigidBody} resultant The resultant to add, in world coordinates.
+     * @returns {module:LBPhysics.RigidBody}    this.
      */
     addWorldResultant: function(resultant) {
         this.resultant.addResultant(resultant);
@@ -1268,15 +1272,15 @@ LBPhysics.RigidBody.prototype = {
      * Retrieves the resultant in world coordinates.
      * @param {Boolean} convertToWrench If true the resultant is converted to a wrench,
      * otherwise its application point is set to the total center of mass.
-     * @param {LBGeometry.Plane} [wrenchPlane]    If convertToWrench is true, this is the
-     * optional plane passed to {@link LBPhysics.Resultant3D.convertToWrench}.
-     * @param {LBGeometry.Sphere} [wrenchBounds]  If convertToWrench is true and
+     * @param {module:LBGeometry.Plane} [wrenchPlane]    If convertToWrench is true, this is the
+     * optional plane passed to {@link module:LBPhysics.Resultant3D.convertToWrench}.
+     * @param {module:LBGeometry.Sphere} [wrenchBounds]  If convertToWrench is true and
      * wrenchPlane is specified, this is a bounding sphere within which the application
      * point transfered to the wrenchPlane must lie for it to actually be transferred.
-     * @param {LBGeometry.Plane} [secondaryWrenchPlane] If convertToWrench is true and
+     * @param {module:LBGeometry.Plane} [secondaryWrenchPlane] If convertToWrench is true and
      * both wrenchPlane and wrenchBounds are specified, this is a secondary plane to use
      * if the wrench force is not within wrenchBounds.
-     * @returns {LBPhysics.Resultant3D} The resultant in world coordinates.
+     * @returns {module:LBPhysics.Resultant3D} The resultant in world coordinates.
      */
     getResultant: function(convertToWrench, wrenchPlane, wrenchBounds, secondaryWrenchPlane) {
         this.totalResultant.copy(this.resultant);
@@ -1296,7 +1300,7 @@ LBPhysics.RigidBody.prototype = {
      * Internal method that recalculates the overall physical properties of the
      * body.
      * @private
-     * @returns {LBPhysics.RigidBody}    this.
+     * @returns {module:LBPhysics.RigidBody}    this.
      */
     _updatePhysicalProperties: function() {
         if (this.physicalPropertiesDirty) {
@@ -1356,7 +1360,7 @@ LBPhysics.RigidBody.prototype = {
     /**
      * Retrieves the composite center of mass of the rigid body and all its parts,
      * in world coordinates.
-     * @returns {LBGeometry.Vector3}    The center of mass in world coordinates.
+     * @returns {module:LBGeometry.Vector3}    The center of mass in world coordinates.
      */
     getTotalCenterOfMass: function() {
         this._updatePhysicalProperties();
@@ -1365,7 +1369,7 @@ LBPhysics.RigidBody.prototype = {
 
     /**
      * Retrieves the composite moment of inertia tensor.
-     * @returns {LBGeometry.Matrix3} The matrix tensor.
+     * @returns {module:LBGeometry.Matrix3} The matrix tensor.
      */
     getTotalMomentInertia: function() {
         this._updatePhysicalProperties();
@@ -1374,7 +1378,7 @@ LBPhysics.RigidBody.prototype = {
 
     /**
      * Retrieves the composite inverse moment of inertia tensor.
-     * @returns {LBGeometry.Matrix3} The inverse matrix tensor.
+     * @returns {module:LBGeometry.Matrix3} The inverse matrix tensor.
      */
     getTotalInvMomentInertia: function() {
         this._updatePhysicalProperties();
@@ -1385,16 +1389,16 @@ LBPhysics.RigidBody.prototype = {
     /**
      * This integrates the current resultant against the local rotation of the rigid
      * body around a given axis, rotating the body and reducing the resultant appropriately.
-     * @param {LBGeometry.Vector3} axisOrigin A point defining the location of the axis, in
+     * @param {module:LBGeometry.Vector3} axisOrigin A point defining the location of the axis, in
      * local coordinates.
-     * @param {LBGeometry.Vector3} axis The axis of rotation in local coordinates, this must be normalized.
+     * @param {module:LBGeometry.Vector3} axis The axis of rotation in local coordinates, this must be normalized.
      * @param {Number} currentDeg    The current angular rotation about the axis in degrees.
      * @param {function} [constrainer]  Optional function called to enforce any constraints
      * on the rotation angle. The function signature is:
      *  constrainer = function(newDeg, currentDeg, dt) {
      *      return constrainedDeg;
      *  }
-     * @param {LBPhysics.Resultant3D} [resultantToUse=this.resultant] If defined the resultant to use.
+     * @param {module:LBPhysics.Resultant3D} [resultantToUse=this.resultant] If defined the resultant to use.
      * @returns {undefined}
      */
     integrateForceForRotation: function(axisOrigin, axis, currentDeg, constrainer, resultantToUse) {
@@ -1490,12 +1494,12 @@ LBPhysics.RigidBody.prototype = {
  * a 'className' property, the value of that property is passed directly to LBUtil.stringToNewClassInstance()
  * along with the optional 'constructorArgs' property to create
  * the rigid body object, otherwise if defCreatorFunc is defined it is called to create
- * the rigid body object, otherwise {@link LBPhysics.RigidBody} is used.
+ * the rigid body object, otherwise {@link module:LBPhysics.RigidBody} is used.
  * @param {object} data The data to load from.
  * @param {Function} [defCreatorFunc] If defined the function used to create the rigid body if the
  * data object does not contain a construct property, or data is not defined. The argument
  * passed to this function is the data argument.
- * @returns {LBPhysics.RigidBody}    The rigid body object, undefined if both data and defCreatorFunc are not defined.
+ * @returns {module:LBPhysics.RigidBody}    The rigid body object, undefined if both data and defCreatorFunc are not defined.
  */
 LBPhysics.RigidBody.createFromData = function(data, defCreatorFunc) {
     if (!data) {
@@ -1525,10 +1529,10 @@ LBPhysics.RigidBody.createFromData = function(data, defCreatorFunc) {
 /**
  * Helper that retrieves all the rigid bodies in an array of rigid bodies that have
  * a given name.
- * @param {LBPhysics.RigidBody[]} rigidBodies   The array of rigid bodies.
+ * @param {module:LBPhysics.RigidBody[]} rigidBodies   The array of rigid bodies.
  * @param {String} name The name of interest.
- * @param {LBPhysics.RigidBody[]} [store]   If defined the array to store the results into.
- * @returns {LBPhysics.RigidBody[]} The array containing the found rigid bodies.
+ * @param {module:LBPhysics.RigidBody[]} [store]   If defined the array to store the results into.
+ * @returns {module:LBPhysics.RigidBody[]} The array containing the found rigid bodies.
  */
 LBPhysics.RigidBody.getRigidBodiesWithName = function(rigidBodies, name, store) {
     store = store || [];

@@ -21,38 +21,38 @@ function(LBMath, LBGeometry) {
 
 
 /**
- * 
- * @namespace LBCurve
+ * This module contains some classes for generating mathematical curves.
+ * @exports LBCurve
  */
 var LBCurve = LBCurve || {};
 
 /**
  * A parametic 2D quadratic Bezier curve.
  * @constructor
- * @param {LBGeometry.Vector2} [p0=0,0] The point on the curve when t = 0.
- * @param {LBGeometry.Vector2} [p1=0,0] The midpoint control point of the curve.
- * @param {LBGeometry.Vector2} [p2=0,0] The point on the curve when t = 1.
- * @return {LBCurve.QuadraticBezier2}
+ * @param {module:LBGeometry.Vector2} [p0=0,0] The point on the curve when t = 0.
+ * @param {module:LBGeometry.Vector2} [p1=0,0] The midpoint control point of the curve.
+ * @param {module:LBGeometry.Vector2} [p2=0,0] The point on the curve when t = 1.
+ * @return {module:LBCurve.QuadraticBezier2}
  */
 LBCurve.QuadraticBezier2 = function(p0, p1, p2) {
     /**
      * The point at t = 0.
      * @readonly
-     * @member {LBGeometry.Vector2}
+     * @member {module:LBGeometry.Vector2}
      */
     this.p0 = p0 || new LBGeometry.Vector2();
 
     /**
      * The midpoint control point.
      * @readonly
-     * @member {LBGeometry.Vector2}
+     * @member {module:LBGeometry.Vector2}
      */
     this.p1 = p1 || new LBGeometry.Vector2();
 
     /**
      * The point at t = 1.
      * @readonly
-     * @member {LBGeometry.Vector2}
+     * @member {module:LBGeometry.Vector2}
      */
     this.p2 = p2 || new LBGeometry.Vector2();
     
@@ -70,10 +70,10 @@ LBCurve.QuadraticBezier2.prototype.destroy = function() {
 
 /**
  * Sets the control points of the curve.
- * @param {LBGeometry.Vector2} [p0=0,0,0] The point on the curve when t = 0.
- * @param {LBGeometry.Vector2} [p1=0,0,0] The midpoint control point of the curve.
- * @param {LBGeometry.Vector2} [p2=0,0,0] The point on the curve when t = 1.
- * @return {LBCurve.QuadraticBezier2}   this.
+ * @param {module:LBGeometry.Vector2} [p0=0,0,0] The point on the curve when t = 0.
+ * @param {module:LBGeometry.Vector2} [p1=0,0,0] The midpoint control point of the curve.
+ * @param {module:LBGeometry.Vector2} [p2=0,0,0] The point on the curve when t = 1.
+ * @return {module:LBCurve.QuadraticBezier2}   this.
  */
 LBCurve.QuadraticBezier2.prototype.setControlPoints = function(p0, p1, p2) {
     if ((p0 !== this.p0) || (p1 !== this.p1) || (p2 !== this.p2)) {
@@ -118,8 +118,8 @@ LBCurve.QuadraticBezier2.prototype.getCurveLength = function() {
 /**
  * Calculates the coordinates of a point on the curve.
  * @param {Number} t    The parameter defining the point on the curve, normally within the range [0, 1].
- * @param {LBGeometry.Vector2} [store]  If defined the object to store the coordinates into.
- * @return {LBGeometry.Vector2} The coordinates of the point.
+ * @param {module:LBGeometry.Vector2} [store]  If defined the object to store the coordinates into.
+ * @return {module:LBGeometry.Vector2} The coordinates of the point.
  */
 LBCurve.QuadraticBezier2.prototype.calcPoint = function(t, store) {
     var oneMinusT = 1 - t;
@@ -135,8 +135,8 @@ LBCurve.QuadraticBezier2.prototype.calcPoint = function(t, store) {
 /**
  * Calculates the tangent at a point on the curve.
  * @param {Number} t    The parameter defining the point on the curve, normally within the range [0, 1].
- * @param {LBGeometry.Vector2} [store]  If defined the object to store the tangent into.
- * @return {LBGeometry.Vector2} The tangent at the point.
+ * @param {module:LBGeometry.Vector2} [store]  If defined the object to store the tangent into.
+ * @return {module:LBGeometry.Vector2} The tangent at the point.
  */
 LBCurve.QuadraticBezier2.prototype.calcTangent = function(t, store) {
     var oneMinusT = 1 - t;

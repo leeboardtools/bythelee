@@ -19,17 +19,17 @@ define(function() {
     'use strict';
 
 /**
- * 
- * @namespace LBDebug
+ * This module contains some debug helpers.
+ * @exports LBDebug
  */
 var LBDebug = LBDebug || {};
 
 /**
- * Base class for a field in {@link LBDebug.DataLog}, this is also provides a default
+ * Base class for a field in {@link module:LBDebug.DataLog}, this is also provides a default
  * implementation.
  * @constructor
  * @param {String} fieldName The name of the field.
- * @return {LBDebug.DataLogField}
+ * @return {module:LBDebug.DataLogField}
  */
 LBDebug.DataLogField = function(fieldName) {
     
@@ -82,7 +82,7 @@ LBDebug.DataLogField.prototype = {
     },
     
     /**
-     * Called by {@link LBDebug.DataLog.output()} after the current value's text
+     * Called by {@link module:LBDebug.DataLog.output()} after the current value's text
      * has been retrieved to clear the current value.
      * @return {undefined}
      */
@@ -95,10 +95,11 @@ LBDebug.DataLogField.prototype = {
 
 
 /**
- * A {@link LBDebug.DataLogField} that holds other fields.
+ * A {@link module:LBDebug.DataLogField} that holds other fields.
+ * @constructor
  * @param {String} fieldName
  * @param {Function} valueSetter
- * @return {LBDebug.FieldsDataLogField}
+ * @return {module:LBDebug.FieldsDataLogField}
  */
 LBDebug.FieldsDataLogField = function(fieldName, valueSetter) {
     LBDebug.DataLogField.call(this, fieldName);
@@ -111,13 +112,13 @@ LBDebug.FieldsDataLogField = function(fieldName, valueSetter) {
     
     /**
      * Object whose properties are the fields, with the field name the name of the
-     * property and the objects based upon {@link LBDebug.DataLogField}.
+     * property and the objects based upon {@link module:LBDebug.DataLogField}.
      * @member {Object}
      */
     this.fields = {};
     
     /**
-     * Optional function that is called in {@link LBDebug.FieldsDataLogField#setValue} to
+     * Optional function that is called in {@link module:LBDebug.FieldsDataLogField#setValue} to
      * handle setting the value. The call signature is:
      * <p>
      *      valueSetter = function(field, value) {
@@ -135,9 +136,9 @@ LBDebug.FieldsDataLogField.prototype.constructor = LBDebug.FieldsDataLogField;
  * field is added directly to this field. If an array of strings, then the field is added
  * to the sub-field represented by the array of strings. Each entry in the array is the
  * name of a field within the current field. Sub-fields are created as necessary.
- * @param {LBDebug.DataLogField} [field] If defined this is the field object, otherwise
- * a {@link LBDebug.DataLogField} is created.
- * @return {LBDebug.DataLogField}   The added field.
+ * @param {module:LBDebug.DataLogField} [field] If defined this is the field object, otherwise
+ * a {@link module:LBDebug.DataLogField} is created.
+ * @return {module:LBDebug.DataLogField}   The added field.
  */
 LBDebug.FieldsDataLogField.prototype.addField = function(fieldName, field) {
     if (Array.isArray(fieldName)) {
@@ -209,7 +210,7 @@ LBDebug.FieldsDataLogField.prototype.addSpacer = function(fieldName) {
  * Retrieves a given field.
  * @param {String|String[]} fieldName   The name of the field if a single string, or
  * an array of strings containing the names of the sub-field hierarchy.
- * @return {LBDebug.DataLogField/undefined} The field object, undefined if not found.
+ * @return {module:LBDebug.DataLogField/undefined} The field object, undefined if not found.
  */
 LBDebug.FieldsDataLogField.prototype.getField = function(fieldName) {
     if (Array.isArray(fieldName)) {
@@ -346,7 +347,9 @@ LBDebug.FieldsDataLogField.prototype.clearValue = function() {
 
 /**
  * Utility for writing out a set of values repeatedly to {@link console.log}.
- * The data is written when {@link LBDebug.DataLog.output} is called.
+ * The data is written when {@link module:LBDebug.DataLog.output} is called.
+ * @class
+ * @hideconstructor
  */
 LBDebug.DataLog = {
     /**
@@ -358,7 +361,7 @@ LBDebug.DataLog = {
     /**
      * The field implementation.
      * @private
-     * @type {LBDebug.FieldsDataLogField}
+     * @type {module:LBDebug.FieldsDataLogField}
      */
     fields: new LBDebug.FieldsDataLogField(""),
 
@@ -375,8 +378,8 @@ LBDebug.DataLog = {
  * field is added to the top-level. If an array of strings, then the field is added
  * to the sub-field represented by the array of strings. Each entry in the array is the
  * name of a field within the current field. Sub-fields are created as necessary.
- * @param {LBDebug.DataLogField} [field] If defined this is the field object, otherwise
- * a {@link LBDebug.DataLogField} is created.
+ * @param {module:LBDebug.DataLogField} [field] If defined this is the field object, otherwise
+ * a {@link module:LBDebug.DataLogField} is created.
  * @return {undefined}
  */
 LBDebug.DataLog.addField = function(name, field) {
@@ -388,7 +391,7 @@ LBDebug.DataLog.addField = function(name, field) {
  * Retrieves a given field.
  * @param {String|String[]} name   The name of the field if a single string, or
  * an array of strings containing the names of the sub-field hierarchy.
- * @return {LBDebug.DataLogField/undefined} The field object, undefined if not found.
+ * @return {module:LBDebug.DataLogField/undefined} The field object, undefined if not found.
  */
 LBDebug.DataLog.getField = function(name) {
     return LBDebug.DataLog.fields.getField(name);
@@ -401,10 +404,11 @@ LBDebug.DataLog.getField = function(name) {
  * or if an array of strings then the array contains the names of the sub-fields.
  * To add a spacer to the top level, this should be undefined or empty.
  * If a specified field does not exist, no spacer is added.
- * @return {undefined}
+ * @return {module:LBDebug.DataLog} this.
  */
 LBDebug.DataLog.addSpacer = function(name) {
     LBDebug.DataLog.fields.addSpacer(name);
+    return this;
 };
 
 /**
@@ -464,9 +468,9 @@ LBDebug.DataLog.output = function() {
 
 
 /**
- * Helper that creates a {@link LBDebug.FieldsDataLogField} whose {@link LBDebug.FieldsDataLogField#setValue}
- * takes a {@link LBGeometry.Vector2}.
- * @return {LBDebug.FieldsDataLogField} The field.
+ * Helper that creates a {@link module:LBDebug.FieldsDataLogField} whose {@link module:LBDebug.FieldsDataLogField#setValue}
+ * takes a {@link module:LBGeometry.Vector2}.
+ * @return {module:LBDebug.FieldsDataLogField} The field.
  */
 LBDebug.DataLog.createFieldVector2 = function() {
     var field = new LBDebug.FieldsDataLogField("", function(fields, value) {
@@ -481,9 +485,9 @@ LBDebug.DataLog.createFieldVector2 = function() {
 };
 
 /**
- * Adds a field for a {@link LBGeometry.Vector2}.
- * @param {String|String[]} name The name of the field, see {@link LBDebug.DataLog.addField}.
- * @return {LBDebug.DataLogField}   The added field.
+ * Adds a field for a {@link module:LBGeometry.Vector2}.
+ * @param {String|String[]} name The name of the field, see {@link module:LBDebug.DataLog.addField}.
+ * @return {module:LBDebug.DataLogField}   The added field.
  */
 LBDebug.DataLog.addFieldVector2 = function(name) {
     var field = LBDebug.DataLog.createFieldVector2();
@@ -491,9 +495,9 @@ LBDebug.DataLog.addFieldVector2 = function(name) {
 };
 
 /**
- * Helper that creates a {@link LBDebug.FieldsDataLogField} whose {@link LBDebug.FieldsDataLogField#setValue}
- * takes a {@link LBGeometry.Vector3}.
- * @return {LBDebug.FieldsDataLogField} The field.
+ * Helper that creates a {@link module:LBDebug.FieldsDataLogField} whose {@link module:LBDebug.FieldsDataLogField#setValue}
+ * takes a {@link module:LBGeometry.Vector3}.
+ * @return {module:LBDebug.FieldsDataLogField} The field.
  */
 LBDebug.DataLog.createFieldVector3 = function() {
     var field = new LBDebug.FieldsDataLogField("", function(fields, value) {
@@ -510,9 +514,9 @@ LBDebug.DataLog.createFieldVector3 = function() {
 };
 
 /**
- * Adds a field for a {@link LBGeometry.Vector3}.
- * @param {String|String[]} name The name of the field, see {@link LBDebug.DataLog.addField}.
- * @return {LBDebug.DataLogField}   The added field.
+ * Adds a field for a {@link module:LBGeometry.Vector3}.
+ * @param {String|String[]} name The name of the field, see {@link module:LBDebug.DataLog.addField}.
+ * @return {module:LBDebug.DataLogField}   The added field.
  */
 LBDebug.DataLog.addFieldVector3 = function(name) {
     var field = LBDebug.DataLog.createFieldVector3();
@@ -520,9 +524,9 @@ LBDebug.DataLog.addFieldVector3 = function(name) {
 };
 
 /**
- * Helper that creates a {@link LBDebug.FieldsDataLogField} whose {@link LBDebug.FieldsDataLogField#setValue}
- * takes a {@link LBGeometry.Euler}.
- * @return {LBDebug.FieldsDataLogField} The field.
+ * Helper that creates a {@link module:LBDebug.FieldsDataLogField} whose {@link module:LBDebug.FieldsDataLogField#setValue}
+ * takes a {@link module:LBGeometry.Euler}.
+ * @return {module:LBDebug.FieldsDataLogField} The field.
  */
 LBDebug.DataLog.createFieldEuler = function() {
     var field = new LBDebug.FieldsDataLogField("", function(fields, value) {
@@ -539,9 +543,9 @@ LBDebug.DataLog.createFieldEuler = function() {
 };
 
 /**
- * Adds a field for a {@link LBGeometry.Euler}.
- * @param {String|String[]} name The name of the field, see {@link LBDebug.DataLog.addField}.
- * @return {LBDebug.DataLogField}   The added field.
+ * Adds a field for a {@link module:LBGeometry.Euler}.
+ * @param {String|String[]} name The name of the field, see {@link module:LBDebug.DataLog.addField}.
+ * @return {module:LBDebug.DataLogField}   The added field.
  */
 LBDebug.DataLog.addFieldEuler = function(name) {
     var field = LBDebug.DataLog.createFieldEuler();    
@@ -550,9 +554,9 @@ LBDebug.DataLog.addFieldEuler = function(name) {
 
 
 /**
- * Helper that creates a {@link LBDebug.FieldsDataLogField} whose {@link LBDebug.FieldsDataLogField#setValue}
- * takes a {@link LBPhysics.Resultant}.
- * @return {LBDebug.FieldsDataLogField} The field.
+ * Helper that creates a {@link module:LBDebug.FieldsDataLogField} whose {@link module:LBDebug.FieldsDataLogField#setValue}
+ * takes a {@link module:LBPhysics.Resultant}.
+ * @return {module:LBDebug.FieldsDataLogField} The field.
  */
 LBDebug.DataLog.createFieldResultant = function() {
     var field = new LBDebug.FieldsDataLogField("", function(fields, value) {
@@ -569,9 +573,9 @@ LBDebug.DataLog.createFieldResultant = function() {
 };
 
 /**
- * Adds a field for a {@link LBPhysics.Resultant3D}.
- * @param {String|String[]} name The name of the field, see {@link LBDebug.DataLog.addField}.
- * @return {LBDebug.DataLogField}   The added field.
+ * Adds a field for a {@link module:LBPhysics.Resultant3D}.
+ * @param {String|String[]} name The name of the field, see {@link module:LBDebug.DataLog.addField}.
+ * @return {module:LBDebug.DataLogField}   The added field.
  */
 LBDebug.DataLog.addFieldResultant = function(name) {
     var field = LBDebug.DataLog.createFieldResultant();

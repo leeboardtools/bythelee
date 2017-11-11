@@ -28,33 +28,33 @@ function(LBCamera, LBUI3d, LBGeometry, LBMath, LBUtil, LBSpherical, LBTracking) 
 LBUI3d.CameraLimits = function() {
     /**
      * The minimum allowed position.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.minPos = new LBGeometry.Vector3(-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE);
 
     /**
      * The maximum allowed position.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.maxPos = new LBGeometry.Vector3(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE);
     
     /**
      * The allowed range for azimuth degrees.
-     * @member {LBMath.DegRange}
+     * @member {module:LBMath.DegRange}
      */
     this.azimuthRange = new LBMath.DegRange(-180, 360);
     
     /**
      * The allowed range for elevation degrees. Note that by default we avoid
      * 90 and -90 degrees, which become degenerate.
-     * @member {LBMath.DegRange}
+     * @member {module:LBMath.DegRange}
      */
     this.elevationRange = new LBMath.DegRange(LBUI3d.CameraLimits.LOWER_ELEVATION_DEG_LIMIT, 
             LBUI3d.CameraLimits.UPPER_ELEVATION_DEG_LIMIT - LBUI3d.CameraLimits.LOWER_ELEVATION_DEG_LIMIT);
     
     /**
      * The allowed range for rotation degrees.
-     * @member {LBMath.DegRange}
+     * @member {module:LBMath.DegRange}
      */
     this.rotationRange = new LBMath.DegRange(-180, 360);
 };
@@ -76,10 +76,10 @@ LBUI3d.CameraLimits.prototype = {
      * Applies the camera limits to a position and spherical orientation.
      * srcPosition and srcOrientation are not modified unless they are the same as
      * dstPosition and dstOrientation, respectively.
-     * @param {LBGeometry.Vector3} srcPosition  The position to be limited if necessary.
-     * @param {LBSpherical.Orientation} srcOrientation  The orientation to be limited if necessary.
-     * @param {LBGeometry.Vector3} dstPosition  Set to the position, limited if necessary.
-     * @param {LBSpherical.Orientation} dstOrientation  Set to the orientation, limited if necessary.
+     * @param {module:LBGeometry.Vector3} srcPosition  The position to be limited if necessary.
+     * @param {module:LBSpherical.Orientation} srcOrientation  The orientation to be limited if necessary.
+     * @param {module:LBGeometry.Vector3} dstPosition  Set to the position, limited if necessary.
+     * @param {module:LBSpherical.Orientation} dstOrientation  Set to the orientation, limited if necessary.
      */
     applyLimits: function(srcPosition, srcOrientation, dstPosition, dstOrientation) {
         if (dstPosition && srcPosition) {
@@ -93,9 +93,9 @@ LBUI3d.CameraLimits.prototype = {
     
     /**
      * Applies the camera limits to a position.
-     * @param {LBGeometry.Vector3} srcPosition  The position to be limited if necessary. This
+     * @param {module:LBGeometry.Vector3} srcPosition  The position to be limited if necessary. This
      * is not modified unless it is the same object as dstPosition.
-     * @param {LBGeometry.Vector3} dstPosition  Set to srcPosition, limited as necessary.
+     * @param {module:LBGeometry.Vector3} dstPosition  Set to srcPosition, limited as necessary.
      * @returns {LBUI3d.CameraLimits}   this.
      */
     applyPositionLimits: function(srcPosition, dstPosition) {
@@ -108,9 +108,9 @@ LBUI3d.CameraLimits.prototype = {
     
     /**
      * Applies the camera limits to a orientation.
-     * @param {LBSpherical.Orientation} srcOrientation  The orientation to be limited if necessary. This
+     * @param {module:LBSpherical.Orientation} srcOrientation  The orientation to be limited if necessary. This
      * is not modified unless it is the same object as dstOrientation.
-     * @param {LBSpherical.Orientation} dstOrientation  Set to srcOrientation, limited if necessary.
+     * @param {module:LBSpherical.Orientation} dstOrientation  Set to srcOrientation, limited if necessary.
      * @returns {LBUI3d.CameraLimits}   this.
      */
     applyOrientationLimits: function(srcOrientation, dstOrientation) {
@@ -131,7 +131,7 @@ var _workingMatrix4 = new LBGeometry.Matrix4();
 
 /**
  * Base class for an object that controls a camera. Typical camera controllers
- * are associated with an {@link LBGeometry.Object3D}, which we call the target.
+ * are associated with an {@link module:LBGeometry.Object3D}, which we call the target.
  * <p>
  * Camera controllers normally work within the context of an {@link LBUI3d.View3D}.
  * <p>
@@ -159,13 +159,13 @@ LBUI3d.CameraController = function(worldLimits, localLimits) {
     
     /**
      * The current camera position in world coordinates.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.currentPosition = new LBGeometry.Vector3();
     
     /**
      * The current camera orientation in world coordinates.
-     * @member {LBGeometry.Quaternion}
+     * @member {module:LBGeometry.Quaternion}
      */
     this.currentQuaternion = new LBGeometry.Quaternion();
     
@@ -212,7 +212,7 @@ LBUI3d.CameraController.prototype = {
 
 /**
  * Sets the target for the controller.
- * @param {LBGeometry.Object3D} target  The target.
+ * @param {module:LBGeometry.Object3D} target  The target.
  */
 LBUI3d.CameraController.prototype.setTarget = function(target) {
     this.target = target;
@@ -702,7 +702,7 @@ LBUI3d.CameraController.prototype.finishRotate = function(isCancel) {
 
 /**
  * Calculates the presumed distance to the screen based.
- * This currently only supports {@link LBCamera.PerspectiveCamera}s.
+ * This currently only supports {@link module:LBCamera.PerspectiveCamera}s.
  * @returns {Number}    The distance, 0 if not supported.
  */
 LBUI3d.CameraController.prototype.calcScreenDistance = function() {
@@ -721,8 +721,8 @@ LBUI3d.CameraController.prototype.calcScreenDistance = function() {
  * @param {Number} x    The x coordinate of the point on the screen in the view container's client coordinates.
  * @param {Number} y    The y coordinate of the point on the screen in the view container's client coordinates.
  * @param {Number} screenDistance   The screen distance.
- * @param {LBSpherical.Orientation} [store] If defined the object to store the orientation into.
- * @returns {LBSpherical.Orientation}   The spherical orientation
+ * @param {module:LBSpherical.Orientation} [store] If defined the object to store the orientation into.
+ * @returns {module:LBSpherical.Orientation}   The spherical orientation
  */
 LBUI3d.CameraController.prototype.calcOrientationFromScreenPos = function(x, y, screenDistance, store) {
     store = store || new LBSpherical.Orientation();
@@ -746,7 +746,7 @@ LBUI3d.CameraController.prototype.calcOrientationFromScreenPos = function(x, y, 
  * Helper used to adjust a rotation matrix to align the camera axis with the presumed
  * local x-axis (the camera view is along its y axis, so we need to rotate the y axis).
  * @protected
- * @param {LBGeometry.Matrix4} mat  The rotation matrix to be adjusted.
+ * @param {module:LBGeometry.Matrix4} mat  The rotation matrix to be adjusted.
  */
 LBUI3d.CameraController.adjustMatForCameraAxis = function(mat) {
     // The camera view is along its y axis, so we need to rotate the y axis by 90 degrees about
@@ -770,10 +770,10 @@ LBUI3d.CameraController.adjustMatForCameraAxis = function(mat) {
 /**
  * Converts a camera position and spherical orientation in target local coordinates to
  * a world position and quaternion.
- * @param {LBGeometry.Vector3} localPos The local position.
- * @param {LBSpherical.Orientation} localOrientation    The local spherical orientation.
- * @param {LBGeometry.Vector3} worldPos Set to the world position.
- * @param {LBGeometry.Quaternion} worldQuaternion   Set to the quaternion representing the orientation in world coordinates.
+ * @param {module:LBGeometry.Vector3} localPos The local position.
+ * @param {module:LBSpherical.Orientation} localOrientation    The local spherical orientation.
+ * @param {module:LBGeometry.Vector3} worldPos Set to the world position.
+ * @param {module:LBGeometry.Quaternion} worldQuaternion   Set to the quaternion representing the orientation in world coordinates.
  * @returns {undefined}
  */
 LBUI3d.CameraController.prototype.localPosOrientationToWorldPosQuaternion = function(localPos, localOrientation, worldPos, worldQuaternion) {
@@ -795,8 +795,8 @@ LBUI3d.CameraController.prototype.localPosOrientationToWorldPosQuaternion = func
 /**
  * Converts a camera position and spherical orientation in world coordinates to
  * a world position and quaternion, adjusting for the camera alignment.
- * @param {LBSpherical.Orientation} worldOrientation    The local spherical orientation.
- * @param {LBGeometry.Quaternion} worldQuaternion   Set to the quaternion representing the orientation in world coordinates.
+ * @param {module:LBSpherical.Orientation} worldOrientation    The local spherical orientation.
+ * @param {module:LBGeometry.Quaternion} worldQuaternion   Set to the quaternion representing the orientation in world coordinates.
  * @returns {undefined}
  */
 LBUI3d.CameraController.prototype.worldOrientationToWorldQuaternion = function(worldOrientation, worldQuaternion) {
@@ -832,8 +832,8 @@ LBUI3d.CameraController.prototype.update = function(dt, updateCamera) {
  * Called by {@link LBUI3d.CameraController#update} to update the current camera position
  * @protected
  * @param {Number}  dt  The time step in milliseconds.
- * @param {LBGeometry.Vector3} position The camera world coordinates position to be updated.
- * @param {LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
+ * @param {module:LBGeometry.Vector3} position The camera world coordinates position to be updated.
+ * @param {module:LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
  * @returns {undefined}
  */
 LBUI3d.CameraController.prototype.updateCameraPosition = function(dt, position, quaternion) {
@@ -854,13 +854,13 @@ LBUI3d.LocalPOVCameraController = function(localLimits) {
     
     /**
      * The current local camera position.
-     * @member {LBGeometry.Vector3}
+     * @member {module:LBGeometry.Vector3}
      */
     this.localPosition = new LBGeometry.Vector3();
     
     /**
      * The current camera spherical orientation.
-     * @member {LBSpherical.Orientation}
+     * @member {module:LBSpherical.Orientation}
      */
     this.localOrientation = new LBSpherical.Orientation();
     
@@ -948,8 +948,8 @@ function calcDecelRateForTime(vel, time) {
  * @protected
  * @override
  * @param {Number}  dt  The time step in milliseconds.
- * @param {LBGeometry.Vector3} position The camera world coordinates position to be updated.
- * @param {LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
+ * @param {module:LBGeometry.Vector3} position The camera world coordinates position to be updated.
+ * @param {module:LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
  * @returns {undefined}
  */
 LBUI3d.LocalPOVCameraController.prototype.updateCameraPosition = function(dt, position, quaternion) {
@@ -979,8 +979,8 @@ LBUI3d.LocalPOVCameraController.prototype.updateCameraPosition = function(dt, po
 
 /**
  * Sets the point of view of the camera to a specific position and spherical orientation.
- * @param {LBGeometry.Vector3} position The local position.
- * @param {LBSpherical.Orientation} sphericalOrientation    The spherical orientation.
+ * @param {module:LBGeometry.Vector3} position The local position.
+ * @param {module:LBSpherical.Orientation} sphericalOrientation    The spherical orientation.
  * @returns {undefined}
  */
 LBUI3d.LocalPOVCameraController.prototype.setLocalCameraPOV = function(position, sphericalOrientation) {
@@ -990,8 +990,8 @@ LBUI3d.LocalPOVCameraController.prototype.setLocalCameraPOV = function(position,
 
 /**
  * Requests the point of view of the camera be decelerated to 0 velocity given an initial velocity.
- * @param {LBGeometry.Vector3} positionVel The local position velocity.
- * @param {LBSpherical.Orientation} orientationVel    The spherical orientation velocity.
+ * @param {module:LBGeometry.Vector3} positionVel The local position velocity.
+ * @param {module:LBSpherical.Orientation} orientationVel    The spherical orientation velocity.
  * @returns {undefined}
  */
 LBUI3d.LocalPOVCameraController.prototype.requestLocalCameraPOVDeceleration = function(positionVel, orientationVel) {
@@ -1221,7 +1221,7 @@ LBUI3d.LocalPOVCameraController.prototype.finishRotate = function(isCancel) {
  * For {@link LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL}, the controller tries to
  * update the camera such that the target stays fixed relative to the camera. The location
  * of the camera is specified relative to the target via {@link LBUI3d.ChaseCameraController#desiredCoordinates},
- * which is a {@link LBSpherical.CoordinatesRAA}. The reference orientation of the camera
+ * which is a {@link module:LBSpherical.CoordinatesRAA}. The reference orientation of the camera
  * is based upon a local reference orientation frame relative to the target's local
  * coordinates where the x axis points to the target and the z axis is in the same direction
  * as the target's z axis when the elevation and azimuth angles are zero. 
@@ -1263,14 +1263,14 @@ LBUI3d.ChaseCameraController = function(distance, chaseMode, globalLimits) {
     /**
      * The desired position of the camera relative to the target's local coordinate system, in
      * spherical coordinates.
-     * @member {LBSpherical.CoordinatesRAA}
+     * @member {module:LBSpherical.CoordinatesRAA}
      */
     this.desiredCoordinates = new LBSpherical.CoordinatesRAA(distance);
     
     /**
      * The desired orientation of the camera relative to a reference frame that has
      * the camera pointing at the target and the z axis up.
-     * @member {LBSpherical.Orientation}
+     * @member {module:LBSpherical.Orientation}
      */
     this.desiredOrientation = new LBSpherical.Orientation();
     
@@ -1342,8 +1342,8 @@ LBUI3d.ChaseCameraController.prototype.constructor = LBUI3d.ChaseCameraControlle
  * @protected
  * @override
  * @param {Number}  dt  The time step in milliseconds.
- * @param {LBGeometry.Vector3} position The camera world coordinates position to be updated.
- * @param {LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
+ * @param {module:LBGeometry.Vector3} position The camera world coordinates position to be updated.
+ * @param {module:LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
  * @returns {undefined}
  */
 LBUI3d.ChaseCameraController.prototype.updateCameraPosition = function(dt, position, quaternion) {
@@ -1390,8 +1390,8 @@ LBUI3d.ChaseCameraController.prototype.updateCameraPosition = function(dt, posit
 /**
  * Converts the desired coordinates and orientation in local chase mode to the world
  * position and quaternion for the camera.
- * @param {LBGeometry.Vector3} position The camera world coordinates position to be updated.
- * @param {LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
+ * @param {module:LBGeometry.Vector3} position The camera world coordinates position to be updated.
+ * @param {module:LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
  * @returns {undefined}
  */
 LBUI3d.ChaseCameraController.prototype.handleLocalChaseMode = function(position, quaternion) {
@@ -1418,8 +1418,8 @@ LBUI3d.ChaseCameraController.prototype.handleLocalChaseMode = function(position,
 /**
  * Converts the desired coordinates and orientation in world chase mode to the world
  * position and quaternion for the camera.
- * @param {LBGeometry.Vector3} position The camera world coordinates position to be updated.
- * @param {LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
+ * @param {module:LBGeometry.Vector3} position The camera world coordinates position to be updated.
+ * @param {module:LBGeometry.Quaternion} quaternion    The camera world coordinates quaternion to be update.
  * @returns {undefined}
  */
 LBUI3d.ChaseCameraController.prototype.handleWorldChaseMode = function(position, quaternion) {

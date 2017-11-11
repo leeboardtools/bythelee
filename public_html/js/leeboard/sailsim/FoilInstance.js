@@ -26,8 +26,8 @@ function(LBPhysics, LBFoils, LBGeometry, LBDebug, LBSailSim) {
  * An instance of a foil, a foil is something that generates a force due
  * to its interaction with a flowing fluid.
  * @constructor
- * @extends LBPhysics.RigidBody
- * @param {object} foil The {@link LBFoils.Foil} object that generates the forces.
+ * @extends module:LBPhysics.RigidBody
+ * @param {object} foil The {@link module:LBFoils.Foil} object that generates the forces.
  * @param {object} obj3D    The 3D object that defines the local coordinate system
  * of the foil.
  * @param {Number} mass The mass of the foil.
@@ -38,7 +38,7 @@ LBSailSim.FoilInstance = function(foil, obj3D, mass, centerOfMass) {
     
     /**
      * The foil used to generate the forces.
-     * @member {LBFoils.Foil}
+     * @member {module:LBFoils.Foil}
      */
     this.foil = foil || new LBFoils.Foil();
     
@@ -50,7 +50,7 @@ LBSailSim.FoilInstance = function(foil, obj3D, mass, centerOfMass) {
     this.rotationOffsetDegs = [0, 0, 0];
     
     /**
-     * Object holding the details from the foil, see {@link LBFoils.Foil#calcWorldForce}.
+     * Object holding the details from the foil, see {@link module:LBFoils.Foil#calcWorldForce}.
      */
     this.foilDetails = {
         
@@ -127,7 +127,7 @@ LBSailSim.FoilInstance.prototype.updateFoilForce = function(dt, flow) {
 };
 
 /**
- * Helper that adds fields for a given foil instance name to {@link LBDebug.DataLog}.
+ * Helper that adds fields for a given foil instance name to {@link module:LBDebug.DataLog}.
  * @param {String} name The foil instance name to debug.
  * @returns {undefined}
  */
@@ -152,8 +152,8 @@ LBSailSim.FoilInstance.addDebugFields = function(name) {
 /**
  * Loads the foil instance's properties from properties in a data object.
  * @param {object} data The data to load from.
- * @param {LBSailSim.Env} sailEnv  The sailing environment, passed to {@link LBFoils.Foil} for
- * loading the {@link LBFoils.ClCdCurve} object.
+ * @param {LBSailSim.Env} sailEnv  The sailing environment, passed to {@link module:LBFoils.Foil} for
+ * loading the {@link module:LBFoils.ClCdCurve} object.
  * @returns {LBSailSim.FoilInstance}    this.
  */
 LBSailSim.FoilInstance.prototype.load = function(data, sailEnv) {

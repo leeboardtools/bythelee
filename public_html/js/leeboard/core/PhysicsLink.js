@@ -19,13 +19,19 @@ define(['lbphysics'],
 function(LBPhysics) {
 
     'use strict';
-    
+
 /**
- * Base class that manages linking a {@link LBPhysics.RigidBody} to a physics engine.
- * @constructor
- * @returns {LBPhysics.PhysicsLink}
+ * This module contains helper base classes for linking our stuff with a physics engine.
+ * @exports LBPhysicsLink
  */
-LBPhysics.PhysicsLink = function() {    
+var LBPhysicsLink = LBPhysics;
+
+/**
+ * Base class that manages linking a {@link module:LBPhysicsLink.RigidBody} to a physics engine.
+ * @constructor
+ * @returns {module:LBPhysicsLink.Link}
+ */
+LBPhysicsLink.Link = function() {    
     this.rigidBodies = [];
     
     this.views = [];
@@ -33,18 +39,18 @@ LBPhysics.PhysicsLink = function() {
     this.updateCount = 0;
     
     /**
-     * The next id to be assigned to a rigid body passed to {@link LBPhysics.PhysicsLink#getRigidBodyId}.
+     * The next id to be assigned to a rigid body passed to {@link module:LBPhysicsLink.Link#getRigidBodyId}.
      * @private
      */
     this._nextRigidBodyId = 1;
 };
 
-LBPhysics.PhysicsLink.prototype = {
+LBPhysicsLink.Link.prototype = {
     
     /**
      * Retrieves an id that can be used to uniquely identify a rigid body within
      * the physics stuff.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body of interest.
+     * @param {module:LBPhysicsLink.RigidBody} rigidBody   The rigid body of interest.
      * @returns {Number}    The id for the rigid body.
      */
     getRigidBodyId: function(rigidBody) {
@@ -57,22 +63,22 @@ LBPhysics.PhysicsLink.prototype = {
     },
 
     /**
-     * Adds a top-level {@link LBPhysics.RigidBody} to the manager as a fixed object.
+     * Adds a top-level {@link module:LBPhysicsLink.RigidBody} to the manager as a fixed object.
      * This rigid body should not be a part of any other rigid body.
-     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
-     * @returns {LBPhysics.PhysicsLink}   this.
+     * @param {module:LBPhysicsLink.RigidBody} rigidBody The rigid body.
+     * @returns {module:LBPhysicsLink.Link}   this.
      */
     addFixedObject: function(rigidBody) {
         throw 'addFixedObject not implemented';
     },
     
     /**
-     * Adds a top-level {@link LBPhysics.RigidBody} to the manager. This rigid body
+     * Adds a top-level {@link module:LBPhysicsLink.RigidBody} to the manager. This rigid body
      * should not be a part of any other rigid body.
-     * @param {LBPhysics.RigidBody} rigidBody The rigid body.
+     * @param {module:LBPhysicsLink.RigidBody} rigidBody The rigid body.
      * @param {Object}  [data]  Optional data containing additional information for
      * loading other items associated with the rigid body.
-     * @returns {LBPhysics.PhysicsLink}   this.
+     * @returns {module:LBPhysicsLink.Link}   this.
      */
     addRigidBody: function(rigidBody, data) {
         this.rigidBodies.push(rigidBody);
@@ -87,10 +93,10 @@ LBPhysics.PhysicsLink.prototype = {
     },
     
     /**
-     * Called from {@link LBPhysics.PhysicsLink#addRigidBody} after the rigid body
+     * Called from {@link module:LBPhysicsLink.Link#addRigidBody} after the rigid body
      * has been added.
      * @protected
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @param {module:LBPhysicsLink.RigidBody} rigidBody   The rigid body.
      * @param {Object}  [data]  Optional data containing additional information for
      * loading other items associated with the rigid body, such as a Phaser display object.
      * @returns {undefined}
@@ -101,7 +107,7 @@ LBPhysics.PhysicsLink.prototype = {
     
     /**
      * Removes a rigid body from the manager.
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body.
+     * @param {module:LBPhysicsLink.RigidBody} rigidBody   The rigid body.
      * @returns {Boolean}   true if the rigid body was removed, false if it was not
      * part of this link.
      */
@@ -121,10 +127,10 @@ LBPhysics.PhysicsLink.prototype = {
     },
     
     /**
-     * Called from {@link LBPhysics.PhysicsLink#removeRigidBody} right before the rigid
+     * Called from {@link module:LBPhysicsLink.Link#removeRigidBody} right before the rigid
      * body is removed from the rigid body list, this does nothing.
      * @protected
-     * @param {LBPhysics.RigidBody} rigidBody   The rigid body being removed.
+     * @param {module:LBPhysicsLink.RigidBody} rigidBody   The rigid body being removed.
      * @returns {undefined}
      */
     _rigidBodyRemoved: function(rigidBody) {
@@ -208,7 +214,7 @@ LBPhysics.PhysicsLink.prototype = {
         });
     },
     
-    constructor: LBPhysics.PhysicsLink
+    constructor: LBPhysicsLink.Link
 };
 
 
