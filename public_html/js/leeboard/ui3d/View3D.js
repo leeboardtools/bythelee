@@ -55,7 +55,8 @@ LBUI3d.View3D = function(scene3D, container, camera, renderer) {
     var height = container.clientHeight;
     
     if (!camera) {
-        camera = new LBCamera.PerspectiveCamera(50, width / height, 0.1, 10000);
+        // 64000 m is 40 miles...
+        camera = new LBCamera.PerspectiveCamera(50, width / height, 0.1, 64000);
         camera.position.z = 5;
     }
     

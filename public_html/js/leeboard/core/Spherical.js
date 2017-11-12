@@ -167,14 +167,14 @@ LBSpherical.Orientation.prototype = {
 
 
 /**
- * Defines a point in spherical coordinates using radius, azimuth, and elevation (RAA).
+ * Defines a point in spherical coordinates using radius, azimuth, and elevation (RAE).
  * @constructor
  * @param {Number} [radius=0]   The radius
  * @param {Number} [azimuthDeg=0]   The azimuth in degrees.
  * @param {Number} [elevationDeg=0]  The elevation in degrees.
- * @returns {module:LBSpherical.CoordinatesRAA}
+ * @returns {module:LBSpherical.CoordinatesRAE}
  */
-LBSpherical.CoordinatesRAA = function(radius, azimuthDeg, elevationDeg) {
+LBSpherical.CoordinatesRAE = function(radius, azimuthDeg, elevationDeg) {
     this.radius = radius || 0;
     this.azimuthDeg = azimuthDeg || 0;
     this.elevationDeg = elevationDeg || 0;
@@ -182,25 +182,25 @@ LBSpherical.CoordinatesRAA = function(radius, azimuthDeg, elevationDeg) {
 
 
 /**
- * An {@link module:LBSpherical.CoordinatesRAA} that's all zero.
+ * An {@link module:LBSpherical.CoordinatesRAE} that's all zero.
  * @constant
- * @type {module:LBSpherical.CoordinatesRAA}
+ * @type {module:LBSpherical.CoordinatesRAE}
  */
-LBSpherical.CoordinatesRAA.ZERO = new LBSpherical.CoordinatesRAA();
+LBSpherical.CoordinatesRAE.ZERO = new LBSpherical.CoordinatesRAE();
 
-LBSpherical.CoordinatesRAA.prototype = {
+LBSpherical.CoordinatesRAE.prototype = {
     /**
      * Creates a clone of this.
-     * @returns {module:LBSpherical.OrientationRAA}   The clone.
+     * @returns {module:LBSpherical.CoordinatesRAE}   The clone.
      */
     clone: function() {
-        return new LBSpherical.CoordinatesRAA(this.radius, this.azimuthDeg, this.elevationDeg);
+        return new LBSpherical.CoordinatesRAE(this.radius, this.azimuthDeg, this.elevationDeg);
     },
     
     /**
      * Sets this to match another.
-     * @param {module:LBSpherical.OrientationRAA} other   The object to copy.
-     * @returns {module:LBSpherical.OrientationRAA}   this.
+     * @param {module:LBSpherical.CoordinatesRAE} other   The object to copy.
+     * @returns {module:LBSpherical.CoordinatesRAE}   this.
      */
     copy: function(other) {
         this.radius = other.radius;
@@ -212,7 +212,7 @@ LBSpherical.CoordinatesRAA.prototype = {
     /**
      * Sets the azimuth and elevation to match those of a spherical orientation.
      * @param {module:LBSpherical.Orientation} orientation The orientation to copy from.
-     * @returns {module:LBSpherical.OrientationRAA}   this.
+     * @returns {module:LBSpherical.CoordinatesRAE}   this.
      */
     setFromSphericalOrientation: function(orientation) {
         this.azimuthDeg = orientation.azimuthDeg;
@@ -240,7 +240,7 @@ LBSpherical.CoordinatesRAA.prototype = {
     /**
      * Sets the coordinates from a point in cartesian coordinates.
      * @param {module:LBGeometry.Vector3} point The cartesian coordinates.
-     * @returns {module:LBSpherical.OrientationRAA}   this.
+     * @returns {module:LBSpherical.CoordinatesRAE}   this.
      */
     setFromVector3: function(point) {
         this.radius = point.length();
@@ -285,7 +285,7 @@ LBSpherical.CoordinatesRAA.prototype = {
      * while maintaining the azimuth and radius.
      * @param {Number} z    The z coordinate of interest. If this is larger than
      * the radius, then the radius will just be set to this and the elevation will be 90.
-     * @returns {module:LBSpherical.CoordinatesRAA}    this.
+     * @returns {module:LBSpherical.CoordinatesRAE}    this.
      */
     adjustElevationForZ: function(z) {
         if (z <= this.radius) {
@@ -299,7 +299,7 @@ LBSpherical.CoordinatesRAA.prototype = {
         return this;
     },
     
-    constructor: LBSpherical.CoordinatesRAA
+    constructor: LBSpherical.CoordinatesRAE
 };
     
     return LBSpherical;

@@ -62,6 +62,12 @@ LBSailSim.Env = function(assetLoader) {
     this.gravity = 9.81;
     
     /**
+     * The maximum distance we can see (i.e. the camera clipping should be beyond this.)
+     * @member {Number}
+     */
+    this.horizonDistance = 32000;
+    
+    /**
      * Array of callback objects. These callback objects are examimed for
      * the appropriate functions, and if present that function is called at the
      * appropriate time.

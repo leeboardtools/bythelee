@@ -1230,7 +1230,7 @@ LBUI3d.LocalPOVCameraController.prototype.finishRotate = function(isCancel) {
  * For {@link module:LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL}, the controller tries to
  * update the camera such that the target stays fixed relative to the camera. The location
  * of the camera is specified relative to the target via {@link module:LBUI3d.ChaseCameraController#desiredCoordinates},
- * which is a {@link module:LBSpherical.CoordinatesRAA}. The reference orientation of the camera
+ * which is a {@link module:LBSpherical.CoordinatesRAE}. The reference orientation of the camera
  * is based upon a local reference orientation frame relative to the target's local
  * coordinates where the x axis points to the target and the z axis is in the same direction
  * as the target's z axis when the elevation and azimuth angles are zero. 
@@ -1272,9 +1272,9 @@ LBUI3d.ChaseCameraController = function(distance, chaseMode, globalLimits) {
     /**
      * The desired position of the camera relative to the target's local coordinate system, in
      * spherical coordinates.
-     * @member {module:LBSpherical.CoordinatesRAA}
+     * @member {module:LBSpherical.CoordinatesRAE}
      */
-    this.desiredCoordinates = new LBSpherical.CoordinatesRAA(distance);
+    this.desiredCoordinates = new LBSpherical.CoordinatesRAE(distance);
     
     /**
      * The desired orientation of the camera relative to a reference frame that has
@@ -1313,10 +1313,10 @@ LBUI3d.ChaseCameraController = function(distance, chaseMode, globalLimits) {
     
     this.currentDecelerationTime = 0;
     
-    this.desiredCoordinatesVel = new LBSpherical.CoordinatesRAA();
+    this.desiredCoordinatesVel = new LBSpherical.CoordinatesRAE();
     this.desiredOrientationVel = new LBSpherical.Orientation();
     
-    this.desiredCoordinatesDecel = new LBSpherical.CoordinatesRAA();
+    this.desiredCoordinatesDecel = new LBSpherical.CoordinatesRAE();
     this.desiredOrientationDecel = new LBSpherical.Orientation();
     
     this.zoomScale = distance;
@@ -1497,7 +1497,7 @@ LBUI3d.ChaseCameraController.prototype.decelerateToZero = function(coordinatesVe
     this.desiredCoordinatesVel = LBUtil.copyOrClone(this.desiredCoordinatesVel, coordinatesVel);
     this.desiredOrientationVel = LBUtil.copyOrClone(this.desiredOrientationVel, orientationVel);
     
-    this.desiredCoordinatesDecel = this.desiredCoordinatesDecel || new LBSpherical.CoordinatesRAA();
+    this.desiredCoordinatesDecel = this.desiredCoordinatesDecel || new LBSpherical.CoordinatesRAE();
     this.desiredCoordinatesDecel.azimuthDeg = calcDecelRateForTime(coordinatesVel.azimuthDeg, dt);
     this.desiredCoordinatesDecel.elevationDeg = calcDecelRateForTime(coordinatesVel.elevationDeg, dt);
     
@@ -1657,7 +1657,7 @@ LBUI3d.ChaseCameraController.prototype.finishPan = function(isCancel) {
         this.desiredOrientationVel.azimuthDeg = (this.desiredOrientation.azimuthDeg - this.prevDesiredOrientation.azimuthDeg) / this.deltaT;
         this.desiredOrientationVel.elevationDeg = (this.desiredOrientation.elevationDeg - this.prevDesiredOrientation.elevationDeg) / this.deltaT;
         
-        this.decelerateToZero(LBSpherical.CoordinatesRAA.ZERO, this.desiredOrientationVel);
+        this.decelerateToZero(LBSpherical.CoordinatesRAE.ZERO, this.desiredOrientationVel);
     }
 };
 
@@ -1716,7 +1716,7 @@ LBUI3d.ChaseCameraController.prototype.finishRotate = function(isCancel) {
     }
 
     if ((this.deltaT > 0) && (this.coordinatesDecel > 0)) {
-        this.desiredCoordinatesVel = this.desiredCoordinatesVel || new LBSpherical.CoordinatesRAA();
+        this.desiredCoordinatesVel = this.desiredCoordinatesVel || new LBSpherical.CoordinatesRAE();
         
         this.desiredCoordinatesVel.radius = 0;
         this.desiredCoordinatesVel.azimuthDeg = (this.desiredCoordinates.azimuthDeg - this.prevDesiredCoordinates.azimuthDeg) / this.deltaT;

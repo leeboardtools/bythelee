@@ -98,6 +98,8 @@ LBSailSim.Water3D.prototype = {
         this.surfaceMesh.rotation.x = - Math.PI * 0.5;
         this.scene3D.add( this.surfaceMesh );
         
+        // TEST!!!
+        //this.surfaceMesh.visible = false;
         
         // TEST!!!
         //this.testPuff = new LBSailSim.WindPuff();

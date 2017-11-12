@@ -16,8 +16,8 @@
 
 
 
-define(['lbsailsim', 'lbmath', 'three'],
-function(LBSailSim, LBMath, THREE) {
+define(['lbsailsim', 'lbmath', 'lbspherical', 'three', 'three-skyshader'],
+function(LBSailSim, LBMath, LBSpherical, THREE) {
     
 
 LBSailSim.Sky3D = function(scene3D, sailEnv) {
@@ -26,8 +26,12 @@ LBSailSim.Sky3D = function(scene3D, sailEnv) {
 
     this.scene3D.scene.fog = new THREE.FogExp2( 0xaabbbb, 0.001 );
     
-    this.loadSkyBox();
+    if (!this.loadSkyShader()) {
+        this.loadSkyBox();
+    }
 };
+
+var _sunPos;
 
 LBSailSim.Sky3D.prototype = {
     loadSkyBox: function() {
@@ -72,6 +76,33 @@ LBSailSim.Sky3D.prototype = {
         
         return true;
     },
+    
+    loadSkyShader: function() {
+        var radius = this.sailEnv.horizonDistance;
+        this.sky = new THREE.Sky(radius);
+        this.scene3D.add(this.sky.mesh);
+        
+        var uniforms = this.sky.uniforms;
+        uniforms.turbidity.value = 10;
+        uniforms.rayleigh.value = 2;
+        uniforms.luminance.value = 1.;
+        uniforms.mieCoefficient.value = 0.005;
+        uniforms.mieDirectionalG.value = 0.8;
+        this.sunCoords = new LBSpherical.CoordinatesRAE(radius);
+        this.updateSunPos(30, 10);
+        return true;
+    },
+    
+    updateSunPos: function(azimuthDeg, elevationDeg) {
+        this.sunCoords.azimuthDeg = azimuthDeg;
+        this.sunCoords.elevationDeg = elevationDeg;
+        
+        _sunPos = this.sunCoords.toVector3(_sunPos);
+        this.scene3D.coordMapping.vector3ToThreeJS(_sunPos, _sunPos);
+        
+        this.sky.uniforms.sunPosition.value.copy(_sunPos);
+    },
+    
     
     update: function(dt) {
         

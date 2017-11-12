@@ -33,7 +33,7 @@ function checkSphericalOrientation(assert, spherical, azimuthDeg, elevationDeg, 
     assert.nearEqual(LBMath.wrapDegrees(spherical.rotationDeg), LBMath.wrapDegrees(rotationDeg), msg + " Rotation OK", tolerance);
 };
 
-function checkSphericalCoordinatesRAA(assert, spherical, radius, azimuthDeg, elevationDeg, msg, tolerance) {
+function checkSphericalCoordinatesRAE(assert, spherical, radius, azimuthDeg, elevationDeg, msg, tolerance) {
     if (!LBUtil.isVar(msg)) {
         msg = "";
     }
@@ -54,8 +54,8 @@ QUnit.test('Orientation', function(assert) {
     
 });
 
-QUnit.test('CoordinatesRAA', function(assert) {
-    var spherical = new LBSpherical.CoordinatesRAA(10, 20, 30);
+QUnit.test('CoordinatesRAE', function(assert) {
+    var spherical = new LBSpherical.CoordinatesRAE(10, 20, 30);
     
     var cartesian = spherical.toVector3();
     
@@ -66,20 +66,20 @@ QUnit.test('CoordinatesRAA', function(assert) {
     var z = spherical.radius * Math.cos(theta);
     checkVector3(assert, cartesian, x, y, z, "toVector3()");
     
-    var spherical2 = new LBSpherical.CoordinatesRAA();
+    var spherical2 = new LBSpherical.CoordinatesRAE();
     spherical2.setFromVector3(cartesian);
-    checkSphericalCoordinatesRAA(assert, spherical2, spherical.radius, spherical.azimuthDeg, spherical.elevationDeg, "fromVector3");
+    checkSphericalCoordinatesRAE(assert, spherical2, spherical.radius, spherical.azimuthDeg, spherical.elevationDeg, "fromVector3");
     
     
     spherical.elevationDeg = -30;
     spherical.toVector3(cartesian);
     
     spherical2.setFromVector3(cartesian);
-    checkSphericalCoordinatesRAA(assert, spherical2, spherical.radius, spherical.azimuthDeg, spherical.elevationDeg, "fromVector3 Neg elevation");
+    checkSphericalCoordinatesRAE(assert, spherical2, spherical.radius, spherical.azimuthDeg, spherical.elevationDeg, "fromVector3 Neg elevation");
 });
 
 return {
     checkSphericalOrientation: checkSphericalOrientation,
-    checkSphericalCoordinatesRAA: checkSphericalCoordinatesRAA
+    checkSphericalCoordinatesRAE: checkSphericalCoordinatesRAE
 };
 });
