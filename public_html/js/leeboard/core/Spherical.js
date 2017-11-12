@@ -33,7 +33,8 @@ var _workingEuler = new LBGeometry.Euler();
  * Defines an orientation in spherical coordinates using azimuth, elevation, and rotation
  * angles in degrees.
  * <p>
- * An azimuth of 0 degrees points towards the +x axis.
+ * An azimuth of 0 degrees points towards the +x axis. We follow the navigation convention, 
+ * normal rotation is CW (towards -y).
  * An elevation of + degrees points towards the +z axis.
  * The rotation angle is around the azimuth/elevation axis
  * @constructor
@@ -44,7 +45,7 @@ var _workingEuler = new LBGeometry.Euler();
  */
 LBSpherical.Orientation = function(azimuthDeg, elevationDeg, rotationDeg) {
     /**
-     * The azimuth angle in degrees, this is the rotation about the world z-axis.
+     * The azimuth angle in degrees, this is the CW rotation about the world z-axis.
      * @member {Number}
      */
     this.azimuthDeg = azimuthDeg || 0;
@@ -116,7 +117,7 @@ LBSpherical.Orientation.prototype = {
         store = store || new LBGeometry.Vector3();
         
         var theta = (90 - this.elevationDeg) * LBMath.DEG_TO_RAD;
-        var phi = this.azimuthDeg * LBMath.DEG_TO_RAD;
+        var phi = -this.azimuthDeg * LBMath.DEG_TO_RAD;
         var r_sinTheta = r * Math.sin(theta);
         return store.set(r_sinTheta * Math.cos(phi), r_sinTheta * Math.sin(phi), r * Math.cos(theta));
     },
@@ -127,8 +128,8 @@ LBSpherical.Orientation.prototype = {
      * @returns {module:LBGeometry.Euler}  The Euler object.
      */
     toEuler: function(store) {
-        return (store) ? store.set(this.rotationDeg * LBMath.DEG_TO_RAD, -this.elevationDeg * LBMath.DEG_TO_RAD, this.azimuthDeg * LBMath.DEG_TO_RAD, 'ZYX')
-            : new LBGeometry.Euler(this.rotationDeg * LBMath.DEG_TO_RAD, -this.elevationDeg * LBMath.DEG_TO_RAD, this.azimuthDeg * LBMath.DEG_TO_RAD, 'ZYX');
+        return (store) ? store.set(this.rotationDeg * LBMath.DEG_TO_RAD, -this.elevationDeg * LBMath.DEG_TO_RAD, -this.azimuthDeg * LBMath.DEG_TO_RAD, 'ZYX')
+            : new LBGeometry.Euler(this.rotationDeg * LBMath.DEG_TO_RAD, -this.elevationDeg * LBMath.DEG_TO_RAD, -this.azimuthDeg * LBMath.DEG_TO_RAD, 'ZYX');
     },
     
     /**
@@ -253,7 +254,7 @@ LBSpherical.CoordinatesRAE.prototype = {
             var theta = Math.acos(point.z / this.radius);
             var phi = Math.atan2(point.y, point.x);
             
-            this.azimuthDeg = phi * LBMath.RAD_TO_DEG;
+            this.azimuthDeg = -phi * LBMath.RAD_TO_DEG;
             this.elevationDeg = 90 - theta * LBMath.RAD_TO_DEG;
         }
         
@@ -271,7 +272,7 @@ LBSpherical.CoordinatesRAE.prototype = {
         var theta = (90 - this.elevationDeg) * LBMath.DEG_TO_RAD;
         var rSinTheta = this.radius * Math.sin(theta);
         
-        var phi = this.azimuthDeg * LBMath.DEG_TO_RAD;
+        var phi = -this.azimuthDeg * LBMath.DEG_TO_RAD;
         store.x = rSinTheta * Math.cos(phi);
         store.y = rSinTheta * Math.sin(phi);
         store.z = this.radius * Math.cos(theta);

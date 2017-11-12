@@ -249,7 +249,7 @@ LBMath.DegRange.prototype = {
         }
         else if (deg > this.maxDeg) {
             // Are we closer to maxDeg or minDeg?
-            return ((deg - this.maxDeg) < (deg - 360 - this.minDeg)) ? this.maxDeg : this.minDeg;
+            return ((deg - this.maxDeg) < Math.abs(deg - 360 - this.minDeg)) ? this.maxDeg : this.minDeg;
         }
         return deg;
     },

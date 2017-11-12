@@ -740,7 +740,7 @@ LBUI3d.CameraController.prototype.calcOrientationFromScreenPos = function(x, y, 
         var dx = x - this.view.container.clientWidth / 2;
         var dy = y - this.view.container.clientHeight / 2;
 
-        store.azimuthDeg = Math.atan2(dx, screenDistance) * LBMath.RAD_TO_DEG;
+        store.azimuthDeg = -Math.atan2(dx, screenDistance) * LBMath.RAD_TO_DEG;
         store.elevationDeg = Math.atan2(dy, screenDistance) * LBMath.RAD_TO_DEG;
     }
     else {
@@ -1045,25 +1045,25 @@ LBUI3d.LocalPOVCameraController.prototype.setStandardView = function(view) {
             azimuthDeg = 0;
             break;
         case LBUI3d.CameraController.VIEW_FWD_STBD :
-            azimuthDeg = -45;
+            azimuthDeg = 45;
             break;
         case LBUI3d.CameraController.VIEW_STBD :
-            azimuthDeg = -90;
+            azimuthDeg = 90;
             break;
         case LBUI3d.CameraController.VIEW_AFT_STBD :
-            azimuthDeg = -135;
+            azimuthDeg = 135;
             break;
         case LBUI3d.CameraController.VIEW_AFT :
             azimuthDeg = 180;
             break;
         case LBUI3d.CameraController.VIEW_AFT_PORT :
-            azimuthDeg = 135;
+            azimuthDeg = -135;
             break;
         case LBUI3d.CameraController.VIEW_PORT :
-            azimuthDeg = 90;
+            azimuthDeg = -90;
             break;
         case LBUI3d.CameraController.VIEW_FWD_PORT :
-            azimuthDeg = 45;
+            azimuthDeg = -45;
             break;
         case LBUI3d.CameraController.VIEW_UP :
             azimuthDeg = this.localOrientation.azimuthDeg - this.forwardAzimuthDeg;
@@ -1437,7 +1437,7 @@ LBUI3d.ChaseCameraController.prototype.handleWorldChaseMode = function(position,
     _chaseWorldCoordinates = LBUtil.copyOrClone(_chaseWorldCoordinates, this.desiredCoordinates);
     _chaseEuler = _chaseEuler || new LBGeometry.Euler();
     _chaseEuler.setFromQuaternion(this.target.quaternion, 'ZYX');
-    _chaseWorldCoordinates.azimuthDeg += _chaseEuler.z * LBMath.RAD_TO_DEG;
+    _chaseWorldCoordinates.azimuthDeg += -_chaseEuler.z * LBMath.RAD_TO_DEG;
     
     position = _chaseWorldCoordinates.toVector3(position);
     position.x += this.target.position.x;
@@ -1460,7 +1460,7 @@ LBUI3d.ChaseCameraController.prototype.handleWorldChaseMode = function(position,
             _chasePos.copy(position).sub(this.target.position);
             _chaseWorldCoordinates.setFromVector3(_chasePos);
             this.desiredCoordinates.copy(_chaseWorldCoordinates);
-            this.desiredCoordinates.azimuthDeg -= _chaseEuler.z * LBMath.RAD_TO_DEG;
+            this.desiredCoordinates.azimuthDeg -= -_chaseEuler.z * LBMath.RAD_TO_DEG;
         }
     }
 
@@ -1527,25 +1527,25 @@ LBUI3d.ChaseCameraController.prototype.setStandardView = function(view) {
             azimuthDeg = 0;
             break;
         case LBUI3d.CameraController.VIEW_FWD_STBD :
-            azimuthDeg = -45;
+            azimuthDeg = 45;
             break;
         case LBUI3d.CameraController.VIEW_STBD :
-            azimuthDeg = -90;
+            azimuthDeg = 90;
             break;
         case LBUI3d.CameraController.VIEW_AFT_STBD :
-            azimuthDeg = -135;
+            azimuthDeg = 135;
             break;
         case LBUI3d.CameraController.VIEW_AFT :
             azimuthDeg = 180;
             break;
         case LBUI3d.CameraController.VIEW_AFT_PORT :
-            azimuthDeg = 135;
+            azimuthDeg = -135;
             break;
         case LBUI3d.CameraController.VIEW_PORT :
-            azimuthDeg = 90;
+            azimuthDeg = -90;
             break;
         case LBUI3d.CameraController.VIEW_FWD_PORT :
-            azimuthDeg = 45;
+            azimuthDeg = -45;
             break;
         case LBUI3d.CameraController.VIEW_UP :
             azimuthDeg = this.desiredCoordinates.azimuthDeg - this.forwardAzimuthDeg;

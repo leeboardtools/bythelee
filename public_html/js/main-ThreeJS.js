@@ -171,7 +171,7 @@ LBMyApp.prototype.init = function(mainContainer) {
     this.initSceneEnv();
     this.initSailEnv();
 
-    this.setWindForce(2);
+    this.setWindForce(0);
     
     this.onWindowResize();
 };
@@ -286,6 +286,7 @@ LBMyApp.prototype.closeSplash = function(event) {
     
     this.windDeg = 0;
     this.windForce = 4;
+    //this.windForce = 0;
 
     this.sailEnv.wind.setAverageFromDeg(this.windDeg);
     this.sailEnv.wind.setAverageForce(this.windForce);

@@ -31,7 +31,7 @@ LBSailSim.Sky3D = function(scene3D, sailEnv) {
     }
 };
 
-var _sunPos;
+var _minLightAltitudeDeg = -2.3;    // From THREE.Sky's fragment shader, which uses PI/1.95 as the cutoff angle.
 
 LBSailSim.Sky3D.prototype = {
     loadSkyBox: function() {
@@ -83,29 +83,33 @@ LBSailSim.Sky3D.prototype = {
         this.scene3D.add(this.sky.mesh);
         
         var uniforms = this.sky.uniforms;
-        uniforms.turbidity.value = 10;
-        uniforms.rayleigh.value = 2;
-        uniforms.luminance.value = 1.;
+        uniforms.turbidity.value = 3.5;
+        uniforms.rayleigh.value = 1.5;
+        uniforms.luminance.value = 0.5;
         uniforms.mieCoefficient.value = 0.005;
         uniforms.mieDirectionalG.value = 0.8;
-        this.sunCoords = new LBSpherical.CoordinatesRAE(radius);
-        this.updateSunPos(30, 10);
+        this._sunCoords = new LBSpherical.CoordinatesRAE(radius);
+        this.setSunAzimuthAltitudeDeg(90, 20);
         return true;
     },
     
-    updateSunPos: function(azimuthDeg, elevationDeg) {
-        this.sunCoords.azimuthDeg = azimuthDeg;
-        this.sunCoords.elevationDeg = elevationDeg;
+    setSunAzimuthAltitudeDeg: function(azimuthDeg, elevationDeg) {
+        this._sunCoords.azimuthDeg = azimuthDeg;
+        this._sunCoords.elevationDeg = elevationDeg;
         
-        _sunPos = this.sunCoords.toVector3(_sunPos);
-        this.scene3D.coordMapping.vector3ToThreeJS(_sunPos, _sunPos);
+        this._sunPos = this._sunCoords.toVector3(this._sunPos);
+        this.scene3D.coordMapping.vector3ToThreeJS(this._sunPos, this._sunPos);
         
-        this.sky.uniforms.sunPosition.value.copy(_sunPos);
+        if (this.sky) {
+            this.sky.uniforms.sunPosition.value.copy(this._sunPos);
+        }
     },
     
     
     update: function(dt) {
-        
+        if (this._sunPos && (this._sunCoords.elevationDeg > _minLightAltitudeDeg)) {
+            this.scene3D.mainLight.position.copy(this._sunPos);
+        }
     },
     
     destroy: function() {
