@@ -24,7 +24,7 @@ LBSailSim.Sky3D = function(scene3D, sailEnv) {
     this.scene3D = scene3D;
     this.sailEnv = sailEnv;
 
-    this.scene3D.scene.fog = new THREE.FogExp2( 0xaabbbb, 0.0001 );
+    this.scene3D.scene.fog = new THREE.FogExp2( 0xaabbbb, 0.001 );
     
     this.loadSkyBox();
 };
@@ -33,14 +33,21 @@ LBSailSim.Sky3D.prototype = {
     loadSkyBox: function() {
         // Adapted from ThreeJS examples/canvas_geometry_panorama.html, webgl_shaders_ocean.html...
         var loader = new THREE.CubeTextureLoader();
+        /*
         loader.setPath('textures/three-js/skybox/');
-        
         this.skyTextureCube = loader.load([
             'px.jpg', 'nx.jpg',
             'py.jpg', 'ny.jpg',
             'pz.jpg', 'nz.jpg'
         ]);
-
+        */
+        loader.setPath('textures/skybox-blue/');
+        this.skyTextureCube = loader.load([
+            'px.png', 'nx.png',
+            'py.png', 'ny.png',
+            'pz.png', 'nz.png'
+        ]);
+        
         
         var cubeShader = THREE.ShaderLib[ 'cube' ];
         cubeShader.uniforms[ 'tCube' ].value = this.skyTextureCube;

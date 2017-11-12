@@ -456,7 +456,7 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
                     '	vec3 reflectionSample = fullSample.rgb;',
 
                     '	float theta = max( dot( eyeDirection, surfaceNormal ), 0.0 );',
-                    '	float rf0 = 0.2;',
+                    '	float rf0 = 0.3;',
                     '	float reflectance = rf0 + ( 1.0 - rf0 ) * pow( ( 1.0 - theta ), 5.0 );',
                     '	vec3 scatter = max( 0.0, dot( surfaceNormal, eyeDirection ) ) * waterColor;',
 
