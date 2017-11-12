@@ -15,6 +15,8 @@
  */
 
 
+/* global Detector */
+
 require( ['three', 'lbsailsim', 'lbui3d', 'lbutil', 'lbmath', 'lbgeometry', 'lbassets', 'lbsailsimthree', 'lbcameracontrollers'],
     function(THREE, LBSailSim, LBUI3d, LBUtil, LBMath, LBGeometry, LBAssets, LBSailSimThree, LBCameraControllers) {
         
@@ -72,6 +74,13 @@ function LBMyApp() {
     
     this.hudWindDirElement = document.getElementById('hud_wind_dir');
     this.hudWindSpeedElement = document.getElementById('hud_wind_speed');
+
+    this.hudDrivingForceElement = document.getElementById('hud_f_driving');
+    this.hudHeelingForceElement = document.getElementById('hud_f_heeling');
+    this.hudFrictionForceElement = document.getElementById('hud_f_friction');
+    this.hudResiduaryForceElement = document.getElementById('hud_f_residuary');
+    this.hudInducedKeelForceElement = document.getElementById('hud_f_induced_keel');
+    this.hudInducedSailForceElement = document.getElementById('hud_f_induced_sail');
     
 
     this.rudderSliderElement = document.getElementById('rudder_slider');
@@ -90,10 +99,6 @@ function LBMyApp() {
     setupSlider(this.jibsheetControl);
     
     this.assetLoader = new LBAssets.Loader();
-    
-    // TODO Get rid of windDeg, windForce...
-    this.windDeg = 0;
-    this.windForce = 2;
     
     this.physicsEngineType = LBSailSim.SailEnvTHREE.CANNON_PHYSICS;
     
@@ -279,13 +284,17 @@ LBMyApp.prototype.closeSplash = function(event) {
         return;
     }
     
+    this.windDeg = 0;
+    this.windForce = 4;
+
+    this.sailEnv.wind.setAverageFromDeg(this.windDeg);
+    this.sailEnv.wind.setAverageForce(this.windForce);
+    
     document.getElementById('splash').hidden = true;
     document.getElementById('container').style.visibility = "visible";
 
     this.toggleHUDBoat();
     this.toggleHUDWind();
-    
-    this.sailEnv.wind.setAverageForce(4);
 
 };
 
@@ -490,6 +499,7 @@ LBMyApp.prototype.update = function(dt) {
     
     this.updateHUDBoat();
     this.updateHUDWind();
+    this.updateHUDForces();
 };
 
 /**
@@ -528,6 +538,7 @@ LBMyApp.prototype.updateHUDBoat = function() {
                 if (!LBMath.isLikeZero(this.myBoat.getKnots())) {
                     leewayAngle = this.myBoat.getLeewayDeg(true);
                     if (leewayAngle < 0) {
+                        leewayAngle = -leewayAngle;
                         leewayDir = "S";
                     }
                     else if (leewayAngle > 0) {
@@ -583,6 +594,32 @@ LBMyApp.prototype.updateHUDWind = function() {
         var led = element.getElementsByClassName('wind_speed_led_f' + i)[0];
         var style = window.getComputedStyle(led, null);
         led.style.backgroundColor = setColorFunctionAlpha(style.backgroundColor, ' 0.1');
+    }
+};
+
+/**
+ * Handles updating the Forces HUD.
+ * @returns {undefined}
+ */
+LBMyApp.prototype.updateHUDForces = function() {
+    if (this.isHUDForceOn) {
+        if (this.myBoat) {
+            var sigDigits = 1;
+            this.hudDrivingForceElement.innerText = this.myBoat.getDrivingForceMag().toFixed(0);
+            this.hudHeelingForceElement.innerText = this.myBoat.getHeelingForceMag().toFixed(0);
+            this.hudFrictionForceElement.innerText = this.myBoat.getFrictionalDrag().toFixed(sigDigits);
+            this.hudResiduaryForceElement.innerText = this.myBoat.getResiduaryDrag().toFixed(sigDigits);
+            this.hudInducedKeelForceElement.innerText = this.myBoat.getHydrofoilDrag().toFixed(0);
+            this.hudInducedSailForceElement.innerText = 0;
+        }
+        else {
+            this.hudDrivingForceElement.innerText = 0;
+            this.hudHeelingForceElement.innerText = 0;
+            this.hudFrictionForceElement.innerText = 0;
+            this.hudResiduaryForceElement.innerText = 0;
+            this.hudInducedKeelForceElement.innerText = 0;
+            this.hudInducedSailForceElement.innerText = 0;
+        }
     }
 };
 

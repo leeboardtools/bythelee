@@ -16,7 +16,7 @@
             "debugForces": true,
             "mass": 378,
             "massRadius": 4,    "_comment": "Used for the force arrows",
-            "linearDamping": 0.1,
+            "linearDamping": 0.0,
             "angularDamping": 0.3,
             "velocityTerms": 3,
             "appWindHeight": 2,
