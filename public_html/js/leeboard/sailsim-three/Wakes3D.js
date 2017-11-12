@@ -24,7 +24,7 @@ function(LBSailSim, LBParticles, LBGeometry, LBMath, LBShaders, THREE) {
 /**
  * Manages the generation of wakes for vessels.
  * @constructor
- * @param {LBUI3d.Scene3D} scene3D  The 3D scene where the wake is drawn.
+ * @param {module:LBUI3d.Scene3D} scene3D  The 3D scene where the wake is drawn.
  * @param {LBSailSim.SailEnv} sailEnv   The sailing environment that's created this.
  * @return {Wakes3D_L19.LBSailSim.Wakes3D}
  */

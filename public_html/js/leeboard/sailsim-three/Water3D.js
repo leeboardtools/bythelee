@@ -30,7 +30,7 @@ function(LBSailSim, LBMath, THREE) {
  * It does this again using shaders.
  * <p>
  * All the shader based stuff is handled by {@link LBSailSim.WaterShader}. See it for more details.
- * @param {LBUI3d.Scene3D} scene3D  The 3D scene.
+ * @param {module:LBUI3d.Scene3D} scene3D  The 3D scene.
  * @param {LBSailSim.SailEnv} sailEnv   The sailing environment.
  * @returns {LBSailSim.Water3D}
  */

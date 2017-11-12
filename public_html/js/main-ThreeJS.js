@@ -107,12 +107,12 @@ LBMyApp.prototype.constructor = LBMyApp;
 
 /**
  * 
- * @param {LBUI3d.View3D} view
+ * @param {module:LBUI3d.View3D} view
  * @param {Number} standardView
  * @returns {undefined}
  */
 LBMyApp.prototype.addNormalView = function(view, standardView) {
-    view.localPOVCameraController = new LBCameraControllers.LocalPOVController();
+    view.localPOVCameraController = new LBUI3d.LocalPOVCameraController();
     view.addCameraController(view.localPOVCameraController);
     
     // The x-axis of the boat faces aft, and the origin is near the bow. We want to look forward from the cockpit.
@@ -126,9 +126,9 @@ LBMyApp.prototype.addNormalView = function(view, standardView) {
     }
     view.localPOVCameraController.localOrientation.azimuthDeg = 180;
     
-    var chaseMode = LBCameraControllers.ChaseController.CHASE_MODE_WORLD;
-    //chaseMode = LBCameraControllers.ChaseController.CHASE_MODE_LOCAL;
-    view.chaseCameraController = new LBCameraControllers.ChaseController(20, chaseMode);
+    var chaseMode = LBUI3d.ChaseCameraController.CHASE_MODE_WORLD;
+    //chaseMode = LBUI3d.ChaseCameraController.CHASE_MODE_LOCAL;
+    view.chaseCameraController = new LBUI3d.ChaseCameraController(20, chaseMode);
     view.chaseCameraController.worldLimits.minPos.z = 1;
     view.chaseCameraController.desiredCoordinates.elevationDeg = 20;
     view.chaseCameraController.forwardAzimuthDeg = 0;
@@ -430,31 +430,31 @@ LBMyApp.prototype.onKeyDownEvent = function(event) {
             break;
             
         case 'q' :
-            this.activeView.activeCameraController.setStandardView(LBCameraControllers.Controller.VIEW_FWD_PORT);
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_FWD_PORT);
             break;
         case 'w' :
-            this.activeView.activeCameraController.setStandardView(LBCameraControllers.Controller.VIEW_FWD);
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_FWD);
             break;
         case 'e' :
-            this.activeView.activeCameraController.setStandardView(LBCameraControllers.Controller.VIEW_FWD_STBD);
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_FWD_STBD);
             break;
         case 'a' :
-            this.activeView.activeCameraController.setStandardView(LBCameraControllers.Controller.VIEW_PORT);
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_PORT);
             break;
         case 'd' :
-            this.activeView.activeCameraController.setStandardView(LBCameraControllers.Controller.VIEW_STBD);
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_STBD);
             break;
         case 'z' :
-            this.activeView.activeCameraController.setStandardView(LBCameraControllers.Controller.VIEW_AFT_PORT);
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_AFT_PORT);
             break;
         case 'x' :
-            this.activeView.activeCameraController.setStandardView(LBCameraControllers.Controller.VIEW_AFT);
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_AFT);
             break;
         case 'c' :
-            this.activeView.activeCameraController.setStandardView(LBCameraControllers.Controller.VIEW_AFT_STBD);
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_AFT_STBD);
             break;
         case 's' :
-            this.activeView.activeCameraController.setStandardView(LBCameraControllers.Controller.VIEW_UP);
+            this.activeView.activeCameraController.setStandardView(LBUI3d.CameraController.VIEW_UP);
             break;
     }
 };
@@ -693,7 +693,7 @@ LBMyApp.prototype.windVeer = function() {
 
 
 /**
- * @param {Number} dir One of the LBCameraControllers.Controller.VIEW_ constants.
+ * @param {Number} dir One of the LBUI3d.CameraController.VIEW_ constants.
  * @returns {undefined}
  */
 LBMyApp.prototype.setCameraView = function(dir) {
@@ -712,7 +712,7 @@ LBMyApp.prototype.setCameraView = function(dir) {
  * @returns {undefined}
  */
 LBMyApp.prototype.viewFwd = function() {
-    this.setCameraView(LBCameraControllers.Controller.VIEW_FWD);
+    this.setCameraView(LBUI3d.CameraController.VIEW_FWD);
 };
 
 /**
@@ -720,7 +720,7 @@ LBMyApp.prototype.viewFwd = function() {
  * @returns {undefined}
  */
 LBMyApp.prototype.viewAft = function() {
-    this.setCameraView(LBCameraControllers.Controller.VIEW_AFT);
+    this.setCameraView(LBUI3d.CameraController.VIEW_AFT);
 };
 
 /**
@@ -728,7 +728,7 @@ LBMyApp.prototype.viewAft = function() {
  * @returns {undefined}
  */
 LBMyApp.prototype.viewFwdPort = function() {
-    this.setCameraView(LBCameraControllers.Controller.VIEW_FWD_PORT);
+    this.setCameraView(LBUI3d.CameraController.VIEW_FWD_PORT);
 };
 
 /**
@@ -736,7 +736,7 @@ LBMyApp.prototype.viewFwdPort = function() {
  * @returns {undefined}
  */
 LBMyApp.prototype.viewFwdStbd = function() {
-    this.setCameraView(LBCameraControllers.Controller.VIEW_FWD_STBD);
+    this.setCameraView(LBUI3d.CameraController.VIEW_FWD_STBD);
 };
 
 /**
@@ -744,7 +744,7 @@ LBMyApp.prototype.viewFwdStbd = function() {
  * @returns {undefined}
  */
 LBMyApp.prototype.viewPort = function() {
-    this.setCameraView(LBCameraControllers.Controller.VIEW_PORT);
+    this.setCameraView(LBUI3d.CameraController.VIEW_PORT);
 };
 
 /**
@@ -752,7 +752,7 @@ LBMyApp.prototype.viewPort = function() {
  * @returns {undefined}
  */
 LBMyApp.prototype.viewStbd = function() {
-    this.setCameraView(LBCameraControllers.Controller.VIEW_STBD);
+    this.setCameraView(LBUI3d.CameraController.VIEW_STBD);
 };
 
 /**
@@ -760,7 +760,7 @@ LBMyApp.prototype.viewStbd = function() {
  * @returns {undefined}
  */
 LBMyApp.prototype.viewAftPort = function() {
-    this.setCameraView(LBCameraControllers.Controller.VIEW_AFT_PORT);
+    this.setCameraView(LBUI3d.CameraController.VIEW_AFT_PORT);
 };
 
 /**
@@ -768,7 +768,7 @@ LBMyApp.prototype.viewAftPort = function() {
  * @returns {undefined}
  */
 LBMyApp.prototype.viewAftStbd = function() {
-    this.setCameraView(LBCameraControllers.Controller.VIEW_AFT_STBD);
+    this.setCameraView(LBUI3d.CameraController.VIEW_AFT_STBD);
 };
 
 /**
@@ -776,7 +776,7 @@ LBMyApp.prototype.viewAftStbd = function() {
  * @returns {undefined}
  */
 LBMyApp.prototype.viewUp = function() {
-    this.setCameraView(LBCameraControllers.Controller.VIEW_UP);
+    this.setCameraView(LBUI3d.CameraController.VIEW_UP);
 };
 
 /**
@@ -957,7 +957,7 @@ LBMyApp.prototype.toggleMap = function() {
  * 
  * @param {Element} pipElement
  * @param {Number} standardView
- * @returns {LBUI3d.View3D}
+ * @returns {module:LBUI3d.View3D}
  */
 LBMyApp.prototype.createPIPView = function(pipElement, standardView) {
     var view = new LBUI3d.View3D(this.mainScene, pipElement);
@@ -976,7 +976,7 @@ LBMyApp.prototype.togglePIPLowerLeft = function() {
     
     if (isOn) {
         if (!this.pipLowerLeftView) {
-            this.pipLowerLeftView = this.createPIPView(element, LBCameraControllers.Controller.VIEW_AFT_STBD);
+            this.pipLowerLeftView = this.createPIPView(element, LBUI3d.CameraController.VIEW_AFT_STBD);
         }
         this.pipLowerLeftView.isEnabled = true;
     }
@@ -1003,7 +1003,7 @@ LBMyApp.prototype.togglePIPLowerRight = function() {
     
     if (isOn) {
         if (!this.pipLowerRightView) {
-            this.pipLowerRightView = this.createPIPView(element, LBCameraControllers.Controller.VIEW_AFT_PORT);
+            this.pipLowerRightView = this.createPIPView(element, LBUI3d.CameraController.VIEW_AFT_PORT);
         }
         this.pipLowerRightView.isEnabled = true;
     }

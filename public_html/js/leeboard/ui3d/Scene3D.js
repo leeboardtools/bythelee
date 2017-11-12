@@ -16,14 +16,16 @@
 
 
 /* global THREE, LBMath */
-define(['three', 'lbgeometry'], 
-function(THREE, LBGeometry) {
+define(['three', 'lbgeometry', 'lbui3dbase'], 
+function(THREE, LBGeometry, LBUI3d) {
 
     'use strict';
 
 /**
- * 
- * @namespace LBUI3d
+ * My 3D application framework module, these classes all rely upon ThreeJS.
+ * If this description and the LBUI3d static members appear multiple times in the docs,
+ * that's a limitation of JSDoc: {@link https://github.com/jsdoc3/jsdoc/issues/515}.
+ * @exports LBUI3d
  */
 var LBUI3d = LBUI3d || {};
 
@@ -31,7 +33,7 @@ var LBUI3d = LBUI3d || {};
 /**
  * Our repesentation of a scene.
  * @constructor
- * @returns {LBUI3d.Scene3D}
+ * @returns {module:LBUI3d.Scene3D}
  */
 LBUI3d.Scene3D = function() {
     this.scene = new THREE.Scene();
@@ -53,7 +55,7 @@ LBUI3d.Scene3D.prototype = {
     /**
      * Adds one or more 3D objects to the scene.
      * @param {module:LBGeometry.Object3D} object3D    The object(s) to add.
-     * @returns {LBUI3d.Scene3D}    this.
+     * @returns {module:LBUI3d.Scene3D}    this.
      */
     add: function(object3D) {
         this.scene.add.apply(this.scene, arguments);
@@ -61,7 +63,7 @@ LBUI3d.Scene3D.prototype = {
     
     /**
      * Removes one or more 3D objects from the scene.
-     * @returns {LBUI3d.Scene3D}    this.
+     * @returns {module:LBUI3d.Scene3D}    this.
      */
     remove: function() {
         this.scene.remove.apply(this.scene, arguments);

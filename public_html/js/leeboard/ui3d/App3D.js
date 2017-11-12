@@ -16,16 +16,23 @@
 
 
 /* global LBUI3d, LBUtil */
-define(['lbutil', 'lbscene3d', 'lbview3d'], 
+define(['lbutil', 'lbui3dbase', 'lbscene3d', 'lbview3d'], 
 function(LBUtil, LBUI3d) {
 
     'use strict';
 
+/**
+ * My 3D application framework module, these classes all rely upon ThreeJS.
+ * If this description and the LBUI3d static members appear multiple times in the docs,
+ * that's a limitation of JSDoc: {@link https://github.com/jsdoc3/jsdoc/issues/515}.
+ * @exports LBUI3d
+ */
+var LBUI3d = LBUI3d || {};
 
 /**
  * Our 3D application framework.
  * @constructor
- * @return {LBUI3d.App3D}
+ * @return {module:LBUI3d.App3D}
  */
 LBUI3d.App3D = function() {
     
@@ -42,7 +49,7 @@ LBUI3d.App3D = function() {
 
     /**
      * Array of views managed by the app.
-     * @member {LBUI3d.View3D[]}
+     * @member {module:LBUI3d.View3D[]}
      */
     this.views = [];
 
@@ -72,7 +79,7 @@ LBUI3d.App3D = function() {
     
     /**
      * The mouse mode currently active in all the views.
-     * @member {LBUI3d.View3D.MOUSE_ROTATE_MODE|LBUI3d.View3D.MOUSE_PAN_MODE}
+     * @member {module:LBUI3d.View3D.MOUSE_ROTATE_MODE|LBUI3d.View3D.MOUSE_PAN_MODE}
      */
     this.mouseMode = LBUI3d.View3D.MOUSE_ROTATE_MODE;
     
@@ -257,7 +264,7 @@ LBUI3d.App3D.prototype.toggleFullScreen = function(container) {
 };
 
 /**
- * Called each cycle, before {@link LBUI3d.App3D.render}.
+ * Called each cycle, before {@link module:LBUI3d.App3D.render}.
  * @protected
  * @param {Number} dt The number of milliseconds since the last call to this.
  */
