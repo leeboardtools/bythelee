@@ -97,7 +97,7 @@
                     "name": "portWindIndicator",
                     "mass": 0,
                     "obj3D": {
-                        "position" : { "x": 1.7429, "y": -0.656, "z": 2.0 },
+                        "position" : { "x": 1.7619, "y": -0.738, "z": 1.5 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                     },
                     "telltale3D": {
@@ -109,7 +109,7 @@
                     "name": "stbdWindIndicator",
                     "mass": 0,
                     "obj3D": {
-                        "position" : { "x": 1.7429, "y": 0.656, "z": 2.0 },
+                        "position" : { "x": 1.7619, "y": 0.738, "z": 1.5 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                     },
                     "telltale3D": {

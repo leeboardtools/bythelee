@@ -33,11 +33,13 @@ TODO:
 
 Add scenery, range limits.
 
+Make buoys floating.
+
 Add time course.
 
 Add jib.
 
-Shut of wakes if FPS too low.
+Shut off wakes if FPS too low.
 
 Look into adjusting physics time step based on actual FPS.
 
