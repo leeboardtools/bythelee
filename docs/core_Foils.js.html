@@ -45,9 +45,12 @@
 define(['lbutil', 'lbmath', 'lbgeometry', 'lbphysics'],
 function(LBUtil, LBMath, LBGeometry, LBPhysics) {
     
+    'use strict';
+
 
 /**
- * @namespace LBFoils
+ * This module contains all the stuff related to 2D fluid based foil force modeling.
+ * @exports LBFoils
  */
 var LBFoils = LBFoils || {};
 
@@ -57,7 +60,7 @@ var LBFoils = LBFoils || {};
  * @param {Number} cl The lift coefficient.
  * @param {Number} cd The drag coefficient.
  * @param {Number} cm The moment coefficient.
- * @returns {LBFoils.ClCd} 
+ * @returns {module:LBFoils.ClCd} 
  */
 LBFoils.ClCd = function(cl, cd, cm) {
     /**
@@ -86,12 +89,12 @@ LBFoils.ClCd = function(cl, cd, cm) {
     this.cmIsChordFraction = false;
 };
 
-LBFoils.ClCd._workingVector3A;
-LBFoils.ClCd._workingVector3B;
-LBFoils.ClCd._workingLine3A;
+var _workingVector3A;
+var _workingVector3B;
+var _workingLine3A;
 /**
  * Calculates the lift and drag forces and the moment from the coefficients.
- * @param {object} coefs    The lift/drag coefficients.
+ * @param {module:LBFoils.ClCd} coefs    The lift/drag coefficients.
  * @param {Number} rho    The density.
  * @param {Number} area   The area.
  * @param {Number} qInfSpeed   The magnitude of the free stream velocity.
@@ -113,19 +116,19 @@ LBFoils.ClCd.calcLiftDragMoment = function(coefs, rho, area, qInfSpeed, qInfLoca
         store.moment = 0;
     }
     else if (coefs.cmIsChordFraction) {
-        var force = LBFoils.ClCd._workingVector3A = LBFoils.ClCd._workingVector3A || new LBGeometry.Vector3();
+        var force = _workingVector3A = _workingVector3A || new LBGeometry.Vector3();
         var cosAlpha = qInfLocal.x / qInfSpeed;
         var sinAlpha = qInfLocal.y / qInfSpeed;
         force.set(store.drag * cosAlpha - store.lift * sinAlpha, store.drag * sinAlpha + store.lift * cosAlpha, 0);
 
-        var line = LBFoils.ClCd._workingLine3A = LBFoils.ClCd._workingLine3A || new LBGeometry.Line3();
+        var line = _workingLine3A = _workingLine3A || new LBGeometry.Line3();
         
         // We use |coefs.cm| because the sign is handled by the lift/drag and qInfLocal direction.
         line.start.set(Math.abs(coefs.cm) * chordLength, 0, 0);
         line.end.copy(line.start);
         line.end.add(force);
 
-        var applPoint = LBFoils.ClCd._workingVector3B = LBFoils.ClCd._workingVector3B || new LBGeometry.Vector3();
+        var applPoint = _workingVector3B = _workingVector3B || new LBGeometry.Vector3();
         line.closestPointToPoint(LBGeometry.ORIGIN, false, applPoint);        
         applPoint.z = 0;
         
@@ -202,7 +205,7 @@ LBFoils.calcCmForClCd = function(degrees, cl, cd, chordFraction) {
  * @param {Number}  cl45Deg The Cl value at 45 degrees angle of attack.
  * @param {Number}  cd45Deg The Cd value at 45 degrees angle of attack.
  * @param {Number}  cd90Deg The Cd value at 90 degrees angle of attachk.
- * @returns {LBFoils.ClCdStall}
+ * @returns {module:LBFoils.ClCdStall}
  */
 LBFoils.ClCdStall = function(cl45Deg, cd45Deg, cd90Deg) {
     /**
@@ -230,7 +233,7 @@ LBFoils.ClCdStall.prototype = {
     /**
      * Loader method.
      * @param {object} data   The data, typically loaded from a JSON file.
-     * @returns {object} this.
+     * @returns {module:LBFoils.ClCdStall} this.
      */
     load: function(data) {
         this.cl45Deg = data.cl45Deg || this.cl45Deg;
@@ -242,8 +245,8 @@ LBFoils.ClCdStall.prototype = {
     /**
      * Calculates the coefficients of lift, drag and moment for a given angle of attack in degrees.
      * @param {Number} deg    The angle of attack in degrees.
-     * @param {object} store  If not undefined, the object to store the coefficients in.
-     * @returns {object}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
+     * @param {module:LBFoils.ClCd} store  If not undefined, the object to store the coefficients in.
+     * @returns {module:LBFoils.ClCd}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
      */
     calcCoefsDeg: function(deg, store) {        
         store = store || new LBFoils.ClCd();
@@ -279,9 +282,9 @@ LBFoils.ClCdStall.prototype = {
 };
 
 /**
- * Creates and load a {@link LBFoils.ClCdStall} object from properties in a data object.
+ * Creates and load a {@link module:LBFoils.ClCdStall} object from properties in a data object.
  * @param {object} data The data object.
- * @returns {object}    The loaded object, undefined if data is undefined.
+ * @returns {module:LBFoils.ClCdStall}    The loaded object, undefined if data is undefined.
  */
 LBFoils.ClCdStall.createFromData = function(data) {
     if (!data) {
@@ -303,7 +306,7 @@ LBFoils.ClCdStall.createFromData = function(data) {
 /**
  * Interpolator based Cl/Cd/Cm calculator.
  * @constructor
- * @returns {LBFoils.ClCdInterp}
+ * @returns {module:LBFoils.ClCdInterp}
  */
 LBFoils.ClCdInterp = function() {    
     this.alphas = [];
@@ -323,9 +326,9 @@ LBFoils.ClCdInterp.prototype = {
      * Loads the interpolation data. Note that this stores the coefficient arrays
      * by reference, not as copies, unless there are symmetries involved.
      * @param {object} data   The data, typically loaded from a JSON file.
-     * @param {object} isForeAftSymmetric   If true the data is presumed to be symmetric
+     * @param {boolean} isForeAftSymmetric   If true the data is presumed to be symmetric
      * about the 90 degrees point.
-     * @returns {object} this.
+     * @returns {module:LBFoils.ClCdInterp} this.
      */
     load: function(data, isForeAftSymmetric) {
         this.alphas = data.alphas;
@@ -360,8 +363,8 @@ LBFoils.ClCdInterp.prototype = {
     /**
      * Calculates the coefficients of lift, drag and moment for a given angle of attack in degrees.
      * @param {Number} deg    The angle of attack in degrees.
-     * @param {object} store  If not undefined, the object to store the coefficients in.
-     * @returns {object}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
+     * @param {module:LBFoils.ClCd} store  If not undefined, the object to store the coefficients in.
+     * @returns {module:LBFoils.ClCd}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
      */
     calcCoefsDeg: function(deg, store) {
         store = store || new LBFoils.ClCd();
@@ -392,7 +395,7 @@ LBFoils.ClCdInterp.prototype = {
  * A Cl/Cd curve calculates lift (Cl), drag (Cd), and moment (Cm) coeffiecients given an angle
  * of attack.
  * @constructor
- * @returns {LBFoils.ClCdCurve}
+ * @returns {module:LBFoils.ClCdCurve}
  */
 LBFoils.ClCdCurve = function() {
     this.name = "";
@@ -416,7 +419,7 @@ LBFoils.ClCdCurve.prototype = {
     /**
      * The main loading method.
      * @param {object} data   The data, typically loaded from a JSON file.
-     * @return {object} this.
+     * @return {module:LBFoils.ClCdCurve} this.
      */
     load: function(data) {
         if (!data) {
@@ -452,8 +455,8 @@ LBFoils.ClCdCurve.prototype = {
     /**
      * Calculates the coefficients of lift, drag and moment for a given angle of attack in degrees.
      * @param {Number} degrees    The angle of attack in degrees.
-     * @param {object} store  If not undefined, the object to store the coefficients in.
-     * @returns {object}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
+     * @param {module:LBFoils.ClCd} store  If not undefined, the object to store the coefficients in.
+     * @returns {module:LBFoils.ClCd}  The object with the lift, drag, and moment coefficients (cl, cd, cm).
      */
     calcCoefsDeg: function(degrees, store) {
         var sign;
@@ -555,13 +558,13 @@ LBFoils.ClCdCurve.prototype = {
  * its local z coordinate will be the same as the z coordinate of the 2D slice in the
  * local coordinate system.
  * @constructor
- * @returns {LBFoils.Foil}
+ * @returns {module:LBFoils.Foil}
  */
 LBFoils.Foil = function() {
     /**
      * A line describing the chord, with the chord.start treated as the
      * leading edge of the chord. This is used to resolve the angle of attack.
-     * @member {object}
+     * @member {module:LBGeometry.Line2}
      */
     this.chordLine = new LBGeometry.Line2();
     
@@ -585,12 +588,12 @@ LBFoils.Foil = function() {
     
     /**
      * The coefficient of lift/drag/moment curve.
-     * @member {LBFoils.ClCdCurve}
+     * @member {module:LBFoils.ClCdCurve}
      */
     this.clCdCurve = new LBFoils.ClCdCurve();
     
     /**
-     * This is used by {@link LBFoils.Foil#calcWorldForce} to control the weighting
+     * This is used by {@link module:LBFoils.Foil#calcWorldForce} to control the weighting
      * of the velocities of the start and end points of the chord when determining
      * the overall velocity of the foil.
      * @member {Number}
@@ -614,7 +617,7 @@ LBFoils.Foil.prototype = {
      * @param {object} data   The data, typically loaded from a JSON file.
      * @param {object} curveLib The optional curve library used to obtain pre-loaded
      * ClCdCurves, used for 'libClCdCurve' properties.
-     * @return {object} this.
+     * @return {module:LBFoils.Foil} this.
      */
     load: function(data, curveLib) {
         this.chordLine = LBUtil.copyCommonProperties(this.chordLine, data.chordLine);
@@ -639,7 +642,7 @@ LBFoils.Foil.prototype = {
      * Calculates the lift and drag forces, and the moment, all in local coordinates.
      * The moment is about the leading edge, or this.chordLine.start.
      * @param {Number} rho  The fluid density.
-     * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
+     * @param {module:LBGeometry.Vector2} qInfLocal    The free stream velocity in the local x-y plane.
      * @param {object} [details]  If defined, an object to receive details about the calculation.
      * @param {object} [store]  If defined, the object to receive the forces and moment.
      * @returns {object}    The object containing the forces and moment.
@@ -664,7 +667,7 @@ LBFoils.Foil.prototype = {
         
         if (details) {
             details.angleDeg = angleDeg;
-            details.qInfLocal = LBGeometry.Vector3.copyOrClone(details.qInfLocal, qInfLocal);
+            details.qInfLocal = LBUtil.copyOrClone(details.qInfLocal, qInfLocal);
         }
         return LBFoils.ClCd.calcLiftDragMoment(coefs, rho, this.area, qInfSpeed, qInfLocal, chordLength, this.aspectRatio, store);
     },
@@ -673,11 +676,11 @@ LBFoils.Foil.prototype = {
      * Calculates the forces and moment in the local x-y plane coordinates.
      * The moment is about the leading edge, or this.chordLine.start.
      * @param {Number} rho  The fluid density.
-     * @param {object} qInfLocal    The free stream velocity in the local x-y plane.
+     * @param {module:LBGeometry.Vector2} qInfLocal    The free stream velocity in the local x-y plane.
      * @param {object} [details]   If defined, an object that will receive details such
      * as lift, drag, induced drag, moment.
-     * @param {object} [resultant]  If defined, the object set to the resultant force.
-     * @returns {LBPhysics.Resultant3D}  The resultant force in local coordinates.
+     * @param {module:LBPhysics.Resultant3D} [resultant]  If defined, the object set to the resultant force.
+     * @returns {module:LBPhysics.Resultant3D}  The resultant force in local coordinates.
      */
     calcLocalForce: function(rho, qInfLocal, details, resultant) {
         details = this.calcLocalLiftDragMoment(rho, qInfLocal, details, details);
@@ -712,13 +715,13 @@ LBFoils.Foil.prototype = {
      * the foil as a 2D slice, we end up projecting the apparent wind onto the local
      * x-y plane. Cross wind effects are ignored for now.
      * @param {Number} rho    The fluid density.
-     * @param {object} qInfWorld  The free stream velocity in world coordinates.
-     * @param {LBPhysics.CoordSystemState} coordSystemState   The coordinate system state, this defines the
+     * @param {module:LBGeometry.Vector2} qInfWorld  The free stream velocity in world coordinates.
+     * @param {module:LBPhysics.CoordSystemState} coordSystemState   The coordinate system state, this defines the
      *  world-local transformations as well as the change in world position/orientation.
      * @param {object} [details]  If defined, an object that will receive details such
      * as lift, drag, induced drag, moment.
-     * @param {object} [resultant]  If defined, the object set to the resultant force.
-     * @returns {LBPhysics.Resultant3D}  The resultant force in world coordinates.
+     * @param {module:LBPhysics.Resultant3D} [resultant]  If defined, the object set to the resultant force.
+     * @returns {module:LBPhysics.Resultant3D}  The resultant force in world coordinates.
      */
     calcWorldForce: function(rho, qInfWorld, coordSystemState, details, resultant) {
         var appVel = LBFoils.Foil._workingVel;
@@ -748,7 +751,7 @@ LBFoils.Foil.prototype = {
         }
         
         if (details) {
-            details.worldVel = LBGeometry.Vector3.copyOrClone(details.worldVel, velResults.worldVel);
+            details.worldVel = LBUtil.copyOrClone(details.worldVel, velResults.worldVel);
         }
         
         appVel.negate();
@@ -793,10 +796,10 @@ LBFoils.Foil.prototype = {
  * @param {object} data The data to load from.
  * @param {object} curveLib The optional curve library used to obtain pre-loaded
  * ClCdCurves, used for 'libClCdCurve' properties.
- * @param {object} [defCreatorFunc] If defined the function used to create the foil if the
+ * @param {function} [defCreatorFunc] If defined the function used to create the foil if the
  * data object does not contain a construct property, or data is not defined. The argument
  * passed to this function is the data argument.
- * @returns {object}    The foil object, undefined if both data and defCreatorFunc are not defined.
+ * @returns {module:LBFoils.Foil}    The foil object, undefined if both data and defCreatorFunc are not defined.
  */
 LBFoils.Foil.createFromData = function(data, curveLib, defCreatorFunc) {
     if (!data) {
@@ -832,13 +835,13 @@ return LBFoils;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="-_anonymous_-LBAssets.Loader.html">Loader</a></li><li><a href="-_anonymous_-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="-_anonymous_-LBCamera.Camera.html">Camera</a></li><li><a href="-_anonymous_-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="-_anonymous_-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="-_anonymous_-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="-_anonymous_-LBControls.SmoothController.html">SmoothController</a></li><li><a href="-_anonymous_-LBControls.SteppedController.html">SteppedController</a></li><li><a href="-_anonymous_-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="-_anonymous_-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="-_anonymous_-LBFoils.ClCd.html">ClCd</a></li><li><a href="-_anonymous_-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="-_anonymous_-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="-_anonymous_-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="-_anonymous_-LBFoils.Foil.html">Foil</a></li><li><a href="-_anonymous_-LBGeometry.Color.html">Color</a></li><li><a href="-_anonymous_-LBGeometry.Euler.html">Euler</a></li><li><a href="-_anonymous_-LBGeometry.Face3.html">Face3</a></li><li><a href="-_anonymous_-LBGeometry.Geometry.html">Geometry</a></li><li><a href="-_anonymous_-LBGeometry.Line2.html">Line2</a></li><li><a href="-_anonymous_-LBGeometry.Line3.html">Line3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="-_anonymous_-LBGeometry.Object3D.html">Object3D</a></li><li><a href="-_anonymous_-LBGeometry.Plane.html">Plane</a></li><li><a href="-_anonymous_-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="-_anonymous_-LBGeometry.Sphere.html">Sphere</a></li><li><a href="-_anonymous_-LBGeometry.Vector2.html">Vector2</a></li><li><a href="-_anonymous_-LBGeometry.Vector3.html">Vector3</a></li><li><a href="-_anonymous_-LBMath.CSpline.html">CSpline</a></li><li><a href="-_anonymous_-LBMath.DegRange.html">DegRange</a></li><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="-_anonymous_-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="-_anonymous_-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="-_anonymous_-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="-_anonymous_-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="-_anonymous_-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="-_anonymous_-LBVolume.Tetra.html">Tetra</a></li><li><a href="-_anonymous_-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="-_anonymous_-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="-_anonymous_-LBVolume.Volume.html">Volume</a></li><li><a href="LBCannon.CannonPhysicsLink.html">CannonPhysicsLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBUI3d.App3D.html">App3D</a></li><li><a href="LBUI3d.CameraController.html">CameraController</a></li><li><a href="LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="LBUI3d.FollowCameraController.html">FollowCameraController</a></li><li><a href="LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="LBUI3d.SphericalOrientation.html">SphericalOrientation</a></li><li><a href="LBUI3d.View3D.html">View3D</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBAssets_.html">LBAssets|</a></li><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBCurve.html">LBCurve</a></li><li><a href="LBDebug.html">LBDebug</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li><li><a href="LBUI3d.html">LBUI3d</a></li><li><a href="LBUtil.html">LBUtil</a></li><li><a href="LBVolume.html">LBVolume</a></li></ul><h3>Global</h3><ul><li><a href="global.html#.">.</a></li><li><a href="global.html#Detector">Detector</a></li><li><a href="global.html#THREE">THREE</a></li><li><a href="global.html#%257B@link">{@link</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-LBAssets.html">LBAssets</a></li><li><a href="module-LBCamera.html">LBCamera</a></li><li><a href="module-LBCannonPhysicsLink.html">LBCannonPhysicsLink</a></li><li><a href="module-LBCannonUtil.html">LBCannonUtil</a></li><li><a href="module-LBControls.html">LBControls</a></li><li><a href="module-LBCurve.html">LBCurve</a></li><li><a href="module-LBDebug.html">LBDebug</a></li><li><a href="module-LBFoils.html">LBFoils</a></li><li><a href="module-LBGeometry.html">LBGeometry</a></li><li><a href="module-LBMath.html">LBMath</a></li><li><a href="module-LBParticles.html">LBParticles</a></li><li><a href="module-LBPhysics.html">LBPhysics</a></li><li><a href="module-LBPhysicsLink.html">LBPhysicsLink</a></li><li><a href="module-LBRandom.html">LBRandom</a></li><li><a href="module-LBShaders.html">LBShaders</a></li><li><a href="module-LBSpherical.html">LBSpherical</a></li><li><a href="module-LBTracking.html">LBTracking</a></li><li><a href="module-LBUI3d.html">LBUI3d</a></li><li><a href="module-LBUtil.html">LBUtil</a></li><li><a href="module-LBVolume.html">LBVolume</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Wakes3D.html">Wakes3D</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.WaterShader.html">WaterShader</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBSailSim.WindPuff.html">WindPuff</a></li><li><a href="module-LBAssets.Loader.html">Loader</a></li><li><a href="module-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="module-LBCamera.Camera.html">Camera</a></li><li><a href="module-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="module-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="module-LBCannonPhysicsLink.Link.html">Link</a></li><li><a href="module-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="module-LBControls.SmoothController.html">SmoothController</a></li><li><a href="module-LBControls.SteppedController.html">SteppedController</a></li><li><a href="module-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="module-LBDebug.DataLog.html">DataLog</a></li><li><a href="module-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="module-LBDebug.FieldsDataLogField.html">FieldsDataLogField</a></li><li><a href="module-LBFoils.ClCd.html">ClCd</a></li><li><a href="module-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="module-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="module-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="module-LBFoils.Foil.html">Foil</a></li><li><a href="module-LBGeometry.Color.html">Color</a></li><li><a href="module-LBGeometry.Euler.html">Euler</a></li><li><a href="module-LBGeometry.Face3.html">Face3</a></li><li><a href="module-LBGeometry.Geometry.html">Geometry</a></li><li><a href="module-LBGeometry.Line2.html">Line2</a></li><li><a href="module-LBGeometry.Line3.html">Line3</a></li><li><a href="module-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="module-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="module-LBGeometry.Object3D.html">Object3D</a></li><li><a href="module-LBGeometry.Plane.html">Plane</a></li><li><a href="module-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="module-LBGeometry.Rect.html">Rect</a></li><li><a href="module-LBGeometry.Sphere.html">Sphere</a></li><li><a href="module-LBGeometry.Vector2.html">Vector2</a></li><li><a href="module-LBGeometry.Vector3.html">Vector3</a></li><li><a href="module-LBMath.CSpline.html">CSpline</a></li><li><a href="module-LBMath.DegRange.html">DegRange</a></li><li><a href="module-LBParticles.Cache.html">Cache</a></li><li><a href="module-LBParticles.ParticleSystem.html">ParticleSystem</a></li><li><a href="module-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="module-LBPhysics.CoordTransforms.html">CoordTransforms</a></li><li><a href="module-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="module-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="module-LBPhysicsLink.Link.html">Link</a></li><li><a href="module-LBRandom.NormalGenerator.html">NormalGenerator</a></li><li><a href="module-LBRandom.UniformGenerator.html">UniformGenerator</a></li><li><a href="module-LBShaders.Computer.html">Computer</a></li><li><a href="module-LBShaders.TargetCopier.html">TargetCopier</a></li><li><a href="module-LBSpherical.CoordinatesRAA.html">CoordinatesRAA</a></li><li><a href="module-LBSpherical.Orientation.html">Orientation</a></li><li><a href="module-LBTracking.ValueFollower.html">ValueFollower</a></li><li><a href="module-LBUI3d.App3D.html">App3D</a></li><li><a href="module-LBUI3d.CameraController.html">CameraController</a></li><li><a href="module-LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="module-LBUI3d.ChaseCameraController.html">ChaseCameraController</a></li><li><a href="module-LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="module-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="module-LBUI3d.View3D.html">View3D</a></li><li><a href="module-LBUtil.RollingBuffer.html">RollingBuffer</a></li><li><a href="module-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="module-LBVolume.Tetra.html">Tetra</a></li><li><a href="module-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="module-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="module-LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Detector">Detector</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Oct 14 2017 10:42:13 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Nov 11 2017 20:48:25 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

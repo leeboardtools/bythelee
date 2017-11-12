@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: CoordSystemState</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: CoordSystemState</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="module-LBPhysics.html">LBPhysics</a>.</span>CoordSystemState<span class="signature">(velTerms<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="module-LBPhysics.CoordSystemState.html">module:LBPhysics.CoordSystemState</a>}</span></h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+
+    
+    <h4 class="name" id="CoordSystemState"><span class="type-signature"></span>new CoordSystemState<span class="signature">(velTerms<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="module-LBPhysics.CoordSystemState.html">module:LBPhysics.CoordSystemState</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    This is used to track the transforms for converting between a world coordinate
+system and a local coordinate system. It can also keep track of the previous transforms
+so it may calculate the world and local velocities of points in either coordinate
+system.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>velTerms</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    2
+                
+                </td>
+            
+
+            <td class="description last">The number of terms to use for the finite difference
+velocity calculation, must be at least 2.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Physics.js.html">core/Physics.js</a>, <a href="core_Physics.js.html#line496">line 496</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="module-LBPhysics.CoordSystemState.html">module:LBPhysics.CoordSystemState</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="dt"><span class="type-signature"></span>dt<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    The time step passed to <a href="module-LBPhysics.CoordSystemState.html#setXfrms">module:LBPhysics.CoordSystemState#setXfrms</a>.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Physics.js.html">core/Physics.js</a>, <a href="core_Physics.js.html#line516">line 516</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="xfrmsBuffer"><span class="type-signature"></span>xfrmsBuffer<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    The array of coordinate transforms
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Physics.js.html">core/Physics.js</a>, <a href="core_Physics.js.html#line510">line 510</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="calcAngularVelocityAboutLocalAxis"><span class="type-signature"></span>calcAngularVelocityAboutLocalAxis<span class="signature">(rotAxis)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Calculates the angular velocity about an axis in the local coordinate system
+based upon the current and past transforms.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rotAxis</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The axis, this must be normalized.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Physics.js.html">core/Physics.js</a>, <a href="core_Physics.js.html#line709">line 709</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The angular velocity in radians/sec.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="calcVectorLocalToWorld"><span class="type-signature"></span>calcVectorLocalToWorld<span class="signature">(localPos, results, prevLocalPos<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="module-LBPhysics.CoordSystemState.html">module:LBPhysics.CoordSystemState</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Calculates world position, world velocity, and local velocity for a given local
+point.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>localPos</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The local coordinates of the point of interest.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>results</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The object to receive the results. Results are stored
+in keys, and are only computed if the key exists:
+     <li>worldPos: The world coordinates of localPos.
+     <li>worldVel:   The velocity of localPos in world coordinates.
+     <li>localVel:   The velocity of localPos in local coordinates. Note that this is
+     the world velocity rotated into local coordinates, it is not the velocity
+     of the position relative to the local coordinate system (if that were the case
+     then this would always be 0 if prevLocalPos were not defined).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>prevLocalPos</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If defined, the previous local position, used for velocity calculation,
+if not defined then the previous position is presumed to be localPos.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Physics.js.html">core/Physics.js</a>, <a href="core_Physics.js.html#line617">line 617</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="module-LBPhysics.CoordSystemState.html">module:LBPhysics.CoordSystemState</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="destroy"><span class="type-signature"></span>destroy<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Call when done with the object to have it release any internal references
+to other objects to help with garbage collection.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Physics.js.html">core/Physics.js</a>, <a href="core_Physics.js.html#line755">line 755</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getVelocityTerms"><span class="type-signature"></span>getVelocityTerms<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Retrieves the number of positions used for computing velocity.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Physics.js.html">core/Physics.js</a>, <a href="core_Physics.js.html#line565">line 565</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="reset"><span class="type-signature"></span>reset<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Marks the coordinate transforms as invalid so the initial transforms are not
+saved for velocity calculations.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Physics.js.html">core/Physics.js</a>, <a href="core_Physics.js.html#line596">line 596</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setXfrms"><span class="type-signature"></span>setXfrms<span class="signature">(worldXfrm<span class="signature-attributes">opt</span>, dt<span class="signature-attributes">opt</span>, localXfrm<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="module-LBPhysics.CoordSystemState.html">module:LBPhysics.CoordSystemState</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Sets the world and local transforms, saving the previous transforms in the
+process. If either Xfrm matrix is not defined it is obtained by inverting the
+other matrix, if both are not defined then the matrices are set to the identity
+matrix.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>worldXfrm</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Matrix4.html">module:LBGeometry.Matrix4</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If defined, the 4x4 matrix for transforming from local to world coordinaes.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The simulation time change from the last call to this, used
+to compute velocity.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>localXfrm</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Matrix4.html">module:LBGeometry.Matrix4</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If defined, the 4x4 matrix for transforming from world to local coordinates.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Physics.js.html">core/Physics.js</a>, <a href="core_Physics.js.html#line539">line 539</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    this.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="module-LBPhysics.CoordSystemState.html">module:LBPhysics.CoordSystemState</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="vector3ToLocal"><span class="type-signature"></span>vector3ToLocal<span class="signature">(vector, store<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Converts a vector from world to local coordinates.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>vector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The vector in world coordinates to be transformed.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>store</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If defined, the vector to store the local coordinates into,
+may be the same as vector.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Physics.js.html">core/Physics.js</a>, <a href="core_Physics.js.html#line587">line 587</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The vector containing the local coordinates.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="vector3ToWorld"><span class="type-signature"></span>vector3ToWorld<span class="signature">(vector, store<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Converts a vector from local to world coordinates.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>vector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The vector in local coordinates to be transformed.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>store</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">If defined, the vector to store the world coordinates into,
+may be the same as vector.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="core_Physics.js.html">core/Physics.js</a>, <a href="core_Physics.js.html#line576">line 576</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The vector containing the world coordinates.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-LBAssets.html">LBAssets</a></li><li><a href="module-LBCamera.html">LBCamera</a></li><li><a href="module-LBCannonPhysicsLink.html">LBCannonPhysicsLink</a></li><li><a href="module-LBCannonUtil.html">LBCannonUtil</a></li><li><a href="module-LBControls.html">LBControls</a></li><li><a href="module-LBCurve.html">LBCurve</a></li><li><a href="module-LBDebug.html">LBDebug</a></li><li><a href="module-LBFoils.html">LBFoils</a></li><li><a href="module-LBGeometry.html">LBGeometry</a></li><li><a href="module-LBMath.html">LBMath</a></li><li><a href="module-LBParticles.html">LBParticles</a></li><li><a href="module-LBPhysics.html">LBPhysics</a></li><li><a href="module-LBPhysicsLink.html">LBPhysicsLink</a></li><li><a href="module-LBRandom.html">LBRandom</a></li><li><a href="module-LBShaders.html">LBShaders</a></li><li><a href="module-LBSpherical.html">LBSpherical</a></li><li><a href="module-LBTracking.html">LBTracking</a></li><li><a href="module-LBUI3d.html">LBUI3d</a></li><li><a href="module-LBUtil.html">LBUtil</a></li><li><a href="module-LBVolume.html">LBVolume</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Wakes3D.html">Wakes3D</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.WaterShader.html">WaterShader</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBSailSim.WindPuff.html">WindPuff</a></li><li><a href="module-LBAssets.Loader.html">Loader</a></li><li><a href="module-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="module-LBCamera.Camera.html">Camera</a></li><li><a href="module-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="module-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="module-LBCannonPhysicsLink.Link.html">Link</a></li><li><a href="module-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="module-LBControls.SmoothController.html">SmoothController</a></li><li><a href="module-LBControls.SteppedController.html">SteppedController</a></li><li><a href="module-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="module-LBDebug.DataLog.html">DataLog</a></li><li><a href="module-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="module-LBDebug.FieldsDataLogField.html">FieldsDataLogField</a></li><li><a href="module-LBFoils.ClCd.html">ClCd</a></li><li><a href="module-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="module-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="module-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="module-LBFoils.Foil.html">Foil</a></li><li><a href="module-LBGeometry.Color.html">Color</a></li><li><a href="module-LBGeometry.Euler.html">Euler</a></li><li><a href="module-LBGeometry.Face3.html">Face3</a></li><li><a href="module-LBGeometry.Geometry.html">Geometry</a></li><li><a href="module-LBGeometry.Line2.html">Line2</a></li><li><a href="module-LBGeometry.Line3.html">Line3</a></li><li><a href="module-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="module-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="module-LBGeometry.Object3D.html">Object3D</a></li><li><a href="module-LBGeometry.Plane.html">Plane</a></li><li><a href="module-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="module-LBGeometry.Rect.html">Rect</a></li><li><a href="module-LBGeometry.Sphere.html">Sphere</a></li><li><a href="module-LBGeometry.Vector2.html">Vector2</a></li><li><a href="module-LBGeometry.Vector3.html">Vector3</a></li><li><a href="module-LBMath.CSpline.html">CSpline</a></li><li><a href="module-LBMath.DegRange.html">DegRange</a></li><li><a href="module-LBParticles.Cache.html">Cache</a></li><li><a href="module-LBParticles.ParticleSystem.html">ParticleSystem</a></li><li><a href="module-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="module-LBPhysics.CoordTransforms.html">CoordTransforms</a></li><li><a href="module-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="module-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="module-LBPhysicsLink.Link.html">Link</a></li><li><a href="module-LBRandom.NormalGenerator.html">NormalGenerator</a></li><li><a href="module-LBRandom.UniformGenerator.html">UniformGenerator</a></li><li><a href="module-LBShaders.Computer.html">Computer</a></li><li><a href="module-LBShaders.TargetCopier.html">TargetCopier</a></li><li><a href="module-LBSpherical.CoordinatesRAA.html">CoordinatesRAA</a></li><li><a href="module-LBSpherical.Orientation.html">Orientation</a></li><li><a href="module-LBTracking.ValueFollower.html">ValueFollower</a></li><li><a href="module-LBUI3d.App3D.html">App3D</a></li><li><a href="module-LBUI3d.CameraController.html">CameraController</a></li><li><a href="module-LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="module-LBUI3d.ChaseCameraController.html">ChaseCameraController</a></li><li><a href="module-LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="module-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="module-LBUI3d.View3D.html">View3D</a></li><li><a href="module-LBUtil.RollingBuffer.html">RollingBuffer</a></li><li><a href="module-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="module-LBVolume.Tetra.html">Tetra</a></li><li><a href="module-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="module-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="module-LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Detector">Detector</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Nov 11 2017 20:48:26 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

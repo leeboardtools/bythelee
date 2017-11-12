@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/Debug.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/Debug.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* 
+ * Copyright 2017 Albert Santos.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+define(function() {
+    
+    'use strict';
+
+/**
+ * This module contains some debug helpers.
+ * @exports LBDebug
+ */
+var LBDebug = LBDebug || {};
+
+/**
+ * Base class for a field in {@link module:LBDebug.DataLog}, this is also provides a default
+ * implementation.
+ * @constructor
+ * @param {String} fieldName The name of the field.
+ * @return {module:LBDebug.DataLogField}
+ */
+LBDebug.DataLogField = function(fieldName) {
+    
+    /**
+     * Enable flag, if false the field is not output.
+     * @member {Boolean}
+     */
+    this.isEnabled = true;
+
+    /**
+     * The name of the field.
+     * @member {String}
+     */
+    this.fieldName = fieldName;
+    
+    /**
+     * The value currently associated with the field.
+     * @member {Object}
+     */
+    this.value = undefined;
+};
+
+LBDebug.DataLogField.prototype = {
+    /**
+     * Retrieves the text string describing the field for the output row.
+     * @param {String} [baseName] The base name, may be undefined.
+     * @return {String} The heading text.
+     */
+    getHeadingText: function(baseName) {
+        if (baseName) {
+            return baseName + '.' + this.fieldName;
+        }
+        return this.fieldName;
+    },
+    
+    /**
+     * Retrieves the text representation of the field's current value.
+     * @return {String} The text representation.
+     */
+    getValueText: function() {
+        return (this.value === undefined) ? "" : this.value;
+    },
+    
+    /**
+     * Sets the current value of the field.
+     * @param {Object} value    The value to set.
+     */
+    setValue: function(value) {
+        this.value = value;
+    },
+    
+    /**
+     * Called by {@link module:LBDebug.DataLog.output()} after the current value's text
+     * has been retrieved to clear the current value.
+     * @return {undefined}
+     */
+    clearValue: function() {
+        this.value = undefined;
+    },
+    
+    constructor: LBDebug.DataLogField
+};
+
+
+/**
+ * A {@link module:LBDebug.DataLogField} that holds other fields.
+ * @constructor
+ * @param {String} fieldName
+ * @param {Function} valueSetter
+ * @return {module:LBDebug.FieldsDataLogField}
+ */
+LBDebug.FieldsDataLogField = function(fieldName, valueSetter) {
+    LBDebug.DataLogField.call(this, fieldName);
+
+    /**
+     * Array containing the names of the data fields output.
+     * @member {String[]}
+     */
+    this.fieldNames = [];
+    
+    /**
+     * Object whose properties are the fields, with the field name the name of the
+     * property and the objects based upon {@link module:LBDebug.DataLogField}.
+     * @member {Object}
+     */
+    this.fields = {};
+    
+    /**
+     * Optional function that is called in {@link module:LBDebug.FieldsDataLogField#setValue} to
+     * handle setting the value. The call signature is:
+     * &lt;p>
+     *      valueSetter = function(field, value) {
+     *      }
+     */
+    this.valueSetter = valueSetter;
+};
+
+LBDebug.FieldsDataLogField.prototype = Object.create(LBDebug.DataLogField.constructor);
+LBDebug.FieldsDataLogField.prototype.constructor = LBDebug.FieldsDataLogField;
+
+/**
+ * Adds a field.
+ * @param {String|String[]} fieldName   The field's name. If a single string, then the
+ * field is added directly to this field. If an array of strings, then the field is added
+ * to the sub-field represented by the array of strings. Each entry in the array is the
+ * name of a field within the current field. Sub-fields are created as necessary.
+ * @param {module:LBDebug.DataLogField} [field] If defined this is the field object, otherwise
+ * a {@link module:LBDebug.DataLogField} is created.
+ * @return {module:LBDebug.DataLogField}   The added field.
+ */
+LBDebug.FieldsDataLogField.prototype.addField = function(fieldName, field) {
+    if (Array.isArray(fieldName)) {
+        if (fieldName.length === 1) {
+            fieldName = fieldName[0];
+        }
+        else {
+            var subField = this.fields[fieldName[0]];
+            if (!subField) {
+                subField = new LBDebug.FieldsDataLogField(fieldName[0]);
+                this.addField(fieldName[0], subField);
+            }
+            
+            fieldName = fieldName.slice(1);
+            return subField.addField(fieldName, field);
+        }
+    }
+    
+    if (!field) {
+        field = new LBDebug.DataLogField(fieldName);
+    }
+    else {
+        field.fieldName = fieldName;
+    }
+
+    this.fieldNames.push(fieldName);
+    this.fields[fieldName] = field;
+    return field;
+};
+
+/**
+ * Adds a spacer column to the field.
+ * @param {String|String[]} [fieldName] If defined, this is either a single string
+ * with the name of the field within this field to which the spacer is to be added,
+ * or if an array of strings then the array contains the names of the sub-fields.
+ * To add a spacer to this field, this should be undefined or empty.
+ * If a specified field does not exist, no spacer is added.
+ * @return {undefined}
+ */
+LBDebug.FieldsDataLogField.prototype.addSpacer = function(fieldName) {
+    var nextFieldNames;
+    if (fieldName) {
+        if (Array.isArray(fieldName)) {
+            if (fieldName.length === 0) {
+                fieldName = undefined;
+            }
+            else {
+                nextFieldNames = fieldName.slice(1);
+                fieldName = fieldName[0];
+            }
+        }
+    }
+    
+    if (fieldName) {
+        var subField = this.fields[fieldName];
+        if (!subField) {
+            subField = new LBDebug.FieldsDataLogField(fieldName);
+            this.addField(fieldName, subField);
+        }
+        
+        subField.addSpacer(nextFieldNames);
+    }
+    else {
+        this.fieldNames.push("");
+    }
+};
+
+/**
+ * Retrieves a given field.
+ * @param {String|String[]} fieldName   The name of the field if a single string, or
+ * an array of strings containing the names of the sub-field hierarchy.
+ * @return {module:LBDebug.DataLogField/undefined} The field object, undefined if not found.
+ */
+LBDebug.FieldsDataLogField.prototype.getField = function(fieldName) {
+    if (Array.isArray(fieldName)) {
+        var nextFields = fieldName.splice(1);
+        fieldName = fieldName[0];
+        var subField = this.fields[fieldName];
+        if (!subField) {
+            return undefined;
+        }
+        return subField.getField(nextFields);
+    }
+    
+    return this.fields[fieldName];
+};
+
+// @inheritdoc...
+LBDebug.FieldsDataLogField.prototype.getHeadingText = function(baseName) {
+    if (!this.isEnabled || (this.fieldNames.length === 0)) {
+        return undefined;
+    }
+    
+    var text = "";
+    if (this.fieldName) {
+        if (baseName) {
+            baseName += "." + this.fieldName;
+        }
+        else {
+            baseName = this.fieldName;
+        }
+    }
+    
+    var fields = this.fields;
+    this.fieldNames.forEach(function(name) {
+        var fieldText;
+        if (!name) {
+            // Spacer...
+            fieldText = "";
+        }
+        else {
+            var field = fields[name];
+            if (!field || !field.isEnabled) {
+                return;
+            }
+
+            fieldText = field.getHeadingText(baseName);
+        }
+        
+        if (fieldText !== undefined) {
+            if (text) {
+                text += "\t";
+            }
+            text += fieldText;
+        }
+    });
+    
+    return text;
+};
+
+// @inheritdoc...
+LBDebug.FieldsDataLogField.prototype.getValueText = function() {
+    if (!this.isEnabled || (this.fieldNames.length === 0)) {
+        return undefined;
+    }
+    
+    var text = "";
+    var fields = this.fields;
+    this.fieldNames.forEach(function(name) {
+        var fieldText;
+        if (!name) {
+            // Spacer...
+            fieldText = "";
+        }
+        else {
+            var field = fields[name];
+            if (!field || !field.isEnabled) {
+                return;
+            }
+
+            fieldText = field.getValueText();
+        }
+        
+        if (fieldText !== undefined) {
+            if (text) {
+                text += "\t";
+            }
+            text += fieldText;
+        }
+    });
+    
+    return text;
+};
+
+// @inheritdoc...
+LBDebug.FieldsDataLogField.prototype.setValue = function(value) {
+    if (this.isEnabled) {
+        this.value = value;
+        if (this.valueSetter) {
+            this.valueSetter(this, value);
+        }
+    }
+};
+
+/**
+ * Sets the value of a sub-field.
+ * @param {String|String[]} fieldName   The name of the field if a single string, or
+ * an array of strings containing the names of the sub-field hierarchy.
+ * If the sub-field is not found nothing happens.
+ * @param {Object} value  The value to assign.
+ * @return {undefined}
+ */
+LBDebug.FieldsDataLogField.prototype.setSubFieldValue = function(fieldName, value) {
+    if (this.isEnabled) {
+        var field = this.getField(fieldName);
+        if (field) {
+            field.setValue(value);
+        }
+    }
+};
+
+/**
+ * Clears the value of all the fields.
+ * @return {undefined}
+ */
+LBDebug.FieldsDataLogField.prototype.clearValue = function() {
+    var fields = this.fields;
+    this.fieldNames.forEach(function(name) {
+        var field = fields[name];
+        if (field) {
+            field.clearValue();
+        }
+    });
+};
+
+
+/**
+ * Utility for writing out a set of values repeatedly to {@link console.log}.
+ * The data is written when {@link module:LBDebug.DataLog.output} is called.
+ * @class
+ * @hideconstructor
+ */
+LBDebug.DataLog = {
+    /**
+     * Enable flag, if false text is neither buffered nor output.
+     * @member {Boolean}
+     */
+    isEnabled: true,
+    
+    /**
+     * The field implementation.
+     * @private
+     * @member {module:LBDebug.FieldsDataLogField}
+     */
+    fields: new LBDebug.FieldsDataLogField(""),
+
+    /**
+     * Counter for each line output.
+     * @member {Number}
+     */
+    outputCount: 0
+};
+
+/**
+ * Adds a field.
+ * @param {String|String[]} name   The field's name. If a single string, then the
+ * field is added to the top-level. If an array of strings, then the field is added
+ * to the sub-field represented by the array of strings. Each entry in the array is the
+ * name of a field within the current field. Sub-fields are created as necessary.
+ * @param {module:LBDebug.DataLogField} [field] If defined this is the field object, otherwise
+ * a {@link module:LBDebug.DataLogField} is created.
+ * @return {undefined}
+ */
+LBDebug.DataLog.addField = function(name, field) {
+    LBDebug.DataLog.fields.addField(name, field);
+};
+
+
+/**
+ * Retrieves a given field.
+ * @param {String|String[]} name   The name of the field if a single string, or
+ * an array of strings containing the names of the sub-field hierarchy.
+ * @return {module:LBDebug.DataLogField/undefined} The field object, undefined if not found.
+ */
+LBDebug.DataLog.getField = function(name) {
+    return LBDebug.DataLog.fields.getField(name);
+};
+
+/**
+ * Adds a spacer column.
+ * @param {String|String[]} [name] If defined, this is either a single string
+ * with the name of the field within this field to which the spacer is to be added,
+ * or if an array of strings then the array contains the names of the sub-fields.
+ * To add a spacer to the top level, this should be undefined or empty.
+ * If a specified field does not exist, no spacer is added.
+ * @return {module:LBDebug.DataLog} this.
+ */
+LBDebug.DataLog.addSpacer = function(name) {
+    LBDebug.DataLog.fields.addSpacer(name);
+    return this;
+};
+
+/**
+ * Writes a heading line to {@link console.log}, basically a columns heading string
+ * for the data fields.
+ * @return {undefined}
+ */
+LBDebug.DataLog.outputHeading = function() {
+    var log = LBDebug.DataLog;
+    if (!log.isEnabled) {
+        return;
+    }
+    
+    var fields = log.fields;
+    var text = fields.getHeadingText();
+    if (text) {
+        // Final '\t' is to separate the extra file/line info added by console.log.
+        console.log("Output#\t" + text + "\t");
+    }
+};
+
+/**
+ * Sets the value of a data field.
+ * @param {String|String[]} name   The name of the field if a single string, or
+ * an array of strings containing the names of the sub-field hierarchy.
+ * @param {Object} value    The value to assign.
+ * @return {undefined}
+ */
+LBDebug.DataLog.setValue = function(name, value) {
+    var log = LBDebug.DataLog;
+    if (log.isEnabled) {
+        var field = log.fields.getField(name);
+        if (field) {
+            field.setValue(value);
+        }
+    }
+};
+
+/**
+ * Writes the current values of all the data fields to {@link console.log}, then
+ * setting the current values to undefined.
+ * @return {undefined}
+ */
+LBDebug.DataLog.output = function() {
+    var log = LBDebug.DataLog;
+    if (log.isEnabled) {
+        var fieldsText = log.fields.getValueText();
+        if (fieldsText) {
+            // Final '\t' is to separate the extra file/line info added by console.log.
+            console.log(log.outputCount + "\t" + fieldsText + "\t");
+            
+            log.fields.clearValue();
+            ++this.outputCount;
+        }
+    }
+};
+
+
+/**
+ * Helper that creates a {@link module:LBDebug.FieldsDataLogField} whose {@link module:LBDebug.FieldsDataLogField#setValue}
+ * takes a {@link module:LBGeometry.Vector2}.
+ * @return {module:LBDebug.FieldsDataLogField} The field.
+ */
+LBDebug.DataLog.createFieldVector2 = function() {
+    var field = new LBDebug.FieldsDataLogField("", function(fields, value) {
+        fields.fields.x.value = value.x;
+        fields.fields.y.value = value.y;
+    });
+    
+    field.addField("x");
+    field.addField("y");
+    
+    return field;
+};
+
+/**
+ * Adds a field for a {@link module:LBGeometry.Vector2}.
+ * @param {String|String[]} name The name of the field, see {@link module:LBDebug.DataLog.addField}.
+ * @return {module:LBDebug.DataLogField}   The added field.
+ */
+LBDebug.DataLog.addFieldVector2 = function(name) {
+    var field = LBDebug.DataLog.createFieldVector2();
+    return LBDebug.DataLog.addField(name, field);
+};
+
+/**
+ * Helper that creates a {@link module:LBDebug.FieldsDataLogField} whose {@link module:LBDebug.FieldsDataLogField#setValue}
+ * takes a {@link module:LBGeometry.Vector3}.
+ * @return {module:LBDebug.FieldsDataLogField} The field.
+ */
+LBDebug.DataLog.createFieldVector3 = function() {
+    var field = new LBDebug.FieldsDataLogField("", function(fields, value) {
+        fields.fields.x.value = value.x;
+        fields.fields.y.value = value.y;
+        fields.fields.z.value = value.z;
+    });
+    
+    field.addField("x");
+    field.addField("y");
+    field.addField("z");
+    
+    return field;
+};
+
+/**
+ * Adds a field for a {@link module:LBGeometry.Vector3}.
+ * @param {String|String[]} name The name of the field, see {@link module:LBDebug.DataLog.addField}.
+ * @return {module:LBDebug.DataLogField}   The added field.
+ */
+LBDebug.DataLog.addFieldVector3 = function(name) {
+    var field = LBDebug.DataLog.createFieldVector3();
+    return LBDebug.DataLog.addField(name, field);
+};
+
+/**
+ * Helper that creates a {@link module:LBDebug.FieldsDataLogField} whose {@link module:LBDebug.FieldsDataLogField#setValue}
+ * takes a {@link module:LBGeometry.Euler}.
+ * @return {module:LBDebug.FieldsDataLogField} The field.
+ */
+LBDebug.DataLog.createFieldEuler = function() {
+    var field = new LBDebug.FieldsDataLogField("", function(fields, value) {
+        fields.fields.ex.value = value.x;
+        fields.fields.ey.value = value.y;
+        fields.fields.ez.value = value.z;
+    });
+    
+    field.addField("ex");
+    field.addField("ey");
+    field.addField("ez");
+    
+    return field;
+};
+
+/**
+ * Adds a field for a {@link module:LBGeometry.Euler}.
+ * @param {String|String[]} name The name of the field, see {@link module:LBDebug.DataLog.addField}.
+ * @return {module:LBDebug.DataLogField}   The added field.
+ */
+LBDebug.DataLog.addFieldEuler = function(name) {
+    var field = LBDebug.DataLog.createFieldEuler();    
+    return LBDebug.DataLog.addField(name, field);
+};
+
+
+/**
+ * Helper that creates a {@link module:LBDebug.FieldsDataLogField} whose {@link module:LBDebug.FieldsDataLogField#setValue}
+ * takes a {@link module:LBPhysics.Resultant}.
+ * @return {module:LBDebug.FieldsDataLogField} The field.
+ */
+LBDebug.DataLog.createFieldResultant = function() {
+    var field = new LBDebug.FieldsDataLogField("", function(fields, value) {
+        fields.fields.applPoint.setValue(value.applPoint);
+        fields.fields.force.setValue(value.force);
+        fields.fields.moment.setValue(value.moment);
+    });
+    
+    field.addField("applPoint", LBDebug.DataLog.createFieldVector3());
+    field.addField("force", LBDebug.DataLog.createFieldVector3());
+    field.addField("moment", LBDebug.DataLog.createFieldVector3());
+    
+    return field;
+};
+
+/**
+ * Adds a field for a {@link module:LBPhysics.Resultant3D}.
+ * @param {String|String[]} name The name of the field, see {@link module:LBDebug.DataLog.addField}.
+ * @return {module:LBDebug.DataLogField}   The added field.
+ */
+LBDebug.DataLog.addFieldResultant = function(name) {
+    var field = LBDebug.DataLog.createFieldResultant();
+    return LBDebug.DataLog.addField(name, field);
+};
+
+return LBDebug;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-LBAssets.html">LBAssets</a></li><li><a href="module-LBCamera.html">LBCamera</a></li><li><a href="module-LBCannonPhysicsLink.html">LBCannonPhysicsLink</a></li><li><a href="module-LBCannonUtil.html">LBCannonUtil</a></li><li><a href="module-LBControls.html">LBControls</a></li><li><a href="module-LBCurve.html">LBCurve</a></li><li><a href="module-LBDebug.html">LBDebug</a></li><li><a href="module-LBFoils.html">LBFoils</a></li><li><a href="module-LBGeometry.html">LBGeometry</a></li><li><a href="module-LBMath.html">LBMath</a></li><li><a href="module-LBParticles.html">LBParticles</a></li><li><a href="module-LBPhysics.html">LBPhysics</a></li><li><a href="module-LBPhysicsLink.html">LBPhysicsLink</a></li><li><a href="module-LBRandom.html">LBRandom</a></li><li><a href="module-LBShaders.html">LBShaders</a></li><li><a href="module-LBSpherical.html">LBSpherical</a></li><li><a href="module-LBTracking.html">LBTracking</a></li><li><a href="module-LBUI3d.html">LBUI3d</a></li><li><a href="module-LBUtil.html">LBUtil</a></li><li><a href="module-LBVolume.html">LBVolume</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Wakes3D.html">Wakes3D</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.WaterShader.html">WaterShader</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBSailSim.WindPuff.html">WindPuff</a></li><li><a href="module-LBAssets.Loader.html">Loader</a></li><li><a href="module-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="module-LBCamera.Camera.html">Camera</a></li><li><a href="module-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="module-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="module-LBCannonPhysicsLink.Link.html">Link</a></li><li><a href="module-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="module-LBControls.SmoothController.html">SmoothController</a></li><li><a href="module-LBControls.SteppedController.html">SteppedController</a></li><li><a href="module-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="module-LBDebug.DataLog.html">DataLog</a></li><li><a href="module-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="module-LBDebug.FieldsDataLogField.html">FieldsDataLogField</a></li><li><a href="module-LBFoils.ClCd.html">ClCd</a></li><li><a href="module-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="module-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="module-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="module-LBFoils.Foil.html">Foil</a></li><li><a href="module-LBGeometry.Color.html">Color</a></li><li><a href="module-LBGeometry.Euler.html">Euler</a></li><li><a href="module-LBGeometry.Face3.html">Face3</a></li><li><a href="module-LBGeometry.Geometry.html">Geometry</a></li><li><a href="module-LBGeometry.Line2.html">Line2</a></li><li><a href="module-LBGeometry.Line3.html">Line3</a></li><li><a href="module-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="module-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="module-LBGeometry.Object3D.html">Object3D</a></li><li><a href="module-LBGeometry.Plane.html">Plane</a></li><li><a href="module-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="module-LBGeometry.Rect.html">Rect</a></li><li><a href="module-LBGeometry.Sphere.html">Sphere</a></li><li><a href="module-LBGeometry.Vector2.html">Vector2</a></li><li><a href="module-LBGeometry.Vector3.html">Vector3</a></li><li><a href="module-LBMath.CSpline.html">CSpline</a></li><li><a href="module-LBMath.DegRange.html">DegRange</a></li><li><a href="module-LBParticles.Cache.html">Cache</a></li><li><a href="module-LBParticles.ParticleSystem.html">ParticleSystem</a></li><li><a href="module-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="module-LBPhysics.CoordTransforms.html">CoordTransforms</a></li><li><a href="module-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="module-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="module-LBPhysicsLink.Link.html">Link</a></li><li><a href="module-LBRandom.NormalGenerator.html">NormalGenerator</a></li><li><a href="module-LBRandom.UniformGenerator.html">UniformGenerator</a></li><li><a href="module-LBShaders.Computer.html">Computer</a></li><li><a href="module-LBShaders.TargetCopier.html">TargetCopier</a></li><li><a href="module-LBSpherical.CoordinatesRAA.html">CoordinatesRAA</a></li><li><a href="module-LBSpherical.Orientation.html">Orientation</a></li><li><a href="module-LBTracking.ValueFollower.html">ValueFollower</a></li><li><a href="module-LBUI3d.App3D.html">App3D</a></li><li><a href="module-LBUI3d.CameraController.html">CameraController</a></li><li><a href="module-LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="module-LBUI3d.ChaseCameraController.html">ChaseCameraController</a></li><li><a href="module-LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="module-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="module-LBUI3d.View3D.html">View3D</a></li><li><a href="module-LBUtil.RollingBuffer.html">RollingBuffer</a></li><li><a href="module-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="module-LBVolume.Tetra.html">Tetra</a></li><li><a href="module-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="module-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="module-LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Detector">Detector</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Nov 11 2017 20:48:25 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

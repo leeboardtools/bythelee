@@ -1,0 +1,2561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: LocalPOVCameraController</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: LocalPOVCameraController</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="module-LBUI3d.html">LBUI3d</a>.</span>LocalPOVCameraController<span class="signature">(localLimits<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="module-LBUI3d.LocalPOVCameraController.html">module:LBUI3d.LocalPOVCameraController</a>}</span></h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+
+    
+    <h4 class="name" id="LocalPOVCameraController"><span class="type-signature"></span>new LocalPOVCameraController<span class="signature">(localLimits<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="module-LBUI3d.LocalPOVCameraController.html">module:LBUI3d.LocalPOVCameraController</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    A camera controller that sets itself to a local position and orientation
+on a target. Basically a first person point of view.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>localLimits</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBUI3d.CameraLimits.html">module:LBUI3d.CameraLimits</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Optional limits on the local camera position.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line861">line 861</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="module-LBUI3d.LocalPOVCameraController.html">module:LBUI3d.LocalPOVCameraController</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="currentDecelerationTime"><span class="type-signature"></span>currentDecelerationTime<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    The current transition time in seconds when decelerating after a mouse up with position or orientation
+velocity. 0 if not decelerating.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line907">line 907</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="degDecel"><span class="type-signature"></span>degDecel<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    The deceleration value to use for orientation degrees, when decelerating after a mouse up
+with orientation velocity. In degrees/second^2.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line894">line 894</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="forwardAzimuthDeg"><span class="type-signature"></span>forwardAzimuthDeg<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    This is used to determine the azimuth of the forward direction for the standard views.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line880">line 880</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="localOrientation"><span class="type-signature"></span>localOrientation<span class="type-signature"> :<a href="module-LBSpherical.Orientation.html">module:LBSpherical.Orientation</a></span></h4>
+
+
+
+
+<div class="description">
+    The current camera spherical orientation.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="module-LBSpherical.Orientation.html">module:LBSpherical.Orientation</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line874">line 874</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="localPosition"><span class="type-signature"></span>localPosition<span class="type-signature"> :<a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span></h4>
+
+
+
+
+<div class="description">
+    The current local camera position.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line868">line 868</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="maxTransitionTime"><span class="type-signature"></span>maxTransitionTime<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    The maximum number of seconds to allow for decelerating after a mouse up with position
+or orientation velocity.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line901">line 901</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="positionDecel"><span class="type-signature"></span>positionDecel<span class="type-signature"> :Number</span></h4>
+
+
+
+
+<div class="description">
+    The deceleration value to use for position, when decelerating after a mouse up
+with position velocity. In position units/second^2.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line887">line 887</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="finishPan"><span class="type-signature">(protected) </span>finishPan<span class="signature">(isCancel)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Called to finish pan tracking.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>isCancel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If true the pan should be cancelled.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line1139">line 1139</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="finishRotate"><span class="type-signature">(protected) </span>finishRotate<span class="signature">(isCancel)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Called to finish rotation tracking.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>isCancel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If true the pan should be cancelled.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line1201">line 1201</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="panPOV"><span class="type-signature"></span>panPOV<span class="signature">(dx, dy)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Pans the camera point of view horizontall or vertically
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The amount to pan horizontally.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The amount to pan vertically.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line1100">line 1100</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="requestLocalCameraPOVDeceleration"><span class="type-signature"></span>requestLocalCameraPOVDeceleration<span class="signature">(positionVel, orientationVel)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Requests the point of view of the camera be decelerated to 0 velocity given an initial velocity.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>positionVel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The local position velocity.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>orientationVel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBSpherical.Orientation.html">module:LBSpherical.Orientation</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The spherical orientation velocity.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line1006">line 1006</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="rotatePOVDeg"><span class="type-signature"></span>rotatePOVDeg<span class="signature">(horzDeg, vertDeg)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Rotates the camera point of view horizontally and/or vertically.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>horzDeg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The number of degrees to rotate horizontally.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vertDeg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The number of degrees to rotate vertically.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line1088">line 1088</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setLocalCameraPOV"><span class="type-signature"></span>setLocalCameraPOV<span class="signature">(position, sphericalOrientation)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Sets the point of view of the camera to a specific position and spherical orientation.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>position</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The local position.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sphericalOrientation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBSpherical.Orientation.html">module:LBSpherical.Orientation</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The spherical orientation.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line995">line 995</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setStandardView"><span class="type-signature"></span>setStandardView<span class="signature">(view)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Sets one of the standard views.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>view</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">One of the LBUI3d.CameraController.VIEW_x values.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line1039">line 1039</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="startPan"><span class="type-signature">(protected) </span>startPan<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Called to start panning.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line1112">line 1112</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="startRotate"><span class="type-signature">(protected) </span>startRotate<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Called to start rotating.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line1154">line 1154</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="trackPan"><span class="type-signature">(protected) </span>trackPan<span class="signature">(x, y, timeStamp)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Called to actively track a pan.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The tracked x coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The tracked y coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>timeStamp</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The track event time stamp.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line1129">line 1129</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="trackRotate"><span class="type-signature">(protected) </span>trackRotate<span class="signature">(x, y, timeStamp)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Called to actively track a rotation.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The tracked x coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The tracked y coordinate.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>timeStamp</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The track event time stamp.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line1177">line 1177</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="updateCameraPosition"><span class="type-signature">(protected) </span>updateCameraPosition<span class="signature">(dt, position, quaternion)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Called by <a href="module-LBUI3d.CameraController.html#update">module:LBUI3d.CameraController#update</a> to update the current camera position
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The time step in milliseconds.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>position</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Vector3.html">module:LBGeometry.Vector3</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The camera world coordinates position to be updated.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>quaternion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-LBGeometry.Quaternion.html">module:LBGeometry.Quaternion</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The camera world coordinates quaternion to be update.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="ui3d_CameraControllers.js.html">ui3d/CameraControllers.js</a>, <a href="ui3d_CameraControllers.js.html#line964">line 964</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-LBAssets.html">LBAssets</a></li><li><a href="module-LBCamera.html">LBCamera</a></li><li><a href="module-LBCannonPhysicsLink.html">LBCannonPhysicsLink</a></li><li><a href="module-LBCannonUtil.html">LBCannonUtil</a></li><li><a href="module-LBControls.html">LBControls</a></li><li><a href="module-LBCurve.html">LBCurve</a></li><li><a href="module-LBDebug.html">LBDebug</a></li><li><a href="module-LBFoils.html">LBFoils</a></li><li><a href="module-LBGeometry.html">LBGeometry</a></li><li><a href="module-LBMath.html">LBMath</a></li><li><a href="module-LBParticles.html">LBParticles</a></li><li><a href="module-LBPhysics.html">LBPhysics</a></li><li><a href="module-LBPhysicsLink.html">LBPhysicsLink</a></li><li><a href="module-LBRandom.html">LBRandom</a></li><li><a href="module-LBShaders.html">LBShaders</a></li><li><a href="module-LBSpherical.html">LBSpherical</a></li><li><a href="module-LBTracking.html">LBTracking</a></li><li><a href="module-LBUI3d.html">LBUI3d</a></li><li><a href="module-LBUtil.html">LBUtil</a></li><li><a href="module-LBVolume.html">LBVolume</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Wakes3D.html">Wakes3D</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.WaterShader.html">WaterShader</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBSailSim.WindPuff.html">WindPuff</a></li><li><a href="module-LBAssets.Loader.html">Loader</a></li><li><a href="module-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="module-LBCamera.Camera.html">Camera</a></li><li><a href="module-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="module-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="module-LBCannonPhysicsLink.Link.html">Link</a></li><li><a href="module-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="module-LBControls.SmoothController.html">SmoothController</a></li><li><a href="module-LBControls.SteppedController.html">SteppedController</a></li><li><a href="module-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="module-LBDebug.DataLog.html">DataLog</a></li><li><a href="module-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="module-LBDebug.FieldsDataLogField.html">FieldsDataLogField</a></li><li><a href="module-LBFoils.ClCd.html">ClCd</a></li><li><a href="module-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="module-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="module-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="module-LBFoils.Foil.html">Foil</a></li><li><a href="module-LBGeometry.Color.html">Color</a></li><li><a href="module-LBGeometry.Euler.html">Euler</a></li><li><a href="module-LBGeometry.Face3.html">Face3</a></li><li><a href="module-LBGeometry.Geometry.html">Geometry</a></li><li><a href="module-LBGeometry.Line2.html">Line2</a></li><li><a href="module-LBGeometry.Line3.html">Line3</a></li><li><a href="module-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="module-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="module-LBGeometry.Object3D.html">Object3D</a></li><li><a href="module-LBGeometry.Plane.html">Plane</a></li><li><a href="module-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="module-LBGeometry.Rect.html">Rect</a></li><li><a href="module-LBGeometry.Sphere.html">Sphere</a></li><li><a href="module-LBGeometry.Vector2.html">Vector2</a></li><li><a href="module-LBGeometry.Vector3.html">Vector3</a></li><li><a href="module-LBMath.CSpline.html">CSpline</a></li><li><a href="module-LBMath.DegRange.html">DegRange</a></li><li><a href="module-LBParticles.Cache.html">Cache</a></li><li><a href="module-LBParticles.ParticleSystem.html">ParticleSystem</a></li><li><a href="module-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="module-LBPhysics.CoordTransforms.html">CoordTransforms</a></li><li><a href="module-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="module-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="module-LBPhysicsLink.Link.html">Link</a></li><li><a href="module-LBRandom.NormalGenerator.html">NormalGenerator</a></li><li><a href="module-LBRandom.UniformGenerator.html">UniformGenerator</a></li><li><a href="module-LBShaders.Computer.html">Computer</a></li><li><a href="module-LBShaders.TargetCopier.html">TargetCopier</a></li><li><a href="module-LBSpherical.CoordinatesRAA.html">CoordinatesRAA</a></li><li><a href="module-LBSpherical.Orientation.html">Orientation</a></li><li><a href="module-LBTracking.ValueFollower.html">ValueFollower</a></li><li><a href="module-LBUI3d.App3D.html">App3D</a></li><li><a href="module-LBUI3d.CameraController.html">CameraController</a></li><li><a href="module-LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="module-LBUI3d.ChaseCameraController.html">ChaseCameraController</a></li><li><a href="module-LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="module-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="module-LBUI3d.View3D.html">View3D</a></li><li><a href="module-LBUtil.RollingBuffer.html">RollingBuffer</a></li><li><a href="module-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="module-LBVolume.Tetra.html">Tetra</a></li><li><a href="module-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="module-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="module-LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Detector">Detector</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Nov 11 2017 20:48:26 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

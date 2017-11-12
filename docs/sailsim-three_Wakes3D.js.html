@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: sailsim-three/Wakes3D.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: sailsim-three/Wakes3D.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* 
+ * Copyright 2017 albert.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+define(['lbsailsim', 'lbparticles', 'lbgeometry', 'lbmath', 'lbshaders', 'three'], 
+function(LBSailSim, LBParticles, LBGeometry, LBMath, LBShaders, THREE) {
+
+'use strict';
+
+
+/**
+ * Manages the generation of wakes for vessels.
+ * @constructor
+ * @param {module:LBUI3d.Scene3D} scene3D  The 3D scene where the wake is drawn.
+ * @param {LBSailSim.SailEnv} sailEnv   The sailing environment that's created this.
+ * @return {Wakes3D_L19.LBSailSim.Wakes3D}
+ */
+LBSailSim.Wakes3D = function(scene3D, sailEnv) {
+    this.scene3D = scene3D;
+    this.sailEnv = sailEnv;
+
+    this.wakeImpl = createShaderWakes(this);
+    if (!this.wakeImpl) {
+        this.wakeImpl = new LBSailSim.ParticleWakes(this);
+    }
+    
+    /**
+     * The collection of vessels for which wakes are generated.
+     * @member {LBSailSim.Vessel[]}
+     */
+    this.vessels = [];
+    
+    /**
+     * The square of the minimum speed before any wake particles are generated.
+     * @member {Number}
+     */
+    this.minWakeSpeedSq = 0.5 * 0.5;
+};
+
+LBSailSim.Wakes3D.prototype = {
+    addVessel: function(vessel) {
+        if (!vessel.hull) {
+            // Only support vessels that have a hull.
+            return;
+        }
+        
+        this.vessels.push(vessel);
+    },
+    
+    removeVessel: function(vessel) {
+        var i = this.vessels.findIndex(vessel);
+        if (i >= 0) {
+            this.vessels.splice(i, 1);
+        }
+    },
+    
+    update: function(dt) {
+        if (this.disabled) {
+            return;
+        }
+        
+        if (this.wakeImpl) {
+            this.wakeImpl.update(dt);
+        }
+    },
+    
+    destroy: function() {
+        if (this.scene3D) {
+            if (this.wakeImpl) {
+                this.wakeImpl.destroy();
+                this.wakeImpl = undefined;
+            }
+            
+            this.vessels.length = 0;
+            this.vessels = undefined;
+            
+            this.scene3D = undefined;
+            this.sailEnv = undefined;
+        }
+    },
+    
+    constructor: LBSailSim.Wakes3D
+};
+
+LBSailSim.ParticleWakes = function(wakes) {
+    this.wakes = wakes;
+    this.scene3D = wakes.scene3D;
+    this.sailEnv = wakes.sailEnv;
+    
+    this.particles = new LBParticles.ParticleSystem({
+        maxParticles: 1000
+    });
+    this.scene3D.add(this.particles);
+
+    this.particleOptions = {
+        position: new LBGeometry.Vector3(),
+        positionRandomness: .1,
+        velocity: new LBGeometry.Vector3(),
+        velocityRandomness: .0,
+        //color: 0xaa88ff,
+        color: 0x808080,
+        colorRandomness: .1,
+        turbulence: .0,
+        lifetime: 10,
+        size: 10,
+        sizeRandomness: 1
+    };
+    
+    /**
+     * The average life span of a wake particle in seconds.
+     * @member {Number}
+     */
+    this.particleDuration = 10;
+    
+    this.particleFrequency = 0;
+    
+    this.particlesToGenerate = 1;
+};
+
+LBSailSim.ParticleWakes.prototype = {
+    update: function(dt) {
+        if (this.delayCount) {
+            --this.delayCount;
+        }
+        else {
+            this.delayCount = this.particleFrequency;
+
+            var me = this;
+            this.wakes.vessels.forEach(function(vessel) {
+                me._updateVesselWake(vessel, dt);
+            });
+        }
+        
+        this.particles.update(this.sailEnv.app3D.runMillisecs / 1000);
+    },
+    
+    _updateVesselWake: function(vessel, dt) {
+        // Are we going fast enough?
+        var velocity = vessel.getVelocityMPS();
+        var speedSq = velocity.lengthSq();
+        if (speedSq &lt; this.wakes.minWakeSpeedSq) {
+            return;
+        }
+        
+        // Get the span of the hull's waterline across the velocity direction.
+        var hull = vessel.hull;
+        var wakeEndPort = hull.wakeEndPort;
+        var wakeEndStbd = hull.wakeEndStbd;
+        if (!wakeEndPort || !wakeEndStbd) {
+            return;
+        }
+        
+        var wakeAngle = 19.47 * LBMath.DEG_TO_RAD;
+
+        var velVesselAngle = Math.atan2(velocity.y, velocity.x);
+        
+        // Along that waterline generate a particle.
+        // The particle will have an overall velocity such that particles at
+        // the edges of the wake will form an angle of 19.47 degrees to the
+        // mid-point as the wake progresses.
+        
+        for (var i = this.particlesToGenerate; i > 0; --i) {
+            var spanValue = Math.random();
+
+            var pos = this.particleOptions.position;
+            pos.lerpVectors(wakeEndStbd, wakeEndPort, spanValue);
+            var centerSpanValue = spanValue - 0.5;
+            pos.z = 0.01;
+
+            var alpha = 2 * centerSpanValue * wakeAngle;
+            var wakeVel = Math.sin(wakeAngle);
+            var velAlpha = alpha + velVesselAngle;
+
+            var vel = this.particleOptions.velocity;
+            wakeVel = 0;
+            vel.x = wakeVel * Math.cos(velAlpha);
+            vel.y = wakeVel * Math.sin(velAlpha);
+            vel.z = 0;
+            
+            //pos.z = 1;
+            //vel.x = velocity.x / 9;
+            //vel.y = velocity.y / 9;
+
+            this.scene3D.coordMapping.vector3ToThreeJS(pos, pos);
+            this.scene3D.coordMapping.vector3ToThreeJS(vel, vel);
+
+            this.particles.spawnParticle(this.particleOptions);
+        }
+    },
+    
+    destroy: function() {
+        if (this.particles) {
+            this.particles.dispose();
+            this.particles = undefined;
+        
+            this.scene3D = undefined;
+            this.sailEnv = undefined;
+        }
+    },
+    
+    constructor: LBSailSim.ParticleWakes
+};
+
+
+function createShaderWakes(wakes) {
+    return null;
+/*    
+    var renderer = wakes.sailEnv.mainView.renderer;
+    if (!LBShaders.Computer.isSupported(renderer)) {
+        return null;
+    }
+    
+    var shaderWakes = new LBSailSim.ShaderWakes(wakes);
+    if (!shaderWakes.init()) {
+        return null;
+    }
+    return shaderWakes;
+*/
+};
+
+LBSailSim.ShaderWakes = function(wakes) {
+    this.scene3D = wakes.scene3D;
+    this.wakes = wakes;
+    
+    // The grid size is the number of grid points along one side.
+    this.wakeGridSize = 128;
+    
+    // The wake bounds is the length of one side.
+    this.wakeBounds = 50;
+    
+    this.maxVesselDistanceSq = (0.25 * this.wakeBounds * this.wakeBounds);
+    
+    var renderer = wakes.sailEnv.mainView.renderer;
+    this.computer = new LBShaders.Computer(this.wakeGridSize, this.wakeGridSize, renderer);
+    
+    this._meshOrigin = new LBGeometry.Vector3();
+};
+
+var _shaderWakesPrevPos = new LBGeometry.Vector2();
+var _shaderWakesOffset = new LBGeometry.Vector2();
+var _halfVector3 = new LBGeometry.Vector3(0.5, 0.5, 0.5);
+
+LBSailSim.ShaderWakes.prototype = {
+    init: function() {
+        var water3D = this.wakes.sailEnv.water3D;
+        var color = undefined;
+        //color = 0x808080;
+        
+        // NOTE: water3D.createWaterMaterial() has been removed...
+        this.wakeMaterial = water3D.createWaterMaterial(this.wakeBounds, this.wakeGridSize, color);
+        
+        this.wakeMaterial.wireframe = true;
+        
+        this.wakeGeometry = new THREE.PlaneBufferGeometry(this.wakeBounds, this.wakeBounds, this.wakeGridSize - 1, this.wakeGridSize - 1);
+        this.wakeGeometry.rotateX(-LBMath.PI_2);
+        this.wakeMesh = new THREE.Mesh(this.wakeGeometry, this.wakeMaterial);
+        this.scene3D.add(this.wakeMesh);
+        
+        this.vesselShaderMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                heightmap: { value: null }
+            },
+            vertexShader: this.computer.getPassThroughVertexShader(),
+            fragmentShader: vesselTriggerFragmentShader
+        });
+        
+        var uniforms = this.vesselShaderMaterial.uniforms;
+        this.computer.setupUniforms(uniforms);
+
+        uniforms.offset = { value : new THREE.Vector2(0, 0) };
+        uniforms.ptCount = { value: 0 };
+        uniforms.oldPoints = { value: [] };
+        uniforms.newPoints = { value: [] };
+        for (var i = 0; i &lt; 5; ++i) {
+            uniforms.oldPoints.value.push(new THREE.Vector2(0, 0));
+            uniforms.newPoints.value.push(new THREE.Vector2(0, 0));
+        }
+        uniforms.strength = { value: 0.1 };
+        uniforms.radius = { value: 0.5 / this.wakeBounds };
+        
+        
+        /**
+         * This is the shader material that models the general wave dispersion. It comes after
+         * any disturbances are generated by the vessels.
+         */
+        this.wakeShaderMaterial = new THREE.ShaderMaterial({
+            uniforms: { 
+                heightmap: { value: null }
+            },
+            vertexShader: this.computer.getPassThroughVertexShader(),
+            fragmentShader: wakeHeightmapFragmentShader
+        });
+        
+        var uniforms = this.wakeShaderMaterial.uniforms;
+        this.computer.setupUniforms(uniforms);
+        uniforms.offset = { value : new THREE.Vector2(0, 0) };
+        uniforms.accelScale = { value: 1.0 };
+        
+        // TEST!!!
+/*        var initialHeightmap = water3D.createWaterTexture(this.wakeGridSize);
+        var pixels = initialHeightmap.image.data;
+        pixels[this.wakeGridSize * 4 * this.wakeGridSize * 0.5 + this.wakeGridSize * 0.5 * 4] = 2;
+        this.computer.applyTexture(initialHeightmap).swapRenderTargets();
+        this.computer.applyTexture(initialHeightmap).swapRenderTargets();
+ */       
+        return true;
+    },
+    
+    update: function(dt) {
+        var focusVessel = this.wakes.sailEnv.getFocusVessel();
+        if (focusVessel) {
+            var startX = this.wakeMesh.position.x;
+            var startZ = this.wakeMesh.position.z;
+            
+            this._meshOrigin.copy(focusVessel.obj3D.position);
+            this._meshOrigin.z = 0;
+
+            this.scene3D.coordMapping.vector3ToThreeJS(focusVessel.obj3D.position, this.wakeMesh.position);
+            this.wakeMesh.position.y = 0;
+            
+            // ThreeJS z maps to shader V of UV.
+            _shaderWakesOffset.set(this.wakeMesh.position.x - startX, this.wakeMesh.position.z - startZ);
+        }
+        else {
+            this.scene3D.coordMapping.vector3FromThreeJS(this.wakeMesh.position, this._meshOrigin);
+            
+            _shaderWakesOffset.set(0, 0);
+        }
+        
+        var me = this;
+        this._offset = _shaderWakesOffset;
+        this.wakes.vessels.forEach(function(vessel) {
+            me._updateVessel(vessel, dt);
+        });
+        
+        var uniforms = this.wakeShaderMaterial.uniforms;
+        if (this._offset) {
+            uniforms.offset.value.copy(this._offset)
+                    .divideScalar(this.wakeBounds);
+        }
+        else {
+            uniforms.offset.value.set(0, 0);
+        }
+        uniforms.accelScale.value = dt * 3;
+        
+        uniforms.heightmap.value = this.computer.getPreviousRenderTarget().texture;
+        this.computer.applyShader(this.wakeShaderMaterial).swapRenderTargets();
+        this.wakeMaterial.uniforms.heightmap.value = this.computer.getPreviousRenderTarget().texture;
+    },
+    
+    _updateVessel: function(vessel, dt) {
+        var distanceSq = vessel.obj3D.position.distanceToSquared(this._meshOrigin);
+        if (distanceSq > this.maxVesselDistanceSq) {
+            return;
+        }
+        
+        // Did we move from the last time?
+        var lastPos = vessel._lbWakesLastPosition = vessel._lbWakesLastPosition || vessel.obj3D.position.clone();
+        if (vessel.obj3D.position.equals(lastPos)) {
+            return;
+        }
+        
+        var speed = vessel.obj3D.position.distanceTo(lastPos) / dt;
+        
+        var uniforms = this.vesselShaderMaterial.uniforms;
+        uniforms.strength.value = speed * 1;
+        uniforms.ptCount.value = 1;
+        uniforms.oldPoints.value[0].set(lastPos.x - this._meshOrigin.x, lastPos.y - this._meshOrigin.y)
+                .divideScalar(this.wakeBounds)
+                .add(_halfVector3);
+        uniforms.newPoints.value[0].set(vessel.obj3D.position.x - this._meshOrigin.x, vessel.obj3D.position.y - this._meshOrigin.y)
+                .divideScalar(this.wakeBounds)
+                .add(_halfVector3);
+        
+        if (this._offset) {
+            uniforms.offset.value.copy(this._offset)
+                    .divideScalar(this.wakeBounds);
+            this._offset = null;
+        }
+        else {
+            uniforms.offset.value.set(0, 0);
+        }
+        
+        uniforms.heightmap.value = this.computer.getPreviousRenderTarget().texture;
+        this.computer.applyShader(this.vesselShaderMaterial).swapRenderTargets();
+        
+        lastPos.copy(vessel.obj3D.position);
+    },
+    
+    destroy: function() {
+        if (this.scene3D) {
+            this.scene3D.remove(this.wakeMesh);
+            this.wakeMesh = undefined;
+            
+            this.wakeGeometry.dispose();
+            this.wakeGeometry = undefined;
+            
+            this.wakeMaterial.dispose();
+            this.wakeMaterial = undefined;
+            
+            this.wakeShaderMaterial.dispose();
+            this.wakeShaderMaterila = undefined;
+            
+            this.computer.destroy();
+            this.computer = undefined;
+            
+            this.meshOrigin = undefined;
+            
+            this.scene3D = undefined;
+        }
+    },
+    
+    constructor: LBSailSim.ShaderWakes
+};
+
+//
+// Some shader notes:
+// gl_Position is from -1 to 1, top right corner of display is 1,1
+// gl_FragCoord ranges from 0.5 to wakeGridSize - 0.5.
+// coord ranges from 0 to 1
+//
+var vesselTriggerFragmentShader = [
+    // Adapted from https://github.com/evanw/webgl-water/blob/master/water.js
+    '#include &lt;common>',
+    //'const float PI = 3.14159265;',
+
+    'uniform sampler2D heightmap;',
+    'uniform vec2 offset;',
+    'uniform vec2 cellSize;',
+    'uniform vec2 oldPoints[5];',
+    'uniform vec2 newPoints[5];',
+    'uniform float strength;',
+    'uniform float radius;',
+    'uniform vec2 gridNorm;',
+    
+    'float pointVol(vec2 uv, vec2 vertex, float radius) {',
+    '   float dist = length(uv - vertex);',
+    '   float t = dist / radius;',
+    '   float dy = 1. - smoothstep(0.75, 1.25, t);',
+    '   return dy * strength;',
+    '}',
+    
+    'float volume(vec2 vertices[5]) {',
+    '   float vol = 0.;',
+    '   return vol;',
+    '}',
+
+    'void main()	{',
+    '   vec2 uv = gl_FragCoord.xy * cellSize;',
+    
+    '   float oldVol = pointVol(uv, oldPoints[0], radius);',
+    '   float newVol = pointVol(uv, newPoints[0], radius);',
+    '   float delta = newVol - oldVol;',
+    
+    '   vec4 value = texture2D(heightmap, uv + offset);',
+    '   value.x += delta;',
+    
+    //'value.x = delta * 10.;',
+    //'value.x = newVol * 10.;',
+    //'value.x = step(63. - 0.0001, gl_FragCoord.x);',
+    //'value.x = step(0.5 - 0.0001, uv.x + offset.x);',
+    //'value.x = gl_FragCoord.x;',
+    
+    '   gl_FragColor = value;',
+    
+    '}'    
+].join('\n');
+
+var wakeHeightmapFragmentShader = [
+    // Adapted from https://github.com/evanw/webgl-water/blob/master/water.js
+    // Also ThreeJS/examples/webgl_gpgpu_water.html
+    '#include &lt;common>',
+
+    'uniform sampler2D heightmap;',
+    'uniform vec2 offset;',
+    'uniform vec2 cellSize;',
+    'uniform vec2 gridNorm;',
+    'uniform float accelScale;',
+
+    'void main()	{',
+
+    //'   vec2 uv = (gl_FragCoord.xy - 0.5) * gridNorm + offset;',
+    //'   vec2 uv = gl_FragCoord.xy * cellSize - offset;',
+    '   vec2 uv = gl_FragCoord.xy * cellSize;',
+
+    // value.x == height
+    // value.y == velocity
+    // value.z, value.w not used
+    '   vec4 value = texture2D( heightmap, uv );',
+    '   vec2 dx = vec2(cellSize.x, 0);',
+    '   vec2 dy = vec2(0, cellSize.y);',
+    '   float average = 0.25 * (',
+    '       texture2D(heightmap, uv - dx).x',
+    '       + texture2D(heightmap, uv - dy).x',
+    '       + texture2D(heightmap, uv + dx).x',
+    '       + texture2D(heightmap, uv + dy).x);',
+    
+    '   value.y += (average - value.x) * accelScale;',
+    '   value.y *= 0.98;',
+    '   value.x += value.y;',
+    
+    // Taper down towards the edges.
+    '   float radius = length(gl_FragCoord.xy * cellSize - vec2(0.5, 0.5));',
+    '   float atten = smoothstep(0.0, 0.25, 0.5 - radius);',
+    '   value.xy *= atten;',
+    
+    //'value.x = step(63.45 / 64., gl_FragCoord.x * cellSize.x);',
+    //'value = texture2D(heightmap, uv);',
+    //'value.x = step(60. - 0.0001, value.x);',
+    //'value.x = step(1.0 - 0.0001, uv.x);',
+    
+    '   gl_FragColor = value;',
+
+    '}'
+    
+].join('\n');
+    
+return LBSailSim;
+});</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-LBAssets.html">LBAssets</a></li><li><a href="module-LBCamera.html">LBCamera</a></li><li><a href="module-LBCannonPhysicsLink.html">LBCannonPhysicsLink</a></li><li><a href="module-LBCannonUtil.html">LBCannonUtil</a></li><li><a href="module-LBControls.html">LBControls</a></li><li><a href="module-LBCurve.html">LBCurve</a></li><li><a href="module-LBDebug.html">LBDebug</a></li><li><a href="module-LBFoils.html">LBFoils</a></li><li><a href="module-LBGeometry.html">LBGeometry</a></li><li><a href="module-LBMath.html">LBMath</a></li><li><a href="module-LBParticles.html">LBParticles</a></li><li><a href="module-LBPhysics.html">LBPhysics</a></li><li><a href="module-LBPhysicsLink.html">LBPhysicsLink</a></li><li><a href="module-LBRandom.html">LBRandom</a></li><li><a href="module-LBShaders.html">LBShaders</a></li><li><a href="module-LBSpherical.html">LBSpherical</a></li><li><a href="module-LBTracking.html">LBTracking</a></li><li><a href="module-LBUI3d.html">LBUI3d</a></li><li><a href="module-LBUtil.html">LBUtil</a></li><li><a href="module-LBVolume.html">LBVolume</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Wakes3D.html">Wakes3D</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.WaterShader.html">WaterShader</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBSailSim.WindPuff.html">WindPuff</a></li><li><a href="module-LBAssets.Loader.html">Loader</a></li><li><a href="module-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="module-LBCamera.Camera.html">Camera</a></li><li><a href="module-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="module-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="module-LBCannonPhysicsLink.Link.html">Link</a></li><li><a href="module-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="module-LBControls.SmoothController.html">SmoothController</a></li><li><a href="module-LBControls.SteppedController.html">SteppedController</a></li><li><a href="module-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="module-LBDebug.DataLog.html">DataLog</a></li><li><a href="module-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="module-LBDebug.FieldsDataLogField.html">FieldsDataLogField</a></li><li><a href="module-LBFoils.ClCd.html">ClCd</a></li><li><a href="module-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="module-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="module-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="module-LBFoils.Foil.html">Foil</a></li><li><a href="module-LBGeometry.Color.html">Color</a></li><li><a href="module-LBGeometry.Euler.html">Euler</a></li><li><a href="module-LBGeometry.Face3.html">Face3</a></li><li><a href="module-LBGeometry.Geometry.html">Geometry</a></li><li><a href="module-LBGeometry.Line2.html">Line2</a></li><li><a href="module-LBGeometry.Line3.html">Line3</a></li><li><a href="module-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="module-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="module-LBGeometry.Object3D.html">Object3D</a></li><li><a href="module-LBGeometry.Plane.html">Plane</a></li><li><a href="module-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="module-LBGeometry.Rect.html">Rect</a></li><li><a href="module-LBGeometry.Sphere.html">Sphere</a></li><li><a href="module-LBGeometry.Vector2.html">Vector2</a></li><li><a href="module-LBGeometry.Vector3.html">Vector3</a></li><li><a href="module-LBMath.CSpline.html">CSpline</a></li><li><a href="module-LBMath.DegRange.html">DegRange</a></li><li><a href="module-LBParticles.Cache.html">Cache</a></li><li><a href="module-LBParticles.ParticleSystem.html">ParticleSystem</a></li><li><a href="module-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="module-LBPhysics.CoordTransforms.html">CoordTransforms</a></li><li><a href="module-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="module-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="module-LBPhysicsLink.Link.html">Link</a></li><li><a href="module-LBRandom.NormalGenerator.html">NormalGenerator</a></li><li><a href="module-LBRandom.UniformGenerator.html">UniformGenerator</a></li><li><a href="module-LBShaders.Computer.html">Computer</a></li><li><a href="module-LBShaders.TargetCopier.html">TargetCopier</a></li><li><a href="module-LBSpherical.CoordinatesRAA.html">CoordinatesRAA</a></li><li><a href="module-LBSpherical.Orientation.html">Orientation</a></li><li><a href="module-LBTracking.ValueFollower.html">ValueFollower</a></li><li><a href="module-LBUI3d.App3D.html">App3D</a></li><li><a href="module-LBUI3d.CameraController.html">CameraController</a></li><li><a href="module-LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="module-LBUI3d.ChaseCameraController.html">ChaseCameraController</a></li><li><a href="module-LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="module-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="module-LBUI3d.View3D.html">View3D</a></li><li><a href="module-LBUtil.RollingBuffer.html">RollingBuffer</a></li><li><a href="module-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="module-LBVolume.Tetra.html">Tetra</a></li><li><a href="module-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="module-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="module-LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Detector">Detector</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Nov 11 2017 20:48:25 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

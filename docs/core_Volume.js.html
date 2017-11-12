@@ -45,22 +45,25 @@
 define(['lbutil', 'lbmath', 'lbgeometry'],
 function(LBUtil, LBMath, LBGeometry) {
     
+    'use strict';
 
 /**
- * 
- * @namespace LBVolume
+ * A bunch of volume related classes and functions.
+ * @exports LBVolume
  */
 var LBVolume = LBVolume || {};
 
 /**
  * Base class for volumes. A volume has a set of vertices and faces, and can be
- * broken down into a set of tetrahedra via {@link LBVolume.Volume#equivalentTetras}.
+ * broken down into a set of tetrahedra via {@link module:LBVolume.Volume#equivalentTetras}.
  * @constructor
  * @param {String} typeName The type name of the volume class.
  * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
- * @returns {LBVolume.Volume}
+ * @param {Number} [massDistribution=1] Additional factor used by {@link module:LBVolume.allocateMassToVolumes}
+ * to control mass distribution.
+ * @returns {module:LBVolume.Volume}
  */
-LBVolume.Volume = function(typeName, mass) {
+LBVolume.Volume = function(typeName, mass, massDistribution) {
     /**
      * The type name of the volume, used to describe it in messages.
      */
@@ -68,15 +71,22 @@ LBVolume.Volume = function(typeName, mass) {
 
     /**
      * The array of vertices of the tetra.
-     * @type LBGeometry.Vector3
+     * @member {module:LBGeometry.Vector3}
      */
     this.vertices = [];    
     
     /**
      * Mass associated with the volume, set to {@link Number.NaN} if a mass is not assigned.
-     * @type Number
+     * @member {module:Number}
      */
     this.mass = LBUtil.isVar(mass) ? mass : Number.NaN;
+    
+    /**
+     * Additional factor used by {@link module:LBVolume.allocateMassToVolumes} to control mass distribution.
+     * This is basically a normalized density value.
+     * @member {Number}
+     */
+    this.massDistribution = massDistribution || 1;
 };
 
 LBVolume.Volume._workingCenterOfMassResult;
@@ -89,7 +99,7 @@ LBVolume.Volume.prototype = {
     /**
      * Creates a shallow copy of the volume.
      * @abstract
-     * @returns {LBVolume.Tetra}    The shallow copy.
+     * @returns {module:LBVolume.Tetra}    The shallow copy.
      */
     clone: function() {
         throw 'clone() not implemented by ' + this.typeName;
@@ -98,8 +108,8 @@ LBVolume.Volume.prototype = {
     /**
      * Creates a clone of the volume mirrored about a plane.
      * @abstract
-     * @param {LBGeometry.Plane} plane  The plane to mirror about.
-     * @returns {LBVolume.Volume}   The clone.
+     * @param {module:LBGeometry.Plane} plane  The plane to mirror about.
+     * @returns {module:LBVolume.Volume}   The clone.
      */
     cloneMirrored: function(plane) {
         throw 'cloneMirrored() not implemented by ' + this.cloneMirrored;
@@ -107,7 +117,7 @@ LBVolume.Volume.prototype = {
     
     /**
      * Makes the vertices of the volume unique by cloning them.
-     * @returns {LBVolume.Volume}   this.
+     * @returns {module:LBVolume.Volume}   this.
      */
     makeVerticesUnique: function() {
         for (var i = 0; i &lt; this.vertices.length; ++i) {
@@ -130,8 +140,8 @@ LBVolume.Volume.prototype = {
     /**
      * Retrieves the normal vector of a face.
      * @param {Number} f    The face index.
-     * @param {LBGeometry.Vector3} [store]  If defined set to the normal.
-     * @returns {LBGeometry.Vector3}    The normal.
+     * @param {module:LBGeometry.Vector3} [store]  If defined set to the normal.
+     * @returns {module:LBGeometry.Vector3}    The normal.
      */
     getFaceNormal: function(f, store) {
         var face = this.getFaces()[f];
@@ -148,8 +158,8 @@ LBVolume.Volume.prototype = {
     
     /**
      * Computes the centroid of the volume.
-     * @param {LBGeometry.Vector3} [store] If defined the object to store the centroid into.
-     * @returns {LBGeometry.Vector3}    The centroid.
+     * @param {module:LBGeometry.Vector3} [store] If defined the object to store the centroid into.
+     * @returns {module:LBGeometry.Vector3}    The centroid.
      */
     getCentroid: function(store) {
         var tetras = this.equivalentTetras();
@@ -171,14 +181,14 @@ LBVolume.Volume.prototype = {
     },
     
     /**
-     * Retrieves an array of {@link LBVolume.Tetra} objects that make up the volume.
-     * For the case of {@link LBVolume.Tetra} this is a one element array containing
+     * Retrieves an array of {@link module:LBVolume.Tetra} objects that make up the volume.
+     * For the case of {@link module:LBVolume.Tetra} this is a one element array containing
      * the tetra.
      * &lt;p>
      * Note that the tetras returned should be considered to be owned by this volume,
      * and should not be modified directly.
      * @abstract
-     * @returns {LBVolume.Tetra[]}  The array of tetras.
+     * @returns {module:LBVolume.Tetra[]}  The array of tetras.
      */
     equivalentTetras: function() {
         throw 'equivalentTetras() not implemented by ' + this.typeName;
@@ -187,8 +197,8 @@ LBVolume.Volume.prototype = {
     
     /**
      * Applies a rotation defined by Euler angles to all at the vertices.
-     * @param {LBGeometry.Euler}  rotation  The rotation in Euler angles.
-     * @returns {LBVolume.Volume}   this.
+     * @param {module:LBGeometry.Euler}  rotation  The rotation in Euler angles.
+     * @returns {module:LBVolume.Volume}   this.
      */
     applyEuler: function(rotation) {
         var quaternion = new LBGeometry.Quaternion();
@@ -198,8 +208,8 @@ LBVolume.Volume.prototype = {
     
     /**
      * Applies a rotation defined by a quaternion to all at the vertices.
-     * @param {LBGeometry.Quaternion}  quaternion  The quaternion to apply
-     * @returns {LBVolume.Volume}   this.
+     * @param {module:LBGeometry.Quaternion}  quaternion  The quaternion to apply
+     * @returns {module:LBVolume.Volume}   this.
      */
     applyQuaternion: function(quaternion) {
         this.vertices.forEach(function(vertex) {
@@ -212,7 +222,7 @@ LBVolume.Volume.prototype = {
      * Helper that applies a rotation based upon a data object to the vertices of the volume.
      * @param {Object} data The data object, if it has a rotation property then that is
      * used to define the rotation.
-     * @returns {LBVolume.Volume}   this.
+     * @returns {module:LBVolume.Volume}   this.
      */
     loadRotation: function(data) {
         if (data.rotation) {
@@ -249,7 +259,7 @@ LBVolume.Volume.prototype = {
 
 /**
  * Returns the total volume of the volumes in an array.
- * @param {LBVolume.Volume[]} volumes    The array of volumes.
+ * @param {module:LBVolume.Volume[]} volumes    The array of volumes.
  * @returns {Number}    The total volume.
  */
 LBVolume.Volume.totalVolume = function(volumes) {
@@ -266,9 +276,9 @@ LBVolume.Volume.totalVolume = function(volumes) {
  * Note that if a volume does not have a mass assigned, it's volume is used, so to
  * ensure consistency the volumes should either have all their masses defined (use 0
  * to ignore a volume) or not have a mass defined at all.
- * @param {LBVolume.Volume[]} volume    The array of volumes.
+ * @param {module:LBVolume.Volume[]} volume    The array of volumes.
  * @param {Object} [store]  If defined the object to store the results into.
- * @returns {Object}    The results, the position property is compatible with {@link LBGeometry.Vector3}
+ * @returns {Object}    The results, the position property is compatible with {@link module:LBGeometry.Vector3}
  * and contains the coordinates of the center of mass, the mass property is the total mass.
  */
 LBVolume.Volume.totalCenterOfMass = function(volume, store) {
@@ -312,7 +322,7 @@ LBVolume.Volume.totalCenterOfMass = function(volume, store) {
 /**
  * Allocates a mass amongst all the volumes in an array based upon the volume
  * of the individual volumes.
- * @param {LBVolume.Volume[]} volumes    The array of volumes.
+ * @param {module:LBVolume.Volume[]} volumes    The array of volumes.
  * @param {Number} totalMass    The total mass to assign, may be {@link Number.NaN}.
  * @param {Number} [startIndex=0] If specified the index in volumes at which to start.
  * @param {Number} [endIndex=tetras.length] If specified the index after the last index
@@ -332,16 +342,30 @@ LBVolume.Volume.allocateMassToVolumes = function(volumes, totalMass, startIndex,
     }
     else {
         var volValues = [];
-        var totalVol = 0;
+        var distributionValues = [];
+        var totalDistribution = 0;
         for (var i = startIndex; i &lt; endIndex; ++i) {
             var vol = volumes[i].getVolume();
-            volValues.push(vol);
-            totalVol += vol;
+            volValues[i] = vol;
+            
+            var distribution = volumes[i].massDistribution || 1;
+            distributionValues[i] = distribution;
+            totalDistribution += distribution;
+        }
+
+        var totalVol = 0;
+        for (var i = startIndex; i &lt; endIndex; ++i) {
+            volValues[i] *= distributionValues[i];
+            totalVol += volValues[i];
         }
         
         var massVol = (LBMath.isLikeZero(totalVol)) ? 0 : totalMass / totalVol;
         for (var i = startIndex; i &lt; endIndex; ++i) {
             volumes[i].mass = volValues[i] * massVol;
+            var equivalentTetras = volumes[i].equivalentTetras();
+            if (equivalentTetras !== volumes) {
+                LBVolume.Volume.allocateMassToVolumes(equivalentTetras, volumes[i].mass);
+            }
         }
     }
 };
@@ -350,11 +374,11 @@ LBVolume.Volume.allocateMassToVolumes = function(volumes, totalMass, startIndex,
 /**
  * Calculates the inertia tensor from the volumes in a array of volumes. The tensor
  * is relative to the overal centroid of the volumes.
- * @param {LBVolume.Volume[]} volumes    The array of volumes.
- * @param {LBGeometry.Matrix3} [tensor] If defined the 3x3 matrix to receive the tensor.
- * @param {LBGeometry.Vector3} [totalCentroid] If defined this is set to the overall centroid
+ * @param {module:LBVolume.Volume[]} volumes    The array of volumes.
+ * @param {module:LBGeometry.Matrix3} [tensor] If defined the 3x3 matrix to receive the tensor.
+ * @param {module:LBGeometry.Vector3} [totalCentroid] If defined this is set to the overall centroid
  * of all the volumes.
- * @returns {LBGeometry.Matrix3}    The tensor.
+ * @returns {module:LBGeometry.Matrix3}    The tensor.
  */
 LBVolume.Volume.overallInertiaTensor = function(volumes, tensor, totalCentroid) {
     tensor = tensor || new LBGeometry.Matrix3();
@@ -432,11 +456,11 @@ LBVolume.Volume.overallInertiaTensor = function(volumes, tensor, totalCentroid) 
 /**
  * Loads an array of arbitrary volumes from properties in a data object.
  * @param {Object} data The data object.
- * @param {LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
+ * @param {module:LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
  * otherwise data should have a vertices property.
- * @param {LBVolume.Volume[]} [volumes] If defined, the array to store the volumes into.
+ * @param {module:LBVolume.Volume[]} [volumes] If defined, the array to store the volumes into.
  * This is NOT cleared.
- * @returns {LBVolume.Volume[]} The array of volumes.
+ * @returns {module:LBVolume.Volume[]} The array of volumes.
  */
 LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
     if (!vertices) {
@@ -450,12 +474,15 @@ LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
         var item = data.indices[i];
         var indices;
         var mass;
+        var massDistribution;
         if (!Array.isArray(item)) {
             mass = LBUtil.isVar(item.mass) ? item.mass : Number.NaN;
+            massDistribution = item.massDistribution || 1;
             indices = item.indices;
         }
         else {
             mass = Number.NaN;
+            massDistribution = 1;
             indices = item;
         }
         
@@ -486,6 +513,8 @@ LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
                 break;
         }
         
+        volumes[volumes.length - 1].massDistribution = massDistribution;
+        
         if (!Number.isNaN(mass)) {
             LBVolume.Volume.allocateMassToVolumes(volumes, mass, startIndex, volumes.length);
         }
@@ -511,9 +540,9 @@ LBVolume.Volume.loadVolumesFromData = function(data, vertices, volumes) {
 /**
  * Loads an array of vertices representing the outline of a volume in the x-y plane
  * from properties in a data object. The data object is typically the same as that passed
- * to {@link LBVolume.Volume.loadVolumesFromData}.
+ * to {@link module:LBVolume.Volume.loadVolumesFromData}.
  * @param {Object} data The data object.
- * @param {LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
+ * @param {module:LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
  * otherwise data should have a vertices property.
  * @param {Array} [outlineVertices] If defined the array to store the vertices into.
  * @returns {Array} The array of outline vertices.
@@ -550,17 +579,19 @@ LBVolume.Volume.loadXYOutlineFromData = function(data, vertices, outlineVertices
 /**
  * Represents a tetrahedron.
  * @constructor
- * @extends LBVolume.Volume
- * @param {LBGeometry.Vector3[]} [vertices]    If defined, an array containing the
+ * @extends module:LBVolume.Volume
+ * @param {module:LBGeometry.Vector3[]} [vertices]    If defined, an array containing the
  * four vertices for the tetrahedron. References to the vertices are used, they are not copied.
- * If not defined the vertices are all set to new instances of {@link LBGeometry.Vector3}.
+ * If not defined the vertices are all set to new instances of {@link module:LBGeometry.Vector3}.
  * @param {Number} [mass=Number.NaN] If defined the mass assigned to the volume.
  * @param {Number[]} [indices]  If defined an array of the indices of the four vertices
  * in vertices of the tetra.
- * @returns {LBVolume.Tetra}
+ * @param {Number} [massDistribution=1] Additional factor used by {@link module:LBVolume.allocateMassToVolumes}
+ * to control mass distribution.
+ * @returns {module:LBVolume.Tetra}
  */
-LBVolume.Tetra = function(vertices, mass, indices) {
-    LBVolume.Volume.call(this, LBVolume.Tetra.TYPE_NAME, mass);
+LBVolume.Tetra = function(vertices, mass, indices, massDistribution) {
+    LBVolume.Volume.call(this, LBVolume.Tetra.TYPE_NAME, mass, massDistribution);
     
     this._faces = LBVolume.Tetra._facesCCW;
     
@@ -594,9 +625,9 @@ LBVolume.Tetra = function(vertices, mass, indices) {
 };
 
 /**
- * The tetra type name, the value of {@link LBVolume.Volume#typeName} for tetras.
+ * The tetra type name, the value of {@link module:LBVolume.Volume#typeName} for tetras.
  * @constant
- * @type String
+ * @type {String}
  */
 LBVolume.Tetra.TYPE_NAME = "Tetra";
 
@@ -615,7 +646,7 @@ LBVolume.Tetra.prototype.constructor = LBVolume.Tetra;
 
 /**
  * Creates a shallow copy of the tetra.
- * @returns {LBVolume.Tetra}    The shallow copy.
+ * @returns {module:LBVolume.Tetra}    The shallow copy.
  */
 LBVolume.Tetra.prototype.clone = function() {
     return new LBVolume.Tetra(this.vertices, this.mass);
@@ -684,14 +715,14 @@ LBVolume.Tetra.prototype.cloneMirrored = function(plane) {
     vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[2]));
     vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[1]));
     vertices.push(LBGeometry.mirrorPointAboutPlane(plane, this.vertices[3]));
-    return new LBVolume.Tetra(vertices, this.mass);
+    return new LBVolume.Tetra(vertices, this.mass, undefined, this.massDistribution);
 };
 
 /**
  * Calculates the inertia tensor matrix for the tetrahedron using the formulas given in:
  * {@link http://thescipub.com/PDF/jmssp.2005.8.11.pdf}
- * @param {LBGeometry.Matrix3} [tensor] If defined the object to store the tensor into.
- * @returns {LBGeometry.Matrix3}    The inertia tensor.
+ * @param {module:LBGeometry.Matrix3} [tensor] If defined the object to store the tensor into.
+ * @returns {module:LBGeometry.Matrix3}    The inertia tensor.
  */
 LBVolume.Tetra.prototype.tetraInertiaTensor = function(tensor) {
     tensor = tensor || new LBGeometry.Matrix3();
@@ -738,8 +769,8 @@ LBVolume.Tetra.prototype.tetraInertiaTensor = function(tensor) {
 /**
  * Determines where a plane slices a tetra, and if it does slice the tetra this
  * generates the tetras representing the volumes on each side of the plane.
- * @param {LBVolume.Tetra} tetra    The tetra of interest.
- * @param {LBGeometry.Plane} plane  The slicing plane.
+ * @param {module:LBVolume.Tetra} tetra    The tetra of interest.
+ * @param {module:LBGeometry.Plane} plane  The slicing plane.
  * @param {Boolean} [positiveDir=true]    If true then tetras are generated to represent
  * the volume on the side of the plane to which the normal points.
  * @param {Boolean} [negativeDir=true]    If true then tetras are generated to represent
@@ -965,11 +996,11 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
 /**
  * Loads an array of tetras from properties in a data object.
  * @param {Object} data The data object.
- * @param {LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
+ * @param {module:LBGeometry.Vector3[]} [vertices] If defined the array of vertices to use,
  * otherwise data should have a vertices property.
- * @param {LBVolume.Tetra[]} [tetras] If defined, the array to store the tetras into.
+ * @param {module:LBVolume.Tetra[]} [tetras] If defined, the array to store the tetras into.
  * This is NOT cleared.
- * @returns {LBVolume.Tetra[]} The array of tetras.
+ * @returns {module:LBVolume.Tetra[]} The array of tetras.
  */
 LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
     if (!vertices) {
@@ -1052,17 +1083,19 @@ LBVolume.Tetra.loadFromData = function(data, vertices, tetras) {
  * v[1]-v[2]-v[3]-v[4] defines the other tetra (v[1]-v[2]-v[3] defines the shared
  * face, with the vertices v[0], v[1], v[2] ordered CCW (right hand rule).
  * @constructor
- * @extends LBVolume.Volume
- * @param {LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
+ * @extends module:LBVolume.Volume
+ * @param {module:LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
  * volume is set to so each vertex is approximately 0.5 from the center, and the center
  * is at 0,0,0.
  * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
  * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
  * vertices identifiying the vertices, the ordering must be as described above.
- * @returns {LBVolume.TriBiPyramid}
+ * @param {Number} [massDistribution=1] Additional factor used by {@link module:LBVolume.allocateMassToVolumes}
+ * to control mass distribution.
+ * @returns {module:LBVolume.TriBiPyramid}
  */
-LBVolume.TriBiPyramid = function(vertices, mass, indices) {
-    LBVolume.Volume.call(this, LBVolume.TriBiPyramid.TYPE_NAME, mass);
+LBVolume.TriBiPyramid = function(vertices, mass, indices, massDistribution) {
+    LBVolume.Volume.call(this, LBVolume.TriBiPyramid.TYPE_NAME, mass, massDistribution);
     
     this._faces = [];
     if (vertices) {
@@ -1083,9 +1116,9 @@ LBVolume.TriBiPyramid = function(vertices, mass, indices) {
 };
 
 /**
- * The triangular bipyramid type name, the value of {@link LBVolume.Volume#typeName} for cuboids.
+ * The triangular bipyramid type name, the value of {@link module:LBVolume.Volume#typeName} for cuboids.
  * @constant
- * @type String
+ * @type {String}
  */
 LBVolume.TriBiPyramid.TYPE_NAME = "TriBiPyramid";
 
@@ -1120,7 +1153,7 @@ LBVolume.TriBiPyramid.prototype.equivalentTetras = function() {
 // @inheritdoc...
 LBVolume.TriBiPyramid.prototype.cloneMirrored = function(plane) {
     var vertices = LBGeometry.mirrorPointArrayAboutPlane(plane, this.vertices, LBVolume.TriBiPyramid._workingVertices);
-    return new LBVolume.TriBiPyramid(vertices, this.mass);
+    return new LBVolume.TriBiPyramid(vertices, this.mass, undefined, this.massDistribution);
 };
 LBVolume.TriBiPyramid._workingVertices = [];
 
@@ -1136,10 +1169,10 @@ LBVolume.TriBiPyramid._workingVertices = [];
  * and the last four vertices describe the other tetrahedron (the face v[1], v[2], v[3] is
  * internal and does not exist).
  * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
- * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
- * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
+ * @param {module:LBGeometry.Vector3[]} vertexArray   The array of vertices.
+ * @param {module:LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
  * @param {Number[][]} [faces]  If defined an array that is set to the arrays of vertices for each outside face.
- * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
+ * @returns {module:LBVolume.Tetra[]} The array of the tetrahedra.
  */
 LBVolume.TriBiPyramid.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
     if (!tetras) {
@@ -1198,17 +1231,19 @@ LBVolume.TriBiPyramid.toTetras = function(vertexIndices, vertexArray, tetras, fa
  * triangular face, with v[3] connected to v[0], v[4] connected to v[1], and v[5]
  * connected to v[2] (these vertices are therefore ordered CW looking into the prism).
  * @constructor
- * @extends LBVolume.Volume
- * @param {LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
+ * @extends module:LBVolume.Volume
+ * @param {module:LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
  * volume is set to so each vertex on the triangular face is 0.5 from the center of
  * that face, and each face is positioned 0.5 on each side of the origin.
  * @param {Number} [mass=Number.NaN] If defined the mass  assigned to the volume.
  * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
  * vertices identifiying the vertices, the ordering must be as described above.
- * @returns {LBVolume.TriPrism}
+ * @param {Number} [massDistribution=1] Additional factor used by {@link module:LBVolume.allocateMassToVolumes}
+ * to control mass distribution.
+ * @returns {module:LBVolume.TriPrism}
  */
-LBVolume.TriPrism = function(vertices, mass, indices) {
-    LBVolume.Volume.call(this, LBVolume.TriPrism.TYPE_NAME, mass);
+LBVolume.TriPrism = function(vertices, mass, indices, massDistribution) {
+    LBVolume.Volume.call(this, LBVolume.TriPrism.TYPE_NAME, mass, massDistribution);
     
     if (vertices) {
         if (!indices) {
@@ -1231,9 +1266,9 @@ LBVolume.TriPrism = function(vertices, mass, indices) {
 };
 
 /**
- * The triangular bipyramid type name, the value of {@link LBVolume.Volume#typeName} for cuboids.
+ * The triangular bipyramid type name, the value of {@link module:LBVolume.Volume#typeName} for cuboids.
  * @constant
- * @type String
+ * @type {String}
  */
 LBVolume.TriPrism.TYPE_NAME = "TriPrism";
 
@@ -1269,7 +1304,7 @@ LBVolume.TriPrism.prototype.equivalentTetras = function() {
 // @inheritdoc...
 LBVolume.TriPrism.prototype.cloneMirrored = function(plane) {
     var vertices = LBGeometry.mirrorPointArrayAboutPlane(plane, this.vertices, LBVolume.TriPrism._workingVertexArray);
-    return new LBVolume.TriPrism(vertices, this.mass);
+    return new LBVolume.TriPrism(vertices, this.mass, undefined, this.massDistribution);
 };
 LBVolume.TriPrism._workingVertexArray = [];
 
@@ -1286,10 +1321,10 @@ LBVolume.TriPrism._workingVertexArray = [];
  * face and the second 3 vertices the other triangular face, and v[0] is connected to v[3],
  * v[1] is connected to v[4], and v[2] is connected to v[5].
  * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
- * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
- * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
+ * @param {module:LBGeometry.Vector3[]} vertexArray   The array of vertices.
+ * @param {module:LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
  * @param {Number[][]} [faces]  If defined an array that is set to the arrays of vertices for each outside face.
- * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
+ * @returns {module:LBVolume.Tetra[]} The array of the tetrahedra.
  */
 LBVolume.TriPrism.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
     if (!tetras) {
@@ -1361,8 +1396,8 @@ LBVolume.TriPrism.toTetras = function(vertexIndices, vertexArray, tetras, faces)
  * A cuboid volume. A cuboid is a six sided convex polyhedron with each of the
  * sides a quadrilateral (having four edges).
  * @constructor
- * @extends LBVolume.Volume
- * @param {LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
+ * @extends module:LBVolume.Volume
+ * @param {module:LBGeometry.Vector3[]} [vertices] The array of vertices. If undefined the
  * cuboid is set to a unit cube (each side is length 1) centered at 0,0,0.
  * @param {Number} [mass=Number.NaN] If defined the mass assigned to the volume.
  * @param {Number[]} [indices]  If defined the array of the indices of the vertices in
@@ -1370,10 +1405,12 @@ LBVolume.TriPrism.toTetras = function(vertexIndices, vertexArray, tetras, faces)
  * be ordered CCW (right-hand rule), while the second set of indices is such that v[4] is
  * jointed to v[0], v[5] is joined to v[1], v[6] is joined to v[2], v[7] is joined to
  * v[3].
- * @returns {LBVolume.Cuboid}
+ * @param {Number} [massDistribution=1] Additional factor used by {@link module:LBVolume.allocateMassToVolumes}
+ * to control mass distribution.
+ * @returns {module:LBVolume.Cuboid}
  */
-LBVolume.Cuboid = function(vertices, mass, indices) {
-    LBVolume.Volume.call(this, LBVolume.Cuboid.TYPE_NAME, mass);
+LBVolume.Cuboid = function(vertices, mass, indices, massDistribution) {
+    LBVolume.Volume.call(this, LBVolume.Cuboid.TYPE_NAME, mass, massDistribution);
     
     if (vertices) {
         if (!indices) {
@@ -1398,9 +1435,9 @@ LBVolume.Cuboid = function(vertices, mass, indices) {
 };
 
 /**
- * The cuboid type name, the value of {@link LBVolume.Volume#typeName} for cuboids.
+ * The cuboid type name, the value of {@link module:LBVolume.Volume#typeName} for cuboids.
  * @constant
- * @type String
+ * @type {String}
  */
 LBVolume.Cuboid.TYPE_NAME = "Cuboid";
 
@@ -1435,7 +1472,7 @@ LBVolume.Cuboid.prototype.equivalentTetras = function() {
 // @inheritdoc...
 LBVolume.Cuboid.prototype.cloneMirrored = function(plane) {
     var vertices = LBGeometry.mirrorPointArrayAboutPlane(plane, this.vertices, LBVolume.Cuboid._workingVertexArray);
-    return new LBVolume.Cuboid(vertices, this.mass);
+    return new LBVolume.Cuboid(vertices, this.mass, undefined, this.massDistribution);
 };
 LBVolume.Cuboid._workingVertexArray = [];
 
@@ -1452,10 +1489,10 @@ LBVolume.Cuboid._workingVertexArray = [];
  * opposite face, with the opposite order so that v[4] is connected to v[0], v[5] to v[1],
  * v[6] to v[2], and v[7] to v[3].
  * @param {Number[]} vertexIndices The array of indices of the vertices in vertexArray.
- * @param {LBGeometry.Vector3[]} vertexArray   The array of vertices.
- * @param {LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
+ * @param {module:LBGeometry.Vector3[]} vertexArray   The array of vertices.
+ * @param {module:LBVolume.Tetra[]} [tetras]  If defined the array to store the tetras into. This array is NOT cleared.
  * @param {Number[][]} [faces]  If defined an array that is set to the arrays of vertices for each outside face.
- * @returns {LBVolume.Tetra[]} The array of the tetrahedra.
+ * @returns {module:LBVolume.Tetra[]} The array of the tetrahedra.
  */
 LBVolume.Cuboid.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
     if (!tetras) {
@@ -1561,7 +1598,7 @@ LBVolume.Cuboid.toTetras = function(vertexIndices, vertexArray, tetras, faces) {
  * @param {Number} cy   The y dimension of the center of the box.
  * @param {Number} cz   The z dimension of the center of the box.
  * @param {Number} [mass]   The optional mass for the box.
- * @returns {Volume_L18.createBox.box|Volume_L18.LBVolume.Cuboid}
+ * @returns {module:LBVolume.Cuboid}
  */
 LBVolume.createBox = function(dx, dy, dz, cx, cy, cz, mass) {
     var box = new LBVolume.Cuboid();
@@ -1587,10 +1624,10 @@ LBVolume.createBox = function(dx, dy, dz, cx, cy, cz, mass) {
  * @param {Object} data The data object. This should contain the following properties:
  * &lt;li>[center]: {"x":x, "y":y, "z":z}    The center of the box, if missing 0,0,0 will be used.
  * &lt;li>size: {"x":x, "y":y, "z":z}  The dimensions of the box.
- * &lt;li>[rotation]: See {@link LBGeometry.loadEuler} If specified, the rotation to apply to the
+ * &lt;li>[rotation]: See {@link module:LBGeometry.loadEuler} If specified, the rotation to apply to the
  * box.
  * @param {Number} [mass=undefined] The mass of the box.
- * @returns {Volume_L18.createBox.box|Volume_L18.LBVolume.Cuboid|Volume_L18.loadBoxFromData.box}
+ * @returns {module:LBVolume.Cuboid}
  */
 LBVolume.loadBoxFromData = function(data, mass) {
     var center = LBGeometry.loadVector3(data.center);
@@ -1604,18 +1641,18 @@ LBVolume.loadBoxFromData = function(data, mass) {
 
 /**
  * Loads a cylindrical volume from properties in a data object. For now it simply
- * loads it as a {@link LBVolume.Cuboid}.
+ * loads it as a {@link module:LBVolume.Cuboid}.
  * @param {Object} data The data object. This should contain the following properties:
  * &lt;li>base: {"x":x, "y":y, "z":z}  The base of the cylinder, it will be extruded in the
  * +z direction.
  * &lt;li>size: {"x":dx, "y": dy, "z": length} The dimensions of the cylinder. dx is the diameter
  * along the x-axis, dy is the diameter along the y-axis, length is the length of the cylinder,
  * which is along the +z axis.
- * &lt;li>[pos]: See {@link LBGeometry.loadVector3}
- * &lt;li>[rotation]: See {@link LBGeometry.loadEuler} If specified, the rotation to apply to the
+ * &lt;li>[pos]: See {@link module:LBGeometry.loadVector3}
+ * &lt;li>[rotation]: See {@link module:LBGeometry.loadEuler} If specified, the rotation to apply to the
  * vertices.
  * @param {Number} [mass=undefined] The mass of the cylinder.
- * @returns {LBVolume.Cuboid|undefined}
+ * @returns {module:LBVolume.Cuboid|undefined}
  */
 LBVolume.loadCylinderFromData = function(data, mass) {
     if (!data.size) {
@@ -1685,13 +1722,13 @@ return LBVolume;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="-_anonymous_-LBAssets.Loader.html">Loader</a></li><li><a href="-_anonymous_-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="-_anonymous_-LBCamera.Camera.html">Camera</a></li><li><a href="-_anonymous_-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="-_anonymous_-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="-_anonymous_-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="-_anonymous_-LBControls.SmoothController.html">SmoothController</a></li><li><a href="-_anonymous_-LBControls.SteppedController.html">SteppedController</a></li><li><a href="-_anonymous_-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="-_anonymous_-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="-_anonymous_-LBFoils.ClCd.html">ClCd</a></li><li><a href="-_anonymous_-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="-_anonymous_-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="-_anonymous_-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="-_anonymous_-LBFoils.Foil.html">Foil</a></li><li><a href="-_anonymous_-LBGeometry.Color.html">Color</a></li><li><a href="-_anonymous_-LBGeometry.Euler.html">Euler</a></li><li><a href="-_anonymous_-LBGeometry.Face3.html">Face3</a></li><li><a href="-_anonymous_-LBGeometry.Geometry.html">Geometry</a></li><li><a href="-_anonymous_-LBGeometry.Line2.html">Line2</a></li><li><a href="-_anonymous_-LBGeometry.Line3.html">Line3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="-_anonymous_-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="-_anonymous_-LBGeometry.Object3D.html">Object3D</a></li><li><a href="-_anonymous_-LBGeometry.Plane.html">Plane</a></li><li><a href="-_anonymous_-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="-_anonymous_-LBGeometry.Sphere.html">Sphere</a></li><li><a href="-_anonymous_-LBGeometry.Vector2.html">Vector2</a></li><li><a href="-_anonymous_-LBGeometry.Vector3.html">Vector3</a></li><li><a href="-_anonymous_-LBMath.CSpline.html">CSpline</a></li><li><a href="-_anonymous_-LBMath.DegRange.html">DegRange</a></li><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="-_anonymous_-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="-_anonymous_-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="-_anonymous_-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="-_anonymous_-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="-_anonymous_-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="-_anonymous_-LBVolume.Tetra.html">Tetra</a></li><li><a href="-_anonymous_-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="-_anonymous_-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="-_anonymous_-LBVolume.Volume.html">Volume</a></li><li><a href="LBCannon.CannonPhysicsLink.html">CannonPhysicsLink</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBPhysics.PhysicsLink.html">PhysicsLink</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBUI3d.App3D.html">App3D</a></li><li><a href="LBUI3d.CameraController.html">CameraController</a></li><li><a href="LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="LBUI3d.FollowCameraController.html">FollowCameraController</a></li><li><a href="LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="LBUI3d.SphericalOrientation.html">SphericalOrientation</a></li><li><a href="LBUI3d.View3D.html">View3D</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBAssets_.html">LBAssets|</a></li><li><a href="LBCamera.html">LBCamera</a></li><li><a href="LBCannon.html">LBCannon</a></li><li><a href="LBControls.html">LBControls</a></li><li><a href="LBCurve.html">LBCurve</a></li><li><a href="LBDebug.html">LBDebug</a></li><li><a href="LBFoils.html">LBFoils</a></li><li><a href="LBGeometry.html">LBGeometry</a></li><li><a href="LBMath.html">LBMath</a></li><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBPhysics.html">LBPhysics</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li><li><a href="LBUI3d.html">LBUI3d</a></li><li><a href="LBUtil.html">LBUtil</a></li><li><a href="LBVolume.html">LBVolume</a></li></ul><h3>Global</h3><ul><li><a href="global.html#.">.</a></li><li><a href="global.html#Detector">Detector</a></li><li><a href="global.html#THREE">THREE</a></li><li><a href="global.html#%257B@link">{@link</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-LBAssets.html">LBAssets</a></li><li><a href="module-LBCamera.html">LBCamera</a></li><li><a href="module-LBCannonPhysicsLink.html">LBCannonPhysicsLink</a></li><li><a href="module-LBCannonUtil.html">LBCannonUtil</a></li><li><a href="module-LBControls.html">LBControls</a></li><li><a href="module-LBCurve.html">LBCurve</a></li><li><a href="module-LBDebug.html">LBDebug</a></li><li><a href="module-LBFoils.html">LBFoils</a></li><li><a href="module-LBGeometry.html">LBGeometry</a></li><li><a href="module-LBMath.html">LBMath</a></li><li><a href="module-LBParticles.html">LBParticles</a></li><li><a href="module-LBPhysics.html">LBPhysics</a></li><li><a href="module-LBPhysicsLink.html">LBPhysicsLink</a></li><li><a href="module-LBRandom.html">LBRandom</a></li><li><a href="module-LBShaders.html">LBShaders</a></li><li><a href="module-LBSpherical.html">LBSpherical</a></li><li><a href="module-LBTracking.html">LBTracking</a></li><li><a href="module-LBUI3d.html">LBUI3d</a></li><li><a href="module-LBUtil.html">LBUtil</a></li><li><a href="module-LBVolume.html">LBVolume</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Wakes3D.html">Wakes3D</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.WaterShader.html">WaterShader</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBSailSim.WindPuff.html">WindPuff</a></li><li><a href="module-LBAssets.Loader.html">Loader</a></li><li><a href="module-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="module-LBCamera.Camera.html">Camera</a></li><li><a href="module-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="module-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="module-LBCannonPhysicsLink.Link.html">Link</a></li><li><a href="module-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="module-LBControls.SmoothController.html">SmoothController</a></li><li><a href="module-LBControls.SteppedController.html">SteppedController</a></li><li><a href="module-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="module-LBDebug.DataLog.html">DataLog</a></li><li><a href="module-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="module-LBDebug.FieldsDataLogField.html">FieldsDataLogField</a></li><li><a href="module-LBFoils.ClCd.html">ClCd</a></li><li><a href="module-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="module-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="module-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="module-LBFoils.Foil.html">Foil</a></li><li><a href="module-LBGeometry.Color.html">Color</a></li><li><a href="module-LBGeometry.Euler.html">Euler</a></li><li><a href="module-LBGeometry.Face3.html">Face3</a></li><li><a href="module-LBGeometry.Geometry.html">Geometry</a></li><li><a href="module-LBGeometry.Line2.html">Line2</a></li><li><a href="module-LBGeometry.Line3.html">Line3</a></li><li><a href="module-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="module-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="module-LBGeometry.Object3D.html">Object3D</a></li><li><a href="module-LBGeometry.Plane.html">Plane</a></li><li><a href="module-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="module-LBGeometry.Rect.html">Rect</a></li><li><a href="module-LBGeometry.Sphere.html">Sphere</a></li><li><a href="module-LBGeometry.Vector2.html">Vector2</a></li><li><a href="module-LBGeometry.Vector3.html">Vector3</a></li><li><a href="module-LBMath.CSpline.html">CSpline</a></li><li><a href="module-LBMath.DegRange.html">DegRange</a></li><li><a href="module-LBParticles.Cache.html">Cache</a></li><li><a href="module-LBParticles.ParticleSystem.html">ParticleSystem</a></li><li><a href="module-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="module-LBPhysics.CoordTransforms.html">CoordTransforms</a></li><li><a href="module-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="module-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="module-LBPhysicsLink.Link.html">Link</a></li><li><a href="module-LBRandom.NormalGenerator.html">NormalGenerator</a></li><li><a href="module-LBRandom.UniformGenerator.html">UniformGenerator</a></li><li><a href="module-LBShaders.Computer.html">Computer</a></li><li><a href="module-LBShaders.TargetCopier.html">TargetCopier</a></li><li><a href="module-LBSpherical.CoordinatesRAA.html">CoordinatesRAA</a></li><li><a href="module-LBSpherical.Orientation.html">Orientation</a></li><li><a href="module-LBTracking.ValueFollower.html">ValueFollower</a></li><li><a href="module-LBUI3d.App3D.html">App3D</a></li><li><a href="module-LBUI3d.CameraController.html">CameraController</a></li><li><a href="module-LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="module-LBUI3d.ChaseCameraController.html">ChaseCameraController</a></li><li><a href="module-LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="module-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="module-LBUI3d.View3D.html">View3D</a></li><li><a href="module-LBUtil.RollingBuffer.html">RollingBuffer</a></li><li><a href="module-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="module-LBVolume.Tetra.html">Tetra</a></li><li><a href="module-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="module-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="module-LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Detector">Detector</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Oct 14 2017 10:42:13 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Nov 11 2017 20:48:25 GMT-0500 (EST)
 </footer>
 
 <script> prettyPrint(); </script>

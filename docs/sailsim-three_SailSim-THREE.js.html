@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: sailsim-three/SailSim-THREE.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: sailsim-three/SailSim-THREE.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* 
+ * Copyright 2017 Albert Santos.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+define(['lbsailsim', 'lbcannonphysicslink', 'three', 'lbgeometry', 'lbassets', 'lbui3d', 'lbwater3d', 'lbsky3d', 'lbwakes3d', 'lbwind3d', 'tween'], 
+function(LBSailSim, LBCannonPhysicsLink, THREE, LBGeometry, LBAssets, LBUI3d, LBWater3D, LBSky3D, LBWakes3D, LBWind3D, TWEEN) {
+    
+    'use strict';
+
+
+/**
+ * An implementation of {@link LBSailSim.Env} for use with {@link Phaser.Physics.P2} or Cannon physics.
+ * This pretty much just ties together the physics link and the sailing environment.
+ * @constructor
+ * @extends {LBSailSim.SailEnv}
+ * @param {module:LBUI3d.App3D} app3D   The app calling this.
+ * @param {module:LBUI3d.View3D} mainView   The main view of the app.
+ * @param {LBSailSim.SailEnvTHREE.CANNON_PHYSICS} physicsType  The physics engine to use.
+ * @param {module:LBAssets.Loader} [assetLoader]   The optional asset loader.
+ * @returns {LBSailSim.SailEnvTHREE}
+ */
+LBSailSim.SailEnvTHREE = function(app3D, mainView, physicsType, assetLoader) {
+    LBSailSim.Env.call(this, assetLoader);
+    
+    this.app3D = app3D;
+    this.mainView = mainView;
+    
+    this.physicsType = physicsType;
+    
+    switch (physicsType) {
+        case LBSailSim.SailEnvTHREE.CANNON_PHYSICS :
+        case undefined :
+            this.physicsLink = new LBCannonPhysicsLink.Link();
+            break;
+    }
+    
+    this.water3D = new LBSailSim.Water3D(app3D.mainScene, this);
+    this.wakes3D = new LBSailSim.Wakes3D(app3D.mainScene, this);
+    this.sky3D = new LBSailSim.Sky3D(app3D.mainScene, this);
+    
+    // For testing...
+    //this.water3D.waterMesh.visible = false;
+    //this.sky3D.skyMesh.visible = false;
+    
+//    this.envGroup = new THREE.Group();
+//    this.app3D.mainScene.add(this.envGroup);
+
+    this.envGroup = this.app3D.mainScene;
+};
+
+
+/**
+ * Value to pass to {@link LBSailSim.SailEnvTHREE}'s contructor to use the Cannon JS physics engine.
+ * @constant
+ * @type {Number}
+ */
+LBSailSim.SailEnvTHREE.CANNON_PHYSICS = 0;
+
+LBSailSim.SailEnvTHREE.prototype = Object.create(LBSailSim.Env.prototype);
+LBSailSim.SailEnvTHREE.prototype.constructor = LBSailSim.SailEnvTHREE;
+
+LBSailSim.SailEnvTHREE.prototype.clearEnv = function() {
+    LBSailSim.Env.prototype.clearEnv.call(this);
+    
+    while (this.envGroup.children.length > 0) {
+        this.envGroup.remove(this.envGroup.children[0]);
+    }
+};
+
+LBSailSim.SailEnvTHREE.prototype.floatingObjectLoaded = function(data, rigidBody, objectDef) {
+    LBSailSim.Env.prototype.floatingObjectLoaded.call(this, data, rigidBody, objectDef);
+    
+    var me = this;
+    if (objectDef &amp;&amp; objectDef.threeModel) {
+        this.app3D.mainScene.loadJSONModel(objectDef.threeModel, function(model) {
+            rigidBody._lbThreeModel = model;
+            me.envGroup.add(model);            
+            LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody(rigidBody);
+        });
+    }
+    //this.physicsLink.addRigidBody(rigidBody, data);
+    this.physicsLink.addFixedObject(rigidBody);
+};
+
+
+LBSailSim.SailEnvTHREE.prototype._boatCheckedOut = function(boat, data) {
+    this.physicsLink.addRigidBody(boat, data);
+    LBSailSim.Env.prototype._boatCheckedOut.call(this, boat, data);
+    
+    var me = this;
+    if (data.threeModel) {
+        this.app3D.mainScene.loadJSONModel(data.threeModel, function(model) {
+            boat._lbThreeModel = model;
+            me.envGroup.add(model);
+            
+            loadVesselPartModel(me, boat.spars, model, me.app3D.mainScene);
+            loadVesselPartModel(me, boat.lines, model, me.app3D.mainScene);
+            loadVesselPartModel(me, boat.windIndicators, model, me.app3D.mainScene);
+            loadVesselPartModel(me, boat.hydrofoils, model, me.app3D.mainScene);
+            loadVesselPartModel(me, boat.airfoils, model, me.app3D.mainScene);
+        });
+    }
+    
+    this.wakes3D.addVessel(boat);
+};
+
+function loadVesselPartModel(sailEnv, parts, parentModel, mainScene) {
+    parts.forEach(function(rigidBody) {
+        var partData = rigidBody.loadData;
+        if (partData) {
+            if (partData.telltale3D) {
+                rigidBody._lbTelltale = LBSailSim.Telltale3D.createFromData(sailEnv, partData.telltale3D);
+                rigidBody._lbThreeModel = rigidBody._lbTelltale;
+                parentModel.add(rigidBody._lbThreeModel);
+            }
+            else {
+                mainScene.loadModelFromData(partData, function(model) {
+                    rigidBody._lbThreeModel = model;
+                    parentModel.add(model);
+
+                    if (rigidBody.sailSurface) {
+                        mapSailSurfaceToModel(rigidBody.sailSurface, model);
+                    }
+                });
+            }
+        }
+    });
+};
+
+function vector3ToTHREEDistanceSq(vec, vecThree) {
+    var dx = vec.x - vecThree.x;
+    var dy = vec.y - vecThree.z;
+    var dz = vec.z + vecThree.y;
+    return dx * dx + dy * dy + dz * dz;
+};
+
+function mapSailSurfaceToModel(sailSurface, model) {
+    var vertices = model.geometry.vertices;
+    var vertexIndices = [];
+    var vertexCount = vertices.length;
+    for (var i = 0; i &lt; vertexCount; ++i) {
+        vertexIndices.push(i);
+    }
+    
+    sailSurface.slices.forEach(function(slice) {
+        for (var j = 0; j &lt; slice.points.length; ++j) {
+            var minIndex = 0;
+            var minDistanceSq = vector3ToTHREEDistanceSq(slice.points[j], vertices[vertexIndices[minIndex]]);
+            for (var k = 1; k &lt; vertexIndices.length; ++k) {
+                var distanceSq = vector3ToTHREEDistanceSq(slice.points[j], vertices[vertexIndices[k]]);
+                if (distanceSq &lt; minDistanceSq) {
+                    minDistanceSq = distanceSq;
+                    minIndex = k;
+                }
+            }
+            
+            slice.indexMapping[j] = vertexIndices[minIndex];
+            vertexIndices.splice(minIndex, 1);
+            if (!vertexIndices.length) {
+                break;
+            }
+        }
+    });
+    
+    // If there are extra vertices, look for the slices that only have two points
+    // and see if they lie on those slices. If they do, we need to add them somehow.
+};
+
+LBSailSim.SailEnvTHREE.prototype._boatReturned = function(boat) {
+    this.wakes3D.removeVessel(boat);
+    LBSailSim.Env.prototype._boatReturned.call(this, boat);
+    this.physicsLink.removeRigidBody(boat);
+};
+
+/**
+ * The main simulation update method, call from the {@link module:LBUI3d.App3D}'s update() method.
+ * @param {Number} dt   The time step.
+ * @returns {undefined}
+ */
+LBSailSim.SailEnvTHREE.prototype.update = function(dt) {
+    dt = dt || this.physicsLink.timeStep();
+    
+    dt = this.physicsLink.timeStep();
+    
+    TWEEN.update(this.app3D.runMillisecs);
+    LBSailSim.Env.prototype.update.call(this, dt);
+    
+    this.physicsLink.update(dt);
+    
+    // Don't have to call updateDisplayObjects()...
+    //this.physicsLink.updateDisplayObjects();
+    this.physicsLink.rigidBodies.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
+    
+    this.sky3D.update(dt);
+    this.water3D.update(dt);
+    this.wakes3D.update(dt);
+};
+
+LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody = function(rigidBody) {
+    var model = rigidBody._lbThreeModel;
+    if (model) {
+        if (rigidBody.sailSurface) {
+            rigidBody.sailSurface.slices.forEach(function(slice) {
+                var count = slice.indexMapping.length;
+                for (var i = 0; i &lt; count; ++i) {
+                    var index = slice.indexMapping[i];
+                    LBSailSim.SailEnvTHREE.copyVectorToTHREE(slice.points[i], model.geometry.vertices[index]);
+                }
+            });
+            model.geometry.verticesNeedUpdate = true;
+        }
+        
+        var obj3D = rigidBody.obj3D;
+        LBSailSim.SailEnvTHREE.copyVectorToTHREE(obj3D.position, model.position);
+        if (!model.noLBOrientationCopy) {
+            LBSailSim.SailEnvTHREE.copyQuaternionToTHREE(obj3D.quaternion, model.quaternion);
+        }
+        model.updateMatrixWorld(true);
+    }
+    
+    rigidBody.parts.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
+};
+
+LBSailSim.SailEnvTHREE.copyVectorToTHREE = LBUI3d.ZIsUpCoordMapping.vector3ToThreeJS;
+
+LBSailSim.SailEnvTHREE.copyQuaternionToTHREE = LBUI3d.ZIsUpCoordMapping.quaternionToThreeJS;;
+
+LBSailSim.SailEnvTHREE.copyEulerToTHREE = LBUI3d.ZIsUpCoordMapping.eulerToThreeJS;;
+
+return LBSailSim;
+});</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-LBAssets.html">LBAssets</a></li><li><a href="module-LBCamera.html">LBCamera</a></li><li><a href="module-LBCannonPhysicsLink.html">LBCannonPhysicsLink</a></li><li><a href="module-LBCannonUtil.html">LBCannonUtil</a></li><li><a href="module-LBControls.html">LBControls</a></li><li><a href="module-LBCurve.html">LBCurve</a></li><li><a href="module-LBDebug.html">LBDebug</a></li><li><a href="module-LBFoils.html">LBFoils</a></li><li><a href="module-LBGeometry.html">LBGeometry</a></li><li><a href="module-LBMath.html">LBMath</a></li><li><a href="module-LBParticles.html">LBParticles</a></li><li><a href="module-LBPhysics.html">LBPhysics</a></li><li><a href="module-LBPhysicsLink.html">LBPhysicsLink</a></li><li><a href="module-LBRandom.html">LBRandom</a></li><li><a href="module-LBShaders.html">LBShaders</a></li><li><a href="module-LBSpherical.html">LBSpherical</a></li><li><a href="module-LBTracking.html">LBTracking</a></li><li><a href="module-LBUI3d.html">LBUI3d</a></li><li><a href="module-LBUtil.html">LBUtil</a></li><li><a href="module-LBVolume.html">LBVolume</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Wakes3D.html">Wakes3D</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.WaterShader.html">WaterShader</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBSailSim.WindPuff.html">WindPuff</a></li><li><a href="module-LBAssets.Loader.html">Loader</a></li><li><a href="module-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="module-LBCamera.Camera.html">Camera</a></li><li><a href="module-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="module-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="module-LBCannonPhysicsLink.Link.html">Link</a></li><li><a href="module-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="module-LBControls.SmoothController.html">SmoothController</a></li><li><a href="module-LBControls.SteppedController.html">SteppedController</a></li><li><a href="module-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="module-LBDebug.DataLog.html">DataLog</a></li><li><a href="module-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="module-LBDebug.FieldsDataLogField.html">FieldsDataLogField</a></li><li><a href="module-LBFoils.ClCd.html">ClCd</a></li><li><a href="module-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="module-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="module-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="module-LBFoils.Foil.html">Foil</a></li><li><a href="module-LBGeometry.Color.html">Color</a></li><li><a href="module-LBGeometry.Euler.html">Euler</a></li><li><a href="module-LBGeometry.Face3.html">Face3</a></li><li><a href="module-LBGeometry.Geometry.html">Geometry</a></li><li><a href="module-LBGeometry.Line2.html">Line2</a></li><li><a href="module-LBGeometry.Line3.html">Line3</a></li><li><a href="module-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="module-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="module-LBGeometry.Object3D.html">Object3D</a></li><li><a href="module-LBGeometry.Plane.html">Plane</a></li><li><a href="module-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="module-LBGeometry.Rect.html">Rect</a></li><li><a href="module-LBGeometry.Sphere.html">Sphere</a></li><li><a href="module-LBGeometry.Vector2.html">Vector2</a></li><li><a href="module-LBGeometry.Vector3.html">Vector3</a></li><li><a href="module-LBMath.CSpline.html">CSpline</a></li><li><a href="module-LBMath.DegRange.html">DegRange</a></li><li><a href="module-LBParticles.Cache.html">Cache</a></li><li><a href="module-LBParticles.ParticleSystem.html">ParticleSystem</a></li><li><a href="module-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="module-LBPhysics.CoordTransforms.html">CoordTransforms</a></li><li><a href="module-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="module-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="module-LBPhysicsLink.Link.html">Link</a></li><li><a href="module-LBRandom.NormalGenerator.html">NormalGenerator</a></li><li><a href="module-LBRandom.UniformGenerator.html">UniformGenerator</a></li><li><a href="module-LBShaders.Computer.html">Computer</a></li><li><a href="module-LBShaders.TargetCopier.html">TargetCopier</a></li><li><a href="module-LBSpherical.CoordinatesRAA.html">CoordinatesRAA</a></li><li><a href="module-LBSpherical.Orientation.html">Orientation</a></li><li><a href="module-LBTracking.ValueFollower.html">ValueFollower</a></li><li><a href="module-LBUI3d.App3D.html">App3D</a></li><li><a href="module-LBUI3d.CameraController.html">CameraController</a></li><li><a href="module-LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="module-LBUI3d.ChaseCameraController.html">ChaseCameraController</a></li><li><a href="module-LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="module-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="module-LBUI3d.View3D.html">View3D</a></li><li><a href="module-LBUtil.RollingBuffer.html">RollingBuffer</a></li><li><a href="module-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="module-LBVolume.Tetra.html">Tetra</a></li><li><a href="module-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="module-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="module-LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Detector">Detector</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Nov 11 2017 20:48:25 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ui3d/App3D.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ui3d/App3D.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* 
+ * Copyright 2017 albert.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/* global LBUI3d, LBUtil */
+define(['lbutil', 'lbui3dbase', 'lbscene3d', 'lbview3d'], 
+function(LBUtil, LBUI3d) {
+
+    'use strict';
+
+/**
+ * My 3D application framework module, these classes all rely upon ThreeJS.
+ * If this description and the LBUI3d static members appear multiple times in the docs,
+ * that's a limitation of JSDoc: {@link https://github.com/jsdoc3/jsdoc/issues/515}.
+ * @exports LBUI3d
+ */
+var LBUI3d = LBUI3d || {};
+
+/**
+ * Our 3D application framework.
+ * @constructor
+ * @return {module:LBUI3d.App3D}
+ */
+LBUI3d.App3D = function() {
+    
+    /**
+     * The current running state.
+     */
+    this._runState = LBUI3d.App3D.RUN_STATE_NOT_STARTED;
+    
+    /**
+     * The main scene.
+     * @member {Number}
+     */
+    this.mainScene = new LBUI3d.Scene3D();
+
+    /**
+     * Array of views managed by the app.
+     * @member {module:LBUI3d.View3D[]}
+     */
+    this.views = [];
+
+    /**
+     * The current number of frames per second.
+     * @member {Number}
+     */
+    this.fps = 0;
+
+    /**
+     * The number of times a frame has been rendered.
+     * @member {Number}
+     */
+    this.frameCount = 0;
+    
+    /**
+     * The number of milliseconds elapsed between the last frame and the current frame.
+     * @member {Number}
+     */
+    this.lastFrameMillisecs = 0;
+    
+    /**
+     * The total number of milliseconds the application has been operating in run or step mode.
+     * @member {Number}
+     */
+    this.runMillisecs = 0;
+    
+    /**
+     * The mouse mode currently active in all the views.
+     * @member {module:LBUI3d.View3D.MOUSE_ROTATE_MODE|LBUI3d.View3D.MOUSE_PAN_MODE}
+     */
+    this.mouseMode = LBUI3d.View3D.MOUSE_ROTATE_MODE;
+    
+    
+    this._nextSecondTimeStamp = (performance || Date).now() + 1000;
+    this._prevSecondFrameCount = 0;
+    this._lastFrameTimeStamp = 0;
+};
+
+LBUI3d.App3D.RUN_STATE_NOT_STARTED = 0;
+LBUI3d.App3D.RUN_STATE_RUNNING = 1;
+LBUI3d.App3D.RUN_STATE_PAUSED = 2;
+
+LBUI3d.App3D.activeApp = undefined;
+LBUI3d.App3D.prototype = {
+    constructor: LBUI3d.App3D
+};
+
+/**
+ * The main initialization function.
+ * @protected
+ * @param {Object} mainContainer    The main DOM container.
+ */
+LBUI3d.App3D.prototype.init = function(mainContainer) {
+    this.mainContainer = mainContainer;
+    var me = this;
+    window.addEventListener('resize', function() { me.onWindowResize(); }, false);
+};
+
+/**
+ * Retrieves the current run state, one of the LBUI3d.App3D.RUN_STATE_ constants.
+ * @return {Number} The current run state.
+ */
+LBUI3d.App3D.prototype.getRunState = function() {
+    return this._runState;
+};
+
+/**
+ * 
+ * @return {Boolean}    True if the application run state is running.
+ */
+LBUI3d.App3D.prototype.isRunning = function() {
+    return this._runState === LBUI3d.App3D.RUN_STATE_RUNNING;
+};
+
+/**
+ * 
+ * @return {Boolean}    True if the application run state is paused.
+ */
+LBUI3d.App3D.prototype.isPaused = function() {
+    return this._runState === LBUI3d.App3D.RUN_STATE_PAUSED;
+};
+
+/**
+ * Toggles the application run state between running and paused.
+ */
+LBUI3d.App3D.prototype.togglePaused = function() {
+    if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
+        this.pause();
+    }
+    else {
+        this.runContinuous();
+    }
+};
+
+/**
+ * Puts the application run state into pause.
+ */
+LBUI3d.App3D.prototype.pause = function() {
+    if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
+        this._runState = LBUI3d.App3D.RUN_STATE_PAUSED;
+    }
+};
+
+/**
+ * Puts the application run state into continuous running.
+ */
+LBUI3d.App3D.prototype.runContinuous = function() {
+    if (this._runState !== LBUI3d.App3D.RUN_STATE_RUNNING) {
+        this._runState = LBUI3d.App3D.RUN_STATE_RUNNING;
+        this._lastFrameTimeStamp = 0;
+        LBUI3dApp3DAnimate((performance || Date).now());
+    }
+};
+
+/**
+ * Performs one simulation/render pass and the puts the application run state into pause.
+ */
+LBUI3d.App3D.prototype.runSingleStep = function() {
+    if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
+        this.pause();
+    }
+    else {
+        this._lastFrameTimeStamp = 0;
+        LBUI3dApp3DAnimate((performance || Date).now());
+        this._runState = LBUI3d.App3D.RUN_STATE_PAUSED;
+    }
+};
+
+/**
+ * Adds a view to the application.
+ * @param {LBUI3d.View} view    The view to add.
+ */
+LBUI3d.App3D.prototype.addView = function(view) {
+    this.views.push(view);
+    view.setMouseMode(this.mouseMode);
+};
+
+/**
+ * Removes a view from the application.
+ * @param {LBUI3d.View} view    The view to remove.
+ */
+LBUI3d.App3D.prototype.removeView = function(view) {
+    var index = this.views.indexOf(view);
+    if (index >= 0) {
+        this.views.splice(index, 1);
+    }
+};
+
+/**
+ * Changes the mouse mode of all the views and their camera controllers.
+ * @param {Number} mode The mouse mode to set.
+ */
+LBUI3d.App3D.prototype.setMouseMode = function(mode) {
+    if (this.mouseMode !== mode) {
+        this.views.forEach(function(view) {
+            view.setMouseMode(mode);
+        });
+        this.mouseMode = mode;
+    }
+};
+
+/**
+ * Sets the current mouse mode to rotate.
+ */
+LBUI3d.App3D.prototype.setRotateMode = function() {
+    this.setMouseMode(LBUI3d.View3D.MOUSE_ROTATE_MODE);
+};
+
+/**
+ * Sets the current mouse mode to pan.
+ */
+LBUI3d.App3D.prototype.setPanMode = function() {
+    this.setMouseMode(LBUI3d.View3D.MOUSE_PAN_MODE);
+};
+
+/**
+ * Changes the current mouse mode to the 'next' mouse mode.
+ * @return {Number} The newly set mouse mode.
+ */
+LBUI3d.App3D.prototype.nextMouseMode = function() {
+    switch (this.mouseMode) {
+    case LBUI3d.View3D.MOUSE_PAN_MODE :
+        this.setRotateMode();
+        break;
+        
+    case LBUI3d.View3D.MOUSE_ROTATE_MODE :
+        this.setPanMode();
+        break;
+    }
+    return this.mouseMode;
+};
+
+/**
+ * The 'resize' event handler for the top-level window.
+ * @protected
+ */
+LBUI3d.App3D.prototype.onWindowResize = function() {
+    this.views.forEach(function(view) {
+        view.onWindowResize();
+    });
+};
+
+/**
+ * Toggles full screen mode.
+ * @param {Object} container    A DOM container object.
+ * @return {unresolved}
+ */
+LBUI3d.App3D.prototype.toggleFullScreen = function(container) {
+    container = container || this.mainContainer;
+    return LBUtil.toggleFullScreen(container);
+};
+
+/**
+ * Called each cycle, before {@link module:LBUI3d.App3D.render}.
+ * @protected
+ * @param {Number} dt The number of milliseconds since the last call to this.
+ */
+LBUI3d.App3D.prototype.update = function(dt) {
+    this.views.forEach(function(view) {
+        view.update(dt);
+    });
+};
+
+/**
+ * Called each render cycle.
+ * @protected
+ * @param {Number} dt The number of milliseconds since the last call to this.
+ */
+LBUI3d.App3D.prototype.render = function(dt) {
+    this.views.forEach(function(view) {
+        view.render(dt);
+    });
+};
+
+/**
+ * Called each time the number of frames per second has been updated.
+ * @protected
+ */
+LBUI3d.App3D.prototype.fpsUpdated = function() {
+    
+};
+
+LBUI3d.App3D.prototype._cycle = function(timeStamp) {
+    if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
+        requestAnimationFrame(LBUI3dApp3DAnimate);
+    }
+    
+    if (timeStamp >= this._nextSecondTimeStamp) {
+        this.fps = (this.frameCount - this._lastSecondFrameCount) * 1000 / (timeStamp - this._nextSecondTimeStamp + 1000);
+        this._lastSecondFrameCount = this.frameCount;
+        this._nextSecondTimeStamp = timeStamp + 1000;
+        this.fpsUpdated();
+    }
+    
+    if (this._lastFrameTimeStamp) {
+        this.lastFrameMillisecs = timeStamp - this._lastFrameTimeStamp;
+    }
+    else {
+        this.lastFrameMillisecs = 1000/60;
+    }
+    
+    var dt = this.lastFrameMillisecs / 1000;
+    this.update(dt);
+    this.render(dt);
+    ++this.frameCount;
+    this.runMillisecs += this.lastFrameMillisecs;
+
+    this._lastFrameTimeStamp = timeStamp;
+};
+
+function LBUI3dApp3DAnimate(timeStamp) {
+    LBUI3d.App3D.activeApp._cycle(timeStamp);
+}
+
+/**
+ * The main function for starting the application.
+ * @param {Object} mainContainer    The main DOM container.
+ * @param {Boolean} [startPaused=false] If true the application is started in the
+ * paused state.
+ */
+LBUI3d.App3D.prototype.start = function(mainContainer, startPaused) {
+    LBUI3d.App3D.activeApp = this;
+    
+    this.init(mainContainer);
+    
+    if (startPaused) {
+        this._runState = LBUI3d.App3D.RUN_STATE_PAUSED;
+    }
+    else {
+        this._runState = LBUI3d.App3D.RUN_STATE_RUNNING;
+        LBUI3dApp3DAnimate((performance || Date).now());
+    }
+};
+
+return LBUI3d;
+});</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-LBAssets.html">LBAssets</a></li><li><a href="module-LBCamera.html">LBCamera</a></li><li><a href="module-LBCannonPhysicsLink.html">LBCannonPhysicsLink</a></li><li><a href="module-LBCannonUtil.html">LBCannonUtil</a></li><li><a href="module-LBControls.html">LBControls</a></li><li><a href="module-LBCurve.html">LBCurve</a></li><li><a href="module-LBDebug.html">LBDebug</a></li><li><a href="module-LBFoils.html">LBFoils</a></li><li><a href="module-LBGeometry.html">LBGeometry</a></li><li><a href="module-LBMath.html">LBMath</a></li><li><a href="module-LBParticles.html">LBParticles</a></li><li><a href="module-LBPhysics.html">LBPhysics</a></li><li><a href="module-LBPhysicsLink.html">LBPhysicsLink</a></li><li><a href="module-LBRandom.html">LBRandom</a></li><li><a href="module-LBShaders.html">LBShaders</a></li><li><a href="module-LBSpherical.html">LBSpherical</a></li><li><a href="module-LBTracking.html">LBTracking</a></li><li><a href="module-LBUI3d.html">LBUI3d</a></li><li><a href="module-LBUtil.html">LBUtil</a></li><li><a href="module-LBVolume.html">LBVolume</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Wakes3D.html">Wakes3D</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.WaterShader.html">WaterShader</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBSailSim.WindPuff.html">WindPuff</a></li><li><a href="module-LBAssets.Loader.html">Loader</a></li><li><a href="module-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="module-LBCamera.Camera.html">Camera</a></li><li><a href="module-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="module-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="module-LBCannonPhysicsLink.Link.html">Link</a></li><li><a href="module-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="module-LBControls.SmoothController.html">SmoothController</a></li><li><a href="module-LBControls.SteppedController.html">SteppedController</a></li><li><a href="module-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="module-LBDebug.DataLog.html">DataLog</a></li><li><a href="module-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="module-LBDebug.FieldsDataLogField.html">FieldsDataLogField</a></li><li><a href="module-LBFoils.ClCd.html">ClCd</a></li><li><a href="module-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="module-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="module-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="module-LBFoils.Foil.html">Foil</a></li><li><a href="module-LBGeometry.Color.html">Color</a></li><li><a href="module-LBGeometry.Euler.html">Euler</a></li><li><a href="module-LBGeometry.Face3.html">Face3</a></li><li><a href="module-LBGeometry.Geometry.html">Geometry</a></li><li><a href="module-LBGeometry.Line2.html">Line2</a></li><li><a href="module-LBGeometry.Line3.html">Line3</a></li><li><a href="module-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="module-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="module-LBGeometry.Object3D.html">Object3D</a></li><li><a href="module-LBGeometry.Plane.html">Plane</a></li><li><a href="module-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="module-LBGeometry.Rect.html">Rect</a></li><li><a href="module-LBGeometry.Sphere.html">Sphere</a></li><li><a href="module-LBGeometry.Vector2.html">Vector2</a></li><li><a href="module-LBGeometry.Vector3.html">Vector3</a></li><li><a href="module-LBMath.CSpline.html">CSpline</a></li><li><a href="module-LBMath.DegRange.html">DegRange</a></li><li><a href="module-LBParticles.Cache.html">Cache</a></li><li><a href="module-LBParticles.ParticleSystem.html">ParticleSystem</a></li><li><a href="module-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="module-LBPhysics.CoordTransforms.html">CoordTransforms</a></li><li><a href="module-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="module-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="module-LBPhysicsLink.Link.html">Link</a></li><li><a href="module-LBRandom.NormalGenerator.html">NormalGenerator</a></li><li><a href="module-LBRandom.UniformGenerator.html">UniformGenerator</a></li><li><a href="module-LBShaders.Computer.html">Computer</a></li><li><a href="module-LBShaders.TargetCopier.html">TargetCopier</a></li><li><a href="module-LBSpherical.CoordinatesRAA.html">CoordinatesRAA</a></li><li><a href="module-LBSpherical.Orientation.html">Orientation</a></li><li><a href="module-LBTracking.ValueFollower.html">ValueFollower</a></li><li><a href="module-LBUI3d.App3D.html">App3D</a></li><li><a href="module-LBUI3d.CameraController.html">CameraController</a></li><li><a href="module-LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="module-LBUI3d.ChaseCameraController.html">ChaseCameraController</a></li><li><a href="module-LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="module-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="module-LBUI3d.View3D.html">View3D</a></li><li><a href="module-LBUtil.RollingBuffer.html">RollingBuffer</a></li><li><a href="module-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="module-LBVolume.Tetra.html">Tetra</a></li><li><a href="module-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="module-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="module-LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Detector">Detector</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Nov 11 2017 20:48:25 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

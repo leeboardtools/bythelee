@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core/Assets.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core/Assets.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* 
+ * Copyright 2017 Albert Santos.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+define(function() {
+
+    'use strict';
+
+/**
+ * This module contains classes for managing assets, in particular the loading and
+ * caching of assets.
+ * @exports LBAssets
+ */
+var LBAssets = LBAssets || {};
+
+/**
+ * This is our basic asset loader, it asynchronously loads and caches assets.
+ * @constructor
+ * @returns {module:LBAssets.Loader}
+ */
+LBAssets.Loader = function() {
+    this.jsonAssets = {};
+};
+
+LBAssets.Loader.prototype = {
+    constructor: LBAssets.Loader
+};
+
+/**
+ * Loads a JSON object.
+ * @param {String} assetName    The name used to identify the asset.
+ * @param {String} fileName The asset location relative to the site root.
+ * @param {Function} [onLoad]   Optional function to call when the asset has successfully been
+ * loaded, the JSON object is passed as the argument.
+ * @param {Function} [onProgress]   Optional progress function.
+ * @param {Function} [onError]  Optional error function.
+ * @returns {module:LBAssets.Loader}   this.
+ */
+LBAssets.Loader.prototype.loadJSON = function(assetName, fileName, onLoad, onProgress, onError) {
+    if (this.jsonAssets[assetName]) {
+        if (onLoad) {
+            onLoad(this.jsonAssets[assetName]);
+        }
+        return this;
+    }
+    
+    onError = onError || function() {
+        console.error("LBAssets.Loader.loadJSON() failed to load '" + fileName + "'.");
+    };
+    
+    var me = this;
+    var request = new XMLHttpRequest();
+    request.open("GET", fileName);
+    request.responseType = 'json';
+    request.onload = function() {
+        me.jsonAssets[assetName] = this.response;
+        onLoad(this.response);
+    };
+    request.onprogress = onProgress;
+    request.onerror = onError;
+    
+    request.send();
+    
+    return this;
+};
+
+/**
+ * Retrieves a JSON asset.
+ * @param {String} assetName    The name of the asset.
+ * @returns {Object}    The JSON object, undefined if it hasn't been successfully loaded.
+ */
+LBAssets.Loader.prototype.getJSON = function(assetName) {
+    return this.jsonAssets[assetName];
+};
+
+
+/**
+ * A class that manages the loading of multiple assets concurrently, calling a callback
+ * when all the assets have been loaded.
+ * &lt;p>
+ * Typical usage is:
+ *      var coordinator = new LBAssets.MultiLoadCoordinator();
+ *      coordinator.setup(function() {
+ *              console.log("Load Completed");
+ *          },
+ *          function() {
+ *              console.log("Load failed");
+ *          });
+ *      
+ *      coordinator.beginLoadCalls();
+ *      loader.loadJSON('abc', 'abc.json', coordinator.getOnLoadFunction(), null, coordinator.getOnError());
+ *      loader.loadJSON('def', 'def.json', coordinator.getOnLoadFunction(), null, coordinator.getOnError());
+ *      coordinator.endLoadCalls();
+ * 
+ * @constructor
+ * @returns {module:LBAssets.MultiLoadCoordinator}
+ */
+LBAssets.MultiLoadCoordinator = function() {
+    this._loaderCount = 0;
+    this.loadState = LBAssets.MultiLoadCoordinator.NOT_LOADED;
+};
+
+LBAssets.MultiLoadCoordinator.NOT_LOADED = 0;
+LBAssets.MultiLoadCoordinator.LOADING = 1;
+LBAssets.MultiLoadCoordinator.LOAD_COMPLETE = 2;
+LBAssets.MultiLoadCoordinator.LOAD_FAILED = 3;
+
+LBAssets.MultiLoadCoordinator.prototype = {
+    /**
+     * Sets up the coordinator, setting the functions to be called on completion and error.
+     * @param {Function} onComplete The function to be called on successful completion of all loads.
+     * @param {Function} onError    The function to be called on a load failure. This is called
+     *  after all the loaders have called either the onload() or onerror() function.
+     * @returns {undefined}
+     */
+    setup: function(onComplete, onError) {
+        this.onComplete = onComplete;
+        this.onError = onError;
+    },
+    
+    /**
+     * Call before starting loading, this locks the callbacks so the onError and onComplete
+     * functions are not called before the call to endLoadCalls().
+     * @returns {undefined}
+     */
+    beginLoadCalls: function() {
+        ++this._loaderCount;
+    },
+    
+    /**
+     * Call after all the loading has been started, this enables the callbacks to onError and
+     * onComplete.
+     * @returns {undefined}
+     */
+    endLoadCalls: function() {
+        this._markLoadCompleted();
+    },
+    
+    /**
+     * Retrieves the function to pass to the loader's onload event handler.
+     * @param {Function} [localOnLoad] Optional function that will get called before the
+     * function returned by this marks this as load completed.
+     * @returns {Function}  The onload handler function.
+     */
+    getOnLoadFunction: function(localOnLoad) {
+        ++this._loaderCount;
+        this.loadState = LBAssets.MultiLoadCoordinator.LOADING;
+        
+        var me = this;
+        return function() {
+            if (localOnLoad) {
+                localOnLoad.apply(null, arguments);
+            }
+            me._markLoadCompleted();
+        };
+    },
+    
+    
+    /**
+     * Retrieves the function to pass to the loader's onprogress event handler.
+     * @returns {Function}  The onprogress handler function.
+     */
+    getOnProgressFunction: function() {
+        return undefined;
+    },
+    
+    /**
+     * Retrieves the function to pass to the loader's onerror event handler.
+     * @param {Function} [localOnError] Optional function that will get called before the
+     * function returned by this marks this as load completed.
+     * @returns {Function}  The onerror handler function.
+     */
+    getOnErrorFunction: function(localOnError) {
+        var me = this;
+        return function() {
+            if (localOnError) {
+                localOnError.apply(null, arguments);
+            }
+            me._markLoadFailed();
+        };
+    },
+    
+    
+    /**
+     * Called by the onload handler function, marks the load as successful.
+     * @private
+     * @returns {undefined}
+     */
+    _markLoadCompleted: function() {
+        --this._loaderCount;
+        if (this._loaderCount === 0) {
+            this._finishLoad();
+        }
+    },
+    
+    /**
+     * Called by the onerror handler function, marks the load as failed.
+     * @returns {undefined}
+     */
+    _markLoadFailed: function() {
+        --this._loaderCount;
+        this.loadState = LBAssets.MultiLoadCoordinator.LOAD_FAILED;
+        if (this.loaderCount === 0) {
+            this._finishLoad();
+        }
+    },
+    
+    /**
+     * Finishes up the loading, this is where the onComplete and onError functions
+     * passed to {@link module:LBAssets.MultiLoadCoordinator#setup} are called.
+     * @private
+     * @returns {undefined}
+     */
+    _finishLoad: function() {
+        if (this.loadState !== LBAssets.MultiLoadCoordinator.LOAD_FAILED) {
+            this.loadState = LBAssets.MultiLoadCoordinator.LOAD_COMPLETE;
+            if (this.onComplete) {
+                this.onComplete();
+            }
+        }
+        else if (this.onError) {
+            this.onError();
+        }
+        
+        this.onComplete = undefined;
+        this.onError = undefined;
+    },
+    
+    constructor: LBAssets.MultiLoadCoordinator
+};
+
+
+return LBAssets;
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-LBAssets.html">LBAssets</a></li><li><a href="module-LBCamera.html">LBCamera</a></li><li><a href="module-LBCannonPhysicsLink.html">LBCannonPhysicsLink</a></li><li><a href="module-LBCannonUtil.html">LBCannonUtil</a></li><li><a href="module-LBControls.html">LBControls</a></li><li><a href="module-LBCurve.html">LBCurve</a></li><li><a href="module-LBDebug.html">LBDebug</a></li><li><a href="module-LBFoils.html">LBFoils</a></li><li><a href="module-LBGeometry.html">LBGeometry</a></li><li><a href="module-LBMath.html">LBMath</a></li><li><a href="module-LBParticles.html">LBParticles</a></li><li><a href="module-LBPhysics.html">LBPhysics</a></li><li><a href="module-LBPhysicsLink.html">LBPhysicsLink</a></li><li><a href="module-LBRandom.html">LBRandom</a></li><li><a href="module-LBShaders.html">LBShaders</a></li><li><a href="module-LBSpherical.html">LBSpherical</a></li><li><a href="module-LBTracking.html">LBTracking</a></li><li><a href="module-LBUI3d.html">LBUI3d</a></li><li><a href="module-LBUtil.html">LBUtil</a></li><li><a href="module-LBVolume.html">LBVolume</a></li></ul><h3>Classes</h3><ul><li><a href="-_anonymous_-LBPhaser.Arrow.html">Arrow</a></li><li><a href="-_anonymous_-LBPhaser.ArrowStyle.html">ArrowStyle</a></li><li><a href="-_anonymous_-LBPhaser.Env.html">Env</a></li><li><a href="LBPhaser.Dial.html">Dial</a></li><li><a href="LBPhaser.P2Link.html">P2Link</a></li><li><a href="LBPhaser.Project3D.html">Project3D</a></li><li><a href="LBPhaser.Project3DPanels.html">Project3DPanels</a></li><li><a href="LBPhaser.Slider.html">Slider</a></li><li><a href="LBSailSim.Env.html">Env</a></li><li><a href="LBSailSim.FoilInstance.html">FoilInstance</a></li><li><a href="LBSailSim.Hull.html">Hull</a></li><li><a href="LBSailSim.Phaser2DView.html">Phaser2DView</a></li><li><a href="LBSailSim.Phaser3DView.html">Phaser3DView</a></li><li><a href="LBSailSim.PhaserSailEnv.html">PhaserSailEnv</a></li><li><a href="LBSailSim.PhaserView.html">PhaserView</a></li><li><a href="LBSailSim.Propulsor.html">Propulsor</a></li><li><a href="LBSailSim.RudderController.html">RudderController</a></li><li><a href="LBSailSim.SailCamberCurve.html">SailCamberCurve</a></li><li><a href="LBSailSim.SailController.html">SailController</a></li><li><a href="LBSailSim.SailEnvTHREE.html">SailEnvTHREE</a></li><li><a href="LBSailSim.SailFoil.html">SailFoil</a></li><li><a href="LBSailSim.SailInstance.html">SailInstance</a></li><li><a href="LBSailSim.SailSlice.html">SailSlice</a></li><li><a href="LBSailSim.SailSurface.html">SailSurface</a></li><li><a href="LBSailSim.ThrottleController.html">ThrottleController</a></li><li><a href="LBSailSim.TriangleSailShaper.html">TriangleSailShaper</a></li><li><a href="LBSailSim.Vessel.html">Vessel</a></li><li><a href="LBSailSim.Wakes3D.html">Wakes3D</a></li><li><a href="LBSailSim.Water.html">Water</a></li><li><a href="LBSailSim.WaterShader.html">WaterShader</a></li><li><a href="LBSailSim.Wind.html">Wind</a></li><li><a href="LBSailSim.WindPuff.html">WindPuff</a></li><li><a href="module-LBAssets.Loader.html">Loader</a></li><li><a href="module-LBAssets.MultiLoadCoordinator.html">MultiLoadCoordinator</a></li><li><a href="module-LBCamera.Camera.html">Camera</a></li><li><a href="module-LBCamera.OrthographicCamera.html">OrthographicCamera</a></li><li><a href="module-LBCamera.PerspectiveCamera.html">PerspectiveCamera</a></li><li><a href="module-LBCannonPhysicsLink.Link.html">Link</a></li><li><a href="module-LBControls.CSplineValueMapper.html">CSplineValueMapper</a></li><li><a href="module-LBControls.SmoothController.html">SmoothController</a></li><li><a href="module-LBControls.SteppedController.html">SteppedController</a></li><li><a href="module-LBCurve.QuadraticBezier2.html">QuadraticBezier2</a></li><li><a href="module-LBDebug.DataLog.html">DataLog</a></li><li><a href="module-LBDebug.DataLogField.html">DataLogField</a></li><li><a href="module-LBDebug.FieldsDataLogField.html">FieldsDataLogField</a></li><li><a href="module-LBFoils.ClCd.html">ClCd</a></li><li><a href="module-LBFoils.ClCdCurve.html">ClCdCurve</a></li><li><a href="module-LBFoils.ClCdInterp.html">ClCdInterp</a></li><li><a href="module-LBFoils.ClCdStall.html">ClCdStall</a></li><li><a href="module-LBFoils.Foil.html">Foil</a></li><li><a href="module-LBGeometry.Color.html">Color</a></li><li><a href="module-LBGeometry.Euler.html">Euler</a></li><li><a href="module-LBGeometry.Face3.html">Face3</a></li><li><a href="module-LBGeometry.Geometry.html">Geometry</a></li><li><a href="module-LBGeometry.Line2.html">Line2</a></li><li><a href="module-LBGeometry.Line3.html">Line3</a></li><li><a href="module-LBGeometry.Matrix3.html">Matrix3</a></li><li><a href="module-LBGeometry.Matrix4.html">Matrix4</a></li><li><a href="module-LBGeometry.Object3D.html">Object3D</a></li><li><a href="module-LBGeometry.Plane.html">Plane</a></li><li><a href="module-LBGeometry.Quaternion.html">Quaternion</a></li><li><a href="module-LBGeometry.Rect.html">Rect</a></li><li><a href="module-LBGeometry.Sphere.html">Sphere</a></li><li><a href="module-LBGeometry.Vector2.html">Vector2</a></li><li><a href="module-LBGeometry.Vector3.html">Vector3</a></li><li><a href="module-LBMath.CSpline.html">CSpline</a></li><li><a href="module-LBMath.DegRange.html">DegRange</a></li><li><a href="module-LBParticles.Cache.html">Cache</a></li><li><a href="module-LBParticles.ParticleSystem.html">ParticleSystem</a></li><li><a href="module-LBPhysics.CoordSystemState.html">CoordSystemState</a></li><li><a href="module-LBPhysics.CoordTransforms.html">CoordTransforms</a></li><li><a href="module-LBPhysics.Resultant3D.html">Resultant3D</a></li><li><a href="module-LBPhysics.RigidBody.html">RigidBody</a></li><li><a href="module-LBPhysicsLink.Link.html">Link</a></li><li><a href="module-LBRandom.NormalGenerator.html">NormalGenerator</a></li><li><a href="module-LBRandom.UniformGenerator.html">UniformGenerator</a></li><li><a href="module-LBShaders.Computer.html">Computer</a></li><li><a href="module-LBShaders.TargetCopier.html">TargetCopier</a></li><li><a href="module-LBSpherical.CoordinatesRAA.html">CoordinatesRAA</a></li><li><a href="module-LBSpherical.Orientation.html">Orientation</a></li><li><a href="module-LBTracking.ValueFollower.html">ValueFollower</a></li><li><a href="module-LBUI3d.App3D.html">App3D</a></li><li><a href="module-LBUI3d.CameraController.html">CameraController</a></li><li><a href="module-LBUI3d.CameraLimits.html">CameraLimits</a></li><li><a href="module-LBUI3d.ChaseCameraController.html">ChaseCameraController</a></li><li><a href="module-LBUI3d.LocalPOVCameraController.html">LocalPOVCameraController</a></li><li><a href="module-LBUI3d.Scene3D.html">Scene3D</a></li><li><a href="module-LBUI3d.View3D.html">View3D</a></li><li><a href="module-LBUtil.RollingBuffer.html">RollingBuffer</a></li><li><a href="module-LBVolume.Cuboid.html">Cuboid</a></li><li><a href="module-LBVolume.Tetra.html">Tetra</a></li><li><a href="module-LBVolume.TriBiPyramid.html">TriBiPyramid</a></li><li><a href="module-LBVolume.TriPrism.html">TriPrism</a></li><li><a href="module-LBVolume.Volume.html">Volume</a></li></ul><h3>Namespaces</h3><ul><li><a href="LBPhaser.html">LBPhaser</a></li><li><a href="LBSailSim.html">LBSailSim</a></li><li><a href="LBThreeJS.html">LBThreeJS</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Detector">Detector</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Nov 11 2017 20:48:25 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
