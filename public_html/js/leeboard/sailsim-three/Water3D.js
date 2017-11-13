@@ -457,6 +457,13 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
                     '   vec4 fullSample = texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.z + distortion );',
                     '	vec3 reflectionSample = fullSample.rgb;',
 
+        '   float delta = 0.2;',
+        '   vec3 avgReflectionSample = texture2D(mirrorSampler, (mirrorCoord.xy + vec2(delta,0.0)) / mirrorCoord.z + distortion).rgb',
+        '           + texture2D(mirrorSampler, (mirrorCoord.xy + vec2(0.,delta)) / mirrorCoord.z + distortion).rgb',
+        '           + texture2D(mirrorSampler, (mirrorCoord.xy + vec2(0.,-delta)) / mirrorCoord.z + distortion).rgb',
+        '           + texture2D(mirrorSampler, (mirrorCoord.xy + vec2(-delta, 0.)) / mirrorCoord.z + distortion).rgb;',
+        '   reflectionSample = (reflectionSample + avgReflectionSample / 4.) * 0.4;',
+
                     '	float theta = max( dot( eyeDirection, surfaceNormal ), 0.0 );',
                     '	float rf0 = 0.3;',
                     '	float reflectance = rf0 + ( 1.0 - rf0 ) * pow( ( 1.0 - theta ), 5.0 );',

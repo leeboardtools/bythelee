@@ -121,7 +121,7 @@
                     "name": "decWindIndicator",
                     "mass": 0,
                     "obj3D": {
-                        "position" : { "x": 2.0, "y": 0.0, "z": 0.55 },
+                        "position" : { "x": 2.0, "y": 0.0, "z": 0.73 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                     },
                     "threeModel": "models/tubby/stbd_wind_indicator.json"
@@ -221,7 +221,7 @@
                     "massRadius": 4,
                     "velocityTerms": 3,
                     "obj3D": {
-                        "position" : { "x": 1.7, "y": 0, "z": 1.0 },
+                        "position" : { "x": 1.65, "y": 0, "z": 1.0 },
                         "rotation": { "exd": 0, "eyd": 0, "ezd": 0 }
                         },
                     "threeModel": "models/tubby/mainsail.json",

@@ -111,11 +111,8 @@ Hull windage
 Draggable controls:
 
 
-Animate water
 
-Sailing boundaries
-
-
+Add sun position calculator, based on a given time of day and location.
 
 
 Much Later:
