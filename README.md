@@ -1,6 +1,6 @@
 # README #
 
-This is the home of **By The Lee**, LeeboardTools' little Javascript sailing simulator. The goal is to eventually have a sailing simulation engine that can be used for various purposes, such as illustrating the various forces that occur in a sailboat, or even just showing how a sailboat behaves in various scenarios.
+This is the home of **By The Lee**, LeeboardTools' Javascript sailing simulator. The goal is to eventually have a sailing simulation engine that can be used for various purposes, such as illustrating the various forces that occur in a sailboat, or even just showing how a sailboat behaves in various scenarios.
 
 And of course, maybe one day it will also be used to create a game or two for those off-season months.
 
@@ -9,37 +9,53 @@ At the moment the **By The Lee** app can be run from http://leeboardtools.github
 ## The Executive Summary ##
 **By The Lee** is written entirely in Javascript. The app is separated into a core library, a sailing simulator engine and a UI.
 
-The sailing simulator is 3D simulator. It maintains the state of the boats in 3D space, and calculates the various sailing forces in 3D. However, it does not implement an actual physics engine. Instead, it relies upon a host to take the forces and generate the appropriate accelerations and perform the integration of accelerations and velocities as well as resolve any collisions.
+The sailing simulator is a 3D simulator. It maintains the state of the boats in 3D space, and calculates the various sailing forces in 3D. However, it does not implement an actual physics engine. Instead, it relies upon an open source physics engine to take the forces and generate the appropriate accelerations and perform the integration of accelerations and velocities as well as resolve any collisions. It also relies upon an open source 3D library to provide the much of the 3D mathematics (which also ends up providing the 3D UI support as well).
 
 The following open source Javascript libraries are currently used:
 
-* [three.js](https://threejs.org/) is now the primary 3D framework. Because of the way **By The Lee** started (it was based on [Phaser CE](https://github.com/photonstorm/phaser-ce/blob/master/README.md), the files in the core and sailing simulator components provide an encapsulation of three.js. For example, there's core/Geometry-THREE.js, which defines LBGeometry.Vector3 amongst other objects, as an enhanced alias for THREE.Vector3.
+* [three.js](https://threejs.org/) is now the primary 3D framework. Because of the way **By The Lee** started (it was originally based on [Phaser CE](https://github.com/photonstorm/phaser-ce/blob/master/README.md), the files in the core and sailing simulator components provide an encapsulation of three.js. For example, there's core/Geometry-THREE.js, which defines LBGeometry.Vector3 amongst other objects, as an enhanced alias for THREE.Vector3.
 
 * [cannon.js](https://github.com/schteppe/cannon.js/blob/master/README.markdown) is the 3D physics engine.
 
-* [RequireJS](http://requirejs.org/) is used to manage dependencies.
+* [RequireJS](http://requirejs.org/) is used to manage Javascript module dependencies.
 
 * [tween.js](https://github.com/tweenjs/tween.js/) is used to provide tweening, such as the automatic motion tracking of the wake particles.
+
+* [QUnit](http://qunitjs.com/) is used as the unit test framework.
 
 The HUD display and controls are all implemented using HTML elements.
 
 
 ## Development ##
-I'm currently using NetBeans IDE 8.1 as my IDE. There's nothing special about it, other than offering a Google Chrome plug-in to aid in debugging, though I normally use Firefox simply because I like its debugger better (well, except for that it won't display getter/setter based properties).
+I'm currently using NetBeans IDE 8.1 as my IDE. There's nothing special about it, other than offering a Google Chrome plug-in to aid in debugging, though I generally just use the developer tools in the browser anyway.
 
 
 ### Code Organization ###
-The Javascript code is all within the public\_html/js folder. With the exception of main.js, all the library code is within the public\_html/js/leeboard folder. main.js is the main entry point to **By The Lee**.
+The Javascript code is all within the public\_html/js folder. With the exception of the main entry point to **By The Lee**, main-ThreeJS.js, and the configuration file for RequireJS, require-js-config.js, all of our code is in the leeboard folder.
 
-Along with main.js are phaser.min.js, phaser.js, three.min.js, and three.js. These are the files for Phaser and three.js, respectively. The .min versions are the minimized versions, which are what should be used in the live version of the apps, while the other versions are the 'normal' versions which can easily be stepped into in the debugger.
+The core portion of the library is in public\_html/js/leeboard/core. These files do not depend on any leeboardtools files outside of core. In fact, the files that depend on any outside code are suffixed with the library, for example Camera-THREE.js and Geometry-THREE.js both depend upon three.js.
 
-The core portion of the library is in public\_html/js/leeboard/core.
+Here's a summary of the source folders in public\_html/js/leeboard/sailsim:
+* cannon: Stuff for interfacing with the cannon.js physics engine.
+* core: The core leeboardtools library, these files do not depend upon any other leeboardtools files.
+* phaser: Stuff for interfacing with the Phaser library, no longer used.
+* sailsim: The main sailing simulator files, these provide the physics modeling of the sailing simulation.
+* sailsim-phaser: Old stuff for the Phaser based sailing simulation, no longer used.
+* sailsim-three: The 3D UI modeling for the sailing simulator, these may directly use three.js.
+* three-js-extras: Files from three.js that we use that aren't actually part of three.js / three.min.js. These typically come from the three.js examples at https://github.com/mrdoob/three.js/tree/dev/examples.
+* ui3d: These provide more general purpose 3D UI modeling capabilities, and directly use three.js.
 
-The sailing simulator is in public\_html/js/leeboard/sailsim.
+###Other Folders Of Interest###
+Within public\_html we have:
+* css: Obvious
+* data: This pretty much contains JSON files for describing stuff like boats, lift/drag curves, and the sailing environment. This does not include Blender models.
+* images: Most of the images here are leftovers from the old Phaser version.
+* images/three-js: This contains images taken from the three.js examples.
+* models: This holds the Blender models (which have to be exported to JSON format via the Blender plug-in at https://github.com/mrdoob/three.js/tree/dev/utils/exporters/blender. The models for a particular boat should be placed into a sub-folder, such as Tubby.
+* test: These are the unit test files, they're based on QUnit (http://qunitjs.com/).
+* textures: Various textures.
+* textures/three-js: This contains textures taken from the three.js examples.
 
-The third party libraries are in public\_html/js/lib.
-
-Image files copied from ThreeJS are in public\_html/images/three-js.
 
 
 ### Unit Tests ###
@@ -60,7 +76,7 @@ The docs folder will then be populated with the appropriate HTML files for the d
 
 
 ### The Release ###
-At the moment I don't use a minimizer, some day I will.
+At the moment I don't use a minimizer, maybe some day I will.
 Other than that, the release process consists of copying the files from public\_html to the root folder of the leeboardtools.github.io repository.
 
 Some day, such as when I get around to using a minimizer, I'll automate this...
