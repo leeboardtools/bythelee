@@ -90,6 +90,8 @@
                 "bwl": 2.13,
                 "tc": 0.15,
                 "k": 200e-6,
+                "buoyancyDamping": 0.75,
+                "swcScale": 1.3,
                 "debugForces": true
             },
             "windIndicators": [

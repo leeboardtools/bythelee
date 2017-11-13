@@ -352,9 +352,25 @@ LBSailSim.Hull.prototype = {
         
         // And buoyancy...
         this.forceBuoyancy = this.immersedVolume * this.vessel.sailEnv.water.density * this.vessel.sailEnv.gravity;
+        // Add some damping...
+        if (this.buoyancyDamping) {
+            // Based on the linear damping used in cannon/bullet, which is:
+            //      vNew = v * (1 - damping)^(dt)
+            // Since we work in forces, we want to generate a force that has a similar effect.
+            // Working backwards:
+            //      F = mass * accel
+            //      accel = deltaV / dt
+            //      deltaV = vNew - v
+            // We get:
+            //      deltaV = v * (1 - damping)^(dt) - v
+            var deltaV = this.vessel.worldLinearVelocity.z * (Math.pow(1 - this.buoyancyDamping, dt) - 1);
+            var accel = -deltaV / dt;
+            this.forceBuoyancy -= accel * this.vessel.getTotalMass();
+        }
+
         force.set(0, 0, this.forceBuoyancy);
         resultant.addForce(force, this.worldCenterOfBuoyancy);
-
+        
         this.handleDebugFields(resultant);
         return resultant;
     },
@@ -393,7 +409,10 @@ LBSailSim.Hull.prototype = {
         this.k = data.k || this.k;
         
         this.swc = data.swc || LBSailSim.Hull.estimateSW(this);
+        this.swc *= data.swcScale || 1;
         this.swcnh = this.swc;
+        
+        this.buoyancyDamping = data.buoyancyDamping || 0;
         
         this.debugForces = data.debugForces;
         

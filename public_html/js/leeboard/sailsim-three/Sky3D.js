@@ -84,12 +84,12 @@ LBSailSim.Sky3D.prototype = {
         
         var uniforms = this.sky.uniforms;
         uniforms.turbidity.value = 3.5;
-        uniforms.rayleigh.value = 1.5;
-        uniforms.luminance.value = 0.5;
+        uniforms.rayleigh.value = 0.9;
+        uniforms.luminance.value = 0.8;
         uniforms.mieCoefficient.value = 0.005;
         uniforms.mieDirectionalG.value = 0.8;
         this._sunCoords = new LBSpherical.CoordinatesRAE(radius);
-        this.setSunAzimuthAltitudeDeg(90, 20);
+        this.setSunAzimuthAltitudeDeg(40, 30);
         return true;
     },
     

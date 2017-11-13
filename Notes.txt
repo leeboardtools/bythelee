@@ -31,9 +31,11 @@ are both checked.
 
 TODO:
 
-Add scenery, range limits.
+Fix excessive pitch oscillations.
 
 Make buoys floating.
+
+Add scenery, range limits.
 
 Add time course.
 
