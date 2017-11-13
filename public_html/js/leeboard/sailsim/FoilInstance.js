@@ -50,6 +50,20 @@ LBSailSim.FoilInstance = function(foil, obj3D, mass, centerOfMass) {
     this.rotationOffsetDegs = [0, 0, 0];
     
     /**
+     * If defined, the minimum z coordinate for which forces will be generated.
+     * @member {Number}
+     */
+    this.minZ = undefined;
+    
+    
+    /**
+     * If defined, the maximum z coordinate for which forces will be generated.
+     * @member {Number}
+     */
+    this.maxZ = undefined;
+
+    
+    /**
      * Object holding the details from the foil, see {@link module:LBFoils.Foil#calcWorldForce}.
      */
     this.foilDetails = {
@@ -94,6 +108,13 @@ LBSailSim.FoilInstance.prototype.updateFoilForce = function(dt, flow) {
     var pos = LBSailSim.FoilInstance._workingPos;
     pos.set(0, 0, this.foil.sliceZ);
     pos.applyMatrix4(this.coordSystem.worldXfrm);
+    
+    if ((this.minZ !== undefined) && (pos.z < this.minZ)) {
+        return this;
+    }
+    if ((this.maxZ !== undefined) && (pos.z > this.maxZ)) {
+        return this;
+    }
     
     var qInf = LBSailSim.FoilInstance._workingQInf = LBSailSim.getFlowVelocity(flow, pos, LBSailSim.FoilInstance._workingQInf);
     var resultant = LBSailSim.FoilInstance._workingResultant = this.foil.calcWorldForce(flow.density, qInf,

@@ -19,7 +19,7 @@
  * This is the catch-all file that loads all the LBSailSim dependencies.
  */
 
-define(['lbsailsimbase', 'lbutil', 'lbdelft', 'lbfoilinstance', 'lbhull', 'lbpropulsor', 'lbsail', 'lbsailenv', 'lbvessel'], 
+define(['lbsailsimbase', 'lbutil', 'lbboundaries', 'lbdelft', 'lbfoilinstance', 'lbhull', 'lbpropulsor', 'lbsail', 'lbsailenv', 'lbvessel'], 
 function(LBSailSim, LBUtil) {
 
     'use strict';

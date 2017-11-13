@@ -522,6 +522,13 @@ LBSailSim.Vessel.prototype._createAndLoadFoilInstance = function(data, isSail) {
         }
     }
     
+    if (isSail) {
+        foilInstance.minZ = 2;
+    }
+    else {
+        foilInstance.maxZ = 0;
+    }
+    
     return foilInstance.load(data, this.sailEnv);
 };
 

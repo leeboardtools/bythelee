@@ -23,9 +23,12 @@ function(LBSailSim, LBUtil, LBMath, LBGeometry) {
 /**
  * The water manager, its primary responsibility is water currents.
  * @constructor
+ * @param {LBSailSim.SailEnv} sailEnv The sailing environment this belongs to.
  * @returns {LBSailSim.Water}
  */
-LBSailSim.Water = function() {
+LBSailSim.Water = function(sailEnv) {
+    this.sailEnv = sailEnv;
+    
     /**
      * Density of the water, fresh water is ~1000, salt water is ~1025 kg/m^3
      */
@@ -36,6 +39,8 @@ LBSailSim.Water = function() {
      */
     this.kViscosity = 1e-6;
 };
+
+var _workingVel = new LBGeometry.Vector2();
 
 LBSailSim.Water.prototype = {
     constructor: LBSailSim.Water,
@@ -54,6 +59,12 @@ LBSailSim.Water.prototype = {
         //vy = 0.1;
         //vx = 0.4;
         //vx = -0.5;
+        if (this.sailEnv && this.sailEnv.boundaries) {
+            if (this.sailEnv.boundaries.getBoundaryCurrent(_workingVel)) {
+                vx = _workingVel.x;
+                vy = _workingVel.y;
+            }
+        }
 
         if (!vel) {
             return new LBGeometry.Vector3(vx, vy, 0);

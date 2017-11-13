@@ -586,13 +586,21 @@ LBMyApp.prototype.updateHUDWind = function() {
     var force = LBSailSim.Wind.getForceForKnots(windSpeed);
     var element = document.getElementsByClassName("wind_speed_indicator")[0];
     for (var i = 0; i <= force; ++i) {
-        var led = element.getElementsByClassName('wind_speed_led_f' + i)[0];
+        var leds = element.getElementsByClassName('wind_speed_led_f' + i); 
+        if (!leds || !leds.length) {
+            continue;
+        }
+        var led = leds[0];
         var style = window.getComputedStyle(led, null);
         led.style.backgroundColor = setColorFunctionAlpha(style.backgroundColor, ' 1.0');
     }
     
     for (var i = force + 1; i <= 8; ++i) {
-        var led = element.getElementsByClassName('wind_speed_led_f' + i)[0];
+        var leds = element.getElementsByClassName('wind_speed_led_f' + i); 
+        if (!leds || !leds.length) {
+            continue;
+        }
+        var led = leds[0];
         var style = window.getComputedStyle(led, null);
         led.style.backgroundColor = setColorFunctionAlpha(style.backgroundColor, ' 0.1');
     }

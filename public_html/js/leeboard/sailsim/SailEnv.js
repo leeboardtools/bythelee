@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-define(['lbutil', 'lbmath', 'lbgeometry', 'lbphysics', 'lbfoils', 'lbsailsimbase', 'lbassets', 'lbvessel', 'lbwind', 'lbwater'], 
+define(['lbutil', 'lbmath', 'lbgeometry', 'lbphysics', 'lbfoils', 'lbsailsimbase', 'lbassets', 'lbvessel', 'lbwind', 'lbwater', 'lbboundaries'], 
 function(LBUtil, LBMath, LBGeometry, LBPhysics, LBFoils, LBSailSim, LBAssets) {
     
     'use strict';
@@ -30,8 +30,9 @@ function(LBUtil, LBMath, LBGeometry, LBPhysics, LBFoils, LBSailSim, LBAssets) {
 LBSailSim.Env = function(assetLoader) {
     this.assetLoader = assetLoader || new LBAssets.Loader();
     
-    this.wind = new LBSailSim.Wind();
-    this.water = new LBSailSim.Water();
+    this.boundaries = new LBSailSim.Boundaries();
+    this.wind = new LBSailSim.Wind(this);
+    this.water = new LBSailSim.Water(this);
     
     this.clCdCurves = [];
 
@@ -78,7 +79,7 @@ LBSailSim.Env = function(assetLoader) {
     
     this.loadCoordinator = new LBAssets.MultiLoadCoordinator();
     
-    this.floatingObjectDefs = {};
+    this.objectDefs = {};
     this.floatingObjects = [];
     this.floatingObjectsByClassification = {};
 };
@@ -128,7 +129,7 @@ LBSailSim.Env.prototype = {
         this.boatDatas = {};
         this.boatsByType = {};
         
-        this.floatingObjectDefs = {};
+        this.objectDefs = {};
         this.floatingObjects.length = 0;
         this.floatingObjectsByClassification = {};
     },
@@ -167,6 +168,10 @@ LBSailSim.Env.prototype = {
             this.loadCoordinator.getOnProgressFunction(),
             this.loadCoordinator.getOnErrorFunction());
         
+        if (data.objectDefs) {
+            data.objectDefs.forEach(this._loadObjectDef, this);
+        }
+
         if (data.boundaries) {
             this._loadBoundaries(data.boundaries);
         }
@@ -189,30 +194,27 @@ LBSailSim.Env.prototype = {
     },
     
     _loadBoundaries: function(data) {
-        
+        this.boundaries = LBSailSim.Boundaries.createFromData(this, data);
     },
     
     _loadFloating: function(data) {
-        if (data.objectDefs) {
-            data.objectDefs.forEach(this._loadFloatingObjectDef, this);
-        }
         if (data.objects) {
-            data.objects.forEach(this._loadFloatingObject, this);
+            data.objects.forEach(this.loadFloatingObject, this);
         }
     },
     
-    _loadFloatingObjectDef: function(data) {
-        this.floatingObjectDefs[data.name] = data;
+    _loadObjectDef: function(data) {
+        this.objectDefs[data.name] = data;
     },
     
-    _loadFloatingObject: function(data) {
+    loadFloatingObject: function(data) {
         // Get the object definition and load the object from it.
         if (!data.def) {
             console.error("Could not load the floating object '" + data.name + "', data.def was not defined.");
             return;
         }
         
-        var objectDef = this.floatingObjectDefs[data.def];
+        var objectDef = this.objectDefs[data.def];
         if (!objectDef) {
             console.error("Could not load the floating object '" + data.name + "', the data definition '" + data.def + "' was not defined.");
             return;
@@ -569,6 +571,7 @@ LBSailSim.Env.prototype = {
      * @returns {object}    this.
      */
     update: function(dt) {
+        this.boundaries.update(dt);
         this.wind.update(dt);
         this.water.update(dt);
         return this;

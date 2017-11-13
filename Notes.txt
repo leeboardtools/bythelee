@@ -31,13 +31,18 @@ are both checked.
 
 TODO:
 
-Fix excessive pitch oscillations.
+Sailing Boundaries:
+Need to tweak what happens beyond the boundaries. Right now the counteracting wind is added to the existing
+wind, which may cause the overall wind to drop to near zero just beyond the boundaries.
+
 
 Make buoys floating.
 
-Add scenery, range limits.
+Add scenery.
 
 Add time course.
+
+Add MOB
 
 Add jib.
 

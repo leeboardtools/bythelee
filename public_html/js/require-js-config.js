@@ -49,6 +49,7 @@ var require = {
         'lbphaserproject3d': 'leeboard/phaser/Project3D',
         'lbphaser': 'leeboard/phaser/LBPhaser',
         
+        'lbboundaries': 'leeboard/sailsim/Boundaries',
         'lbdelft': 'leeboard/sailsim/Delft',
         'lbfoilinstance': 'leeboard/sailsim/FoilInstance',
         'lbhull': 'leeboard/sailsim/Hull',
@@ -69,8 +70,6 @@ var require = {
         'lbwakes3d': 'leeboard/sailsim-three/Wakes3D',
         'lbwater3d': 'leeboard/sailsim-three/Water3D',
         'lbwind3d': 'leeboard/sailsim-three/Wind3D',
-        
-        'lbthreejs': 'leeboard/three-js/ThreeJSUtil',
         
         'three-detector': 'leeboard/three-js-extras/Detector',
         'three-gpuparticlesystem': 'leeboard/three-js-extras/GPUParticleSystem',

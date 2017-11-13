@@ -26,9 +26,12 @@ function(LBSailSim, LBUtil, LBMath, LBGeometry, LBRandom) {
 /**
  * The wind manager.
  * @constructor
+ * @param {LBSailSim.SailEnv} sailEnv The sailing environment this belongs to.
  * @returns {LBSailSim.Wind}
  */
-LBSailSim.Wind = function() {
+LBSailSim.Wind = function(sailEnv) {
+    this.sailEnv = sailEnv;
+    
     /**
      * The density.
      * @member {Number}
@@ -323,16 +326,18 @@ LBSailSim.Wind.prototype = {
      * @returns {object}    The object containing the velocity.
      */
     getFlowVelocity: function(x, y, z, vel) {
-        var speed = this.baseMPS;
-        var vx = speed * this.averageToDir.x;
-        var vy = speed * this.averageToDir.y;
+        vel = vel || new LBGeometry.Vector3();
         
-        if (!vel) {
-            return new LBGeometry.Vector3(vx, vy);
-        }
-        vel.x = vx;
-        vel.y = vy;
+        var speed = this.baseMPS;
+        vel.x = speed * this.averageToDir.x;
+        vel.y = speed * this.averageToDir.y;
         vel.z = 0;
+        
+        if (this.sailEnv && this.sailEnv.boundaries) {
+            if (this.sailEnv.boundaries.getBoundaryWindVel(x, y, _workingVel)) {
+                vel.add(_workingVel);
+            }
+        }
         
         if (x < this.minActivePosition.x) {
             this.minActivePosition.x = x;

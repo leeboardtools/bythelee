@@ -130,6 +130,9 @@ LBSailSim.Delft.calcWettedSurfaceHeelCorrection = function(hull) {
     coefs.length = 0;
 
     var deg = Math.abs(hull.heelAngleDeg);
+    if (deg > 45) {
+        deg = 45;
+    }
     for (var i = 0; i < LBSailSim.Delft.wettedSurfaceHeelInterps.length; ++i) {
         coefs.push(LBSailSim.Delft.wettedSurfaceHeelInterps[i].interpolate(deg));
     }
