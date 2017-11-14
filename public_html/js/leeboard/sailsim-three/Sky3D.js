@@ -78,8 +78,17 @@ LBSailSim.Sky3D.prototype = {
     },
     
     loadSkyShader: function() {
+        // TEST!!!
+        //return false;
+        
+        
         var radius = this.sailEnv.horizonDistance;
-        this.sky = new THREE.Sky(radius);
+        this.sky = new THREE.Sky({
+            radius: radius,
+            //useBox: true,
+            widthSegments: 4,
+            heightSegments: 2
+        });
         this.scene3D.add(this.sky.mesh);
         
         var uniforms = this.sky.uniforms;

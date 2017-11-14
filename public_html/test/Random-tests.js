@@ -48,4 +48,32 @@ QUnit.test( "normal", function( assert ) {
     testNormal(assert, generator);
 });
 
+
+function testRunningAvg(assert, runningAvg, valueToAdd, refAvg, refCount, msg) {
+    msg = msg || "";
+    
+    assert.equal(runningAvg.addValue(valueToAdd), refAvg, "addValue " + msg);
+    assert.equal(runningAvg.getAverage(), refAvg, "getAverage " + msg);
+    assert.equal(runningAvg.getValueCount(), refCount, "getValueCount " + msg);
+};
+
+QUnit.test("RunningAverage", function(assert) {
+    var runningAvg = new LBRandom.RunningAverage(4);
+    assert.equal(runningAvg.getAverage(), 0, "Average no values");
+    assert.equal(runningAvg.getValueCount(), 0, "Value count no values");
+    
+    testRunningAvg(assert, runningAvg, 10, 10, 1, "[10]");
+    testRunningAvg(assert, runningAvg, 12, 11, 2, "[10,12]");
+    testRunningAvg(assert, runningAvg, 14, 12, 3, "[10,12,14]");
+    testRunningAvg(assert, runningAvg, 16, 13, 4, "[10,12,14,16]");
+    testRunningAvg(assert, runningAvg, 18, 15, 4, "[12,14,16,18]");
+    
+    runningAvg.clear();
+    assert.equal(runningAvg.getAverage(), 0, "Average no values");
+    assert.equal(runningAvg.getValueCount(), 0, "Value count no values");
+    testRunningAvg(assert, runningAvg, -10, -10, 1, "[-10]");
+    testRunningAvg(assert, runningAvg, -12, -11, 2, "[-10,-12]");
+    
+});
+
 });

@@ -31,20 +31,51 @@ are both checked.
 
 TODO:
 
+Change SkyCube textures to be based on snapshots of sky shader.
+
 Sailing Boundaries:
 Need to tweak what happens beyond the boundaries. Right now the counteracting wind is added to the existing
 wind, which may cause the overall wind to drop to near zero just beyond the boundaries.
 
-
 Make buoys floating.
+
+Lateral hull resistance > longitudinal hull resistance - an angle vs. scale curve, 1 when angle is 0.
+
+Hull windage - just a Cl/Cd curve.
+
+
+Add transition region when limiting force due to z limits.
+
+
+Add timer:
+Current time
+Elapsed time
+Lap times
+
+
+Add Map View
+Need objects to be mapped. Include myBoat's course.
+    - Boundaries
+    - Buoys
+    - Goals, and which is the current goal, completed goals, future goals
+    - Sprites for everything.
+    - Own boat
+    - Other boats, objects, etc.
+
 
 Add scenery.
 
-Add time course.
+Add time courses: 
+    Windward-Leeward-Finish
+    Triangle
+    Olympic
 
-Add MOB
+Add Crew Over Board
 
 Add jib.
+
+
+Add ability to reset boat to start? Or right capsized boat after 10 seconds?
 
 Shut off wakes if FPS too low.
 
@@ -55,7 +86,6 @@ Get rid of the overloads of Vector2, Vector3 in Geometry-THREE.js?
 
 
 Camera Controllers:
-Fix ChaseCameraController elevation limit.
 
 
 Work on the timing in App3D._cycle().
@@ -79,15 +109,9 @@ Toggle Velocity Arrows
 Toggle Force Arrows
 
 
-Add minimum angle for lift to sail foil.
-
 Add ability to release rudder (space + CTRL? dbl-click rudder control?)
 
 Add 3D force arrows.
-
-Add Map View
-
-Need to limit the sail/keel forces when they get near the water surface (probably anything closer than 45 degrees).
 
 Need to track shifting child rigid bodies, but only when they change.
 Maybe we don't really care about the boom and rudder?
@@ -109,10 +133,6 @@ So, want to be able to update the vertices of the shape associated with a given 
 but only if the volume has moved or changed shape.
 More than anything, don't want to have to create new shapes.
 
-
-
-Lateral hull resistance > longitudinal hull resistance
-Hull windage
 
 
 Draggable controls:

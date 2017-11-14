@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-define(['lbmath'],
-function(LBMath) {
+define(['lbmath', 'lbutil'],
+function(LBMath, LBUtil) {
     'use strict';
 
 /**
@@ -144,6 +144,64 @@ LBRandom.variance = function(values, mean) {
 LBRandom.stdev = function(values, mean) {
     return Math.sqrt(LBRandom.variance(values, mean));
 };
+
+
+/**
+ * Object that tracks a running average.
+ * @constructor
+ * @param {Number} [maxSize=100]    The maximum number of values to track.
+ * @returns {LBRandom.RunningAverage}
+ */
+LBRandom.RunningAverage = function(maxSize) {
+    this._buffer = new LBUtil.RollingBuffer(maxSize || 100);
+    this.sum = 0;
+    this.average = 0;
+};
+
+LBRandom.RunningAverage.prototype = {
+    /**
+     * Resets the runnign average to have no values.
+     * @returns {LBRandom.RunningAverage}   this.
+     */
+    clear: function() {
+        this._buffer.clear();
+        this.sum = 0;
+        this.average = 0;
+        return this;
+    },
     
+    /**
+     * Adds a value to the running average.
+     * @param {Number} value    The value to add.
+     * @returns {Number}    The new average.
+     */
+    addValue: function(value) {
+        if (this._buffer.isFull()) {
+            this.sum -= this._buffer.popOldest();
+        }
+        this._buffer.push(value);
+        this.sum += value;
+        this.average = this.sum / this._buffer.getCurrentSize();
+        return this.average;
+    },
+    
+    /**
+     * @returns {Number}    The running average.
+     */
+    getAverage: function() {
+        return this.average;
+    },
+    
+    /**
+     * @returns {Number}    The number of values in the average.
+     */
+    getValueCount: function() {
+        return this._buffer.getCurrentSize();
+    },
+    
+    constructor: LBRandom.RunningAverage
+};
+
+
 return LBRandom;
 });

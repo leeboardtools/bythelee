@@ -18,9 +18,12 @@ if (this.require) {
 var THREE = require('three');
 }
 
-THREE.Sky = function (radius) {
+THREE.Sky = function (options) {
     
-    radius = radius || 450000;
+    options = options || {};
+    var radius = options.radius || 450000;
+    var widthSegments = options.widthSegments || 32;
+    var heightSegments = options.heightSegments || 15;
 
 	var skyShader = THREE.Sky.SkyShader;
 
@@ -33,7 +36,13 @@ THREE.Sky = function (radius) {
 		side: THREE.BackSide
 	} );
 
-	var skyGeo = new THREE.SphereBufferGeometry( radius, 32, 15 );
+    var skyGeo;
+    if (options.useBox) {
+        skyGeo = new THREE.BoxBufferGeometry( radius, radius, radius );
+    }
+    else {
+        skyGeo = new THREE.SphereBufferGeometry( radius, widthSegments, heightSegments );
+    }
 	var skyMesh = new THREE.Mesh( skyGeo, skyMat );
 
 	// Expose variables

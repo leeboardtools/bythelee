@@ -72,6 +72,10 @@ LBPhysicsLink.Link.prototype = {
         throw 'addFixedObject not implemented';
     },
     
+    addChainedObject: function(rigidBody, data) {
+        throw 'addChainedObject not implemented';
+    },
+    
     /**
      * Adds a top-level {@link module:LBPhysics.RigidBody} to the manager. This rigid body
      * should not be a part of any other rigid body.

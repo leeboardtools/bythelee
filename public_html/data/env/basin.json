@@ -48,6 +48,7 @@
             "threeModel": "models/can.json"
         }
     ],
+    
     "floating": {
         "objects": [
             {

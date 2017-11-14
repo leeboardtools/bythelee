@@ -58,6 +58,11 @@ LBCannonPhysicsLink.Link.prototype.addFixedObject = function(rigidBody) {
     return this._addCannonRigidBody(rigidBody, CANNON.Body.STATIC);
 };
 
+// @inheritdoc..
+LBCannonPhysicsLink.Link.prototype.addChainedObject = function(rigidBody, data) {
+    return this._addCannonRigidBody(rigidBody, CANNON.Body.STATIC);
+};
+
 // @inheritdoc...
 LBCannonPhysicsLink.Link.prototype._rigidBodyAdded = function(rigidBody, data) {
     return this._addCannonRigidBody(rigidBody, CANNON.Body.DYNAMIC);
