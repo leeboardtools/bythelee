@@ -26,6 +26,7 @@ define(function() {
  */
 var LBAssets = LBAssets || {};
 
+
 /**
  * This is our basic asset loader, it asynchronously loads and caches assets.
  * @constructor
@@ -242,6 +243,105 @@ LBAssets.MultiLoadCoordinator.prototype = {
     constructor: LBAssets.MultiLoadCoordinator
 };
 
+
+/**
+ * Helper that implements an include mechanism with a JSON file. The include mechanism 
+ * currently only works with objects inside the data file, not external data files.
+ * The way it works is if data has a property named 'includables', the 'includables' property
+ * is treated as an object whose properties represent objects to be included elsewhere.
+ * Other objects below data, including objects within arrays, are then scanned for a property
+ * named 'include', and if one is encountered, the value of the 'include' property is looked up
+ * in the 'includables' object. The value of that property is then substituded in the
+ * data object being processed, with the original 'include' property being removed. An example:
+ * <p>
+ * data = {
+ *      "includables": {
+ *          "abc": { "name": "Abc", "Desc: "First Three Letters" },
+ *          "small_buoy": { 
+ *              "mass": 10, 
+ *              "size": { "x": 0.1, "y": 0.1, "z": 0.2 },
+ *          }
+ *      },
+ *      "buoys": [
+ *          "abc": {
+ *              "pos": { "x": 100, "y": 10 },
+ *              "include": "small_buoy",
+ *              "color": "red"
+ *          },
+ *          "def": {
+ *              "pos": { "x": 10, "y": 20 },
+ *              "large_buoy": {
+ *                  "mass": 100,
+ *                  "size: { "x": 1, "y": 1, "z": 2 }
+ *              }
+ *          }
+ *      ]
+ * };
+ * 
+ * would be expanded to:
+ * data = {
+ *      "includables": {
+ *          "abc": { "name": "Abc", "Desc: "First Three Letters" },
+ *          "small_buoy": { 
+ *              "mass": 10, 
+ *              "size": { "x": 0.1, "y": 0.1, "z": 0.2 },
+ *          }
+ *      },
+ *      "buoys": [
+ *          "abc": {
+ *              "pos": { "x": 100, "y": 10 },
+ *              "color": "red",
+ *              "mass": 10, 
+ *              "size": { "x": 0.1, "y": 0.1, "z": 0.2 },
+ *          },
+ *          "def": {
+ *              "pos": { "x": 10, "y": 20 },
+ *              "large_buoy": {
+ *                  "mass": 100,
+ *                  "size: { "x": 1, "y": 1, "z": 2 }
+ *              }
+ *          }
+ *      ]
+ * };
+ *      
+ * @param {Object} data The data object to expand includes within.
+ * @returns {Object}    data.
+ */
+LBAssets.expandIncludes = function(data) {
+    if (data.includables) {
+        Object.keys(data).forEach(function(subDataName) {
+            if (subDataName !== 'includables') {
+                expandIncludesInData(data.includables, data[subDataName]);
+            }
+        });
+    }
+    return data;
+};
+
+function expandIncludesInData(includables, data) {
+    if (data instanceof Object) {
+        var names = Object.keys(data);
+        names.forEach(function(subDataName) {
+            if (subDataName !== 'include') {
+                expandIncludesInData(includables, data[subDataName]);
+            }
+        });
+    }
+    else if (Array.isArray(data)) {
+        data.forEach(function(obj) {
+            expandIncludesInData(includables, obj);
+        });
+    }
+    
+    if (data.include) {
+        if (includables[data.include]) {
+            Object.assign(data, includables[data.include]);
+        }
+        else {
+            console.log('LBAssets.expandIncludes(): includable ' + data.include + ' not found.');
+        }
+    }
+};
 
 return LBAssets;
 });

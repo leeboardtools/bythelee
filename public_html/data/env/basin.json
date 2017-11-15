@@ -4,6 +4,18 @@
     "boatList": "data/boats.json",
     "clCdCurves": "data/clcdcurves.json",
     
+    "includables": {
+        "buoy_cylinder": {
+            "_mass": 25,
+            "volume": {
+                "type": "cylinder",
+                "base": {"x": 0.0, "y": 0.0, "z":-0.5 },
+                "size": {"x": 0.25, "y": 0.25, "z": 1.0 }
+            }
+        },
+        "buoy_cylinder_z": { "z": -0.5 }
+    },
+    
     "boundaries": {
         "windVelDistanceScale": 0.25,
         "currentDistanceScale": 0.05,
@@ -29,13 +41,38 @@
     "objectDefs": [
         {
             "name": "boundary_post",
-            "_mass": 10,
+            "_mass": 250,
             "volume": {
                 "type": "box",
                 "size": {"x": 0.5, "y": 0.5, "z": 3.0 }
             },
             "phaserImage": "can",
             "threeModel": "models/boundary_post.json"
+        },
+        {
+            "name": "buoy_cylinder_blue",
+            "include": "buoy_cylinder",
+            "threeModel": "models/buoy_cylinder_blue.json"
+        },
+        {
+            "name": "buoy_cylinder_green",
+            "include": "buoy_cylinder",
+            "threeModel": "models/buoy_cylinder_green.json"
+        },
+        {
+            "name": "buoy_cylinder_purple",
+            "include": "buoy_cylinder",
+            "threeModel": "models/buoy_cylinder_purple.json"
+        },
+        {
+            "name": "buoy_cylinder_red",
+            "include": "buoy_cylinder",
+            "threeModel": "models/buoy_cylinder_red.json"
+        },
+        {
+            "name": "buoy_cylinder_yellow",
+            "include": "buoy_cylinder",
+            "threeModel": "models/buoy_cylinder_yellow.json"
         },
         {
             "name": "can",
@@ -52,54 +89,54 @@
     "floating": {
         "objects": [
             {
-                "def": "can",
+                "def": "buoy_cylinder_blue",
                 "classification": "buoy",
-                "pos": {"x": 10, "y": 0 },
+                "pos": {"x": 10, "y": 0, "include": "buoy_cylinder_z" },
                 "constraint": "chain",
                 "chain": {
                     "length": 10
                 },
-                "name": "Green A"
+                "name": "Blue Buoy"
             },
             {
-                "def": "can",
+                "def": "buoy_cylinder_red",
                 "classification": "buoy",
-                "pos": {"x": 10, "y": -20 },
+                "pos": {"x": 10, "y": -20, "include": "buoy_cylinder_z" },
                 "constraint": "chain",
                 "chain": {
                     "length": 10
                 },
-                "name": "Green B"
+                "name": "Red Buoy"
             },
             {
-                "def": "can",
+                "def": "buoy_cylinder_yellow",
                 "classification": "buoy",
-                "pos": {"x": 10, "y": -40 },
+                "pos": {"x": 10, "y": -40, "include": "buoy_cylinder_z" },
                 "constraint": "chain",
                 "chain": {
                     "length": 10
                 },
-                "name": "Green C"
+                "name": "Yellow Buoy"
             },
             {
-                "def": "can",
+                "def": "buoy_cylinder_green",
                 "classification": "buoy",
-                "pos": {"x": 25, "y": -20 },
+                "pos": {"x": 25, "y": -20, "include": "buoy_cylinder_z" },
                 "constraint": "chain",
                 "chain": {
                     "length": 10
                 },
-                "name": "Green D"
+                "name": "Green Buoy"
             },
             {
-                "def": "can",
+                "def": "buoy_cylinder_purple",
                 "classification": "buoy",
-                "pos": {"x": 40, "y": -20 },
+                "pos": {"x": 40, "y": -20, "include": "buoy_cylinder_z" },
                 "constraint": "chain",
                 "chain": {
                     "length": 10
                 },
-                "name": "Green E"
+                "name": "Purple Buoy"
             }
         ]
     },

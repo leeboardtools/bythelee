@@ -1640,14 +1640,14 @@ LBVolume.loadCylinderFromData = function(data, mass) {
     var z = size.z;
     
     var vertices = [
-        new LBGeometry.Vector3(base.x - rx, base.y - ry, 0),
-        new LBGeometry.Vector3(base.x - rx, base.y + ry, 0),
-        new LBGeometry.Vector3(base.x + rx, base.y + ry, 0),
-        new LBGeometry.Vector3(base.x + rx, base.y - ry, 0),
-        new LBGeometry.Vector3(base.x - rx, base.y - ry, z),
-        new LBGeometry.Vector3(base.x - rx, base.y + ry, z),
-        new LBGeometry.Vector3(base.x + rx, base.y + ry, z),
-        new LBGeometry.Vector3(base.x + rx, base.y - ry, z)
+        new LBGeometry.Vector3(base.x - rx, base.y - ry, base.z),
+        new LBGeometry.Vector3(base.x - rx, base.y + ry, base.z),
+        new LBGeometry.Vector3(base.x + rx, base.y + ry, base.z),
+        new LBGeometry.Vector3(base.x + rx, base.y - ry, base.z),
+        new LBGeometry.Vector3(base.x - rx, base.y - ry, base.z + z),
+        new LBGeometry.Vector3(base.x - rx, base.y + ry, base.z + z),
+        new LBGeometry.Vector3(base.x + rx, base.y + ry, base.z + z),
+        new LBGeometry.Vector3(base.x + rx, base.y - ry, base.z + z)
     ];
     
     var volume = new LBVolume.Cuboid(vertices, mass);

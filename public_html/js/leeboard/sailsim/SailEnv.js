@@ -145,6 +145,7 @@ LBSailSim.Env.prototype = {
         var me = this;
         var fileName = 'data/env/' + name + '.json';
         this.assetLoader.loadJSON(name, fileName, function(data) {
+            data = LBAssets.expandIncludes(data);
             me._loadEnvFromData(data, onLoaded, onError);
         });
     },
@@ -156,6 +157,7 @@ LBSailSim.Env.prototype = {
             
         this.assetLoader.loadJSON(data.boatList, data.boatList, 
             this.loadCoordinator.getOnLoadFunction(function(data) {
+                data = LBAssets.expandIncludes(data);
                 me.loadBoatDatas(data);
             }),
             this.loadCoordinator.getOnProgressFunction(),
