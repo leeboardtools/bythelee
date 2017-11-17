@@ -44,7 +44,7 @@ function(LBPhaser, LBMath, Phaser) {
  * its tile position will be updated to match the pixel position of the thumb.
  * @param {Object} [lowerImage] If defined, a label that appears outside the side of the
  * control with corresponding to lowerValue.
- * @param {Object} [lowerImage] If defined, a label that appears outside the side of the
+ * @param {Object} [upperImage] If defined, a label that appears outside the side of the
  * control with corresponding to upperValue.
  * @returns {LBPhaser.Slider}
  */

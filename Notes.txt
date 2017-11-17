@@ -17,6 +17,11 @@ Run:
 
 Last know version of jsdoc being used 3.5.5
 
+To use jsdoc config file:
+    jsdoc public_html/js/leeboard -r -d docs -c ./jsdoc-config.json
+
+
+
 Docs notes:
 Singleton: See LBDebug.DataLog in core/Debug.js
 

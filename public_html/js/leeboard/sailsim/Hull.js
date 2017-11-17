@@ -166,7 +166,7 @@ LBSailSim.Hull = function(vessel) {
     this.resistanceForce = new LBGeometry.Vector3();
 };
 
-var _workingPos = new LBGeometry.Vector3();
+//var _workingPos = new LBGeometry.Vector3();
 var _workingVelResults = { 'worldPos' : new LBGeometry.Vector3() };
 var _workingVelPerpendicular = new LBGeometry.Vector3();
 
@@ -209,53 +209,28 @@ LBSailSim.Hull.prototype = {
         _workingVelPerpendicular.applyMatrix4Rotation(this.vessel.coordSystem.localXfrm);
         _workingVelPerpendicular.normalize();
 
-        var xSum = 0;
-        var ySum = 0;
-        var zSum = 0;
-        var volSum = 0;
-        var centroid = _workingPos;
-        
         var minPerpVertex = undefined;
         var minPerpDistance = Number.MAX_VALUE;
         var maxPerpVertex = undefined;
         var maxPerpDistance = -Number.MAX_VALUE;
         
-        var volumes = this.vessel.volumes;
-        for (var v = 0; v < volumes.length; ++v) {
-            var tetras = volumes[v].equivalentTetras();
-            for (var i = 0; i < tetras.length; ++i) {
-                var result = LBVolume.Tetra.sliceWithPlane(tetras[i], xyPlane, false, true);
-                if (!result || !result[1].length) {
-                    // result[1] contains tetras below waterline...
-                    continue;
-                }
-                
-                for (var j = 0; j < result[1].length; ++j) {
-                    var tetra = result[1][j];
-                    tetra.getCentroid(centroid);
-                    var vol = tetra.getVolume();
-                    xSum += centroid.x * vol;
-                    ySum += centroid.y * vol;
-                    zSum += centroid.z * vol;
-                    volSum += vol;
-                    
-                    tetra.vertices.forEach(function(vertex) {
-                        if (LBMath.isLikeZero(xyPlane.distanceToPoint(vertex))) {
-                            var dot = vertex.dot(_workingVelPerpendicular);
-                            if (dot < minPerpDistance) {
-                                minPerpDistance = dot;
-                                minPerpVertex = vertex;
-                            }
-                            if (dot > maxPerpDistance) {
-                                maxPerpDistance = dot;
-                                maxPerpVertex = vertex;
-                            }
+        this.immersedVolume = LBVolume.Volume.volumesOnSideOfPlane(this.vessel.volumes, xyPlane, false, this.centerOfBuoyancy,
+            function(volIndex, tetra) {
+                tetra.vertices.forEach(function(vertex) {
+                    if (LBMath.isLikeZero(xyPlane.distanceToPoint(vertex))) {
+                        var dot = vertex.dot(_workingVelPerpendicular);
+                        if (dot < minPerpDistance) {
+                            minPerpDistance = dot;
+                            minPerpVertex = vertex;
                         }
-                    });
-                }
-            }
-        }
-        
+                        if (dot > maxPerpDistance) {
+                            maxPerpDistance = dot;
+                            maxPerpVertex = vertex;
+                        }
+                    }
+                });
+            });
+
         if (maxPerpVertex) {
             maxPerpVertex.applyMatrix4(this.vessel.coordSystem.worldXfrm);
             minPerpVertex.applyMatrix4(this.vessel.coordSystem.worldXfrm);
@@ -263,15 +238,6 @@ LBSailSim.Hull.prototype = {
         
         this.wakeEndPort = maxPerpVertex;
         this.wakeEndStbd = minPerpVertex;
-        
-        if (volSum > 0) {
-            this.centerOfBuoyancy.set(xSum / volSum, ySum / volSum, zSum / volSum);
-            this.immersedVolume = volSum;
-        }
-        else {
-            this.centerOfBuoyancy.copy(this.vessel.centerOfMass);
-            this.immersedVolume = 0;
-        }
     },
     
     /**

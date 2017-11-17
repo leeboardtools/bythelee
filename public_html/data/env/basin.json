@@ -13,7 +13,15 @@
                 "size": {"x": 0.25, "y": 0.25, "z": 1.0 }
             }
         },
-        "buoy_cylinder_z": { "z": -0.5 }
+        "buoy_cylinder_z": { "z": -0.5 },
+        
+        "buoy_cylinder_object": {
+            "classification": "buoy",
+            "constraint": "chain",
+            "chain": {
+                "length": 10
+            }
+        }
     },
     
     "boundaries": {
@@ -89,54 +97,34 @@
     "floating": {
         "objects": [
             {
+                "name": "Blue Buoy",
                 "def": "buoy_cylinder_blue",
-                "classification": "buoy",
                 "pos": {"x": 10, "y": 0, "include": "buoy_cylinder_z" },
-                "constraint": "chain",
-                "chain": {
-                    "length": 10
-                },
-                "name": "Blue Buoy"
+                "include": "buoy_cylinder_object"
             },
             {
+                "name": "Red Buoy",
                 "def": "buoy_cylinder_red",
-                "classification": "buoy",
                 "pos": {"x": 10, "y": -20, "include": "buoy_cylinder_z" },
-                "constraint": "chain",
-                "chain": {
-                    "length": 10
-                },
-                "name": "Red Buoy"
+                "include": "buoy_cylinder_object"
             },
             {
+                "name": "Yellow Buoy",
                 "def": "buoy_cylinder_yellow",
-                "classification": "buoy",
                 "pos": {"x": 10, "y": -40, "include": "buoy_cylinder_z" },
-                "constraint": "chain",
-                "chain": {
-                    "length": 10
-                },
-                "name": "Yellow Buoy"
+                "include": "buoy_cylinder_object"
             },
             {
+                "name": "Green Buoy",
                 "def": "buoy_cylinder_green",
-                "classification": "buoy",
                 "pos": {"x": 25, "y": -20, "include": "buoy_cylinder_z" },
-                "constraint": "chain",
-                "chain": {
-                    "length": 10
-                },
-                "name": "Green Buoy"
+                "include": "buoy_cylinder_object"
             },
             {
+                "name": "Purple Buoy",
                 "def": "buoy_cylinder_purple",
-                "classification": "buoy",
                 "pos": {"x": 40, "y": -20, "include": "buoy_cylinder_z" },
-                "constraint": "chain",
-                "chain": {
-                    "length": 10
-                },
-                "name": "Purple Buoy"
+                "include": "buoy_cylinder_object"
             }
         ]
     },

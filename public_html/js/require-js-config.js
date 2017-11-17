@@ -32,6 +32,7 @@ var require = {
         'lbcurve': 'leeboard/core/Curve',
         'lbdebug': 'leeboard/core/Debug',
         'lbfoils': 'leeboard/core/Foils',
+        'lbforces': 'leeboard/core/Forces',
         'lbgeometry': 'leeboard/core/Geometry-THREE',
         'lbmath': 'leeboard/core/Math',
         'lbphysics': 'leeboard/core/Physics',

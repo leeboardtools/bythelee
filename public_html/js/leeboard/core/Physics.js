@@ -899,7 +899,7 @@ LBPhysics.RigidBody = function(obj3D, mass, centerOfMass, momentInertia, base) {
     this.obj3D = obj3D || new LBGeometry.Object3D();
     
     /**
-     * Array of {@link module:LBVolume.Tetra}s that define the volume of the body.
+     * Array of {@link module:LBVolume.Volume}s that define the volume of the body.
      * @member {module:LBVolume.Tetra}
      */
     this.volumes = [];

@@ -61,11 +61,11 @@ LBVolume.Volume = function(typeName, mass, massDistribution) {
     this.massDistribution = massDistribution || 1;
 };
 
-LBVolume.Volume._workingCenterOfMassResult;
-LBVolume.Volume._workingVector3A = new LBGeometry.Vector3();
-LBVolume.Volume._workingVector3B = new LBGeometry.Vector3();
-LBVolume.Volume._workingVector3C = new LBGeometry.Vector3();
-LBVolume.Volume._workingMatrix3;
+var _workingCenterOfMassResult;
+var _workingVector3A = new LBGeometry.Vector3();
+var _workingVector3B = new LBGeometry.Vector3();
+//var _workingVector3C = new LBGeometry.Vector3();
+var _workingMatrix3;
 
 LBVolume.Volume.prototype = {
     /**
@@ -120,8 +120,8 @@ LBVolume.Volume.prototype = {
         var v0 = this.vertices[face[0]];
         var v1 = this.vertices[face[1]];
         var v2 = this.vertices[face[2]];
-        var v1m0 = LBVolume.Volume._workingVector3A.copy(v1).sub(v0);
-        var v2m1 = LBVolume.Volume._workingVector3B.copy(v2).sub(v1);
+        var v1m0 = _workingVector3A.copy(v1).sub(v0);
+        var v2m1 = _workingVector3B.copy(v2).sub(v1);
         
         store = (store) ? store.copy(v1m0) : v1m0.clone();
         store.cross(v2m1).normalize();
@@ -135,8 +135,8 @@ LBVolume.Volume.prototype = {
      */
     getCentroid: function(store) {
         var tetras = this.equivalentTetras();
-        var result = LBVolume.Volume._workingCenterOfMassResult = LBVolume.Volume.totalCenterOfMass(tetras,
-            LBVolume.Volume._workingCenterOfMassResult);
+        var result = _workingCenterOfMassResult = LBVolume.Volume.totalCenterOfMass(tetras,
+            _workingCenterOfMassResult);
         if (store) {
             return store.copy(result.position);
         }
@@ -232,14 +232,34 @@ LBVolume.Volume.prototype = {
 /**
  * Returns the total volume of the volumes in an array.
  * @param {module:LBVolume.Volume[]} volumes    The array of volumes.
+ * @param {module:LBGeometry.Vector3} [centerOfVolume]  If defined, set to the center of volume.
  * @returns {Number}    The total volume.
  */
-LBVolume.Volume.totalVolume = function(volumes) {
-    var vol = 0;
-    for (var i = 0; i < volumes.length; ++i) {
-        vol += volumes[i].getVolume();
+LBVolume.Volume.totalVolume = function(volumes, centerOfVolume) {
+    var totalVolume = 0;
+
+    if (centerOfVolume) {
+        centerOfVolume.zero();
+        var centroid = _workingVector3A;
+        for (var i = 0; i < volumes.length; ++i) {
+            var vol = volumes[i].getVolume();
+            totalVolume += vol;
+
+            volumes[i].getCentroid(centroid);
+            centroid.multiplyScalar(vol);
+            centerOfVolume.add(centroid);
+        }
+        
+        if (totalVolume > 0) {
+            centerOfVolume.divideScalar(totalVolume);
+        }
     }
-    return vol;
+    else {
+        for (var i = 0; i < volumes.length; ++i) {
+            totalVolume += volumes[i].getVolume();
+        }
+    }
+    return totalVolume;
 };
 
 
@@ -288,6 +308,75 @@ LBVolume.Volume.totalCenterOfMass = function(volume, store) {
     store.mass = totalMass;
     
     return store;
+};
+
+
+var _workingPos = new LBGeometry.Vector3();
+
+/**
+ * Calculates the total volume and center of volume of the portions of the volumes in
+ * an array of volumes that lie on one side of a plane.
+ * @param {module:LBVolume.Volume[]} volumes    The array of volumes.
+ * @param {module:LBGeometry.Plane} plane   The intersection plane.
+ * @param {Boolean} wantPositiveSide    If true the total volume on the positive side of the plane
+ * is retrieved, otherwise the volume on the negative side of the plane.
+ * @param {module:LBGeometry.Vector3} [centerOfVolume]    If defined set to the total center
+ * of volume on the requested side of the plane.
+ * @param {Function} [tetraCallback]    Optional callback function called for each volume
+ * tetra found on the desired side of the plane. The signature is of the form shown in the example.
+ * <pre><code>
+ *      tetraCallback = function(volumeIndex, tetra) {
+ *      }
+ * </code></pre>
+ * @returns {Number}    The total volume on the desired side of the plane.
+ */
+LBVolume.Volume.volumesOnSideOfPlane = function(volumes, plane, wantPositiveSide, centerOfVolume, tetraCallback) {
+    if (centerOfVolume) {
+        centerOfVolume.zero();
+    }
+    
+    var centroid = _workingPos;
+        
+    var wantNegativeSide = !wantPositiveSide;
+    var resultIndex = wantPositiveSide ? 0 : 1;
+    
+    var totalVolume = 0;
+    var length = volumes.length;
+    for (var v = 0; v < length; ++v) {
+        var tetras = volumes[v].equivalentTetras();
+        for (var i = 0; i < tetras.length; ++i) {
+            var result = LBVolume.Tetra.sliceWithPlane(tetras[i], plane, wantPositiveSide, wantNegativeSide);
+            if (!result || !result[resultIndex].length) {
+                continue;
+            }
+
+            var resultLength = result[resultIndex].length;
+            var resultTetras = result[resultIndex];
+            for (var j = 0; j < resultLength; ++j) {
+                var tetra = resultTetras[j];
+
+                var vol = tetra.getVolume();
+                totalVolume += vol;
+                if (centerOfVolume) {
+                    tetra.getCentroid(centroid);
+                    centroid.multiplyScalar(vol);
+                    centerOfVolume.add(centroid);
+                }
+
+                if (tetraCallback) {
+                    tetraCallback(v, tetra);
+                }
+            }
+        }
+    }
+
+    if (centerOfVolume) {
+        if (totalVolume > 0) {
+            centerOfVolume.divideScalar(totalVolume);
+        }
+    }
+    
+    return totalVolume;
 };
 
 
@@ -356,13 +445,13 @@ LBVolume.Volume.overallInertiaTensor = function(volumes, tensor, totalCentroid) 
     tensor = tensor || new LBGeometry.Matrix3();
     tensor.zero();
     
-    totalCentroid = totalCentroid || LBVolume.Volume._workingVector3A;
+    totalCentroid = totalCentroid || _workingVector3A;
     totalCentroid.zero();
     
     var totalMass = 0;
     
-    var tetraCentroid = LBVolume.Volume._workingVector3B;
-    var tetraInertia = LBVolume.Volume._workingMatrix3;
+    var tetraCentroid = _workingVector3B;
+    var tetraInertia = _workingMatrix3;
     
     for (var i = 0; i < volumes.length; ++i) {
         var vol = volumes[i];
@@ -398,7 +487,7 @@ LBVolume.Volume.overallInertiaTensor = function(volumes, tensor, totalCentroid) 
         }
     }
     
-    LBVolume.Volume._workingMatrix3 = tetraInertia;
+    _workingMatrix3 = tetraInertia;
     
     // The inertia tensor is now relative to the origin. If our centroid is not at the
     // origin we'll need to shift the tensor...
