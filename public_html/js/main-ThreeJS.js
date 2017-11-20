@@ -48,6 +48,20 @@ function LBMyApp() {
     LBUI3d.App3D.call(this);
     this.mainScene.coordMapping = LBUI3d.ZIsUpCoordMapping;
     
+    
+    this.startWindDeg = 0;
+    this.startWindForce = 4;
+    
+    this.startBoatX = 5;
+    this.startBoatY = 0;
+    this.startBoatRollDeg = 0;
+    this.startBoatPitchDeg = 0;
+    this.startBoatYawDeg = 180;
+    
+    // TEST!!!
+    //this.startWindForce = 3;
+    
+    
     var mainViewContainer = document.getElementById('main_view');
     this.mainView = new LBUI3d.View3D(this.mainScene, mainViewContainer);
     this.addNormalView(this.mainView);
@@ -220,18 +234,11 @@ LBMyApp.prototype.loadEnvCompleted = function() {
     // Load a boat...
     var boatType = Object.keys(this.sailEnv.boatsByType)[0];
     var boatName = Object.keys(this.sailEnv.boatsByType[boatType])[0];
-    var centerX = 0;
-    var centerY = 0;
-    var yawDeg = 0;
-    var rollDeg = 0;
-    var pitchDeg = 0;
-    yawDeg = 180;
-    centerX = 5;
-    //rotDeg += 30;
-    //yawDeg = 0;
-    //yawDeg = 90;
-    //rollDeg = 60;
-    //pitchDeg = 30;
+    var centerX = this.startBoatX;
+    var centerY = this.startBoatY;
+    var yawDeg = this.startBoatYawDeg;
+    var rollDeg = this.startBoatRollDeg;
+    var pitchDeg = this.startBoatPitchDeg;
     this.myBoat = this.sailEnv.checkoutBoat(boatType, boatName, centerX, centerY, yawDeg, rollDeg, pitchDeg);
     this.sailEnv.setFocusVessel(this.myBoat);
     
@@ -284,9 +291,8 @@ LBMyApp.prototype.closeSplash = function(event) {
         return;
     }
     
-    this.windDeg = 0;
-    this.windForce = 4;
-    //this.windForce = 0;
+    this.windDeg = this.startWindDeg;
+    this.windForce = this.startWindForce;
 
     this.sailEnv.wind.setAverageFromDeg(this.windDeg);
     this.sailEnv.wind.setAverageForce(this.windForce);

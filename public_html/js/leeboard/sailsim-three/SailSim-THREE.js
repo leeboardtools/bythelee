@@ -47,6 +47,9 @@ LBSailSim.SailEnvTHREE = function(app3D, mainView, physicsType, assetLoader) {
             break;
     }
     
+    this.physicsLink.addForceGenerator(this.buoyancyGenerator);
+    this.physicsLink.addForceGenerator(this.dampingGenerator);
+    
     this.water3D = new LBSailSim.Water3D(app3D.mainScene, this);
     this.wakes3D = new LBSailSim.Wakes3D(app3D.mainScene, this);
     this.sky3D = new LBSailSim.Sky3D(app3D.mainScene, this);
@@ -92,18 +95,6 @@ LBSailSim.SailEnvTHREE.prototype.floatingObjectLoaded = function(data, rigidBody
             me.envGroup.add(model);            
             LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody(rigidBody);
         });
-    }
-    
-    var constraint = data.constraint || 'fixed';
-    switch (constraint) {
-        case 'fixed' :
-        default :
-            this.physicsLink.addFixedObject(rigidBody);
-            break;
-            
-        case 'chain' :
-            this.physicsLink.addChainedObject(rigidBody, data.chain);
-            break;
     }
 };
 

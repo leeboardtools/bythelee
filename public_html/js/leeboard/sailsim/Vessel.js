@@ -880,10 +880,6 @@ LBSailSim.Vessel.prototype._updateFoilForces = function(dt, flow, foils) {
  * @returns {LBSailSim.Vessel}  this.
  */
 LBSailSim.Vessel.prototype.updateForces = function(dt) {
-    this.clearForces();
-    
-    this.updateCoords(dt);
-    
     this.sailEnv.wind.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, this.appWindHeight, this.trueWind);
     this.apparentWind.copy(this.trueWind);
     this.apparentWind.sub(this.worldLinearVelocity);

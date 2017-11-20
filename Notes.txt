@@ -25,6 +25,11 @@ To use jsdoc config file:
 Docs notes:
 Singleton: See LBDebug.DataLog in core/Debug.js
 
+For inline code:
+<pre><code>
+    function abc() {
+    }
+</code></pre>
 
 
 Exporting Blender to JSON model:
@@ -35,6 +40,9 @@ are both checked.
 
 
 TODO:
+Buoys: Need to add updateForces to RigidBody, and have it return true/false depending
+upon whether there's a resultant to be processed. Need to clear the resultant at the
+start of each update pass.
 
 Change SkyCube textures to be based on snapshots of sky shader.
 

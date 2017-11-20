@@ -872,9 +872,11 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
         }
     }
     
-    if (((onPlane.length + above.length) === 4) || ((onPlane.length + below.length) === 4)) {
-        // No intersection...
-        return undefined;
+    if ((onPlane.length + above.length) === 4) {
+        return [ [ tetra ], [] ];
+    }
+    else if ((onPlane.length + below.length) === 4) {
+        return [ [], [ tetra ] ];
     }
     
     if (!LBUtil.isVar(positiveDir)) {
@@ -1053,6 +1055,13 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
     return [aboveTetras, belowTetras];
 };
 
+/**
+ * @enum
+ * Results returned by {@link module:LBVolume.Tetra.sliceWithPlane} for the cases when
+ * all the tetras are above the plane and all the tetras are below the plane.
+ */
+LBVolume.Tetra.ALL_ABOVE = 0;
+LBVolume.Tetra.ALL_BELOW = 1;
 
 /**
  * Loads an array of tetras from properties in a data object.

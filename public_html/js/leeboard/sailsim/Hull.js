@@ -167,6 +167,7 @@ LBSailSim.Hull = function(vessel) {
 };
 
 //var _workingPos = new LBGeometry.Vector3();
+var _workingPlane = LBGeometry.XY_PLANE.clone();
 var _workingVelResults = { 'worldPos' : new LBGeometry.Vector3() };
 var _workingVelPerpendicular = new LBGeometry.Vector3();
 
@@ -201,7 +202,7 @@ LBSailSim.Hull.prototype = {
     },
     
     _updateBuoyancy: function() {
-        var xyPlane = LBGeometry.XY_PLANE.clone();
+        var xyPlane = _workingPlane.copy(LBGeometry.XY_PLANE);
         xyPlane.applyMatrix4(this.vessel.coordSystem.localXfrm);
         
         _workingVelPerpendicular.x = -this.vessel.worldLinearVelocity.y;

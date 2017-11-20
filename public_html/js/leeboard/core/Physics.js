@@ -1032,9 +1032,11 @@ LBPhysics.RigidBody.prototype = {
                 LBVolume.Volume.allocateMassToVolumes(this.volumes, data.mass);
             }
             
-            var comResult = LBVolume.Volume.totalCenterOfMass(this.volumes);
-            if (comResult && (comResult.mass > 0)) {
-                this.centerOfMass.copy(comResult.position);
+            if (!data.centerOfMass) {
+                var comResult = LBVolume.Volume.totalCenterOfMass(this.volumes);
+                if (comResult && (comResult.mass > 0)) {
+                    this.centerOfMass.copy(comResult.position);
+                }
             }
         }
         
@@ -1304,6 +1306,11 @@ LBPhysics.RigidBody.prototype = {
      */
     _updatePhysicalProperties: function() {
         if (this.physicalPropertiesDirty) {
+            if (!this.coordSystem.worldXfrm) {
+                this.coordSystem.worldXfrm = this.obj3D.matrixWorld;
+                this.obj3D.updateMatrixWorld();
+            }
+            
             this.totalMass = this.mass;
             
             this.totalCenterOfMass.copy(this.centerOfMass);

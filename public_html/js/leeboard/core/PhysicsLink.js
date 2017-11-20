@@ -73,10 +73,6 @@ LBPhysicsLink.Link.prototype = {
         throw 'addFixedObject not implemented';
     },
     
-    addChainedObject: function(rigidBody, data) {
-        throw 'addChainedObject not implemented';
-    },
-    
     /**
      * Adds a top-level {@link module:LBPhysics.RigidBody} to the manager. This rigid body
      * should not be a part of any other rigid body.
@@ -218,9 +214,29 @@ LBPhysicsLink.Link.prototype = {
      * @returns {undefined}
      */
     update: function(dt) {
+        this.rigidBodies.forEach(function(rigidBody) {
+            rigidBody.clearForces();
+            this._updateRigidBodyForces(rigidBody, dt);
+            
+        }, this);
+        
         this.forceGenerators.forEach(function(generator) {
             generator.update(dt);
         });
+    },
+    
+    /**
+     * Called from update() for each rigid body to have the body update any forces
+     * generated from itself.
+     * @param {module:LBPhysics.RigidBody} rigidBody    The rigid body.
+     * @param {Number} dt   The time step.
+     * @returns {undefined}
+     */
+    _updateRigidBodyForces: function(rigidBody, dt) {
+        rigidBody.updateCoords(dt);
+        if (rigidBody.updateForces) {
+            rigidBody.updateForces(dt);
+        }
     },
     
     /**

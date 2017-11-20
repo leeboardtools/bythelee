@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-define(['lbutil', 'lbmath', 'lbgeometry', 'lbphysics', 'lbfoils', 'lbsailsimbase', 'lbassets', 'lbvessel', 'lbwind', 'lbwater', 'lbboundaries'], 
-function(LBUtil, LBMath, LBGeometry, LBPhysics, LBFoils, LBSailSim, LBAssets) {
+define(['lbutil', 'lbmath', 'lbgeometry', 'lbphysics', 'lbfoils', 'lbsailsimbase', 'lbassets', 'lbforces', 'lbvessel', 'lbwind', 'lbwater', 'lbboundaries'], 
+function(LBUtil, LBMath, LBGeometry, LBPhysics, LBFoils, LBSailSim, LBAssets, LBForces) {
     
     'use strict';
 
@@ -78,6 +78,16 @@ LBSailSim.Env = function(assetLoader) {
     
     
     this.loadCoordinator = new LBAssets.MultiLoadCoordinator();
+    
+    this.buoyancyGenerator = new LBForces.Buoyancy({
+        gravity: this.gravity,
+        applyGravity: true,
+        fluidZ: 0
+    });
+    
+    this.dampingGenerator = new LBForces.Damping({
+        defaultDamping: 0.1
+    });
     
     this.objectDefs = {};
     this.floatingObjects = [];
@@ -210,6 +220,10 @@ LBSailSim.Env.prototype = {
     },
     
     loadFloatingObject: function(data) {
+        if (data.ignore) {
+            return;
+        }
+        
         // Get the object definition and load the object from it.
         if (!data.def) {
             console.error("Could not load the floating object '" + data.name + "', data.def was not defined.");
@@ -224,6 +238,8 @@ LBSailSim.Env.prototype = {
         
         var rigidBody = LBPhysics.RigidBody.createFromData(objectDef);        
         this.floatingObjects.push(rigidBody);
+        
+        LBForces.Buoyancy.loadRigidBodySettings(rigidBody, objectDef);
 
         if (data.pos) {
             LBGeometry.loadVector3(data.pos, rigidBody.obj3D.position);
@@ -240,7 +256,6 @@ LBSailSim.Env.prototype = {
         classifiedObjects.push(rigidBody);
         
         // TODO: Handle the type.
-        
         this.floatingObjectLoaded(data, rigidBody, objectDef);
     },
     
@@ -251,7 +266,55 @@ LBSailSim.Env.prototype = {
      * @param {Object} objectDef    The definition object.
      */
     floatingObjectLoaded: function(data, rigidBody, objectDef) {
+        if (this.physicsLink) {
+            var constraint = data.constraint || 'fixed';
+            switch (constraint) {
+                case 'fixed' :
+                default :
+                    this._addFixedFloatingObject(rigidBody, data, objectDef);
+                    break;
+
+                case 'chain' :
+                    this._addChainedFloatingObject(rigidBody, data, objectDef);
+                    break;
+            }
+        }
+    },
+    
+    _addFixedFloatingObject: function(rigidBody, data, objectDef) {
+        this.physicsLink.addFixedObject(rigidBody);
+    },
+    
+    _addChainedFloatingObject: function(rigidBody, data, objectDef) {
+        this.physicsLink.addRigidBody(rigidBody, data);
+        this.buoyancyGenerator.addRigidBody(rigidBody);
         
+        if (data.chain) {
+            var length = data.chain.length || 10;
+            var depth = data.chain.depth || length * 0.75;
+            if (depth > length) {
+                depth = length;
+            }
+            var springConstant = data.chain.springConstant || 1;
+            
+            var minSpringLength = length;
+            var anchorPos = new LBGeometry.Vector3();
+            rigidBody.obj3D.localToWorld(anchorPos);
+            anchorPos.z = -depth;
+            
+            var spring = new LBForces.Spring(
+                    rigidBody,
+                    anchorPos,
+                    {
+                        minForceLength: minSpringLength,
+                        springConstant: springConstant
+                    });
+            this.physicsLink.addForceGenerator(spring);
+            
+            if (!rigidBody.linearDamping) {
+                this.dampingGenerator.addRigidBody(rigidBody);
+            }
+        }
     },
     
 

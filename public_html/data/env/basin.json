@@ -6,20 +6,27 @@
     
     "includables": {
         "buoy_cylinder": {
-            "_mass": 25,
+            "mass": 30,
+            "centerOfMass": {"x": 0.0, "y": 0.0, "z": -0.35 },
+            "buoyancyDamping": 0.75,
+            "forceDamping": 0.75,
+            "_linearDamping": 0.75,
+            "angularDamping": 0.35,
             "volume": {
                 "type": "cylinder",
                 "base": {"x": 0.0, "y": 0.0, "z":-0.5 },
                 "size": {"x": 0.25, "y": 0.25, "z": 1.0 }
             }
         },
-        "buoy_cylinder_z": { "z": -0.5 },
+        "buoy_cylinder_z": { "z": 0 },
         
         "buoy_cylinder_object": {
             "classification": "buoy",
             "constraint": "chain",
             "chain": {
-                "length": 10
+                "length": 6,
+                "depth": 5,
+                "springConstant": 500
             }
         }
     },
@@ -103,24 +110,28 @@
                 "include": "buoy_cylinder_object"
             },
             {
+                "_ignore": true,
                 "name": "Red Buoy",
                 "def": "buoy_cylinder_red",
                 "pos": {"x": 10, "y": -20, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
+                "_ignore": true,
                 "name": "Yellow Buoy",
                 "def": "buoy_cylinder_yellow",
                 "pos": {"x": 10, "y": -40, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
+                "_ignore": true,
                 "name": "Green Buoy",
                 "def": "buoy_cylinder_green",
                 "pos": {"x": 25, "y": -20, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
+                "_ignore": true,
                 "name": "Purple Buoy",
                 "def": "buoy_cylinder_purple",
                 "pos": {"x": 40, "y": -20, "include": "buoy_cylinder_z" },

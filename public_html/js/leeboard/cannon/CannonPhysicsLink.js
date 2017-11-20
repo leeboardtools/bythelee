@@ -58,11 +58,6 @@ LBCannonPhysicsLink.Link.prototype.addFixedObject = function(rigidBody) {
     return this._addCannonRigidBody(rigidBody, CANNON.Body.STATIC);
 };
 
-// @inheritdoc..
-LBCannonPhysicsLink.Link.prototype.addChainedObject = function(rigidBody, data) {
-    return this._addCannonRigidBody(rigidBody, CANNON.Body.STATIC);
-};
-
 // @inheritdoc...
 LBCannonPhysicsLink.Link.prototype._rigidBodyAdded = function(rigidBody, data) {
     return this._addCannonRigidBody(rigidBody, CANNON.Body.DYNAMIC);
@@ -105,14 +100,20 @@ LBCannonPhysicsLink.Link.prototype.timeStep = function() {
 LBCannonPhysicsLink.Link.prototype.update = function(dt) {
     if (this.updateCount === 0) {
         // Gotta sync up first time through...
-        this.rigidBodies.forEach(this._updateFromSimStep, this);
         this.dtCurrent = 0;
+        this.rigidBodies.forEach(this._updateFromSimStep, this);
     }
     else {
         this.dtCurrent = this.dt;
     }
     
+    // TEST!!!
+    dt = 1/60;
+    
+    
     // Generate the forces...
+    LBPhysicsLink.Link.prototype.update.call(this, this.dtCurrent);
+    
     this.rigidBodies.forEach(this._applyRigidBodyForces, this);
     
     this.cWorld.step(dt);
@@ -121,6 +122,13 @@ LBCannonPhysicsLink.Link.prototype.update = function(dt) {
     this.rigidBodies.forEach(this._updateFromSimStep, this);
     
     ++this.updateCount;
+};
+
+// @inheritdoc..
+LBCannonPhysicsLink.Link.prototype._updateRigidBodyForces = function(rigidBody, dt) {
+    LBCannonUtil.updateBodyFromRigidBodyVolumes(rigidBody, rigidBody);
+    
+    LBPhysicsLink.Link.prototype._updateRigidBodyForces(rigidBody, dt);
 };
 
 /**
@@ -135,19 +143,8 @@ LBCannonPhysicsLink.Link.prototype._applyRigidBodyForces = function(rigidBody) {
         return;
     }
 
-    LBCannonUtil.updateBodyFromRigidBodyVolumes(body, rigidBody);
-    
-    if (rigidBody.updateForces) {
-        rigidBody.updateForces(this.dtCurrent);
-
-        var resultant = rigidBody.getResultant(true);
-    
-    // TEST!!!
-/*    resultant.applPoint.z = body.position.z;
-    resultant.force.z = 0;
-    resultant.moment.x = resultant.moment.y = 0;
-  */ 
-    
+    var resultant = rigidBody.getResultant(true);
+    if (!resultant.isZero()) {
         body.applyForce(resultant.force, LBCannonPhysicsLink.Link._workingVec3.copy(resultant.applPoint));
         body.torque.vadd(resultant.moment, body.torque);
     }
@@ -175,6 +172,8 @@ LBCannonPhysicsLink.Link.prototype._updateFromSimStep = function(rigidBody) {
     rigidBody.obj3D.quaternion.copy(body.quaternion);
     
     rigidBody.obj3D.updateMatrixWorld(true);
+    
+    //rigidBody.updateCoords(this.dtCurrent);
 };
 
 LBCannonPhysicsLink.Link.getCannonBody = function(rigidBody) {
