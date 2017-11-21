@@ -40,17 +40,11 @@ are both checked.
 
 
 TODO:
-Buoys: Need to add updateForces to RigidBody, and have it return true/false depending
-upon whether there's a resultant to be processed. Need to clear the resultant at the
-start of each update pass.
-
 Change SkyCube textures to be based on snapshots of sky shader.
 
 Sailing Boundaries:
 Need to tweak what happens beyond the boundaries. Right now the counteracting wind is added to the existing
 wind, which may cause the overall wind to drop to near zero just beyond the boundaries.
-
-Make buoys floating.
 
 Lateral hull resistance > longitudinal hull resistance - an angle vs. scale curve, 1 when angle is 0.
 
