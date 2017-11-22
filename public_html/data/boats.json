@@ -26,6 +26,22 @@
                             "color": "green"
                         }
                     }
+                },
+                {
+                    "name": "TubbyD",
+                    "sails": {
+                        "mainsail": {
+                            "color": "white"
+                        }
+                    }
+                },
+                {
+                    "name": "TubbyE",
+                    "sails": {
+                        "mainsail": {
+                            "color": "red"
+                        }
+                    }
                 }
             ],
             "phaser": {
