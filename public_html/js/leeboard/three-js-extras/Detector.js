@@ -1,4 +1,9 @@
 /**
+ * This file is from Three.js' examples:
+ * https://github.com/mrdoob/three.js/blob/dev/examples/js/Detector.js
+ */
+
+/**
  * @author alteredq / http://alteredqualia.com/
  * @author mr.doob / http://mrdoob.com/
  */

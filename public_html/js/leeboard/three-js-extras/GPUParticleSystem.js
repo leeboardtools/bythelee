@@ -1,3 +1,9 @@
+/**
+ * This file was originally from Three.js' examples:
+ *  https://github.com/mrdoob/three.js/blob/dev/examples/js/GPUParticleSystem.js
+ * It has been modified by LeeboardTools.com...
+ */
+
 /*
  * GPU Particle System
  * @author flimshaw - Charlie Hoey - http://charliehoey.com

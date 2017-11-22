@@ -1,4 +1,10 @@
 /**
+ * This file was originally from Three.js' examples:
+ *  https://github.com/mrdoob/three.js/blob/dev/examples/js/objects/Sky.js
+ * It has been modified by LeeboardTools.com...
+ */
+
+/**
  * @author zz85 / https://github.com/zz85
  *
  * Based on "A Practical Analytic Model for Daylight"

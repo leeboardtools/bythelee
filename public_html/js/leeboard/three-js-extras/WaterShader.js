@@ -1,4 +1,10 @@
 /**
+ * This file was originally from Three.js' examples:
+ *  https://github.com/mrdoob/three.js/blob/dev/examples/js/objects/Water.js
+ * It has been modified by LeeboardTools.com...
+ */
+
+/**
  * @author jbouny / https://github.com/jbouny
  *
  * Work based on :
