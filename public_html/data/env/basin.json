@@ -106,25 +106,25 @@
             {
                 "name": "Windward Buoy A",
                 "def": "buoy_cylinder_purple",
-                "pos": {"x": 0, "y": 150, "include": "buoy_cylinder_z" },
+                "pos": {"x": 0, "y": 120, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
                 "name": "Leeward Buoy A",
                 "def": "buoy_cylinder_yellow",
-                "pos": {"x": 0, "y": -150, "include": "buoy_cylinder_z" },
+                "pos": {"x": 0, "y": -120, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
                 "name": "Starboard Corner Buoy",
                 "def": "buoy_cylinder_green",
-                "pos": {"x": 150, "y": 0, "include": "buoy_cylinder_z" },
+                "pos": {"x": 120, "y": 0, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
                 "name": "Port Corner Buoy",
                 "def": "buoy_cylinder_red",
-                "pos": {"x": -150, "y": 0, "include": "buoy_cylinder_z" },
+                "pos": {"x": -120, "y": 0, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
