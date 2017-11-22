@@ -79,7 +79,7 @@ LBSailSim.Sky3D.prototype = {
     
     loadSkyShader: function() {
         // TEST!!!
-        //return false;
+        return false;
         
         
         var radius = this.sailEnv.horizonDistance;

@@ -54,7 +54,14 @@ LBSailSim.SailEnvTHREE = function(app3D, mainView, physicsType, assetLoader) {
     this.wakes3D = new LBSailSim.Wakes3D(app3D.mainScene, this);
     this.sky3D = new LBSailSim.Sky3D(app3D.mainScene, this);
     
-    this.dtRunningAvg = new LBRandom.RunningAverage(60);
+    this.runningAvgCount = 60;
+    this.dtRunningAvg = new LBRandom.RunningAverage(this.runningAvgCount);
+    
+    // Prep the running average to try to smooth over startup...
+    var dt = 1/60;
+    for (var i = 0; i < this.runningAvgCount; ++i) {
+        this.dtRunningAvg.addValue(dt);
+    }
     
     // For testing...
     //this.water3D.waterMesh.visible = false;

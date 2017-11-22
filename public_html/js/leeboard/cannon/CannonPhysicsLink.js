@@ -105,11 +105,7 @@ LBCannonPhysicsLink.Link.prototype.update = function(dt) {
     }
     else {
         this.dtCurrent = this.dt;
-    }
-    
-    // TEST!!!
-    dt = 1/60;
-    
+    }    
     
     // Generate the forces...
     LBPhysicsLink.Link.prototype.update.call(this, this.dtCurrent);
