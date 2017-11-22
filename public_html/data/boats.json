@@ -2,7 +2,32 @@
     "boats": [
         {
             "typeName": "Tubby",
-            "instances": [ "TubbyA", "TubbyB", "TubbyC" ],
+            "instances": [ 
+                {   
+                    "name": "TubbyA",
+                    "sails": {
+                        "mainsail": {
+                            "color": "yellow"
+                        }
+                    }
+                },
+                {   
+                    "name": "TubbyB",
+                    "sails": {
+                        "mainsail": {
+                            "color": "blue"
+                        }
+                    }
+                },
+                {
+                    "name": "TubbyC",
+                    "sails": {
+                        "mainsail": {
+                            "color": "green"
+                        }
+                    }
+                }
+            ],
             "phaser": {
                 "sprite": {
                     "key": "tubby",

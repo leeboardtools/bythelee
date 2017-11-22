@@ -17,8 +17,8 @@
 
 /* global Detector */
 
-require( ['three', 'lbsailsim', 'lbui3d', 'lbutil', 'lbmath', 'lbgeometry', 'lbassets', 'lbsailsimthree', 'lbcameracontrollers'],
-    function(THREE, LBSailSim, LBUI3d, LBUtil, LBMath, LBGeometry, LBAssets, LBSailSimThree, LBCameraControllers) {
+require( ['lbui3d', 'lbutil', 'lbmath', 'lbassets', 'lbsailsimthree'],
+    function(LBUI3d, LBUtil, LBMath, LBAssets, LBSailSim) {
         
         
     'use strict';
@@ -60,6 +60,16 @@ function LBMyApp() {
     
     // TEST!!!
     //this.startWindForce = 3;
+    this.otherBoats = [];
+    this.otherBoats.push({
+        name: 'TubbyB',
+        x: 20,
+        y: 0,
+        rollDeg: 0,
+        pitchDeg: 0,
+        yawDeg: 0,
+        rudderDeg: 30
+    });
     
     
     var mainViewContainer = document.getElementById('main_view');
@@ -254,6 +264,14 @@ LBMyApp.prototype.loadEnvCompleted = function() {
     if (this.mainsheetSliderElement) {
         this.mainsheetSliderElement.hidden = !this.myBoat.getMainsheetController();
     }
+    
+    this.otherBoats.forEach(function(boatEntry) {
+        if (boatEntry.name) {
+            boatEntry.boat = this.sailEnv.checkoutBoat(boatType, boatEntry.name, boatEntry.x, boatEntry.y,
+                    boatEntry.yawDeg, boatEntry.rollDeg, boatEntry.pitchDeg);
+            boatEntry.boat.getRudderController().setValue(boatEntry.rudderDeg);
+        }
+    }, this);
     
     var me = this;
     this.views.forEach(function(view) {

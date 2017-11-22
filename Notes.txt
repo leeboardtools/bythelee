@@ -40,6 +40,8 @@ are both checked.
 
 
 TODO:
+
+
 Change SkyCube textures to be based on snapshots of sky shader.
 
 Sailing Boundaries:
@@ -50,6 +52,7 @@ Lateral hull resistance > longitudinal hull resistance - an angle vs. scale curv
 
 Hull windage - just a Cl/Cd curve.
 
+Add wind shadowing behind sails.
 
 Add transition region when limiting force due to z limits.
 

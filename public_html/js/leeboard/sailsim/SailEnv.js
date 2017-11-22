@@ -47,10 +47,12 @@ LBSailSim.Env = function(assetLoader) {
     /**
      * Each property of boatsByType has the name of the boat type and is an object
      * whose properties correspond to the possible instances of the boat type. These
-     * properties have the name of the boat instance and whose value is the actual
-     * checked out boat, "" if the boat is not checked out. We use "" instead of
-     * undefined so we can distinguish between availability (=== "") and non-existance 
-     * (undefined).
+     * properties have the name of the boat instance and a value that is an object containing
+     * two optional properties:
+     * <pre><code>
+     *  instanceData:   {},     // Optional instance specific data from the JSON file.
+     *  boatInstance:   null    // The boat instance, null if the boat has not been checked out.
+     * </code></pre>
      * @readonly
      * @member {object}
      */
@@ -408,11 +410,16 @@ LBSailSim.Env.prototype = {
         if (data.instances) {
             // TODO: Someday support a range of numbered boats.
             for (var i = 0; i < data.instances.length; ++i) {
-                boatsForType[data.instances[i]] = "";
+                boatsForType[data.instances[i].name] = {
+                    instanceData: data.instances[i],
+                    boatInstance: null
+                };
             }
         }
         else {
-            boatsForType[data.typeName] = "";
+            boatsForType[data.typeName] = {
+                boatInstance: null
+            };
         }
         this.boatsByType[data.typeName] = boatsForType;
     },
@@ -445,15 +452,13 @@ LBSailSim.Env.prototype = {
         }
 
         boatName = boatName || typeName;
-        var boatInstance = boatsOfType[boatName];
-        // Need to use use LBUtil.isVar(), as boatInstance is a string and an empty
-        // string is treated as false.
-        if (!LBUtil.isVar(boatInstance)) {
-            // Boat name for boat type is not supported.
+        var boatEntry = boatsOfType[boatName];
+        if (!boatEntry) {
+            // Boat name not supported for the type.
             return false;
         }
-
-        return boatInstance === "";
+        
+        return boatEntry.boatInstance === null;
     },
     
 
@@ -490,8 +495,14 @@ LBSailSim.Env.prototype = {
         if (!boat) {
             return undefined;
         }
+
+        var boatsOfType = this.boatsByType[typeName];
+        var boatEntry = boatsOfType[boatName];
+        boatEntry.boatInstance = boat;
         
         boat.name = boatName;
+        boat.boatInstanceData = boatEntry.instanceData;
+        
         boat.obj3D.position.x = centerX || 0;
         boat.obj3D.position.y = centerY || 0;
         rollDeg = rollDeg || 0;
@@ -500,7 +511,6 @@ LBSailSim.Env.prototype = {
         boat.obj3D.rotation.set(rollDeg * LBMath.DEG_TO_RAD, pitchDeg * LBMath.DEG_TO_RAD, rotDeg * LBMath.DEG_TO_RAD, 'ZYX');
         boat.obj3D.updateMatrixWorld(true);
 
-        this.boatsByType[typeName][boatName] = boat;
         this._boatCheckedOut(boat, boatData);
         return boat;
     },
@@ -548,8 +558,9 @@ LBSailSim.Env.prototype = {
     returnBoat: function(boat) {
         var boatsOfType = this.boatsByType[boat.typeName];
         if (boatsOfType) {
-            if (boatsOfType[boat.boatName] === boat) {
-                boatsOfType[boat.boatName] = "";
+            var boatEntry = boatsOfType[boat.boatName];
+            if (boatEntry && (boatEntry.boatInstance === boat)) {
+                boatEntry.boatInstance = null;
                 this._boatReturned(boat);
                 boat.destroy();
                 return true;
@@ -588,8 +599,8 @@ LBSailSim.Env.prototype = {
     returnAllBoats: function() {
         var me = this;
         Object.values(this.boatsByType).forEach(function(boatsOfType) {
-           Object.values(boatsOfType).forEach(function(boat) {
-               me.returnBoat(boat);
+           Object.values(boatsOfType).forEach(function(boatEntry) {
+               me.returnBoat(boatEntry.boatInstance);
            });
         });
         

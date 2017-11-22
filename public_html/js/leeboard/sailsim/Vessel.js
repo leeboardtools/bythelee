@@ -401,6 +401,21 @@ LBSailSim.Vessel.prototype.addAirfoil = function(foilInstance) {
 };
 
 /**
+ * Retrieves the airfoil with a given name.
+ * @param {String} name The name of the airfoil.
+ * @returns {LBSailSim.FoilInstance}    The airfoil, undefined if not found.
+ */
+LBSailSim.Vessel.prototype.getAirfoil = function(name) {
+    var length = this.airfoils.length;
+    for (var i = 0; i < length; ++i) {
+        if (this.airfoils[i].name === name) {
+            return this.airfoils[i];
+        }
+    }
+    return undefined;
+};
+
+/**
  * Adds a hydrofoil to the vessel.
  * @param {LBSailSim.FoilInstance} foilInstance The foil instance representing the hydrofoil.
  * @returns {LBSailSim.Vessel}  this.

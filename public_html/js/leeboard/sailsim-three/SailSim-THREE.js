@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsim', 'lbcannonphysicslink', 'three', 'lbgeometry', 'lbassets', 'lbrandom', 'lbui3d', 'lbwater3d', 'lbsky3d', 'lbwakes3d', 'lbwind3d', 'tween'], 
-function(LBSailSim, LBCannonPhysicsLink, THREE, LBGeometry, LBAssets, LBRandom, LBUI3d, LBWater3D, LBSky3D, LBWakes3D, LBWind3D, TWEEN) {
+define(['lbsailsim', 'lbcannonphysicslink', 'lbrandom', 'lbui3d', 'lbgeometry', 'lbwater3d', 'lbsky3d', 'lbwakes3d', 'lbwind3d', 'tween'], 
+function(LBSailSim, LBCannonPhysicsLink, LBRandom, LBUI3d, LBGeometry, LBWater3D, LBSky3D, LBWakes3D, LBWind3D, TWEEN) {
     
     'use strict';
 
@@ -109,18 +109,18 @@ LBSailSim.SailEnvTHREE.prototype._boatCheckedOut = function(boat, data) {
             boat._lbThreeModel = model;
             me.envGroup.add(model);
             
-            loadVesselPartModel(me, boat.spars, model, me.app3D.mainScene);
-            loadVesselPartModel(me, boat.lines, model, me.app3D.mainScene);
-            loadVesselPartModel(me, boat.windIndicators, model, me.app3D.mainScene);
-            loadVesselPartModel(me, boat.hydrofoils, model, me.app3D.mainScene);
-            loadVesselPartModel(me, boat.airfoils, model, me.app3D.mainScene);
+            loadVesselPartModel(me, boat.spars, model, me.app3D.mainScene, boat);
+            loadVesselPartModel(me, boat.lines, model, me.app3D.mainScene, boat);
+            loadVesselPartModel(me, boat.windIndicators, model, me.app3D.mainScene, boat);
+            loadVesselPartModel(me, boat.hydrofoils, model, me.app3D.mainScene, boat);
+            loadVesselPartModel(me, boat.airfoils, model, me.app3D.mainScene, boat);
         });
     }
     
     this.wakes3D.addVessel(boat);
 };
 
-function loadVesselPartModel(sailEnv, parts, parentModel, mainScene) {
+function loadVesselPartModel(sailEnv, parts, parentModel, mainScene, boat) {
     parts.forEach(function(rigidBody) {
         var partData = rigidBody.loadData;
         if (partData) {
@@ -136,11 +136,34 @@ function loadVesselPartModel(sailEnv, parts, parentModel, mainScene) {
 
                     if (rigidBody.sailSurface) {
                         mapSailSurfaceToModel(rigidBody.sailSurface, model);
+                        
+                        customizeSail(boat, rigidBody);
                     }
                 });
             }
         }
     });
+};
+
+function customizeSail(boat, sail) {
+    if (!boat.boatInstanceData || !boat.boatInstanceData.sails) {
+        return;
+    }
+    
+    var sailData = boat.boatInstanceData.sails[sail.name];
+    if (!sailData) {
+        return;
+    }
+    
+    if (sailData.color) {
+        var material = sail._lbThreeModel.material;
+        if (Array.isArray(material)) {
+            material = material[0];
+        }
+        if (material) {
+            material.color = LBGeometry.Color.createFromData(sailData.color, material.color);
+        }
+    }
 };
 
 function vector3ToTHREEDistanceSq(vec, vecThree) {
