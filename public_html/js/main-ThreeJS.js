@@ -17,8 +17,8 @@
 
 /* global Detector */
 
-require( ['lbui3d', 'lbutil', 'lbmath', 'lbassets', 'lbsailsimthree'],
-    function(LBUI3d, LBUtil, LBMath, LBAssets, LBSailSim) {
+require( ['lbui3d', 'lbutil', 'lbmath', 'lbassets', 'lbsailsimthree', 'lbracing'],
+    function(LBUI3d, LBUtil, LBMath, LBAssets, LBSailSim, LBRacing) {
         
         
     'use strict';
@@ -241,6 +241,28 @@ LBMyApp.prototype.loadEnvironment = function(name) {
  * @returns {undefined}
  */
 LBMyApp.prototype.loadEnvCompleted = function() {
+    var me = this;
+    var assetLoader = this.sailEnv.assetLoader;
+    var name = this.sailEnv.name + '.courses';
+    var fileName = 'data/courses/' + name + '.json';
+    assetLoader.loadJSON(name, fileName, function(data) {
+        if (data.courses) {
+            try {
+                this.raceCourses = LBRacing.Course.loadCoursesFromData(me.sailEnv, data.courses);
+            }
+            catch (err) {
+                // Ignore course loading failures...
+            }
+        }
+        me.finishLoading();
+    },
+    undefined,  // onProgress()
+    function(data) {    // onError(), just continue with the loading.
+        me.finishLoading();
+    });
+};
+    
+LBMyApp.prototype.finishLoading = function() {
     // Load a boat...
     var boatType = Object.keys(this.sailEnv.boatsByType)[0];
     var boatName = Object.keys(this.sailEnv.boatsByType[boatType])[0];
@@ -521,6 +543,10 @@ LBMyApp.prototype.update = function(dt) {
     LBUI3d.App3D.prototype.update.call(this, dt);
     
     this.sailEnv.update(dt);
+    
+    if (this.race) {
+        this.race.update(dt);
+    }
     
     this.updateHUDBoat();
     this.updateHUDWind();

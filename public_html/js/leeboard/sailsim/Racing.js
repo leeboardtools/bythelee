@@ -80,13 +80,13 @@ LBRacing.Course.createFromData = function(sailEnv, data) {
     var options = {};
     options.name = data.name;
     options.type = data.type;
-    options.start = LBRacing.Mark.createFromData(data.start);
-    options.finish = LBRacing.Mark.createFromData(data.finish);
+    options.start = LBRacing.Mark.createFromData(sailEnv, data.start);
+    options.finish = LBRacing.Mark.createFromData(sailEnv, data.finish);
     
     if (data.marks) {
         options.marks = [];
         data.marks.forEach(function(markData) {
-            var mark = LBRacing.Mark.createFromData(markData);
+            var mark = LBRacing.Mark.createFromData(sailEnv, markData);
             if (mark) {
                 options.marks.push(mark);
             }
@@ -94,6 +94,25 @@ LBRacing.Course.createFromData = function(sailEnv, data) {
     }
     
     return new LBRacing.Course(options);
+};
+
+/**
+ * Loads an array of courses from an array of data objects compatible with
+ * {@link module:LBRacing.Course.createFromData}.
+ * @param {module:LBSailSim.SailEnv} sailEnv    The sailing environment.
+ * @param {Object[]} data   The array of data objects.
+ * @returns {module:LBRacing.Course[]}  The array of courses.
+ */
+LBRacing.Course.loadCoursesFromData = function(sailEnv, data) {
+    var courses = [];
+    data.forEach(function(courseData) {
+        var course = LBRacing.Course.createFromData(sailEnv, courseData);
+        if (course) {
+            courses.push(course);
+        }
+    });
+    
+    return courses;
 };
 
 
@@ -666,6 +685,6 @@ LBRacing.Competitor.prototype.destroy = function() {
     }
 };
 
-return LBSailSim;
+return LBRacing;
     
 });

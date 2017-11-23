@@ -147,6 +147,9 @@ LBSailSim.Env.prototype = {
         this.boatDatas = {};
         this.boatsByType = {};
         
+        // TODO:
+        // We need to remove the various objects from the physics link...
+        
         this.objectDefs = {};
         this.floatingObjects.length = 0;
         this.floatingObjectsByClassification = {};
@@ -161,6 +164,7 @@ LBSailSim.Env.prototype = {
      */
     loadEnv: function(name, onLoaded, onError) {
         var me = this;
+        this.name = name;
         var fileName = 'data/env/' + name + '.json';
         this.assetLoader.loadJSON(name, fileName, function(data) {
             data = LBAssets.expandIncludes(data);
@@ -246,9 +250,9 @@ LBSailSim.Env.prototype = {
         
         var rigidBody = LBPhysics.RigidBody.createFromData(objectDef);        
         this.floatingObjects.push(rigidBody);
+        rigidBody.name = data.name;
         
         LBForces.Buoyancy.loadRigidBodySettings(rigidBody, objectDef);
-
         if (data.pos) {
             LBGeometry.loadVector3(data.pos, rigidBody.obj3D.position);
         }
