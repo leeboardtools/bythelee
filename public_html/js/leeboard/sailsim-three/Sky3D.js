@@ -1,5 +1,5 @@
 /* 
- * Copyright 2017 albert.
+ * Copyright 2017 Albert Santos.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,14 @@ LBSailSim.Sky3D.prototype = {
             'pz.png', 'nz.png'
         ]);
         
+        // Sky-box arrangement:
+        //          +----+
+        //          | py |
+        //     +----+----+----+----+
+        //     | pz | px | nz | nx |
+        //     +----+----+----+----+
+        //          | ny |
+        //          +----+
         
         var cubeShader = THREE.ShaderLib[ 'cube' ];
         cubeShader.uniforms[ 'tCube' ].value = this.skyTextureCube;
