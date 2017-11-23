@@ -41,8 +41,33 @@ are both checked.
 
 TODO:
 
+Course:
+Start Line
+    - Port then stbd marks
 
-Change SkyCube textures to be based on snapshots of sky shader.
+Mark List:
+    - Round to port
+    - Round to stbd
+    - Gate (port then stbd marks)
+
+Finish line
+    - Port then stbd marks
+
+Need to detect:
+    - Crossing of starting line.
+    - Crossing of finish line
+    - Contact with mark - 30 sec. penalty or do a turn?
+    Detecting contact:
+        Use Cannon.World.collisionMatrix.get(bodyA, bodyB)
+        Can have simple list of marks to check against. Primarily list of upcoming marks.
+        Once there is contact, record the penalty, and disable detection against that mark.
+    Determining passing of mark:
+        Round to port, round to stbd? Which side of velocity vector boat goes around the mark?
+
+
+
+Multi-player
+
 
 Sailing Boundaries:
 Need to tweak what happens beyond the boundaries. Right now the counteracting wind is added to the existing

@@ -65,6 +65,16 @@
             "threeModel": "models/boundary_post.json"
         },
         {
+            "name": "buoy_cylinder_stbd_pin",
+            "include": "buoy_cylinder",
+            "threeModel": "models/buoy_cylinder_stbd_pin.json"
+        },
+        {
+            "name": "buoy_cylinder_port_pin",
+            "include": "buoy_cylinder",
+            "threeModel": "models/buoy_cylinder_port_pin.json"
+        },
+        {
             "name": "buoy_cylinder_blue",
             "include": "buoy_cylinder",
             "threeModel": "models/buoy_cylinder_blue.json"
@@ -106,25 +116,37 @@
             {
                 "name": "Windward Buoy A",
                 "def": "buoy_cylinder_purple",
-                "pos": {"x": 0, "y": 120, "include": "buoy_cylinder_z" },
+                "pos": {"x": 60, "y": 120, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
                 "name": "Leeward Buoy A",
                 "def": "buoy_cylinder_yellow",
-                "pos": {"x": 0, "y": -120, "include": "buoy_cylinder_z" },
+                "pos": {"x": 70, "y": -120, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
                 "name": "Starboard Corner Buoy",
                 "def": "buoy_cylinder_green",
-                "pos": {"x": 120, "y": 0, "include": "buoy_cylinder_z" },
+                "pos": {"x": 180, "y": 0, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
                 "name": "Port Corner Buoy",
                 "def": "buoy_cylinder_red",
-                "pos": {"x": -120, "y": 0, "include": "buoy_cylinder_z" },
+                "pos": {"x": -100, "y": 0, "include": "buoy_cylinder_z" },
+                "include": "buoy_cylinder_object"
+            },
+            {
+                "name": "Port Pin A",
+                "def": "buoy_cylinder_port_pin",
+                "pos": {"x": 50, "y": 0, "include": "buoy_cylinder_z" },
+                "include": "buoy_cylinder_object"
+            },
+            {
+                "name": "Starboard Pin A",
+                "def": "buoy_cylinder_stbd_pin",
+                "pos": {"x": 80, "y": 0, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
@@ -134,28 +156,28 @@
                 "include": "buoy_cylinder_object"
             },
             {
-                "_ignore": true,
+                "ignore": true,
                 "name": "Red Buoy",
                 "def": "buoy_cylinder_red",
                 "pos": {"x": 10, "y": -20, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
-                "_ignore": true,
+                "ignore": true,
                 "name": "Yellow Buoy",
                 "def": "buoy_cylinder_yellow",
                 "pos": {"x": 10, "y": -40, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
-                "_ignore": true,
+                "ignore": true,
                 "name": "Green Buoy",
                 "def": "buoy_cylinder_green",
                 "pos": {"x": 25, "y": -20, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
-                "_ignore": true,
+                "ignore": true,
                 "name": "Purple Buoy",
                 "def": "buoy_cylinder_purple",
                 "pos": {"x": 40, "y": -20, "include": "buoy_cylinder_z" },

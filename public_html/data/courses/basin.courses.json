@@ -1,0 +1,33 @@
+{
+    "courses": [
+        {
+            "name": "Windward - Leeward",
+            "env": "basin",
+            "type": "standard",
+            "start": {
+                "name": "Starting Line",
+                "type": "start",
+                "port": "Port Pin A",
+                "stbd": "Starboard Pin A"
+            },
+            "marks": [
+                {
+                    "name": "Windward Mark",
+                    "type": "port",
+                    "mark": "Windward Buoy A"
+                },
+                {
+                    "name": "Leeward Mark",
+                    "type": "port",
+                    "mark": "Leeward Buoy A"
+                }
+            ],
+            "finish": {
+                "name": "Finish Line",
+                "type": "finish",
+                "port": "Port Pin A",
+                "stbd": "Starboard Pin A"
+            }
+        }
+    ]
+}

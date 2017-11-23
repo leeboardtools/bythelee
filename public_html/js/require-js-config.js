@@ -55,6 +55,7 @@ var require = {
         'lbfoilinstance': 'leeboard/sailsim/FoilInstance',
         'lbhull': 'leeboard/sailsim/Hull',
         'lbpropulsor': 'leeboard/sailsim/Propulsor',
+        'lbracing': 'leeboard/sailsim/Racing',
         'lbsail': 'leeboard/sailsim/Sail',
         'lbsailenv': 'leeboard/sailsim/SailEnv',
         'lbsailsim': 'leeboard/sailsim/SailSim',
