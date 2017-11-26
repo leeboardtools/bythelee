@@ -911,7 +911,7 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
     }
     
     if (this.hull) {
-        this.hullResultant = this.hull.updateForces(dt);
+        this.hullResultant = this.hull.updateForces(dt, this.hullResultant);
         this.addWorldResultant(this.hullResultant);
     }
     

@@ -624,6 +624,13 @@ LBGeometry.Vector3.prototype.isZero = function() {
 };
 
 /**
+ * A pool of {@link module:LBGeometry.Vector3} objects.
+ */
+LBGeometry.Vector3Pool = new LBUtil.Pool(function() {
+    return new LBGeometry.Vector3();
+});
+
+/**
  * Loads a 2D vector from a data object. The supported fields:
  * <li>[x]  The x coordinate, defaults to 0.
  * <li>[y]  The y coordinate, defaults to 0.
@@ -707,11 +714,17 @@ LBGeometry.addVectors3 = function(vecA, vecB) {
 
 /**
  * Subtracts two 2D vectors.
- * @param {object} vecA The first vector.
- * @param {object} vecB The second vectorl
- * @returns {object}    A new vector representing vecA - vecB
+ * @param {module:LBGeometry.Vector2} vecA The first vector.
+ * @param {module:LBGeometry.Vector2} vecB The second vectorl
+ * @param {module:LBGeometry.Vector2} [store] If defined the vector to receive the difference.
+ * @returns {module:LBGeometry.Vector2}    A new vector representing vecA - vecB
  */
-LBGeometry.subVectors2 = function(vecA, vecB) {
+LBGeometry.subVectors2 = function(vecA, vecB, store) {
+    if (store) {
+        store.copy(vecA);
+        store.sub(vecB);
+        return store;
+    }
     var vec = new LBGeometry.Vector2(vecA.x, vecA.y);
     vec.sub(vecB);
     return vec;
@@ -719,11 +732,21 @@ LBGeometry.subVectors2 = function(vecA, vecB) {
 
 /**
  * Subtracts two 3D vectors.
- * @param {object} vecA The first vector.
- * @param {object} vecB The second vectorl
- * @returns {object}    A new vector representing vecA - vecB
+ * @param {module:LBGeometry.Vector3} vecA The first vector.
+ * @param {module:LBGeometry.Vector3} vecB The second vector.
+ * @param {module:LBGeometry.Vector3} [store] If defined the vector to receive the difference.
+ * @returns {module:LBGeometry.Vector3}    A new vector representing vecA - vecB
  */
-LBGeometry.subVectors3 = function(vecA, vecB) {
+LBGeometry.subVectors3 = function(vecA, vecB, store) {
+    if (store) {
+        if (Number.isNaN(vecA.x) || Number.isNaN(vecA.y) || Number.isNaN(vecA.z)) {
+            store.set(0, 0, 0);
+        }
+        else {
+            store.copy(vecA);
+        }
+        return store.sub(vecB);
+    }
     var vec = new LBGeometry.Vector3(vecA.x, vecA.y, vecA.z);
     vec.sub(vecB);
     return vec;
@@ -734,7 +757,7 @@ LBGeometry.subVectors3 = function(vecA, vecB) {
  * @param {module:LBGeometry.Vector2} vecA The first vector.
  * @param {module:LBGeometry.Vector2} vecB The second vector.
  * @param {module:LBGeometry.Vector3} [store]  If defined the 3D vector to receive the cross product.
- * @returns {object}    A new 3D vector representing vecA X vecB
+ * @returns {module:LBGeometry.Vector3}    A new 3D vector representing vecA X vecB
  */
 LBGeometry.crossVectors2 = function(vecA, vecB, store) {
     var z = vecA.x * vecB.y - vecA.y * vecB.x;
@@ -749,11 +772,16 @@ LBGeometry.crossVectors2 = function(vecA, vecB, store) {
  * @param {module:LBGeometry.Vector3} vecA The first vector.
  * @param {module:LBGeometry.Vector3} vecB The second vector.
  * @param {module:LBGeometry.Vector3} [store]  If defined the 3D vector to receive the cross product.
- * @returns {object}    A new vector representing vecA X vecB
+ * @returns {module:LBGeometry.Vector3}    A new vector representing vecA X vecB
  */
 LBGeometry.crossVectors3 = function(vecA, vecB, store) {
     if (store) {
-        store.copy(vecA);
+        if (Number.isNaN(vecA.x) || Number.isNaN(vecA.y) || Number.isNaN(vecA.z)) {
+            store.set(0, 0, 0);
+        }
+        else {
+            store.copy(vecA);
+        }
         store.cross(vecB);
         return store;
     }

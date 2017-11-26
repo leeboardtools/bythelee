@@ -319,7 +319,7 @@ LBUI3d.App3D.prototype.fpsUpdated = function() {
 
 LBUI3d.App3D.prototype._cycle = function(timeStamp) {
     var timeRecord = this.debugTimeRecorder.start('App3D._cycle');
-    var lastMaxMs = timeRecord.maxMs;
+    var lastMaxMs = timeRecord ? timeRecord.maxMs : 0;
     
     if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
         requestAnimationFrame(LBUI3dApp3DAnimate);
@@ -347,11 +347,12 @@ LBUI3d.App3D.prototype._cycle = function(timeStamp) {
 
     this._lastFrameTimeStamp = timeStamp;
     
-    timeRecord.end();
-    if (timeRecord.maxMs > lastMaxMs) {
-        this.debugTimeRecorder.freeze();
+    if (timeRecord) {
+        timeRecord.end();
+        if (timeRecord.maxMs > lastMaxMs) {
+            this.debugTimeRecorder.freeze();
+        }
     }
-    
     
     if (!this.debugTimeRecorder.isNullTimeRecorder) {
         var now = performance.now();

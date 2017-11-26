@@ -164,6 +164,10 @@ LBSailSim.Hull = function(vessel) {
      * @member {module:LBGeometry.Vector3}
      */
     this.resistanceForce = new LBGeometry.Vector3();
+    
+    
+    this._storeMinPerpVertex = new LBGeometry.Vector3();
+    this._storeMaxPerpVertex = new LBGeometry.Vector3();
 };
 
 //var _workingPos = new LBGeometry.Vector3();
@@ -215,6 +219,7 @@ LBSailSim.Hull.prototype = {
         var maxPerpVertex = undefined;
         var maxPerpDistance = -Number.MAX_VALUE;
         
+        var me = this;
         this.immersedVolume = LBVolume.Volume.volumesOnSideOfPlane(this.vessel.volumes, xyPlane, false, this.centerOfBuoyancy,
             function(volIndex, tetra) {
                 tetra.vertices.forEach(function(vertex) {
@@ -222,11 +227,11 @@ LBSailSim.Hull.prototype = {
                         var dot = vertex.dot(_workingVelPerpendicular);
                         if (dot < minPerpDistance) {
                             minPerpDistance = dot;
-                            minPerpVertex = vertex;
+                            minPerpVertex = me._storeMinPerpVertex.copy(vertex);
                         }
                         if (dot > maxPerpDistance) {
                             maxPerpDistance = dot;
-                            maxPerpVertex = vertex;
+                            maxPerpVertex = me._storeMaxPerpVertex.copy(vertex);
                         }
                     }
                 });

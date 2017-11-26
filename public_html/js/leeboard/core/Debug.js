@@ -795,6 +795,10 @@ LBDebug.NullTimeRecorder.prototype = {
     reset: function() {},
     start: function() {},
     end: function() {},
+    record: function(name, callback) {
+        callback();
+    },
+    
     getSummary: function() {},
     constructor: LBDebug.NullTimeRecorder
 };

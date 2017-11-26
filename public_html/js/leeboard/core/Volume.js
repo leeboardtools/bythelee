@@ -328,6 +328,8 @@ var _workingPos = new LBGeometry.Vector3();
  *      tetraCallback = function(volumeIndex, tetra) {
  *      }
  * </code></pre>
+ * Note that the vertices of the tetra are temporary, copies should be made for any vertices
+ * that are to be kept after the function returns.
  * @returns {Number}    The total volume on the desired side of the plane.
  */
 LBVolume.Volume.volumesOnSideOfPlane = function(volumes, plane, wantPositiveSide, centerOfVolume, tetraCallback) {
@@ -367,6 +369,8 @@ LBVolume.Volume.volumesOnSideOfPlane = function(volumes, plane, wantPositiveSide
                     tetraCallback(v, tetra);
                 }
             }
+            
+            LBVolume.Tetra.releaseSlicedTetras(result);
         }
     }
 
@@ -873,9 +877,11 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
     }
     
     if ((onPlane.length + above.length) === 4) {
+        // All above
         return [ [ tetra ], [] ];
     }
     else if ((onPlane.length + below.length) === 4) {
+        // All below
         return [ [], [ tetra ] ];
     }
     
@@ -926,11 +932,11 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
         
         var vertex0 = tetra.vertices[otherIndices[0]];
         line.end.copy(vertex0);
-        var pointA = plane.intersectLine(line);
+        var pointA = plane.intersectLine(line, LBGeometry.Vector3Pool.get());
         
         var vertex1 = tetra.vertices[otherIndices[1]];
         line.end.copy(vertex1);
-        var pointB = plane.intersectLine(line);
+        var pointB = plane.intersectLine(line, LBGeometry.Vector3Pool.get());
         
         if (singleTetras) {
             vertices[0] = tetra.vertices[onPlane[0]];
@@ -953,7 +959,7 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
         
         line.start.copy(tetra.vertices[above[0]]);
         line.end.copy(tetra.vertices[below[0]]);
-        vertices[2] = plane.intersectLine(line);
+        vertices[2] = plane.intersectLine(line, LBGeometry.Vector3Pool.get());
         
         if (positiveDir) {
             vertices[3] = tetra.vertices[above[0]];
@@ -997,15 +1003,15 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
         
         var vertex0 = tetra.vertices[otherIndices[0]];
         line.end.copy(vertex0);
-        var pointA = plane.intersectLine(line);
+        var pointA = plane.intersectLine(line, LBGeometry.Vector3Pool.get());
         
         var vertex1 = tetra.vertices[otherIndices[1]];
         line.end.copy(vertex1);
-        var pointB = plane.intersectLine(line);
+        var pointB = plane.intersectLine(line, LBGeometry.Vector3Pool.get());
         
         var vertex2 = tetra.vertices[otherIndices[2]];
         line.end.copy(vertex2);
-        var pointC = plane.intersectLine(line);
+        var pointC = plane.intersectLine(line, LBGeometry.Vector3Pool.get());
         
         if (singleTetras) {
             vertices[0] = singleVertex;
@@ -1031,16 +1037,16 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
         
         line.start.copy(aboveA);
         line.end.copy(belowA);
-        var ptAA = plane.intersectLine(line);
+        var ptAA = plane.intersectLine(line, LBGeometry.Vector3Pool.get());
         
         line.end.copy(belowB);
-        var ptAB = plane.intersectLine(line);
+        var ptAB = plane.intersectLine(line, LBGeometry.Vector3Pool.get());
         
         line.start.copy(aboveB);
-        var ptBB = plane.intersectLine(line);
+        var ptBB = plane.intersectLine(line, LBGeometry.Vector3Pool.get());
         
         line.end.copy(belowA);
-        var ptBA = plane.intersectLine(line);
+        var ptBA = plane.intersectLine(line, LBGeometry.Vector3Pool.get());
         
         if (positiveDir) {
             var myVertices = [aboveA, ptAA, ptAB, aboveB, ptBA, ptBB];
@@ -1052,8 +1058,49 @@ LBVolume.Tetra.sliceWithPlane = function(tetra, plane, positiveDir, negativeDir)
         }
     }
     
+    if (aboveTetras) {
+        aboveTetras.forEach(function(tetra) {
+            tetra._isTempTetra = true;
+        });
+    }
+    if (belowTetras) {
+        belowTetras.forEach(function(tetra) {
+            tetra._isTempTetra = true;
+        });
+    }
     return [aboveTetras, belowTetras];
 };
+
+/**
+ * Calls {@link module:LBVolume.Tetra.releaseTempTetra} for each tetra in the results object
+ * returned by {@link module:LBVolume.Tetra.sliceWithPlane}.
+ * @param {Object} result   The result from {@link module:LBVolume.Tetra.sliceWithPlane}.
+ * @returns {undefined}
+ */
+LBVolume.Tetra.releaseSlicedTetras = function(result) {
+    var count = result.length;
+    for (var i = 0; i < count; ++i) {
+        result[i].forEach(function(tetra) {
+            LBVolume.Tetra.releaseTempTetra(tetra);
+        });
+    }
+};
+
+/**
+ * If a tetra has been marked as temporary, releases the vertices of the tetra back
+ * into the vector3 pool and destroys the tetra.
+ * @param {module:LBVolume.Tetra} tetra The tetra.
+ * @returns {undefined}
+ */
+LBVolume.Tetra.releaseTempTetra = function(tetra) {
+    if (tetra._isTempTetra) {
+        tetra.vertices.forEach(function(vertex) {
+            LBGeometry.Vector3Pool.release(vertex);
+        });
+        tetra.destroy();
+    }
+};
+
 
 /**
  * @enum

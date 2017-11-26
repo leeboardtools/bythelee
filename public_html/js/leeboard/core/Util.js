@@ -420,6 +420,90 @@ LBUtil.RollingBuffer.prototype = {
     constructor: LBUtil.RollingBuffer
 };
 
+
+/**
+ * A simple class for managing a pool of objects. Objects are obtained via
+ * {@link module:LBUtil.Pool#get}, and when done are returned to the pool via
+ * {@link module:LBUtil.Pool#release}.
+ * @param {Function} allocator  The function called to allocate a new object.
+ * @returns {module.LBUtil.Pool}
+ */
+LBUtil.Pool = function(allocator) {
+    this.allocator = allocator;
+    this._first = null;
+    
+    this._allocatedCount = 0;
+    this._returnedCount = 0;
+    this._recycldedCount = 0;
+};
+
+LBUtil.Pool.prototype = {
+    /**
+     * Retrieves an object from the pool, allocating one if the pool is empty.
+     * @returns {Object}    The object.
+     */
+    get: function() {
+        var obj;
+        if (this._first) {
+            obj = this._first;
+            this._first = obj._lbPoolNext;
+            ++this._recycldedCount;
+        }
+        else {
+            obj = this.allocator();
+            ++this._allocatedCount;
+        }
+        
+        obj._lbPool = this;
+        obj._lbPoolNext = null;
+        return obj;
+    },
+    
+    /**
+     * Returns an object to the pool.
+     * @param {Object} obj  The object.
+     * @returns {undefined}
+     */
+    release: function(obj) {
+        if ((obj._lbPool === this) && !obj._lbPoolNext) {
+            obj._lbPoolNext = this._first;
+            this._first = obj;
+            ++this._returnedCount;
+        }
+    },
+    
+    /**
+     * Marks an object such that calling {@link module:LBUtil.Pool#release} will not
+     * return it to the pool. Call this when an object is being used outside of the
+     * scope that obtained the object from the pool, so the object does not get
+     * accidentally returned to the pool.
+     * @param {Object} obj  The object.
+     * @returns {Object}    obj.
+     */
+    removeFromPool: function(obj) {
+        obj._lbPool = undefined;
+        return obj;
+    },
+    
+    /**
+     * Removes all the objects currently in the pool. If the object has a destroy
+     * method, that is called.
+     * @returns {undefined}
+     */
+    destroy: function() {
+        while (this._first) {
+            var obj = this._first;
+            if (typeof obj.destroy === 'function') {
+                obj.destroy();
+            }
+            this._first = this._first._lbPoolNext;
+        }
+    },
+    
+    constructor: LBUtil.Pool
+};
+
+
 /**
  * Helper for toggling full-screen mode.
  * @param {Element} element  The DOM element to use.

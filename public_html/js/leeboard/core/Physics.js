@@ -72,6 +72,10 @@ LBPhysics.Resultant3D = function(force, moment, position) {
 
 LBPhysics.Resultant3D._workingLine3 = new LBGeometry.Line3();
 LBPhysics.Resultant3D._workingPos = new LBGeometry.Vector3();
+LBPhysics.Resultant3D._workingSub = new LBGeometry.Vector3();
+LBPhysics.Resultant3D._workingMoment = new LBGeometry.Vector3();
+LBPhysics.Resultant3D._workingForceDir = new LBGeometry.Vector3();
+LBPhysics.Resultant3D._workingR = new LBGeometry.Vector3();
 
 LBPhysics.Resultant3D.prototype = {
     /**
@@ -106,8 +110,8 @@ LBPhysics.Resultant3D.prototype = {
      */
     addForce: function(force, position) {
         if (!this.applPoint.equals(position)) {
-            var arm = LBGeometry.subVectors3(position, this.applPoint);
-            var moment = LBPhysics.calcMoment(force, arm);
+            var arm = LBGeometry.subVectors3(position, this.applPoint, LBPhysics.Resultant3D._workingSub);
+            var moment = LBPhysics.calcMoment(force, arm, LBPhysics.Resultant3D._workingMoment);
             this.moment.add(moment);
         }
         
@@ -122,8 +126,8 @@ LBPhysics.Resultant3D.prototype = {
      * @returns {module:LBPhysics.Resultant3D} this.
      */
     addResultant: function(other) {
-        var deltaPos = LBGeometry.subVectors3(other.applPoint, this.applPoint);
-        var moment = LBPhysics.calcMoment(other.force, deltaPos);
+        var deltaPos = LBGeometry.subVectors3(other.applPoint, this.applPoint, LBPhysics.Resultant3D._workingSub);
+        var moment = LBPhysics.calcMoment(other.force, deltaPos, LBPhysics.Resultant3D._workingMoment);
         moment.add(other.moment);
         
         this.moment.add(moment);
@@ -138,8 +142,8 @@ LBPhysics.Resultant3D.prototype = {
      */
     moveApplPoint: function(position) {
         if (!this.applPoint.equals(position)) {
-            var r = LBGeometry.subVectors3(this.applPoint, position);
-            var moment = LBPhysics.calcMoment(this.force, r);
+            var r = LBGeometry.subVectors3(this.applPoint, position, LBPhysics.Resultant3D._workingSub);
+            var moment = LBPhysics.calcMoment(this.force, r, LBPhysics.Resultant3D._workingMoment);
             this.moment.add(moment);
             this.applPoint.copy(position);
         }
@@ -170,17 +174,19 @@ LBPhysics.Resultant3D.prototype = {
         
         // Find the parallel moment.
         var normScale = 1./Math.sqrt(forceMagSq);
-        var forceDir = new LBGeometry.Vector3(this.force.x * normScale, this.force.y * normScale, this.force.z * normScale);        
+        var forceDir = LBPhysics.Resultant3D._workingForceDir.set(this.force.x * normScale, this.force.y * normScale, this.force.z * normScale);        
         var pMoment = forceDir.multiplyScalar(this.moment.dot(forceDir));
 
         // And then the perpendicular moment, which is moment - parallel moment.
-        var moment = LBGeometry.subVectors3(this.moment, pMoment);
+        // Just reusing forceDir for storage...
+        var moment = LBGeometry.subVectors3(this.moment, pMoment, forceDir);
         if (LBGeometry.isVectorLikeZero(moment)) {
             // Already a wrench...
             return this;
         }
         
-        var r = LBGeometry.crossVectors3(moment, this.force);
+        // Just reusing forceDir for storage...
+        var r = LBGeometry.crossVectors3(moment, this.force, LBPhysics.Resultant3D._workingR);
         r.multiplyScalar(-1./forceMagSq);
         
         this.applPoint.add(r);

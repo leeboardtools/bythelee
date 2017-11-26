@@ -825,6 +825,9 @@ LBSailSim.WaterShader.prototype.render = function() {
     }
 };
 
+var _workingView = new THREE.Vector3();
+var _workingTarget = new THREE.Vector3();
+
 /**
  * Updates the texture matrix, pretty much straight from ThreeJS' examples/WaterShader.js
  */
@@ -840,7 +843,7 @@ LBSailSim.WaterShader.prototype.updateTextureMatrix = function() {
     this.normal.set( 0, 0, 1 );
     this.normal.applyMatrix4( this.rotationMatrix );
 
-    var view = this.mirrorWorldPosition.clone().sub( this.cameraWorldPosition );
+    var view = _workingView.copy(this.mirrorWorldPosition).sub( this.cameraWorldPosition );
     view.reflect( this.normal ).negate();
     view.add( this.mirrorWorldPosition );
 
@@ -850,7 +853,7 @@ LBSailSim.WaterShader.prototype.updateTextureMatrix = function() {
     this.lookAtPosition.applyMatrix4( this.rotationMatrix );
     this.lookAtPosition.add( this.cameraWorldPosition );
 
-    var target = this.mirrorWorldPosition.clone().sub( this.lookAtPosition );
+    var target = _workingTarget.copy(this.mirrorWorldPosition).sub( this.lookAtPosition );
     target.reflect( this.normal ).negate();
     target.add( this.mirrorWorldPosition );
 
@@ -900,9 +903,9 @@ LBSailSim.WaterShader.prototype.updateTextureMatrix = function() {
     projectionMatrix.elements[ 10 ] = c.z + 1.0 - this.clipBias;
     projectionMatrix.elements[ 14 ] = c.w;
 
-    var worldCoordinates = new THREE.Vector3();
-    worldCoordinates.setFromMatrixPosition( this.camera.matrixWorld );
-    this.eye = worldCoordinates;
+    this.eye = this.eye || new THREE.Vector3();
+    this.eye.set(0,0,0);
+    this.eye.setFromMatrixPosition( this.camera.matrixWorld );
     this.material.uniforms.eye.value = this.eye;
 };
 
