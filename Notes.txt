@@ -38,6 +38,15 @@ When exporting, make sure in Apply Modifiers Type is set to Geometry, and then F
 are both checked.
 
 
+Node.js/Express
+Install express:
+sudo npm install -g express
+
+Install express generator:
+sudo apt install node-express-generator
+
+
+
 
 TODO:
 

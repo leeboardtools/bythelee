@@ -16,8 +16,8 @@
 
 
 /* global LBUI3d, LBUtil */
-define(['lbutil', 'lbui3dbase', 'lbscene3d', 'lbview3d'], 
-function(LBUtil, LBUI3d) {
+define(['lbutil', 'lbdebug', 'lbui3dbase', 'lbscene3d', 'lbview3d'], 
+function(LBUtil, LBDebug, LBUI3d) {
 
     'use strict';
 
@@ -87,6 +87,26 @@ LBUI3d.App3D = function() {
     this._nextSecondTimeStamp = (performance || Date).now() + 1000;
     this._prevSecondFrameCount = 0;
     this._lastFrameTimeStamp = 0;
+
+    /**
+     * A time recorder to be used for debugging execution times within the update or
+     * render loops. The default is a {@link module:LBDebug.NullTimeRecorder}, which 
+     * does nothing.
+     * @member {module:LBDebug.TimeRecorder}
+     */
+    this.debugTimeRecorder = new LBDebug.NullTimeRecorder();
+    
+    /**
+     * The period, in milliseconds, in which to output the debugging times.
+     * @member {Number}
+     */
+    this.deltaSocketEmitMs = 5000;
+    
+    this._nextSocketEmit = performance.now() + this.deltaSocketEmitMs;
+    
+    if (typeof io === "function") {
+        this.socket = io();
+    }
 };
 
 LBUI3d.App3D.RUN_STATE_NOT_STARTED = 0;
@@ -269,9 +289,11 @@ LBUI3d.App3D.prototype.toggleFullScreen = function(container) {
  * @param {Number} dt The number of milliseconds since the last call to this.
  */
 LBUI3d.App3D.prototype.update = function(dt) {
+    this.debugTimeRecorder.start('App3D.update');
     this.views.forEach(function(view) {
         view.update(dt);
     });
+    this.debugTimeRecorder.end('App3D.update');
 };
 
 /**
@@ -280,9 +302,11 @@ LBUI3d.App3D.prototype.update = function(dt) {
  * @param {Number} dt The number of milliseconds since the last call to this.
  */
 LBUI3d.App3D.prototype.render = function(dt) {
+    this.debugTimeRecorder.start('App3D.render');
     this.views.forEach(function(view) {
         view.render(dt);
     });
+    this.debugTimeRecorder.end('App3D.render');
 };
 
 /**
@@ -294,6 +318,9 @@ LBUI3d.App3D.prototype.fpsUpdated = function() {
 };
 
 LBUI3d.App3D.prototype._cycle = function(timeStamp) {
+    var timeRecord = this.debugTimeRecorder.start('App3D._cycle');
+    var lastMaxMs = timeRecord.maxMs;
+    
     if (this._runState === LBUI3d.App3D.RUN_STATE_RUNNING) {
         requestAnimationFrame(LBUI3dApp3DAnimate);
     }
@@ -319,6 +346,45 @@ LBUI3d.App3D.prototype._cycle = function(timeStamp) {
     this.runMillisecs += this.lastFrameMillisecs;
 
     this._lastFrameTimeStamp = timeStamp;
+    
+    timeRecord.end();
+    if (timeRecord.maxMs > lastMaxMs) {
+        this.debugTimeRecorder.freeze();
+    }
+    
+    
+    if (!this.debugTimeRecorder.isNullTimeRecorder) {
+        var now = performance.now();
+        if (now >= this._nextSocketEmit) {
+            this._nextSocketEmit = now + this.deltaSocketEmitMs;
+            
+            var summary = this.debugTimeRecorder.getSummary(true);
+            summary.fps = this.fps;
+            
+            if (this.socket) {
+                this.socket.emit('debug-timing', summary);
+            }
+            else {
+                var data = summary;
+                console.log('');
+                var now = new Date();
+                console.log('debug-timing:' + now.toTimeString());
+                if (data.fps) {
+                    console.log('FPS: ' + data.fps.toFixed(1));
+                }
+                var sum = 0;
+                Object.keys(data).forEach(function(key) {
+                    var record = data[key];
+                    if (key !== 'fps') {
+                        console.log(key + ': ' + record.maxMs.toFixed(2) + ' ' + record.frozenMs.toFixed(2) + ' ' + record.averageMs.toFixed(2) + ' ' + record.count);
+                        sum += record.averageMs;
+                    }
+                });
+                console.log('total avg. time: ' + sum.toFixed(2));
+                
+            }
+        }
+    }
 };
 
 function LBUI3dApp3DAnimate(timeStamp) {

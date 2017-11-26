@@ -65,6 +65,67 @@ LBSailSim.Water3D = function(scene3D, sailEnv) {
 LBSailSim.Water3D.MESH_SIZE = 4000;
 
 LBSailSim.Water3D.prototype = {
+    createWaterTexture: function(gridDim) {
+        gridDim = gridDim || 64;
+
+        var data = new Float32Array(gridDim * gridDim * 4);
+        var texture = new THREE.DataTexture(data, gridDim, gridDim, THREE.RGBAFormat, THREE.FloatType);
+        
+        var pixels = texture.image.data;
+        var p = 0;
+        for (var i = 0; i < gridDim; ++i) {
+            for (var i = 0; i < gridDim; ++i) {
+                pixels[p++] = 0;
+                pixels[p++] = 0;
+                pixels[p++] = 0;
+                pixels[p++] = 1;
+            }
+        }
+        
+        texture.needsUpdate = true;
+        return texture;
+    },
+    
+    createWaterMaterial: function(totalDim, gridDim, materialColor) {
+        totalDim = 1024;
+        gridDim = gridDim || 64;
+       
+        materialColor = ((materialColor !== undefined) && (materialColor !== null)) ? materialColor : 0x004663;
+        var material = new THREE.ShaderMaterial( {
+                uniforms: THREE.UniformsUtils.merge( [
+                        THREE.ShaderLib[ 'phong' ].uniforms,
+                        {
+                                heightmap: { value: null }
+                        }
+                ] ),
+                vertexShader: waterVertexShader,
+                fragmentShader: THREE.ShaderChunk[ 'meshphong_frag' ]
+
+        } );
+
+        material.lights = true;
+        //material.wireframe = true;
+
+        // Material attributes from MeshPhongMaterial
+        material.color = new THREE.Color( materialColor );
+        material.specular = new THREE.Color( 0x111111 );
+        material.shininess = 5;
+        material.opacity = 1;
+
+        // Sets the uniforms with the material values
+        material.uniforms.diffuse.value = material.color;
+        material.uniforms.specular.value = material.specular;
+        material.uniforms.shininess.value = Math.max( material.shininess, 1e-4 );
+        material.uniforms.opacity.value = material.opacity;
+
+        // Defines
+        material.defines.WIDTH = gridDim.toFixed( 1 );
+        material.defines.BOUNDS = totalDim.toFixed( 1 );
+        
+        return material;
+    },
+    
+
     _loadWater: function() {
         var waterNormals = new THREE.TextureLoader().load( 'textures/three-js/waternormals.jpg' );
         waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
@@ -152,6 +213,77 @@ LBSailSim.Water3D.prototype = {
     
     constructor: LBSailSim.Water3D
 };
+
+
+var waterVertexShader = [
+    // Copied from ThreeJS examples/webgl_gpgpu_water.html
+    'uniform sampler2D heightmap;',
+
+    '#define PHONG',
+
+    'varying vec3 vViewPosition;',
+
+    '#ifndef FLAT_SHADED',
+
+    '        varying vec3 vNormal;',
+
+    '#endif',
+
+    '#include <common>',
+    '#include <uv_pars_vertex>',
+    '#include <uv2_pars_vertex>',
+    '#include <displacementmap_pars_vertex>',
+    '#include <envmap_pars_vertex>',
+    '#include <color_pars_vertex>',
+    '#include <morphtarget_pars_vertex>',
+    '#include <skinning_pars_vertex>',
+    '#include <shadowmap_pars_vertex>',
+    '#include <logdepthbuf_pars_vertex>',
+    '#include <clipping_planes_pars_vertex>',
+
+    'void main() {',
+    '        vec2 cellSize = vec2( 1.0 / WIDTH, 1.0 / WIDTH );',
+    '        #include <uv_vertex>',
+    '        #include <uv2_vertex>',
+    '        #include <color_vertex>',
+            // # include <beginnormal_vertex>
+            // Compute normal from heightmap
+    '        vec3 objectNormal = vec3(',
+    '                ( texture2D( heightmap, uv + vec2( - cellSize.x, 0 ) ).x - texture2D( heightmap, uv + vec2( cellSize.x, 0 ) ).x ) * WIDTH / BOUNDS,',
+    '                ( texture2D( heightmap, uv + vec2( 0, - cellSize.y ) ).x - texture2D( heightmap, uv + vec2( 0, cellSize.y ) ).x ) * WIDTH / BOUNDS,',
+    '                1.0 );',
+            //<beginnormal_vertex>
+    '        #include <morphnormal_vertex>',
+    '        #include <skinbase_vertex>',
+    '        #include <skinnormal_vertex>',
+    '        #include <defaultnormal_vertex>',
+    '#ifndef FLAT_SHADED // Normal computed with derivatives when FLAT_SHADED',
+
+    '        vNormal = normalize( transformedNormal );',
+
+    '#endif',
+
+            //# include <begin_vertex>
+    '        float heightValue = texture2D( heightmap, uv ).x;',
+    '        vec3 transformed = vec3( position.x, heightValue, position.z );',
+            //<begin_vertex>
+
+    '        #include <morphtarget_vertex>',
+    '        #include <skinning_vertex>',
+    '        #include <displacementmap_vertex>',
+    '        #include <project_vertex>',
+    '        #include <logdepthbuf_vertex>',
+    '        #include <clipping_planes_vertex>',
+
+    '        vViewPosition = - mvPosition.xyz;',
+
+    '        #include <worldpos_vertex>',
+    '        #include <envmap_vertex>',
+    '        #include <shadowmap_vertex>',
+
+    '}'
+    
+].join('\n');
 
 
 /**

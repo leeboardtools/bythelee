@@ -582,5 +582,222 @@ LBDebug.DataLog.addFieldResultant = function(name) {
     return LBDebug.DataLog.addField(name, field);
 };
 
+
+/**
+ * Used to hold the time statistics recorded by {@link module:LBDebug.TimeRecorder}.
+ * @constructor
+ * @return {module:LBDebug.TimeRecord}
+ */
+LBDebug.TimeRecord = function() {
+    /**
+     * The total number of milliseconds.
+     * @member {Number}
+     */
+    this.sumMs = 0;
+    
+    /**
+     * The number of calls recorded.
+     * @member {Number}
+     */
+    this.count = 0;
+    
+    /**
+     * The maximum number of milliseconds in any one call.
+     * @member {Number}
+     */
+    this.maxMs = 0;
+    
+    /**
+     * The milliseconds of the last recorded time.
+     * @member {Number}
+     */
+    this.lastMs = 0;
+    
+    /**
+     * The value of {@link module:LBDebug.TimeRecord#lastMs} when {@link module:LBDebug.TimeRecord#freeze}
+     * was last called.
+     * @member {Number}
+     */
+    this.frozenMs = 0;
+};
+
+LBDebug.TimeRecord.prototype = {
+    /**
+     * Resets all propertys back to 0.
+     * @return {undefined}
+     */
+    reset: function() {
+        this.sumMs = 0;
+        this.count = 0;
+        this.maxMs = 0;
+        this.lastMs = 0;
+        this.frozenMs = 0;
+    },
+    
+    /**
+     * Starts a time capture.
+     * @return {undefined}
+     */
+    start: function() {
+        this.startMs = performance.now();
+    },
+    
+    /**
+     * Ends a time capture.
+     * @return {undefined}
+     */
+    end: function() {
+        var deltaMs = performance.now() - this.startMs;
+        this.maxMs = Math.max(this.maxMs, deltaMs);
+        this.sumMs += deltaMs;
+        this.lastMs = deltaMs;
+        ++this.count;
+    },
+    
+    /**
+     * Stores the value of {@link module:LBDebug.TimeRecord#lastMs} in {@link module:LBDebug.TimeRecord#frozenMs}.
+     * @return {undefined}
+     */
+    freeze: function() {
+        this.frozenMs = this.lastMs;
+    },
+    
+    constructor: LBDebug.TimeRecord
+};
+
+
+/**
+ * An object designed to record elapsed times at different points of execution, over multiple
+ * passes. Each point of interest is identified by a name, which is used as the property
+ * name of a {@link module:LBDebug.TimeRecord} property that is used to store the actual
+ * information.
+ * <p>
+ * This is function call compatible with {@link module:LBDebug.NullTimeRecorder}, which can
+ * be substituted in this object's place if no time recording is actually desired. 
+ * @constructor
+ * @return {module:LBDebug.TimeRecorder}
+ */
+LBDebug.TimeRecorder = function() {
+    /**
+     * The object holding the time records.
+     * @member {Object}
+     */
+    this.timeRecords = {};
+};
+
+LBDebug.TimeRecorder.prototype = {
+    /**
+     * Calls {@link module:LBDebug.TimeRecord#reset} for each time record in the recorder.
+     * @return {undefined}
+     */
+    reset: function() {
+        Object.keys(this.timeRecords).forEach(function(key) {
+            this.timeRecords[key].reset();
+        }, this);
+    },
+    
+    /**
+     * Starts the recording for a given name.
+     * @param {String} name The name associated with the recording.
+     * @return {module:LBDebug.TimeRecord}  The time record for the name.
+     */
+    start: function(name) {
+        var timeRecord = this.timeRecords[name];
+        if (!timeRecord) {
+            timeRecord = this.timeRecords[name] = new LBDebug.TimeRecord();
+        }
+        timeRecord.start();
+        return timeRecord;
+    },
+    
+    /**
+     * Ends recording for a given name.
+     * @param {String} name The name associated with the recording.
+     * @return {undefined}
+     */
+    end: function(name) {
+        this.timeRecords[name].end();
+    },
+    
+    /**
+     * Helper that brackets a callback function with start/end calls.
+     * @param {String} name The name associated with the recording.
+     * @param {Function} callback   The callback function, which is the function to be timed.
+     * @return {undefined}
+     */
+    record: function(name, callback) {
+        var timeRecord = this.start(name);
+        callback();
+        timeRecord.end();
+    },
+    
+    /**
+     * Calls {@link module:LBDebug.TimeRecord#freeze} for all the time records.
+     * @return {undefined}
+     */
+    freeze: function() {
+        Object.keys(this.timeRecords).forEach(function(key) {
+            this.timeRecords[key].freeze();
+        }, this);
+    },
+    
+    /**
+     * Retrieves an object whose properties represent each individual time record,
+     * and have the following properties:
+     * <pre><code>
+     *      'name': {               // 'name' is the property name of the time record.
+     *          count: 123,         // The total number of times start/end were called.
+     *          averageMs:  456,    // The average milliseconds for each start/end pair.
+     *          maxMs:  789,        // The maximum milliseconds for the start/end pairs.
+     *          frozenMs:   678     // The frozen milliseconds, if not frozen then this will be 0.
+     * </code></pre>
+     * @param {Boolean} resetRecords    If true {@link module:LBDebug.TimeRecord#reset} will be
+     * called for eac time record.
+     * @return {Object} The summary object.
+     */
+    getSummary: function(resetRecords) {
+        var summary = {};
+        Object.keys(this.timeRecords).forEach(function(key) {
+            var record = this.timeRecords[key];
+            summary[key] = {
+                count: record.count,
+                averageMs: record.sumMs / record.count,
+                maxMs: record.maxMs,
+                frozenMs: record.frozenMs
+            };
+            if (resetRecords) {
+                this.timeRecords[key].reset();
+            }
+        }, this);
+        
+        return summary;
+    },
+    
+    constructor: LBDebug.TimeRecorder
+};
+
+/**
+ * A dummy implementation of {@link module:LBDebug.TimeRecorder} that may be substituted
+ * to avoid testing for a valid time recorded.
+ * @constructor
+ * @return {module:LBDebug.NullTimeRecorder}
+ */
+LBDebug.NullTimeRecorder = function() {
+    /**
+     * true to indicate this is a {@link module:LBDebug.NullTimeRecorder}.
+     * @readonly
+     * @member {Boolean}
+     */
+    this.isNullTimeRecorder = true;
+};
+
+LBDebug.NullTimeRecorder.prototype = {
+    reset: function() {},
+    start: function() {},
+    end: function() {},
+    getSummary: function() {},
+    constructor: LBDebug.NullTimeRecorder
+};
+
 return LBDebug;
 });

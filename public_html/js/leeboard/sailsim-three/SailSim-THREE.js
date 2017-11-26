@@ -225,25 +225,37 @@ LBSailSim.SailEnvTHREE.prototype._boatReturned = function(boat) {
  */
 LBSailSim.SailEnvTHREE.prototype.update = function(dt) {
     dt = dt || this.physicsLink.timeStep();
-    if (dt > 0.25) {
-        dt = 0.25;
+    if (dt > 0.0625) {
+        dt = 0.0625;
     }
     
     dt = this.dtRunningAvg.addValue(dt);
     //dt = this.physicsLink.timeStep();
     
-    TWEEN.update(this.app3D.runMillisecs);
-    LBSailSim.Env.prototype.update.call(this, dt);
+    var me = this;
+    this.app3D.debugTimeRecorder.record('TWEEN.update', function() {
+        TWEEN.update(me.app3D.runMillisecs);
+    });
     
-    this.physicsLink.update(dt);
+    this.app3D.debugTimeRecorder.record('Env.update', function() {
+        LBSailSim.Env.prototype.update.call(me, dt);
+    });
+    
+    this.app3D.debugTimeRecorder.record('physicsLink.update', function() {
+        me.physicsLink.update(dt);
+    });
     
     // Don't have to call updateDisplayObjects()...
     //this.physicsLink.updateDisplayObjects();
-    this.physicsLink.rigidBodies.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
+    this.app3D.debugTimeRecorder.record('updateThreeModelFromRigidBody', function() {
+        me.physicsLink.rigidBodies.forEach(LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody);
+    });
     
+    this.app3D.debugTimeRecorder.start('sky-water-wakes.update');
     this.sky3D.update(dt);
     this.water3D.update(dt);
     this.wakes3D.update(dt);
+    this.app3D.debugTimeRecorder.end('sky-water-wakes.update');
 };
 
 LBSailSim.SailEnvTHREE.updateThreeModelFromRigidBody = function(rigidBody) {
