@@ -126,6 +126,8 @@ LBSailSim.Telltale3D.prototype.update = function(windVel, dt) {
     return this;
 };
 
+var _workingCurrentPos = [];
+
 LBSailSim.Telltale3D.prototype._updateShape = function(windVel, dt) {
     // For now only take the x-y velocity.
     var speedSq = windVel.x * windVel.x + windVel.y * windVel.y;
@@ -136,13 +138,12 @@ LBSailSim.Telltale3D.prototype._updateShape = function(windVel, dt) {
     var positionAttribute = this.bufferGeometry.getAttribute('position');
     var positions = positionAttribute.array;
     var index = 3;
-    var currentPos = [];
-    this.coordMapping.xyzFromThreeJS(positions, 0, currentPos, 0);
+    this.coordMapping.xyzFromThreeJS(positions, 0, _workingCurrentPos, 0);
     for (var i = 0; i < this.segCount; ++i) {
         var angle = theta + (Math.random() - 0.5) * fluctuation;
-        currentPos[0] += this.segLength * Math.sin(angle);
-        currentPos[2] += -this.segLength * Math.cos(angle);
-        this.coordMapping.xyzToThreeJS(currentPos, 0, positions, index);
+        _workingCurrentPos[0] += this.segLength * Math.sin(angle);
+        _workingCurrentPos[2] += -this.segLength * Math.cos(angle);
+        this.coordMapping.xyzToThreeJS(_workingCurrentPos, 0, positions, index);
         index += 3;
     }
     positionAttribute.needsUpdate = true;

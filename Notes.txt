@@ -50,6 +50,9 @@ sudo apt install node-express-generator
 
 TODO:
 
+Turns out a big slow-down on the iPad is the wake particle system generating timing hiccups outside
+of the update loop.
+
 Course:
 Start Line
     - Port then stbd marks

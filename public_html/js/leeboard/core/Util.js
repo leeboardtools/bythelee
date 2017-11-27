@@ -388,7 +388,7 @@ LBUtil.RollingBuffer.prototype = {
     },
     
     /**
-     * Retrieves the object at a given index. Index values are &ge; 0 and &lt; {@link module:LBUtil.RollingBuffer#getCurrentSize()},
+     * Retrieves the object at a given index. Index values are &ge; 0 and &lt; {@link module:LBUtil.RollingBuffer#getCurrentSize},
      * with the value at index 0 the oldest value in the buffer.
      * @param {Number} index    The index of interest.
      * @returns {Object}    The object at the index.
@@ -398,7 +398,7 @@ LBUtil.RollingBuffer.prototype = {
     },
     
     /**
-     * Sets the object at a given index. Index values are &ge; 0 and &lt; {@link module:LBUtil.RollingBuffer#getCurrentSize()},
+     * Sets the object at a given index. Index values are &ge; 0 and &lt; {@link module:LBUtil.RollingBuffer#getCurrentSize},
      * with the value at index 0 the oldest value in the buffer.
      * @param {Number} index    The index of interest.
      * @param {Object} value    The value to assign to the index.

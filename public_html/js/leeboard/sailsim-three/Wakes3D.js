@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsim', 'lbparticles', 'lbgeometry', 'lbmath', 'lbshaders', 'three'], 
-function(LBSailSim, LBParticles, LBGeometry, LBMath, LBShaders, THREE) {
+define(['lbsailsim', 'lbparticles', 'lbgeometry', 'lbmath', 'lbshaders', 'three', 'lbutil'], 
+function(LBSailSim, LBParticles, LBGeometry, LBMath, LBShaders, THREE, LBUtil) {
 
 'use strict';
 
@@ -58,12 +58,16 @@ LBSailSim.Wakes3D.prototype = {
         }
         
         this.vessels.push(vessel);
+        
+        this.wakeImpl.vesselAdded(vessel);
     },
     
     removeVessel: function(vessel) {
         var i = this.vessels.findIndex(vessel);
         if (i >= 0) {
             this.vessels.splice(i, 1);
+            
+            this.wakeImpl.vesselRemoved(vessel);
         }
     },
     
@@ -95,6 +99,12 @@ LBSailSim.Wakes3D.prototype = {
     constructor: LBSailSim.Wakes3D
 };
 
+/**
+ * A particle based wake. This is rather slow on iPads and lesser GPUs.
+ * @constructor
+ * @param {module:LBSailSim.Wakes3D} wakes  The wakes object creating this.
+ * @return {module:LBSailSim.ParticleWakes}
+ */
 LBSailSim.ParticleWakes = function(wakes) {
     this.wakes = wakes;
     this.scene3D = wakes.scene3D;
@@ -131,6 +141,13 @@ LBSailSim.ParticleWakes = function(wakes) {
 };
 
 LBSailSim.ParticleWakes.prototype = {
+    vesselAdded: function(vessel) {
+    },
+    
+    vesselRemoved: function(vessel) {
+        
+    },
+    
     update: function(dt) {
         if (this.delayCount) {
             --this.delayCount;
@@ -217,6 +234,8 @@ LBSailSim.ParticleWakes.prototype = {
 
 function createShaderWakes(wakes) {
     return null;
+
+    return new LBSailSim.MeshWakes(wakes);
 /*    
     var renderer = wakes.sailEnv.mainView.renderer;
     if (!LBShaders.Computer.isSupported(renderer)) {
@@ -230,6 +249,309 @@ function createShaderWakes(wakes) {
     return shaderWakes;
 */
 };
+
+/**
+ * A mesh based wake. This is kind of hokey looking, but runs faster on lesser GPUs (I hope!)
+ * @constructor
+ * @param {module:LBSailSim.Wakes3D} wakes  The wakes object creating this.
+ * @return {module:LBSailSim.MeshWakes}
+ */
+LBSailSim.MeshWakes = function(wakes) {
+    this.scene3D = wakes.scene3D;
+    this.wakes = wakes;
+    this.sailEnv = wakes.sailEnv;
+    
+    this.segmentCount = 20;
+    this.pointsPerSegment = 20;
+    
+    this.segmentCount = 20;
+};
+
+LBSailSim.MeshWakes.prototype = {
+    vesselAdded: function(vessel) {
+        if (!vessel.hull) {
+            return;
+        }
+        
+        var material = new THREE.MeshPhongMaterial({
+            color: 0x001e0f
+        });
+        material.transparent = true;
+        material.opacity = 0.5;
+        
+        var portGeometry = new THREE.PlaneBufferGeometry(1, 10, 2, this.segmentCount - 1);
+        var portMesh = new THREE.Mesh(portGeometry, material);
+        this.scene3D.add(portMesh);
+        
+        var stbdGeometry = new THREE.PlaneBufferGeometry(1, 10, 2, this.segmentCount - 1);
+        var stbdMesh = new THREE.Mesh(stbdGeometry, material);
+        this.scene3D.add(stbdMesh);
+        
+        vessel._lbWakeInfo = {
+            material: material,
+            port: new LBSailSim.MeshWakeSide(this, portMesh, portGeometry, -1),
+            stbd: new LBSailSim.MeshWakeSide(this, stbdMesh, stbdGeometry, 1)
+        };
+        
+        this._updateVesselWake(vessel);
+    },
+    
+    vesselRemoved: function(vessel) {
+        var wakeInfo = vessel._lbWakeInfo;
+        if (wakeInfo) {
+            wakeInfo.port.destroy();
+            wakeInfo.port = null;
+            wakeInfo.stbd.destroy();
+            wakeInfo.stbd = null;
+            
+            wakeInfo.material = null;
+            
+            vessel._lbWakeInfo = null;
+        }
+    },
+    
+    update: function(dt) {
+        this.wakes.vessels.forEach(function(vessel) {
+            this._updateVesselWake(vessel, dt);
+        }, this);
+    },
+    
+    _updateVesselWake: function(vessel, dt) {
+        var wakeInfo = vessel._lbWakeInfo;
+        if (wakeInfo) {
+            var velocity = vessel.getVelocityMPS();
+            var speedSq = velocity.lengthSq();
+            var hull = vessel.hull;
+            var speed = Math.sqrt(speedSq);
+            var wakeAngle = 19.47 * LBMath.DEG_TO_RAD;
+            var velocityAngle = Math.atan2(velocity.y, velocity.x);
+            var wakeSpeed = speed * Math.sin(wakeAngle);
+            var halfWidth = 0.5;
+            var deltaFactor = halfWidth / wakeSpeed;
+
+            wakeInfo.port.addNewPoint(vessel, velocity, velocityAngle, wakeAngle, wakeSpeed, hull.wakeEndPort, deltaFactor);
+            wakeInfo.stbd.addNewPoint(vessel, velocity, velocityAngle, wakeAngle, wakeSpeed, hull.wakeEndStbd, deltaFactor);
+
+            wakeInfo.port.updatePoints(dt);
+            wakeInfo.stbd.updatePoints(dt);
+            
+        }
+    },
+    
+    destroy: function() {
+        if (this.wakes) {
+            if (this.wakes.vessels) {
+                this.wakes.vessels.forEach(function(vessel) {
+                    this.vesselRemoved(vessel);
+                }, this);
+            }
+            this.sailEnv = null;
+            this.wakes = null;
+            this.scene3D = null;
+        }
+    },
+    
+    constructor: LBSailSim.MeshWakes
+};
+
+/**
+ * Holds the information for one wavefront of the wake.
+ * @param {module:LBSailSim.MeshWake} meshWake  The mesh wake object creating this.
+ * @param {THREE.Mesh} mesh The mesh object.
+ * @param {THREE.PlaneBufferGeometry} geometry The geometry object.
+ * @param {Number} dir  The direction the wake travels, either -1 for port, or +1 for starboard
+ * @return {Wakes3D_L19.LBSailSim.MeshWakeSide}
+ */
+LBSailSim.MeshWakeSide = function(meshWake, mesh, geometry, dir) {
+    this.meshWake = meshWake;
+    this.mesh = mesh;
+    this.geometry = geometry; 
+    this.dir = dir;
+    
+    var pointCount = meshWake.segmentCount * meshWake.pointsPerSegment + 1;
+    this.wakePoints = new LBUtil.RollingBuffer(pointCount);
+    
+};
+
+var _meshWakeSideVector3 = new LBGeometry.Vector3();
+var _meshWakeSidePos = [];
+var _meshWakeSideNormal = [];
+
+LBSailSim.MeshWakeSide.prototype = {
+    addNewPoint: function(vessel, velocity, velocityAngle, wakeAngle, wakeSpeed, startPos, deltaFactor) {
+        var wakePoint;
+        if (this.wakePoints.isFull()) {
+            // Recycle the oldest.
+            wakePoint = this.wakePoints.popOldest();
+        }
+        else {
+            wakePoint = {
+                position: new LBGeometry.Vector3(),
+                velocity: new LBGeometry.Vector3()
+            };
+        }
+        if (!startPos || LBMath.isLikeZero(wakeSpeed)) {
+            // Not moving, we'll just get rid of the last wake point.
+            return;
+        }
+        
+        this.wakePoints.push(wakePoint);
+        
+        var angle = velocityAngle + Math.PI + this.dir * wakeAngle;
+        
+        // TODO: Make the z coordinate a function of speed...
+        // TODO: Make the z velocity a function of the time to live.
+
+        wakePoint.position.set(startPos.x, startPos.y, 0.1);
+        wakePoint.velocity.set(wakeSpeed * Math.cos(angle), wakeSpeed * Math.sin(angle), 0);
+        
+        deltaFactor *= this.dir;
+        wakePoint.dx = wakePoint.velocity.x * deltaFactor;
+        wakePoint.dy = wakePoint.velocity.y * deltaFactor;
+    },
+    
+    updatePoints: function(dt) {
+        var activePointCount = this.wakePoints.getCurrentSize();
+        if (activePointCount <= 1) {
+            this.mesh.visible = false;
+            return;
+        }
+        else {
+            this.mesh.visible = true;
+        }
+        
+        for (var i = 0; i < activePointCount; ++i) {
+            var wakePoint = this.wakePoints.get(i);
+            _meshWakeSideVector3.copy(wakePoint.velocity).multiplyScalar(dt);
+            wakePoint.position.add(_meshWakeSideVector3);
+        }
+
+        var positionAttribute = this.geometry.getAttribute('position');
+        var positions = positionAttribute.array;
+        
+        var normalAttribute = this.geometry.getAttribute('normal');
+        var normals = normalAttribute.array;
+        
+        var coordMapping = this.meshWake.wakes.sailEnv.app3D.mainScene.coordMapping;
+        var valueIndex = 0;
+        var pointsPerSegment = this.meshWake.pointsPerSegment;
+        
+        // We start from the boat end and skip our way back...
+        for (var wakePointIndex = activePointCount - 1; wakePointIndex >= 0; wakePointIndex -= pointsPerSegment) {
+            valueIndex = this._updateForWakePoint(wakePointIndex, valueIndex, positions, normals, coordMapping);
+        }
+        
+        var endValueIndex = (this.meshWake.segmentCount + 1) * 3 * 3;
+        if ((wakePointIndex < 0) && (valueIndex < endValueIndex)) {
+            // Set the last filler point to the last point we have.
+            valueIndex = this._updateForWakePoint(0, valueIndex, positions, normals, coordMapping);
+        }
+        
+        // Repeat the last point until we're done.
+        for ( ; valueIndex < endValueIndex; ) {
+            coordMapping.xyzToThreeJS(_meshWakeSidePos, 0, positions, valueIndex);
+            coordMapping.xyzToThreeJS(_meshWakeSideNormal, 0, normals, valueIndex);
+            valueIndex += 3;
+
+            coordMapping.xyzToThreeJS(_meshWakeSidePos, 3, positions, valueIndex);
+            coordMapping.xyzToThreeJS(_meshWakeSideNormal, 3, normals, valueIndex);
+            valueIndex += 3;
+
+            coordMapping.xyzToThreeJS(_meshWakeSidePos, 6, positions, valueIndex);
+            coordMapping.xyzToThreeJS(_meshWakeSideNormal, 6, normals, valueIndex);
+            valueIndex += 3;
+        }
+        
+        positionAttribute.needsUpdate = true;
+        normalAttribute.needsUpdate = true;
+        
+        if (this.geometry.boundingBox) {
+            this.geometry.computeBoundingBox();
+        }
+        if (this.geometry.boundingSphere) {
+            this.geometry.computeBoundingSphere();
+        }
+    },
+    
+    _updateForWakePoint: function(wakePointIndex, valueIndex, positions, normals, coordMapping) {
+        var wakePoint = this.wakePoints.get(wakePointIndex);
+
+        // We set up the array for all three vertices so we can reuse the last computed values to fill
+        // in any leftover segments.
+        _meshWakeSidePos[0] = wakePoint.position.x - wakePoint.dx;
+        _meshWakeSidePos[1] = wakePoint.position.y - wakePoint.dy;
+        _meshWakeSidePos[2] = 0;
+        
+        _meshWakeSidePos[3] = wakePoint.position.x;
+        _meshWakeSidePos[4] = wakePoint.position.y;
+        _meshWakeSidePos[5] = wakePoint.position.z;
+
+        _meshWakeSidePos[6] = wakePoint.position.x + wakePoint.dx;
+        _meshWakeSidePos[7] = wakePoint.position.y + wakePoint.dy;
+        _meshWakeSidePos[8] = 0;
+
+        // a = -dy, dx, 0
+        // b = -dx, -dy, z
+        // n = dx * z, dy*z, dy*dy+dx*dx
+        _meshWakeSideNormal[0] = wakePoint.dx * wakePoint.position.z;
+        _meshWakeSideNormal[1] = wakePoint.dy * wakePoint.position.z;
+        _meshWakeSideNormal[2] = wakePoint.dy * wakePoint.dy + wakePoint.dx * wakePoint.dx;
+        
+        var length = Math.sqrt(_meshWakeSideNormal[0] * _meshWakeSideNormal[0] 
+                + _meshWakeSideNormal[1] * _meshWakeSideNormal[1]
+                + _meshWakeSideNormal[2] * _meshWakeSideNormal[2]);
+        _meshWakeSideNormal[0] /= length;
+        _meshWakeSideNormal[1] /= length;
+        _meshWakeSideNormal[2] /= length;
+
+        // The mid-point normal is always pointing straight up.
+        _meshWakeSideNormal[3] = 0;
+        _meshWakeSideNormal[4] = 0;
+        _meshWakeSideNormal[5] = 1;
+
+        // this is the same as the other point except pointing in the reverse x and y directions.
+        _meshWakeSideNormal[6] = -_meshWakeSideNormal[0];
+        _meshWakeSideNormal[7] = -_meshWakeSideNormal[1];
+        _meshWakeSideNormal[8] = _meshWakeSideNormal[2];
+
+        coordMapping.xyzToThreeJS(_meshWakeSidePos, 0, positions, valueIndex);
+        coordMapping.xyzToThreeJS(_meshWakeSideNormal, 0, normals, valueIndex);
+        valueIndex += 3;
+
+        coordMapping.xyzToThreeJS(_meshWakeSidePos, 3, positions, valueIndex);
+        coordMapping.xyzToThreeJS(_meshWakeSideNormal, 3, normals, valueIndex);
+        valueIndex += 3;
+
+        coordMapping.xyzToThreeJS(_meshWakeSidePos, 6, positions, valueIndex);
+        coordMapping.xyzToThreeJS(_meshWakeSideNormal, 6, normals, valueIndex);
+        valueIndex += 3;
+        
+        return valueIndex;
+    },
+
+    destroy: function() {
+        if (this.mesh) {
+            this.meshWake.scene3D.remove(this.mesh);
+            
+            this.mesh = null;
+            this.meshWake = null;
+            this.geometry = null;
+            this.pointCount = null;
+            this.delta = null;
+            
+            while (this.wakePoints.popNewest()) {
+            }
+        }
+    },
+    
+    constructor: LBSailSim.MeshWakeSide
+};
+
+
+
+
+
+
 
 LBSailSim.ShaderWakes = function(wakes) {
     this.scene3D = wakes.scene3D;

@@ -71,6 +71,8 @@ function LBMyApp() {
         rudderDeg: 30
     });
     
+    // TEST!!!
+    //this.otherBoats.length = 0;
     
     var mainViewContainer = document.getElementById('main_view');
     this.mainView = new LBUI3d.View3D(this.mainScene, mainViewContainer);
@@ -130,7 +132,7 @@ function LBMyApp() {
     this.updateCameraViewButton();
     
     // TEST!!!
-    this.debugTimeRecorder = new LBDebug.TimeRecorder();
+    //this.debugTimeRecorder = new LBDebug.TimeRecorder();
 };
 
 LBMyApp.prototype = Object.create(LBUI3d.App3D.prototype);
