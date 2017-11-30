@@ -29,6 +29,8 @@ LBSailSim.Sky3D = function(scene3D, sailEnv) {
     if (!this.loadSkyShader()) {
         this.loadSkyBox();
     }
+    
+    this.skyColor = new THREE.Color(0x49618d);
 };
 
 var _minLightAltitudeDeg = -2.3;    // From THREE.Sky's fragment shader, which uses PI/1.95 as the cutoff angle.

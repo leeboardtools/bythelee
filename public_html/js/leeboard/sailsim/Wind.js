@@ -835,6 +835,29 @@ LBSailSim.WindPuff.prototype = {
         return vel;
     },
     
+    
+    /**
+     * Retrieves the coordinates of a point within a puff given normalized coordinates
+     * u and v which are between 0 and 1, inclusive.
+     * @param {Number} u    The normalized u coordinate. Looking in the direction the puff is
+     * blowing from, a value of 0 is the left side, a value of 1 is the right side.
+     * @param {Number} v    The normalized v coordinate. A value of 0 is the leading edge
+     * of the puff and a value of 1 is the trailing edge of the puff.
+     * @param {module:LBGeometry.Vector3} [store]   If defined the object to receive the point.
+     * @returns {module:LBGeometry.Vector3} The point.
+     */
+    getPointInPuff: function(u, v, store) {
+        store = store || new LBGeometry.Vector3();
+        
+        var radius = this.rLeading + v * (this.rTrailing - this.rLeading);
+        var angleRad = this.edge0Rad + u * (this.edge1Rad - this.edge0Rad);
+        var cosTheta = Math.cos(angleRad);
+        var sinTheta = Math.sin(angleRad);
+        store.set(this.centerPos.x + radius * cosTheta, this.centerPos.y + radius * sinTheta);
+        return store;
+    },
+    
+    
     /**
      * Advances the puff's state for a given time step.
      * @param {Number} dt   The time step.

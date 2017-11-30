@@ -23,6 +23,42 @@ function(THREE, LBUtil) {
  */
 var LBShaders = LBShaders || {};
 
+
+/**
+ * Helper for creating a texture with an initial color and alpha value.
+ * @param {Number} width    The width of the texture.
+ * @param {Number} height   The height of the texture.
+ * @param {module:LBGeometry.Color} [color] If defined the initial color for the pixels, otherwise it is set to black.
+ * @param {Number} [alpha=1]  If defined the initial alpha value for the pixels.
+ * @returns {THREE.DataTexture} The {@link https://threejs.org/docs/index.html#api/textures/DataTexture|THREE.DataTexture} texture.
+ */
+LBShaders.createDataTexture = function(width, height, color, alpha) {
+    var data = new Float32Array(width * height * 4);
+    var p = 0;
+    var r = 0;
+    var g = 0;
+    var b = 0;
+    var a = LBUtil.isVar(alpha) ? alpha : 1;
+    if (color) {
+        r = color.r;
+        g = color.g;
+        b = color.b;
+    }
+    for (var i = 0; i < width; ++i) {
+        for (var j = 0; j < height; ++j) {
+            data[p++] = r;
+            data[p++] = g;
+            data[p++] = b;
+            data[p++] = a;
+        }
+    }
+    
+    var texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat, THREE.FloatType);
+    texture.needsUpdate = true;
+    return texture;
+};
+
+
 /**
  * Class that helps with managing shader based computations.
  * <p>
@@ -114,25 +150,12 @@ LBShaders.Computer.prototype = {
     /**
      * Helper for creating an appropriately sized texture for use with the computer, the
      * values of texture are initialized to 0,0,0,1.
+     * @param {module:LBGeometry.Color} [color] If defined the initial color for the pixels, otherwise it is set to black.
+     * @param {Number} [alpha=1]  If defined the initial alpha value for the pixels.
      * @returns {THREE.DataTexture} The {@link https://threejs.org/docs/index.html#api/textures/DataTexture|THREE.DataTexture} texture.
      */
-    createShaderTexture: function() {
-        var data = new Float32Array(this.gridWidth * this.gridHeight * 4);
-        var texture = new THREE.DataTexture(data, this.gridWidth, this.gridHeight, THREE.RGBAFormat, THREE.FloatType);
-        
-        var pixels = texture.image.data;
-        var p = 0;
-        for (var i = 0; i < this.gridWidth; ++i) {
-            for (var i = 0; i < this.gridHeight; ++i) {
-                pixels[p++] = 0;
-                pixels[p++] = 0;
-                pixels[p++] = 0;
-                pixels[p++] = 1;
-            }
-        }
-        
-        texture.needsUpdate = true;
-        return texture;
+    createShaderTexture: function(color, alpha) {
+        return LBShaders.createDataTexture(this.gridWidth, this.gridHeight, color, alpha);
     },
     
     /**

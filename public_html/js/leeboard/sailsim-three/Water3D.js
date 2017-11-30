@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsim', 'lbmath', 'three'],
-function(LBSailSim, LBMath, THREE) {
+define(['lbsailsim', 'lbmath', 'lbutil', 'three', 'lbshaders'],
+function(LBSailSim, LBMath, LBUtil, THREE, LBShaders) {
     
     
 /**
@@ -39,6 +39,13 @@ LBSailSim.Water3D = function(scene3D, sailEnv) {
     this.sailEnv = sailEnv;
     
     this.puffsEnabled = true;
+    this.mirroringEnabled = true;
+    
+    // TEST!!!
+    this.puffsEnabled = false;
+    this.mirroringEnabled = false;
+    
+    this.wakesScene = scene3D.scene;
     
     if (!this._loadWater()) {
         var WIDTH = 64;    
@@ -52,6 +59,9 @@ LBSailSim.Water3D = function(scene3D, sailEnv) {
         geometry.rotateX(-LBMath.PI_2);
 
         this.waterMesh = new THREE.Mesh(geometry, material);
+        
+        // TEST!!!
+        //this.waterMesh.visible = false;
 
         // TEST!!!
         //this.waterMesh.position.y = 0.98;
@@ -127,6 +137,8 @@ LBSailSim.Water3D.prototype = {
     
 
     _loadWater: function() {
+        //return false;
+        
         var waterNormals = new THREE.TextureLoader().load( 'textures/three-js/waternormals.jpg' );
         waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
 
@@ -201,8 +213,6 @@ LBSailSim.Water3D.prototype = {
         }
         
         if (this.waterShader) {
-            // Slow down the water a bit.
-            this.waterShader.material.uniforms.time.value += 1.0 / 120.0;
             this.waterShader.render();
         }
     },
@@ -369,8 +379,7 @@ LBSailSim.WaterShader = function(water3D, options) {
     this.lookAtPosition = new THREE.Vector3( 0, 0, - 1 );
     this.clipPlane = new THREE.Vector4();
 
-    if ( camera instanceof THREE.PerspectiveCamera ) {        this.testPuff = null;
-
+    if ( camera instanceof THREE.PerspectiveCamera ) {        
 
             this.camera = camera;
 
@@ -393,13 +402,68 @@ LBSailSim.WaterShader = function(water3D, options) {
         stencilBuffer: false
     };
     this.mirrorRenderTarget = new THREE.WebGLRenderTarget( width, height, targetParameters );
-    this.puffInRenderTarget = this.mirrorRenderTarget.clone();
-    this.puffOutRenderTarget = this.mirrorRenderTarget.clone();
 
+    if ( ! THREE.Math.isPowerOfTwo( width ) || ! THREE.Math.isPowerOfTwo( height ) ) {
+
+        this.mirrorRenderTarget.texture.generateMipmaps = false;
+        this.mirrorRenderTarget.texture.minFilter = THREE.LinearFilter;
+    }
+    
     var mirrorShader = this.getMirrorShader();
     var mirrorUniforms = THREE.UniformsUtils.clone( mirrorShader.uniforms );
 
-    this.material = new THREE.ShaderMaterial( {
+    this.material = this.createShaderMaterial(mirrorShader, mirrorUniforms);
+    this.puffsMaterial = this.createShaderMaterial(mirrorShader);
+    this.puffsMaterial.uniforms.distortionHeightFactor.value = 0.5;
+    this.puffsMaterial.uniforms.reflectionHeightFactor.value = -1.0;
+    this.puffsMaterial.uniforms.alphaHeightFactor.value = 0.0;
+    
+    this.wakesMaterial = this.createShaderMaterial(mirrorShader);
+    this.wakesMaterial.uniforms.noiseHeightFactor.value = 0.0;
+    this.wakesMaterial.uniforms.distortionHeightFactor.value = -5.0;
+    this.wakesMaterial.uniforms.reflectionHeightFactor.value = 0.0;
+    this.water3D.wakesMaterial = this.wakesMaterial;
+
+    this.maxPuffsHeight = 0.05;
+    this.maxPuffsSpeedToHeight = 10;
+    //this.water3D.maxWakesHeight = 0.05;
+
+    var me = this;
+    this.puffMeshPool = new LBUtil.Pool(function() {
+        return me.createPuffMesh();
+    });
+    this.puffMeshesInUse = [];
+    
+    
+    // We need to initialize the mirror render target with a color that will be reflected.
+    var geometry = new THREE.PlaneGeometry(width, height);
+    var material = new THREE.MeshBasicMaterial( { color: 0xaaaaaa } );
+    var mesh = new THREE.Mesh(geometry, material);
+    var tmpScene = new THREE.Scene();
+    tmpScene.add(mesh);
+    var tmpCamera = new THREE.OrthographicCamera(-width/3, width/3, height/3, -height/3, 1, 1000);
+    tmpCamera.position.set(0, 0, 100);
+    tmpCamera.lookAt(mesh.position);
+    this.renderer.render(tmpScene, tmpCamera, this.mirrorRenderTarget, true);
+
+
+    this.eye = this.material.uniforms.eye.value;
+    this.puffsMaterial.uniforms.eye.value = this.eye;
+    this.wakesMaterial.uniforms.eye.value = this.eye;
+    
+    this.updateTextureMatrix();
+
+    this.render();
+};
+
+LBSailSim.WaterShader.prototype = Object.create(THREE.Object3D.prototype);
+LBSailSim.WaterShader.prototype.constructor = LBSailSim.WaterShader;
+
+
+LBSailSim.WaterShader.prototype.createShaderMaterial = function(mirrorShader, mirrorUniforms) {
+    mirrorUniforms = mirrorUniforms || THREE.UniformsUtils.clone( mirrorShader.uniforms );
+    
+    var material = new THREE.ShaderMaterial( {
             fragmentShader: mirrorShader.fragmentShader,
             vertexShader: mirrorShader.vertexShader,
             uniforms: mirrorUniforms,
@@ -408,7 +472,7 @@ LBSailSim.WaterShader = function(water3D, options) {
             fog: this.fog
     } );
 
-    var uniforms = this.material.uniforms;
+    var uniforms = material.uniforms;
     uniforms.mirrorSampler.value = this.mirrorRenderTarget.texture;
     uniforms.textureMatrix.value = this.textureMatrix;
     uniforms.alpha.value = this.alpha;
@@ -420,42 +484,8 @@ LBSailSim.WaterShader = function(water3D, options) {
     uniforms.distortionScale.value = this.distortionScale;
 
     uniforms.eye.value = this.eye;
-
-    if ( ! THREE.Math.isPowerOfTwo( width ) || ! THREE.Math.isPowerOfTwo( height ) ) {
-
-        this.mirrorRenderTarget.texture.generateMipmaps = false;
-        this.mirrorRenderTarget.texture.minFilter = THREE.LinearFilter;
-        this.puffInRenderTarget.texture.generateMipmaps = false;
-        this.puffInRenderTarget.texture.minFilter = THREE.LinearFilter;
-        this.puffOutRenderTarget.texture.generateMipmaps = false;
-        this.puffOutRenderTarget.texture.minFilter = THREE.LinearFilter;
-
-    }
-    
-    
-    this.puffScene = new THREE.Scene();
-    this.puffShaderMaterial = new THREE.ShaderMaterial( {
-        side: THREE.BackSide,
-        fragmentShader: this.getPuffFragmentShader(),
-        vertexShader: this.getPuffVertexShader(),
-        uniforms: this.getPuffUniforms()
-    });
-    
-    uniforms = this.puffShaderMaterial.uniforms;
-    uniforms.textureMatrix.value = this.textureMatrix;
-    
-    this.puffShaderMesh = new THREE.Mesh(
-        new THREE.PlaneBufferGeometry( this.meshWidth, this.meshHeight ),
-        this.puffShaderMaterial
-    );
-    this.puffScene.add(this.puffShaderMesh);
-    
-    this.updateTextureMatrix();
-    this.render();
+    return material;
 };
-
-LBSailSim.WaterShader.prototype = Object.create(THREE.Object3D.prototype);
-LBSailSim.WaterShader.prototype.constructor = LBSailSim.WaterShader;
 
 LBSailSim.WaterShader.prototype.getMirrorShader = function() {
     return {
@@ -472,8 +502,10 @@ LBSailSim.WaterShader.prototype.getMirrorUniforms = function() {
     return THREE.UniformsUtils.merge( [
                     THREE.UniformsLib[ 'fog' ],
                     {
-                        puffSampler: { value: null },
-                        meshSize: { value: new THREE.Vector2(this.meshWidth, this.meshHeight) },
+                        reflectionHeightFactor: { value: 0.0 },
+                        distortionHeightFactor: { value: 0.0 },
+                        noiseHeightFactor: { value: 0.0 },
+                        alphaHeightFactor: { value: 0.0 },
                         
                             normalSampler: { value: null },
                             mirrorSampler: { value: null },
@@ -492,12 +524,9 @@ LBSailSim.WaterShader.prototype.getMirrorUniforms = function() {
 
 LBSailSim.WaterShader.prototype.getMirrorVertexShader = function() {
     return [
-        'uniform vec2 meshSize;',
         'varying vec2 uvCoord;',
-        'varying vec3 nonProjPosition;',
 
                     'uniform mat4 textureMatrix;',
-                    //'uniform float time;',
 
                     'varying vec4 mirrorCoord;',
                     'varying vec3 worldPosition;',
@@ -506,9 +535,7 @@ LBSailSim.WaterShader.prototype.getMirrorVertexShader = function() {
 
                     'void main() {',
                     
-                    // position is in world coords and ranges over the mesh' world dimensions.
-                    '   uvCoord = position.xy / meshSize + 0.5;',
-                    '   nonProjPosition = position;',
+                    '   uvCoord = uv;',
                     
                     // mirrorCoord, worldPosition are projected into the view.
                     '	mirrorCoord = modelMatrix * vec4( position, 1.0 );',
@@ -527,7 +554,11 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
     return [
                     'precision highp float;',
 
-        'uniform sampler2D puffSampler;',
+        'uniform float noiseHeightFactor;',
+        'uniform float reflectionHeightFactor;',
+        'uniform float distortionHeightFactor;',
+        'uniform float alphaHeightFactor;',
+        
         'varying vec2 uvCoord;',
 
                     'uniform sampler2D mirrorSampler;',
@@ -572,6 +603,8 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
                     'void main() {',
                     // noise/surfaceNormal adds shimmer to the water, the noise is from the noise sampler.
                     '	vec4 noise = getNoise( worldPosition.xz );',
+                    // noise is between -1 and 1.
+        '   noise *= clamp((1. + noiseHeightFactor * worldPosition.y), 0., 10.);',
                     '	vec3 surfaceNormal = normalize( noise.xzy * vec3( 1.5, 1.0, 1.5 ) );',
 
                     '	vec3 diffuseLight = vec3(0.0);',
@@ -585,6 +618,7 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
 
                     // distortion is what makes the reflection wavy and move around.
                     '	vec2 distortion = surfaceNormal.xz * ( 0.001 + 1.0 / distance ) * distortionScale;',
+        '   distortion *= clamp((1. + distortionHeightFactor * worldPosition.y), 0., 10.);',
 
                     '   vec4 fullSample = texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.z + distortion );',
                     '	vec3 reflectionSample = fullSample.rgb;',
@@ -601,14 +635,12 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
                     '	float reflectance = rf0 + ( 1.0 - rf0 ) * pow( ( 1.0 - theta ), 5.0 );',
                     '	vec3 scatter = max( 0.0, dot( surfaceNormal, eyeDirection ) ) * waterColor;',
 
-        // We make our puffs appear by changing the reflection coefficient.
-        // Where there's no puff puffCoef is 1.
-        '   float puffCoef = texture2D( puffSampler, mirrorCoord.xy / mirrorCoord.z ).a;',
-        '   reflectance *= puffCoef * 0.25 + 0.75;',
+        '   reflectance += reflectionHeightFactor * worldPosition.y;',
+        '   float a = alpha + alphaHeightFactor * worldPosition.y;',
                     
                     '	vec3 albedo = mix( sunColor * diffuseLight * 0.3 + scatter, ( vec3( 0.1 ) + reflectionSample * 0.9 + reflectionSample * specularLight ), reflectance );',
                     '	vec3 outgoingLight = albedo;',
-                    '	gl_FragColor = vec4( outgoingLight, alpha );',
+                    '	gl_FragColor = vec4( outgoingLight, a );',
 
                     THREE.ShaderChunk[ 'fog_fragment' ],
 
@@ -617,212 +649,92 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
 };
 
 
-LBSailSim.WaterShader.prototype.getPuffUniforms = function() {
-    var uniforms = {
-        meshSize : { value: new THREE.Vector2(this.meshWidth, this.meshHeight) },
-        textureMatrix : { value: new THREE.Matrix4() },
-        puffSampler : { value: null },
-        puffCenter : { value: new THREE.Vector2() },
-        puffDir : { value: new THREE.Vector2() },
-        rLeading : { value: 0 },
-        rTrailing : { value: 0 },
-        rDelta : { value: 0 },
-        edge0Rad : { value: 0 },
-        edge1Rad : { value: 0 },
-        cosEdge0 : { value: 0 },
-        sinEdge0 : { value: 0 },
-        maxTanTheta: { value: 0 },
-        
-        // refAlpha is used to smooth the puff's appearance and disappearance.
-        refAlpha: { value: 1 }
-    };
+    LBSailSim.WaterShader.prototype.createPuffMesh = function() {
+    var geometry = new THREE.PlaneBufferGeometry(1, 1, 3, 3);
+    var mesh = new THREE.Mesh(geometry, this.puffsMaterial);
+    this.scene.add(mesh);
+    return mesh;
+};
+
+
+var _applyPuffVector3;
+var _applyPuffPosition = [];
+var _applyPuffPositionUs = [ 0, 0.25, 0.75, 1. ];
+var _applyPuffPositionVs = [ 0, 0.05, 0.5, 1. ];
+var _applyPuffPositionZs = [
+    [ 0, 0, 0, 0 ],
+    [ 0, 1, 1, 0 ],
+    [ 0, 1, 1, 0 ],
+    [ 0, 0, 0, 0 ]
+];
+
+LBSailSim.WaterShader.prototype._applyPuff = function(puff, puffIndex) {
+    var puffMesh = this.puffMeshesInUse[puffIndex];
+    if (!puffMesh) {
+        puffMesh = this.puffMeshPool.get();
+        this.puffMeshesInUse.push(puffMesh);
+        puffMesh.visible = true;
+    }
     
-    return uniforms;
+    // Now we need to adjust the mesh's vertices to match the puff.
+    // There are 16 vertices. All but the four inner ones have y = 0.
+    var positionAttribute = puffMesh.geometry.getAttribute('position');
+    var positions = positionAttribute.array;
+    var coordMapping = this.water3D.scene3D.coordMapping;
+    var positionIndex = 0;
+    
+    var zScale = LBMath.clamp(puff.speedLeading * puff.speedAttenuationForTime / this.maxPuffsSpeedToHeight, 0, 1);
+    
+    for (var i = 0; i < 4; ++i) {
+        var u = _applyPuffPositionUs[i];
+        var zs = _applyPuffPositionZs[i];
+        for (var j = 0; j < 4; ++j) {
+            var v = _applyPuffPositionVs[j];
+            var z = zs[j] * zScale;
+            positionIndex = LBSailSim.WaterShader._applyPuffPosition(coordMapping, puff, u, v, z, positions, positionIndex);
+        }
+    }
+
+    positionAttribute.needsUpdate = true;
+    puffMesh.geometry.computeVertexNormals();
 };
 
-
-LBSailSim.WaterShader.prototype.getPuffVertexShader = function() {
-    return [
-        'uniform vec2 meshSize;',
-        'uniform mat4 textureMatrix;',
-
-        'varying vec2 uvCoord;',
-        'varying vec3 nonProjPosition;',
-        'varying vec4 mirrorCoord;',
-        'varying vec3 worldPosition;',
-
-        'void main() {',
-
-        // position is in world coords and ranges over the mesh' world dimensions.
-        '   uvCoord = position.xy / meshSize + 0.5;',
-        '   nonProjPosition = position;',
-
-        // mirrorCoord, worldPosition are projected into the view.
-        '   mirrorCoord = modelMatrix * vec4( position, 1.0 );',
-        '   worldPosition = mirrorCoord.xyz;',
-        '   mirrorCoord = textureMatrix * mirrorCoord;',
-        '   vec4 mvPosition =  modelViewMatrix * vec4( position, 1.0 );',
-        '   gl_Position = projectionMatrix * mvPosition;',
-
-        '}'
-].join( '\n' );
-};
-
-
-LBSailSim.WaterShader.prototype.getPuffFragmentShader = function() {
-    return [
-        'precision highp float;',
-
-        'uniform sampler2D puffSampler;',
-        'uniform vec2 puffCenter;',
-        'uniform vec2 puffDir;',
-        'uniform float rLeading;',
-        'uniform float rTrailing;',
-        'uniform float rDelta;',
-        'uniform float edge0Rad;',
-        'uniform float edge1Rad;',
-        'uniform float cosEdge0;',
-        'uniform float sinEdge0;',
-        'uniform float maxTanTheta;',
-        'uniform float refAlpha;',
-        
-        'varying vec2 uvCoord;',
-        'varying vec3 nonProjPosition;',
-        'varying vec4 mirrorCoord;',
-        
-        'void main() {',
-        '   vec2 delta = nonProjPosition.xy - puffCenter;',
-        '   float radius = length(delta);',
-        '   float a = refAlpha;',
-        
-        '   float taper = 0.2;',
-        '   a *= smoothstep(rTrailing, rTrailing + 0.5 * rDelta, radius);',
-        '   a *= 1. - smoothstep(rLeading - taper * rDelta, rLeading, radius);',
-        '   a *= step(0., dot(delta, puffDir));',
-        
-        '   if (a > 0.) {',
-        '       float localX = delta.x * cosEdge0 + delta.y * sinEdge0;',
-        '       float localY = -delta.x * sinEdge0 + delta.y * cosEdge0;',
-        '       float tanTheta = localY / localX;',
-        '       float tanThetaTrans = taper * maxTanTheta;',
-        '       a *= smoothstep(0., tanThetaTrans, tanTheta);',
-        '       a *= 1. - smoothstep(maxTanTheta - tanThetaTrans, maxTanTheta, tanTheta);',
-        '   }',
-        // At this point a value of a = 0 is no puff, a = 1 is full puff. The mirror shader
-        // wants it the reverse so we just do 1 - a.
-
-        '   vec4 fullSample = texture2D( puffSampler, mirrorCoord.xy / mirrorCoord.z );',
-        '   gl_FragColor.a = fullSample.a * (1. - a);',
-        '}'
-    ].join('\n');
+LBSailSim.WaterShader._applyPuffPosition = function(coordMapping, puff, u, v, z, positions, positionIndex) {
+    _applyPuffVector3 = puff.getPointInPuff(u, v, _applyPuffVector3);
+    _applyPuffVector3.z = z;
+    _applyPuffPosition = _applyPuffVector3.toArray(_applyPuffPosition, 0);
+    coordMapping.xyzToThreeJS(_applyPuffPosition, 0, positions, positionIndex);
+    return positionIndex + 3;
 };
 
 LBSailSim.WaterShader.prototype._updatePuffs = function() {
-    if (!this.water3D.puffsEnabled) {
-        return;
-    }
+    var me = this;
+    var puffIndex = 0;
+    this.water3D.sailEnv.wind.forEachPuff(function(puff) {
+        me._applyPuff(puff, puffIndex++);
+    });
     
-    var surfaceMesh = this.water3D.surfaceMesh;
-    if (!surfaceMesh) {
-        return;
-    }
-    
-    // Note that the mesh is a little bit above the water surface of y=0 (THREE coords), otherwise
-    // rendering gets weird since we're transforming by the mirror matrix so the water shader
-    // can easily process this.
-    this.puffShaderMesh.position.set(surfaceMesh.position.x, surfaceMesh.position.y + 0.1, surfaceMesh.position.z);
-    this.puffShaderMesh.quaternion.copy(surfaceMesh.quaternion);
-    this.puffShaderMesh.matrixNeedsUpdated = true;
-    this.puffShaderMesh.updateMatrixWorld();
-
-    // We clear puffOutRenderTarget because _applyPuff() swaps the buffers before
-    // rendering, so puffOutRenderTarget will become puffInRenderTarget.
-    this.renderer.clearTarget(this.puffOutRenderTarget, true, true, true);
-    this.isPuff = false;
-
-    // TEST!!!
-    if (this.water3D.testPuff) {
-        var puff = this.water3D.testPuff;
-        while (puff) {
-            this._applyPuff(puff);
-            puff = puff.nextPuff;
-        }
-    }
-    else if (this.water3D.sailEnv.wind) {
-        var me = this;
-        this.water3D.sailEnv.wind.forEachPuff(function(puff) {
-            me._applyPuff(puff);
-        });
-    }
-    
-    if (!this.isPuff) {
-        this._swapPuffRenderTargets();
+    while (this.puffMeshesInUse.length > puffIndex) {
+        var index = this.puffMeshesInUse.length - 1;
+        var puffMesh = this.puffMeshesInUse[index];
+        puffMesh.visible = false;
+        this.puffMeshPool.release(puffMesh);
+        
+        --this.puffMeshesInUse.length;
     }
 };
-
-LBSailSim.WaterShader.prototype._applyPuff = function(puff) {
-    var uniforms = this.puffShaderMaterial.uniforms;
     
-    uniforms.refAlpha.value = puff.speedAttenuationForTime;
-   
-    uniforms.puffCenter.value.copy(puff.centerPos);
-    uniforms.puffDir.value.copy(puff.velDir);
-    
-    uniforms.rLeading.value = puff.rLeading;
-    uniforms.rTrailing.value = puff.rTrailing;
-    uniforms.rDelta.value = puff.rLeading - puff.rTrailing;
-    
-    uniforms.edge0Rad.value = puff.edge0Rad;
-    uniforms.edge1Rad.value = puff.edge1Rad;
-    
-    uniforms.cosEdge0.value = puff.cosEdge0;
-    uniforms.sinEdge0.value = puff.sinEdge0;
-    uniforms.maxTanTheta.value = puff.maxTanTheta;
-    
-    this._swapPuffRenderTargets();
-
-    uniforms.puffSampler.value = this.puffInRenderTarget.texture;
-    this.renderer.render(this.puffScene, this.mirrorCamera, this.puffOutRenderTarget, true);
-    
-    this.isPuff = true;
-};
-
-LBSailSim.WaterShader.prototype._swapPuffRenderTargets = function() {
-    var tmp = this.puffOutRenderTarget;
-    this.puffOutRenderTarget = this.puffInRenderTarget;
-    this.puffInRenderTarget = tmp;
-};
-
 LBSailSim.WaterShader.prototype.render = function() {
+    // Slow down the water a bit.
+    this.material.uniforms.time.value += 1.0 / 120.0;
+    this.wakesMaterial.uniforms.time.value = this.material.uniforms.time.value;
+    this.puffsMaterial.uniforms.time.value = this.material.uniforms.time.value;
+
     if ( this.matrixNeedsUpdate ) this.updateTextureMatrix();
 
     this.matrixNeedsUpdate = true;
 
-    var scene = this.scene;
-    if ( scene !== undefined && scene instanceof THREE.Scene ) {
-        var clearAlpha = this.renderer.getClearAlpha();
-        if (clearAlpha !== 1) {
-            this.renderer.setClearAlpha(1);
-        }
-        
-        // This is where we render the mirror image.
-        // We turn off the material because we don't want to render the material, which
-        // is what we're rendering to...
-        this.material.visible = false;
-        this.renderer.render( scene, this.mirrorCamera, this.mirrorRenderTarget, true );
-        this.material.visible = true;
-
-        // this.mirrorRenderTarget now contains the mirrored image.
-
-        this._updatePuffs();
-
-        if (clearAlpha !== 1) {
-            this.renderer.setClearAlpha(clearAlpha);
-        }
-        
-        this.material.uniforms.puffSampler.value = this.puffOutRenderTarget.texture;
-        this.material.uniforms.mirrorSampler.value = this.mirrorRenderTarget.texture;
-    }
+    this._updatePuffs();
 };
 
 var _workingView = new THREE.Vector3();
@@ -903,10 +815,8 @@ LBSailSim.WaterShader.prototype.updateTextureMatrix = function() {
     projectionMatrix.elements[ 10 ] = c.z + 1.0 - this.clipBias;
     projectionMatrix.elements[ 14 ] = c.w;
 
-    this.eye = this.eye || new THREE.Vector3();
     this.eye.set(0,0,0);
     this.eye.setFromMatrixPosition( this.camera.matrixWorld );
-    this.material.uniforms.eye.value = this.eye;
 };
 
 return LBSailSim;

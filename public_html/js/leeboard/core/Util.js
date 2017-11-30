@@ -488,7 +488,7 @@ LBUtil.Pool = function(allocator) {
     
     this._allocatedCount = 0;
     this._returnedCount = 0;
-    this._recycldedCount = 0;
+    this._recycledCount = 0;
 };
 
 LBUtil.Pool.prototype = {
@@ -501,7 +501,7 @@ LBUtil.Pool.prototype = {
         if (this._first) {
             obj = this._first;
             this._first = obj._lbPoolNext;
-            ++this._recycldedCount;
+            ++this._recycledCount;
         }
         else {
             obj = this.allocator();

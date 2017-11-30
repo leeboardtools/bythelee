@@ -132,7 +132,7 @@ function LBMyApp() {
     this.updateCameraViewButton();
     
     // TEST!!!
-    //this.debugTimeRecorder = new LBDebug.TimeRecorder();
+    this.debugTimeRecorder = new LBDebug.TimeRecorder();
 };
 
 LBMyApp.prototype = Object.create(LBUI3d.App3D.prototype);
