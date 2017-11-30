@@ -50,9 +50,9 @@ LBSailSim.SailEnvTHREE = function(app3D, mainView, physicsType, assetLoader) {
     this.physicsLink.addForceGenerator(this.buoyancyGenerator);
     this.physicsLink.addForceGenerator(this.dampingGenerator);
     
+    this.sky3D = new LBSailSim.Sky3D(app3D.mainScene, this);
     this.water3D = new LBSailSim.Water3D(app3D.mainScene, this);
     this.wakes3D = new LBSailSim.Wakes3D(app3D.mainScene, this);
-    this.sky3D = new LBSailSim.Sky3D(app3D.mainScene, this);
     
     this.runningAvgCount = 60;
     this.dtRunningAvg = new LBRandom.RunningAverage(this.runningAvgCount);

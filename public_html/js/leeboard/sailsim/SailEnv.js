@@ -71,6 +71,13 @@ LBSailSim.Env = function(assetLoader) {
     this.horizonDistance = 32000;
     
     /**
+     * The number of points to record in vessel trajectories. Default is 600, which is
+     * 10 seconds worth of data at 1/60 second dt.
+     * @member {Number}
+     */
+    this.trajectoryPointsToRecord = 600;
+    
+    /**
      * Array of callback objects. These callback objects are examimed for
      * the appropriate functions, and if present that function is called at the
      * appropriate time.
@@ -174,6 +181,9 @@ LBSailSim.Env.prototype = {
     
     _loadEnvFromData: function(data, onLoaded, onError) {
         var me = this;
+
+        this.trajectoryPointsToRecord = data.trajectoryPointsToRecord || this.trajectoryPointsToRecord;
+        
         this.loadCoordinator.setup(onLoaded, onError);
         this.loadCoordinator.beginLoadCalls();
             

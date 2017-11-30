@@ -56,22 +56,22 @@ io.on('connection', function(socket){
         console.log('disconnected');
     });
     
+    var debug_timing_count = 0;
     socket.on('debug-timing', function(data) {
         console.log('');
         var now = new Date();
-        console.log('debug-timing:' + now.toTimeString());
+        console.log('debug-timing(' + debug_timing_count + '):' + now.toTimeString());
         if (data.fps) {
-            console.log('FPS: ' + data.fps.toFixed(1));
+            console.log('FPS:\t' + data.fps.toFixed(1));
         }
-        var sum = 0;
         Object.keys(data).forEach(function(key) {
             var record = data[key];
             if (key !== 'fps') {
-                        console.log(key + ': ' + record.maxMs.toFixed(2) + ' ' + record.frozenMs.toFixed(2) + ' ' + record.averageMs.toFixed(2) + ' ' + record.count);
-                sum += record.averageMs;
+                        console.log(key + ':\t' + record.maxMs.toFixed(2) + '\t' + record.frozenMs.toFixed(2) + '\t' + record.averageMs.toFixed(2) + '\t' + record.count);
             }
         });
-        console.log('total avg. time: ' + sum.toFixed(2));
+        
+        ++debug_timing_count;
     });
 });
 

@@ -586,5 +586,64 @@ LBMath.finiteDiffBackFirst = function(dt, f0, fm1, fm2, fm3, fm4) {
  */
 LBMath.finiteDiffBackFirst.MAX_TERMS = 5;
 
+
+/**
+ * A helper class that can be used to apply Catmull-Rom spline interpolation to multiple values
+ * for a given t.
+ * @constructor
+ * @returns {module:LBMath.CatmullRomCalculator}
+ */
+LBMath.CatmullRomCalculator = function() {
+    
+};
+
+LBMath.CatmullRomCalculator.prototype = {
+    /**
+     * Sets up the calculator for a given t. The following must be true:
+     * t0 &lt; t1 &lt; t2 &lt; t3 &lt; t4
+     * @param {Number} t    The t of interest, it should be &ge; t0 and &le; t3.
+     * @param {Number} t0   The t at the first point.
+     * @param {Number} t1   The t at the second point.
+     * @param {Number} t2   The t at the third point.
+     * @param {Number} t3   The t at the fourth point.
+     * @returns {module:LBMath.CatmullRomCalculator}    this.
+     */
+    setTs: function(t, t0, t1, t2, t3) {
+        this.p0A1 = (t1 - t) / (t1 - t0);
+        this.p1A1 = (t - t0) / (t1 - t0);
+        this.p1A2 = (t2 - t) / (t2 - t1);
+        this.p2A2 = (t - t1) / (t2 - t1);
+        this.p2A3 = (t3 - t) / (t3 - t2);
+        this.p3A3 = (t - t2) / (t3 - t2);
+        this.a1B1 = (t2 - t) / (t2 - t0);
+        this.a2B1 = (t - t0) / (t2 - t0);
+        this.a2B2 = (t3 - t) / (t3 - t1);
+        this.a3B2 = (t - t1) / (t3 - t1);
+        this.b1C = (t2 - t) / (t2 - t1);
+        this.b2C = (t - t1) / (t2 - t1);
+        return this;
+    },
+    
+    /**
+     * Evalkuates the curve for a given set of values at the t specified in the last
+     * call to {@link module:LBMath.CatmullRomCalculator
+     * @param {type} p0
+     * @param {type} p1
+     * @param {type} p2
+     * @param {type} p3
+     * @returns {Math_L18.CatmullRomCalculator.prototype.calc.b1|Math_L18.CatmullRomCalculator.prototype.calc.b2|Number}
+     */
+    calc: function(p0, p1, p2, p3) {
+        var a1 = this.p0A1 * p0 + this.p1A1 * p1;
+        var a2 = this.p1A2 * p1 + this.p2A2 * p2;
+        var a3 = this.p2A3 * p2 + this.p3A3 * p3;
+        var b1 = this.a1B1 * a1 + this.a2B1 * a2;
+        var b2 = this.a2B2 * a2 + this.a3B2 * a3;
+        return this.b1C * b1 + this.b2C * b2;
+    },
+    
+    constructor: LBMath.CatmullRomCalculator
+};
+
 return LBMath;
 });

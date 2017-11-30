@@ -328,6 +328,12 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
      * @member {LBSailSim.Hull}
      */
     this.hull = undefined;
+    
+    /**
+     * The trajectory of the vessel.
+     * @member {module:LBPhysics.Trajectory}
+     */
+    this.trajectory = new LBPhysics.Trajectory(sailEnv.trajectoryPointsToRecord);
 };
 
 LBSailSim.Vessel._workingVector3A = new LBGeometry.Vector3();
@@ -895,6 +901,8 @@ LBSailSim.Vessel.prototype._updateFoilForces = function(dt, flow, foils) {
  * @returns {LBSailSim.Vessel}  this.
  */
 LBSailSim.Vessel.prototype.updateForces = function(dt) {
+    this.trajectory.updateRigidBodyTrajectory(dt, this);
+    
     this.sailEnv.wind.getFlowVelocity(this.obj3D.position.x, this.obj3D.position.y, this.appWindHeight, this.trueWind);
     this.apparentWind.copy(this.trueWind);
     this.apparentWind.sub(this.worldLinearVelocity);
