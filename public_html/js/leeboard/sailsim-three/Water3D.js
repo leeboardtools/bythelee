@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsim', 'lbmath', 'lbutil', 'three', 'lbshaders'],
-function(LBSailSim, LBMath, LBUtil, THREE, LBShaders) {
+define(['lbsailsim', 'lbmath', 'lbutil', 'three'],
+function(LBSailSim, LBMath, LBUtil, THREE) {
     
     
 /**
@@ -675,10 +675,11 @@ LBSailSim.WaterShader.prototype._applyPuff = function(puff, puffIndex) {
         this.puffMeshesInUse.push(puffMesh);
         puffMesh.visible = true;
     }
+    var geometry = puffMesh.geometry;
     
     // Now we need to adjust the mesh's vertices to match the puff.
     // There are 16 vertices. All but the four inner ones have y = 0.
-    var positionAttribute = puffMesh.geometry.getAttribute('position');
+    var positionAttribute = geometry.getAttribute('position');
     var positions = positionAttribute.array;
     var coordMapping = this.water3D.scene3D.coordMapping;
     var positionIndex = 0;
@@ -696,7 +697,14 @@ LBSailSim.WaterShader.prototype._applyPuff = function(puff, puffIndex) {
     }
 
     positionAttribute.needsUpdate = true;
-    puffMesh.geometry.computeVertexNormals();
+    
+    geometry.computeVertexNormals();
+    if (geometry.boundingBox) {
+        geometry.computeBoundingBox();
+    }
+    if (geometry.boundingSphere) {
+        geometry.computeBoundingSphere();
+    }
 };
 
 LBSailSim.WaterShader._applyPuffPosition = function(coordMapping, puff, u, v, z, positions, positionIndex) {

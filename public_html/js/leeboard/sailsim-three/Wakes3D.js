@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsim', 'lbparticles', 'lbgeometry', 'lbmath', 'lbshaders', 'three', 'lbutil'], 
-function(LBSailSim, LBParticles, LBGeometry, LBMath, LBShaders, THREE, LBUtil) {
+define(['lbsailsim', 'lbparticles', 'lbgeometry', 'lbmath', 'three', 'lbutil'], 
+function(LBSailSim, LBParticles, LBGeometry, LBMath, THREE, LBUtil) {
 
 'use strict';
 
@@ -313,6 +313,13 @@ LBSailSim.MeshWakes.prototype = {
 };
 
 
+/**
+ * This manages the wake for a vessel.
+ * @param {module:LBSailSim.MeshWakes} meshWakes   The mesh wakes object creating this.
+ * @param {module:THREE.Material} material The material for the meshes.
+ * @param {module:LBSailSim.Vessel} vessel  The vessel whose wake is being modeled.
+ * @return {module:LBSailSim.VesselWake}
+ */
 LBSailSim.VesselWake = function(meshWakes, material, vessel) {
     this.meshWakes = meshWakes;
     this.vessel = vessel;
@@ -343,6 +350,10 @@ LBSailSim.VesselWake.prototype = {
         // TODO: Determine the max wave height speed from the hull speed.
         var maxWaveHeight = 0.25;
         var maxWaveHeightSpeed = 3;
+        
+        // TODO: Try to adjust the positions of each trajectory state to account for where
+        // the wake actually leaves the vessel. Right now it just sets the mesh so it
+        // starts from the vessel's origin.
         
         for (var i = 0; i < stateCount; ++i) {
             // We need a separate _allocatedTrajectoryStates object so we can duplicate
@@ -384,7 +395,13 @@ LBSailSim.VesselWake.prototype = {
 };
 
 
-
+/**
+ * This holds a mesh representing a wave coming off one side of the wake.
+ * @param {module:LBSailSim.MeshWakes} meshWakes   The mesh wakes object creating this.
+ * @param {module:THREE.Material} material The material for the mesh.
+ * @param {Number} dir  The direction, -1 for the port side, +1 for the starboard side.
+ * @return {module:LBSailSim.MeshWave}
+ */
 LBSailSim.MeshWave = function(meshWakes, material, dir) {
     this.meshWakes = meshWakes;
     this.material = material;
@@ -392,7 +409,6 @@ LBSailSim.MeshWave = function(meshWakes, material, dir) {
     this.geometry = new THREE.PlaneBufferGeometry(1, 10, 2, meshWakes.segmentCount - 1);
     this.mesh = new THREE.Mesh(this.geometry, this.material);
 
-    //meshWakes.wakes.sailEnv.water3D.wakesScene.add(this.mesh);
     this.meshWakes.wakes.scene3D.add(this.mesh);
     
     this.dir = dir;

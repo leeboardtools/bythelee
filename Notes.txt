@@ -50,15 +50,6 @@ npm install express-generator -g
 
 TODO:
 
-Turns out a big slow-down on the iPad is the wake particle system generating timing hiccups outside
-of the update loop.
-
-
-Have the mirroring sped up by not really mirroring, just using a white-ish color as the reflected color.
-Next step is to use meshes for both the wakes and the puffs, these will need a material that fades to
-the edges of the mesh. The plan is to render these meshes into one of the old puff render targets and
-keep that in the water shader. We can then just darken or lighten the water reflection accordingly.
-
 
 
 Course:
