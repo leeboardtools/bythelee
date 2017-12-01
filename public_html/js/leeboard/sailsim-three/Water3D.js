@@ -38,105 +38,16 @@ LBSailSim.Water3D = function(scene3D, sailEnv) {
     this.scene3D = scene3D;
     this.sailEnv = sailEnv;
     
-    this.puffsEnabled = true;
-    this.mirroringEnabled = true;
-    
-    // TEST!!!
-    this.puffsEnabled = false;
-    this.mirroringEnabled = false;
-    
     this.wakesScene = scene3D.scene;
     
-    if (!this._loadWater()) {
-        var WIDTH = 64;    
-        var BOUNDS = 128;
-        var material = this.createWaterMaterial(BOUNDS, WIDTH);
-
-        var texture = this.createWaterTexture(WIDTH);
-        material.uniforms.heightmap.value = texture;
-
-        var geometry = new THREE.PlaneBufferGeometry(10000, 10000, WIDTH - 1, WIDTH - 1);
-        geometry.rotateX(-LBMath.PI_2);
-
-        this.waterMesh = new THREE.Mesh(geometry, material);
-        
-        // TEST!!!
-        //this.waterMesh.visible = false;
-
-        // TEST!!!
-        //this.waterMesh.position.y = 0.98;
-        //material.wireframe = true;
-
-        this.scene3D.add(this.waterMesh);
-    }
+    this._loadWaterShader();
 };
 
         // 4000 seems to be small enough to get decent resolution at close zoom.
 LBSailSim.Water3D.MESH_SIZE = 4000;
 
 LBSailSim.Water3D.prototype = {
-    createWaterTexture: function(gridDim) {
-        gridDim = gridDim || 64;
-
-        var data = new Float32Array(gridDim * gridDim * 4);
-        var texture = new THREE.DataTexture(data, gridDim, gridDim, THREE.RGBAFormat, THREE.FloatType);
-        
-        var pixels = texture.image.data;
-        var p = 0;
-        for (var i = 0; i < gridDim; ++i) {
-            for (var i = 0; i < gridDim; ++i) {
-                pixels[p++] = 0;
-                pixels[p++] = 0;
-                pixels[p++] = 0;
-                pixels[p++] = 1;
-            }
-        }
-        
-        texture.needsUpdate = true;
-        return texture;
-    },
-    
-    createWaterMaterial: function(totalDim, gridDim, materialColor) {
-        totalDim = 1024;
-        gridDim = gridDim || 64;
-       
-        materialColor = ((materialColor !== undefined) && (materialColor !== null)) ? materialColor : 0x004663;
-        var material = new THREE.ShaderMaterial( {
-                uniforms: THREE.UniformsUtils.merge( [
-                        THREE.ShaderLib[ 'phong' ].uniforms,
-                        {
-                                heightmap: { value: null }
-                        }
-                ] ),
-                vertexShader: waterVertexShader,
-                fragmentShader: THREE.ShaderChunk[ 'meshphong_frag' ]
-
-        } );
-
-        material.lights = true;
-        //material.wireframe = true;
-
-        // Material attributes from MeshPhongMaterial
-        material.color = new THREE.Color( materialColor );
-        material.specular = new THREE.Color( 0x111111 );
-        material.shininess = 5;
-        material.opacity = 1;
-
-        // Sets the uniforms with the material values
-        material.uniforms.diffuse.value = material.color;
-        material.uniforms.specular.value = material.specular;
-        material.uniforms.shininess.value = Math.max( material.shininess, 1e-4 );
-        material.uniforms.opacity.value = material.opacity;
-
-        // Defines
-        material.defines.WIDTH = gridDim.toFixed( 1 );
-        material.defines.BOUNDS = totalDim.toFixed( 1 );
-        
-        return material;
-    },
-    
-
-    _loadWater: function() {
+    _loadWaterShader: function() {
         //return false;
         
         var waterNormals = new THREE.TextureLoader().load( 'textures/three-js/waternormals.jpg' );
@@ -162,32 +73,30 @@ LBSailSim.Water3D.prototype = {
         } );
         this.waterShader = waterShader;
 
+        var geometry = new THREE.PlaneBufferGeometry( meshSize, meshSize );
+        this.waterShader.setupGeometryForShader(geometry);
         this.surfaceMesh = new THREE.Mesh(
-                new THREE.PlaneBufferGeometry( meshSize, meshSize ),
+                geometry,
                 waterShader.material
         );
 
         this.surfaceMesh.add( waterShader );
         this.surfaceMesh.rotation.x = - Math.PI * 0.5;
         this.scene3D.add( this.surfaceMesh );
-        
-        // TEST!!!
-        //this.surfaceMesh.visible = false;
-        
-        // TEST!!!
-        //this.testPuff = new LBSailSim.WindPuff();
-        if (this.testPuff) {
-            this.testPuff.startX = 20;
-            this.testPuff.startY = 0;
-            
-            this.testPuff.nextPuff = new LBSailSim.WindPuff();
-            if (this.testPuff.nextPuff) {
-                this.testPuff.nextPuff.startX = 60;
-                this.testPuff.nextPuff.startY = 10;
-            }
+    },
+    
+    
+    setupWakeGeometry: function(geometry) {
+        if (this.waterShader) {
+            this.waterShader.setupGeometryForShader(geometry);
         }
-        
-        return true;
+    },
+    
+    getWakeShadingAttribute: function(geometry) {
+        if (this.waterShader) {
+            return geometry.getAttribute('shading');
+        }
+        return undefined;
     },
     
     
@@ -196,24 +105,8 @@ LBSailSim.Water3D.prototype = {
      * @param {Number} dt   The time step.
      */
     update: function(dt) {
-        if (this.testPuff) {
-            var puff = this.testPuff;
-            while (puff) {
-                puff.update(dt);
-                if (puff.speedLeading <= 0) {
-                    var puffOptions = {};
-                    puffOptions.depth = 20;
-                    puffOptions.leadingWidth = 30;
-                    puffOptions.expansionDeg = 10;
-                    puffOptions.timeToLive = 15;
-                    puff.setupPuff(new THREE.Vector3(puff.startX, puff.startY, 0), new THREE.Vector2(-2, 0), puffOptions);
-                }
-                puff = puff.nextPuff;
-            }
-        }
-        
         if (this.waterShader) {
-            this.waterShader.render();
+            this.waterShader.update();
         }
     },
     
@@ -223,77 +116,6 @@ LBSailSim.Water3D.prototype = {
     
     constructor: LBSailSim.Water3D
 };
-
-
-var waterVertexShader = [
-    // Copied from ThreeJS examples/webgl_gpgpu_water.html
-    'uniform sampler2D heightmap;',
-
-    '#define PHONG',
-
-    'varying vec3 vViewPosition;',
-
-    '#ifndef FLAT_SHADED',
-
-    '        varying vec3 vNormal;',
-
-    '#endif',
-
-    '#include <common>',
-    '#include <uv_pars_vertex>',
-    '#include <uv2_pars_vertex>',
-    '#include <displacementmap_pars_vertex>',
-    '#include <envmap_pars_vertex>',
-    '#include <color_pars_vertex>',
-    '#include <morphtarget_pars_vertex>',
-    '#include <skinning_pars_vertex>',
-    '#include <shadowmap_pars_vertex>',
-    '#include <logdepthbuf_pars_vertex>',
-    '#include <clipping_planes_pars_vertex>',
-
-    'void main() {',
-    '        vec2 cellSize = vec2( 1.0 / WIDTH, 1.0 / WIDTH );',
-    '        #include <uv_vertex>',
-    '        #include <uv2_vertex>',
-    '        #include <color_vertex>',
-            // # include <beginnormal_vertex>
-            // Compute normal from heightmap
-    '        vec3 objectNormal = vec3(',
-    '                ( texture2D( heightmap, uv + vec2( - cellSize.x, 0 ) ).x - texture2D( heightmap, uv + vec2( cellSize.x, 0 ) ).x ) * WIDTH / BOUNDS,',
-    '                ( texture2D( heightmap, uv + vec2( 0, - cellSize.y ) ).x - texture2D( heightmap, uv + vec2( 0, cellSize.y ) ).x ) * WIDTH / BOUNDS,',
-    '                1.0 );',
-            //<beginnormal_vertex>
-    '        #include <morphnormal_vertex>',
-    '        #include <skinbase_vertex>',
-    '        #include <skinnormal_vertex>',
-    '        #include <defaultnormal_vertex>',
-    '#ifndef FLAT_SHADED // Normal computed with derivatives when FLAT_SHADED',
-
-    '        vNormal = normalize( transformedNormal );',
-
-    '#endif',
-
-            //# include <begin_vertex>
-    '        float heightValue = texture2D( heightmap, uv ).x;',
-    '        vec3 transformed = vec3( position.x, heightValue, position.z );',
-            //<begin_vertex>
-
-    '        #include <morphtarget_vertex>',
-    '        #include <skinning_vertex>',
-    '        #include <displacementmap_vertex>',
-    '        #include <project_vertex>',
-    '        #include <logdepthbuf_vertex>',
-    '        #include <clipping_planes_vertex>',
-
-    '        vViewPosition = - mvPosition.xyz;',
-
-    '        #include <worldpos_vertex>',
-    '        #include <envmap_vertex>',
-    '        #include <shadowmap_vertex>',
-
-    '}'
-    
-].join('\n');
 
 
 /**
@@ -349,8 +171,6 @@ LBSailSim.WaterShader = function(water3D, options) {
     var renderer = water3D.sailEnv.mainView.renderer;
 
     options = options || {};
-
-    this.matrixNeedsUpdate = true;
 
     var width = optionalParameter( options.textureWidth, 512 );
     var height = optionalParameter( options.textureHeight, 512 );
@@ -414,19 +234,12 @@ LBSailSim.WaterShader = function(water3D, options) {
 
     this.material = this.createShaderMaterial(mirrorShader, mirrorUniforms);
     this.puffsMaterial = this.createShaderMaterial(mirrorShader);
-    this.puffsMaterial.uniforms.distortionHeightFactor.value = 0.5;
-    this.puffsMaterial.uniforms.reflectionHeightFactor.value = -1.0;
-    this.puffsMaterial.uniforms.alphaHeightFactor.value = 0.0;
     
     this.wakesMaterial = this.createShaderMaterial(mirrorShader);
-    this.wakesMaterial.uniforms.noiseHeightFactor.value = 0.0;
-    this.wakesMaterial.uniforms.distortionHeightFactor.value = -5.0;
-    this.wakesMaterial.uniforms.reflectionHeightFactor.value = 0.0;
     this.water3D.wakesMaterial = this.wakesMaterial;
 
     this.maxPuffsHeight = 0.05;
-    this.maxPuffsSpeedToHeight = 10;
-    //this.water3D.maxWakesHeight = 0.05;
+    this.maxPuffsSpeed = 15;
 
     var me = this;
     this.puffMeshPool = new LBUtil.Pool(function() {
@@ -451,9 +264,7 @@ LBSailSim.WaterShader = function(water3D, options) {
     this.puffsMaterial.uniforms.eye.value = this.eye;
     this.wakesMaterial.uniforms.eye.value = this.eye;
     
-    this.updateTextureMatrix();
-
-    this.render();
+    this.update();
 };
 
 LBSailSim.WaterShader.prototype = Object.create(THREE.Object3D.prototype);
@@ -487,6 +298,16 @@ LBSailSim.WaterShader.prototype.createShaderMaterial = function(mirrorShader, mi
     return material;
 };
 
+LBSailSim.WaterShader.prototype.setupGeometryForShader = function(geometry) {
+    var shadings = new Float32Array(geometry.attributes.position.count);
+    shadings.fill(1.);
+    geometry.addAttribute('shading', new THREE.BufferAttribute(shadings, 1));
+};
+
+LBSailSim.WaterShader.prototype.getShadingAttribute = function(geometry) {
+    return geometry.getAttribute('shading');
+};
+
 LBSailSim.WaterShader.prototype.getMirrorShader = function() {
     return {
             uniforms: this.getMirrorUniforms(),
@@ -502,11 +323,6 @@ LBSailSim.WaterShader.prototype.getMirrorUniforms = function() {
     return THREE.UniformsUtils.merge( [
                     THREE.UniformsLib[ 'fog' ],
                     {
-                        reflectionHeightFactor: { value: 0.0 },
-                        distortionHeightFactor: { value: 0.0 },
-                        noiseHeightFactor: { value: 0.0 },
-                        alphaHeightFactor: { value: 0.0 },
-                        
                             normalSampler: { value: null },
                             mirrorSampler: { value: null },
                             alpha: { value: 1.0 },
@@ -525,6 +341,10 @@ LBSailSim.WaterShader.prototype.getMirrorUniforms = function() {
 LBSailSim.WaterShader.prototype.getMirrorVertexShader = function() {
     return [
         'varying vec2 uvCoord;',
+        'varying vec3 vNormal;',
+        'varying vec3 vViewNormal;',
+        'attribute float shading;',
+        'varying float vShading;',
 
                     'uniform mat4 textureMatrix;',
 
@@ -535,7 +355,8 @@ LBSailSim.WaterShader.prototype.getMirrorVertexShader = function() {
 
                     'void main() {',
                     
-                    '   uvCoord = uv;',
+        '   uvCoord = uv;',
+        '   vShading = shading;',
                     
                     // mirrorCoord, worldPosition are projected into the view.
                     '	mirrorCoord = modelMatrix * vec4( position, 1.0 );',
@@ -543,6 +364,9 @@ LBSailSim.WaterShader.prototype.getMirrorVertexShader = function() {
                     '	mirrorCoord = textureMatrix * mirrorCoord;',
                     '	vec4 mvPosition =  modelViewMatrix * vec4( position, 1.0 );',
                     '	gl_Position = projectionMatrix * mvPosition;',
+                    
+        'vViewNormal = normalize(normalMatrix * normal);',
+        'vNormal = normalize((modelMatrix * vec4(normal, 1.0)).xyz);',
 
                     THREE.ShaderChunk[ 'fog_vertex' ],
 
@@ -554,13 +378,11 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
     return [
                     'precision highp float;',
 
-        'uniform float noiseHeightFactor;',
-        'uniform float reflectionHeightFactor;',
-        'uniform float distortionHeightFactor;',
-        'uniform float alphaHeightFactor;',
-        
         'varying vec2 uvCoord;',
-
+        'varying vec3 vNormal;',
+        'varying vec3 vViewNormal;',
+        'varying float vShading;',
+        
                     'uniform sampler2D mirrorSampler;',
                     'uniform float alpha;',
                     'uniform float time;',
@@ -573,7 +395,7 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
 
                     'varying vec4 mirrorCoord;',
                     'varying vec3 worldPosition;',
-
+                    
                     'vec4 getNoise( vec2 uv ) {',
                     '	vec2 uv0 = ( uv / 103.0 ) + vec2(time / 17.0, time / 29.0);',
                     '	vec2 uv1 = uv / 107.0-vec2( time / -19.0, time / 31.0 );',
@@ -591,9 +413,11 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
                     '}',
 
                     'void sunLight( const vec3 surfaceNormal, const vec3 eyeDirection, float shiny, float spec, float diffuse, inout vec3 diffuseColor, inout vec3 specularColor ) {',
+                    // Phong
                     '	vec3 reflection = normalize( reflect( -sunDirection, surfaceNormal ) );',
                     '	float direction = max( 0.0, dot( eyeDirection, reflection ) );',
                     '	specularColor += pow( direction, shiny ) * sunColor * spec;',
+                    // Lambert
                     '	diffuseColor += max( dot( sunDirection, surfaceNormal ), 0.0 ) * sunColor * diffuse;',
                     '}',
 
@@ -601,10 +425,10 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
                     THREE.ShaderChunk[ 'fog_pars_fragment' ],
 
                     'void main() {',
-                    // noise/surfaceNormal adds shimmer to the water, the noise is from the noise sampler.
+                    // noise/surfaceNormal adds shimmer to the water The noise is really the surface normal
+                    // to be used, in view space. The multiplication by vec3(1.5, 1.0, 1.5) appears to be
+                    // a scaling operation.
                     '	vec4 noise = getNoise( worldPosition.xz );',
-                    // noise is between -1 and 1.
-        '   noise *= clamp((1. + noiseHeightFactor * worldPosition.y), 0., 10.);',
                     '	vec3 surfaceNormal = normalize( noise.xzy * vec3( 1.5, 1.0, 1.5 ) );',
 
                     '	vec3 diffuseLight = vec3(0.0);',
@@ -617,31 +441,44 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
                     '	float distance = length(worldToEye);',
 
                     // distortion is what makes the reflection wavy and move around.
+                    // NOTE: With the current setup, the mirror sampler returns the same value for everything,
+                    // so distortion has no effect.
                     '	vec2 distortion = surfaceNormal.xz * ( 0.001 + 1.0 / distance ) * distortionScale;',
-        '   distortion *= clamp((1. + distortionHeightFactor * worldPosition.y), 0., 10.);',
 
                     '   vec4 fullSample = texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.z + distortion );',
                     '	vec3 reflectionSample = fullSample.rgb;',
 
-        '   float delta = 0.2;',
-        '   vec3 avgReflectionSample = texture2D(mirrorSampler, (mirrorCoord.xy + vec2(delta,0.0)) / mirrorCoord.z + distortion).rgb',
-        '           + texture2D(mirrorSampler, (mirrorCoord.xy + vec2(0.,delta)) / mirrorCoord.z + distortion).rgb',
-        '           + texture2D(mirrorSampler, (mirrorCoord.xy + vec2(0.,-delta)) / mirrorCoord.z + distortion).rgb',
-        '           + texture2D(mirrorSampler, (mirrorCoord.xy + vec2(-delta, 0.)) / mirrorCoord.z + distortion).rgb;',
-        '   reflectionSample = (reflectionSample + avgReflectionSample / 4.) * 0.4;',
+        // This little snippet is to try to spread out the reflection a bit.
+        //'   float delta = 0.2;',
+        //'   vec3 avgReflectionSample = texture2D(mirrorSampler, (mirrorCoord.xy + vec2(delta,0.0)) / mirrorCoord.z + distortion).rgb',
+        //'           + texture2D(mirrorSampler, (mirrorCoord.xy + vec2(0.,delta)) / mirrorCoord.z + distortion).rgb',
+        //'           + texture2D(mirrorSampler, (mirrorCoord.xy + vec2(0.,-delta)) / mirrorCoord.z + distortion).rgb',
+        //'           + texture2D(mirrorSampler, (mirrorCoord.xy + vec2(-delta, 0.)) / mirrorCoord.z + distortion).rgb;',
+        //'   reflectionSample = (reflectionSample + avgReflectionSample / 4.) * 0.4;',
 
                     '	float theta = max( dot( eyeDirection, surfaceNormal ), 0.0 );',
                     '	float rf0 = 0.3;',
                     '	float reflectance = rf0 + ( 1.0 - rf0 ) * pow( ( 1.0 - theta ), 5.0 );',
                     '	vec3 scatter = max( 0.0, dot( surfaceNormal, eyeDirection ) ) * waterColor;',
 
-        '   reflectance += reflectionHeightFactor * worldPosition.y;',
-        '   float a = alpha + alphaHeightFactor * worldPosition.y;',
-                    
+        '   float a = alpha;',
+        '   reflectionSample *= vShading;',
+        '   diffuseLight *= vShading;',
+        
                     '	vec3 albedo = mix( sunColor * diffuseLight * 0.3 + scatter, ( vec3( 0.1 ) + reflectionSample * 0.9 + reflectionSample * specularLight ), reflectance );',
                     '	vec3 outgoingLight = albedo;',
                     '	gl_FragColor = vec4( outgoingLight, a );',
 
+// The easy way to test values, set the color of gl_FragColor to it...
+//'vec3 testNormal = surfaceNormal;',
+//'testNormal = vViewNormal;',
+//'testNormal = noise.xyz;',
+//'testNormal = texture2D( normalSampler, worldPosition.xz ).xyz;',
+//'testNormal = normalize(testNormal);',
+//'float testVal = 0.5 + testNormal.x * 0.5;',
+//'testVal = 0.5 + vShading * 0.5;',
+//'gl_FragColor = vec4(testVal, testVal, testVal, 1.);',
+                    
                     THREE.ShaderChunk[ 'fog_fragment' ],
 
                     '}'
@@ -649,8 +486,9 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
 };
 
 
-    LBSailSim.WaterShader.prototype.createPuffMesh = function() {
+LBSailSim.WaterShader.prototype.createPuffMesh = function() {
     var geometry = new THREE.PlaneBufferGeometry(1, 1, 3, 3);
+    this.setupGeometryForShader(geometry);
     var mesh = new THREE.Mesh(geometry, this.puffsMaterial);
     this.scene.add(mesh);
     return mesh;
@@ -681,22 +519,32 @@ LBSailSim.WaterShader.prototype._applyPuff = function(puff, puffIndex) {
     // There are 16 vertices. All but the four inner ones have y = 0.
     var positionAttribute = geometry.getAttribute('position');
     var positions = positionAttribute.array;
+    
+    var shadingAttribute = this.getShadingAttribute(geometry);
+    var shadings = shadingAttribute.array;
+    
     var coordMapping = this.water3D.scene3D.coordMapping;
     var positionIndex = 0;
     
-    var zScale = LBMath.clamp(puff.speedLeading * puff.speedAttenuationForTime / this.maxPuffsSpeedToHeight, 0, 1);
+    // In theory we could get the actual puff speed, but why bother?
+    var puffSpeed = LBMath.clamp(puff.speedLeading * puff.speedAttenuationForTime, 0, this.maxPuffsSpeed);
+    var zScale = this.maxPuffsHeight;
     
     for (var i = 0; i < 4; ++i) {
         var u = _applyPuffPositionUs[i];
         var zs = _applyPuffPositionZs[i];
         for (var j = 0; j < 4; ++j) {
+            var zFactor = zs[j];
             var v = _applyPuffPositionVs[j];
-            var z = zs[j] * zScale;
+            var z = zFactor * zScale;
             positionIndex = LBSailSim.WaterShader._applyPuffPosition(coordMapping, puff, u, v, z, positions, positionIndex);
+            
+            shadings[i * 4 + j] = 1. - 0.75 * zFactor * puffSpeed / this.maxPuffsSpeed;
         }
     }
 
     positionAttribute.needsUpdate = true;
+    shadingAttribute.needsUpdate = true;
     
     geometry.computeVertexNormals();
     if (geometry.boundingBox) {
@@ -732,15 +580,13 @@ LBSailSim.WaterShader.prototype._updatePuffs = function() {
     }
 };
     
-LBSailSim.WaterShader.prototype.render = function() {
+LBSailSim.WaterShader.prototype.update = function() {
     // Slow down the water a bit.
     this.material.uniforms.time.value += 1.0 / 120.0;
     this.wakesMaterial.uniforms.time.value = this.material.uniforms.time.value;
     this.puffsMaterial.uniforms.time.value = this.material.uniforms.time.value;
 
-    if ( this.matrixNeedsUpdate ) this.updateTextureMatrix();
-
-    this.matrixNeedsUpdate = true;
+    this.updateTextureMatrix();
 
     this._updatePuffs();
 };
