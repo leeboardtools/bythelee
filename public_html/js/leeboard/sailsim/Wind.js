@@ -86,11 +86,27 @@ LBSailSim.Wind = function(sailEnv) {
     
     /**
      * The first puff in the puff linked list.
-     * @member {LBSailSim.WindPuff}
+     * @member {module:LBSailSim.WindPuff}
      */
     this.firstPuff = null;
     
     this._firstFreePuff = null;
+    
+    /**
+     * The number of puffs currently active.
+     * @member {Number}
+     */
+    this.activePuffsCount = 0;
+    
+    /**
+     * The maximum number of active puffs, if the number of active puffs is at
+     * or above this value no new puffs will be created.
+     * @member {Number}
+     */
+    this.maxActivePuffs = Number.MAX_VALUE;
+    
+    // TEST!!!
+    //this.maxActivePuffs = 1;
     
     this._nextPuffTimeRNG = new LBRandom.NormalGenerator();
     this._positionRNG = new LBRandom.UniformGenerator();
@@ -223,7 +239,7 @@ LBSailSim.Wind.prototype = {
         
         // The lighter the wind speed, the more angular deviation...
         this._dirDegRNG.mean = this.averageFromDeg;
-        this._dirDegRNG.stdev = 180 * this.gustFactor / (2 * this.averageMPS + 1);
+        this._dirDegRNG.stdev = 180 * this.gustFactor / (4 * this.averageMPS + 1);
         
         this._depthRNG.mean = 20;
         this._depthRNG.stdev = 10;
@@ -268,6 +284,7 @@ LBSailSim.Wind.prototype = {
         else {
             puff = new LBSailSim.WindPuff();
         }
+        ++this.activePuffsCount;
         
         puff.nextPuff = this.firstPuff;
         this.firstPuff = puff;
@@ -291,7 +308,7 @@ LBSailSim.Wind.prototype = {
         _workingVel.set(speed * Math.cos(headingRad), speed * Math.sin(headingRad), 0);
 
         this.puffOptions = this.puffOptions || {};
-        this.puffOptions.depth = Math.max(this._depthRNG.nextValue(), 1);
+        this.puffOptions.depth = Math.max(this._depthRNG.nextValue(), 3);
         this.puffOptions.leadingWidth = Math.max(this._leadingWidthRNG.nextValue(), 10);
         this.puffOptions.expansionDeg = Math.max(this._expansionDegRNG.nextValue(), 1);
         this.puffOptions.timeToLive = Math.max(this._timeToLiveRNG.nextValue(), 5);
@@ -399,6 +416,7 @@ LBSailSim.Wind.prototype = {
                 this._firstFreePuff = puff;
                 
                 puff = nextPuff;
+                --this.activePuffsCount;
             }
             else {
                 prevPuff = puff;
@@ -408,8 +426,10 @@ LBSailSim.Wind.prototype = {
         
         // Time for a new puff?
         if (this.elapsedTime >= this.nextPuffTime) {
-            this._generatePuff();
-            this._calcNextPuffTime();
+            if (this.activePuffsCount < this.maxActivePuffs) {
+                this._generatePuff();
+                this._calcNextPuffTime();
+            }
         }
         
         this.minActivePosition.set(Number.MAX_VALUE, Number.MAX_VALUE);
@@ -566,7 +586,7 @@ LBSailSim.WindPuff = function(leadingPosition, velocity, options) {
      * @readonly
      * @member {Number}
      */
-    this.speedAttenuationForTime = 1;
+    this.speedAttenuationForTime = 0;
     
     this.setupPuff(leadingPosition, velocity, options);
 };

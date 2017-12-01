@@ -236,10 +236,18 @@ LBSailSim.WaterShader = function(water3D, options) {
     this.puffsMaterial = this.createShaderMaterial(mirrorShader);
     
     this.wakesMaterial = this.createShaderMaterial(mirrorShader);
+    // Can't use true normals unless we have more than 2 segments across the wake mesh.
+    this.wakesMaterial.uniforms.trueNormalFactor.value = 0.25;
     this.water3D.wakesMaterial = this.wakesMaterial;
 
     this.maxPuffsHeight = 0.05;
+    
+    // This is used to limit the rendering of the puff strength, speeds greater than this
+    // are rendered as this.
     this.maxPuffsSpeed = 15;
+    
+    // Below this we won't bother with the puff.
+    this.minPuffsSpeed = 0.5;
 
     var me = this;
     this.puffMeshPool = new LBUtil.Pool(function() {
@@ -323,6 +331,8 @@ LBSailSim.WaterShader.prototype.getMirrorUniforms = function() {
     return THREE.UniformsUtils.merge( [
                     THREE.UniformsLib[ 'fog' ],
                     {
+            trueNormalFactor: { value: 0 },
+            
                             normalSampler: { value: null },
                             mirrorSampler: { value: null },
                             alpha: { value: 1.0 },
@@ -378,6 +388,7 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
     return [
                     'precision highp float;',
 
+        'uniform float trueNormalFactor;',
         'varying vec2 uvCoord;',
         'varying vec3 vNormal;',
         'varying vec3 vViewNormal;',
@@ -396,6 +407,13 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
                     'varying vec4 mirrorCoord;',
                     'varying vec3 worldPosition;',
                     
+        'vec4 getNormal( vec2 uv) {',
+        '   vec4 normal = texture2D( normalSampler, uv);',
+        '   vec3 trueNormal = vec3(vViewNormal.x, vViewNormal.y - 1., vViewNormal.z);',
+        '   normal += vec4(trueNormal * trueNormalFactor, 0.);',
+        '   return normal;',
+        '}',
+                    
                     'vec4 getNoise( vec2 uv ) {',
                     '	vec2 uv0 = ( uv / 103.0 ) + vec2(time / 17.0, time / 29.0);',
                     '	vec2 uv1 = uv / 107.0-vec2( time / -19.0, time / 31.0 );',
@@ -405,10 +423,14 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
                     // uv2 seems to impart a wind blowing effect.
                     'uv2 *= 0.01;',
                     
-                    '	vec4 noise = texture2D( normalSampler, uv0 ) +',
-                    '		texture2D( normalSampler, uv1 ) +',
-                    '		texture2D( normalSampler, uv2 ) +',
-                    '		texture2D( normalSampler, uv3 );',
+        '   vec4 noise = getNormal( uv0 ) +',
+        '           getNormal( uv1 ) +',
+        '           getNormal( uv2 ) +',
+        '           getNormal( uv3 );',
+                    //'	vec4 noise = texture2D( normalSampler, uv0 ) +',
+                    //'		texture2D( normalSampler, uv1 ) +',
+                    //'		texture2D( normalSampler, uv2 ) +',
+                    //'		texture2D( normalSampler, uv3 );',
                     '	return noise * 0.5 - 1.0;',
                     '}',
 
@@ -470,12 +492,12 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
                     '	gl_FragColor = vec4( outgoingLight, a );',
 
 // The easy way to test values, set the color of gl_FragColor to it...
-//'vec3 testNormal = surfaceNormal;',
-//'testNormal = vViewNormal;',
+'vec3 testNormal = surfaceNormal;',
+'testNormal = vViewNormal;',
 //'testNormal = noise.xyz;',
 //'testNormal = texture2D( normalSampler, worldPosition.xz ).xyz;',
 //'testNormal = normalize(testNormal);',
-//'float testVal = 0.5 + testNormal.x * 0.5;',
+'float testVal = 0.5 + testNormal.x * 0.5;',
 //'testVal = 0.5 + vShading * 0.5;',
 //'gl_FragColor = vec4(testVal, testVal, testVal, 1.);',
                     
@@ -489,6 +511,19 @@ LBSailSim.WaterShader.prototype.getMirrorFragmentShader = function() {
 LBSailSim.WaterShader.prototype.createPuffMesh = function() {
     var geometry = new THREE.PlaneBufferGeometry(1, 1, 3, 3);
     this.setupGeometryForShader(geometry);
+
+    // Force our normals to all be pointing straight up so we don't muck around
+    // with any normals based adjustments in the shader.
+    var normals = geometry.attributes.normal.array;
+    var count = normals.length / 3;
+    var index = 0;
+    for (var i = 0; i < count; ++i) {
+        normals[index++] = 0;
+        normals[index++] = 1;
+        normals[index++] = 0;
+    }
+    geometry.attributes.normal.needsUpdate = true;
+    
     var mesh = new THREE.Mesh(geometry, this.puffsMaterial);
     this.scene.add(mesh);
     return mesh;
@@ -498,7 +533,7 @@ LBSailSim.WaterShader.prototype.createPuffMesh = function() {
 var _applyPuffVector3;
 var _applyPuffPosition = [];
 var _applyPuffPositionUs = [ 0, 0.25, 0.75, 1. ];
-var _applyPuffPositionVs = [ 0, 0.05, 0.5, 1. ];
+var _applyPuffPositionVs = [ 0, 0.15, 0.5, 1. ];
 var _applyPuffPositionZs = [
     [ 0, 0, 0, 0 ],
     [ 0, 1, 1, 0 ],
@@ -507,6 +542,12 @@ var _applyPuffPositionZs = [
 ];
 
 LBSailSim.WaterShader.prototype._applyPuff = function(puff, puffIndex) {
+    // In theory we could get the actual puff speed, but why bother?
+    var puffSpeed = LBMath.clamp(puff.speedLeading * puff.speedAttenuationForTime, 0, this.maxPuffsSpeed);
+    if (puffSpeed < this.minPuffsSpeed) {
+        return;
+    }
+
     var puffMesh = this.puffMeshesInUse[puffIndex];
     if (!puffMesh) {
         puffMesh = this.puffMeshPool.get();
@@ -526,8 +567,6 @@ LBSailSim.WaterShader.prototype._applyPuff = function(puff, puffIndex) {
     var coordMapping = this.water3D.scene3D.coordMapping;
     var positionIndex = 0;
     
-    // In theory we could get the actual puff speed, but why bother?
-    var puffSpeed = LBMath.clamp(puff.speedLeading * puff.speedAttenuationForTime, 0, this.maxPuffsSpeed);
     var zScale = this.maxPuffsHeight;
     
     for (var i = 0; i < 4; ++i) {
@@ -546,7 +585,6 @@ LBSailSim.WaterShader.prototype._applyPuff = function(puff, puffIndex) {
     positionAttribute.needsUpdate = true;
     shadingAttribute.needsUpdate = true;
     
-    geometry.computeVertexNormals();
     if (geometry.boundingBox) {
         geometry.computeBoundingBox();
     }
@@ -587,6 +625,11 @@ LBSailSim.WaterShader.prototype.update = function() {
     this.puffsMaterial.uniforms.time.value = this.material.uniforms.time.value;
 
     this.updateTextureMatrix();
+    
+    // NOTE:
+    // This is where we used to do the mirror texture rendering. We don't do that
+    // anymore because rendering to a second render target was way too slow on a 2017 iPad.
+    //
 
     this._updatePuffs();
 };

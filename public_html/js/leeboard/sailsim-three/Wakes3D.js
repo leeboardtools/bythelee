@@ -251,7 +251,7 @@ LBSailSim.MeshWakes = function(wakes) {
     this.segmentCount = 20;
     this.wakeDuration = 10;
     
-    this.maxWaveHeight = 0.15;
+    this.maxWaveHeight = 0.05;
     
     // TEST!!!
     //this.segmentCount = 4;
@@ -363,7 +363,7 @@ LBSailSim.VesselWake.prototype = {
                 state.wakeHalfWidth = _wakeSpeedScale * state.speed * t;
 
                 state.waveHeight = maxWaveHeight * LBMath.smoothstep(-maxWaveHeightSpeed, maxWaveHeightSpeed, state.speed);
-                state.waveLength = 15 * state.waveHeight;
+                state.waveLength = 25 * state.waveHeight;
                 
                 // Taper down the wake towards the end.
                 state.waveHeight *= 1 - LBMath.smoothstep(heightTaperTimeStart, this.meshWakes.wakeDuration, t);
@@ -404,7 +404,9 @@ LBSailSim.MeshWave = function(meshWakes, material, dir) {
     this.meshWakes = meshWakes;
     this.material = material;
     
-    this.geometry = new THREE.PlaneBufferGeometry(1, 10, 2, meshWakes.segmentCount - 1);
+    this.segmentsAcross = 3;
+    
+    this.geometry = new THREE.PlaneBufferGeometry(1, 10, this.segmentsAcross, meshWakes.segmentCount - 1);
     this.meshWakes.wakes.sailEnv.water3D.setupWakeGeometry(this.geometry);
     this.mesh = new THREE.Mesh(this.geometry, this.material);
 
@@ -421,8 +423,11 @@ var _meshWaveVector3B = new LBGeometry.Vector3();
 
 LBSailSim.MeshWave.prototype = {
     update: function(trajectoryStates, vessel) {
+
         var positionAttribute = this.geometry.getAttribute('position');
         var positions = positionAttribute.array;
+        
+        this.geometry.computeVertexNormals();
         
         var normalAttribute = this.geometry.getAttribute('normal');
         var normals = normalAttribute.array;
@@ -460,11 +465,20 @@ LBSailSim.MeshWave.prototype = {
     
     _updateValuesFromState: function(dt, state, positions, normals, shadings, valueIndex, delta, prevState) {
         var coordMapping = this.meshWakes.wakes.scene3D.coordMapping;
-        var shadingsIndex = valueIndex / 3;
+        var secondLastPointIndex = 3;
+        var lastPointIndex = 6;
+        if (this.segmentsAcross === 3) {
+            secondLastPointIndex += 3;
+            lastPointIndex += 3;
+        }
         
+        var shadingsIndex = valueIndex / 3;
         var shadingStrength = 1 - state.waveHeight / this.meshWakes.maxWaveHeight;
         shadings[shadingsIndex++] = 1;
-        shadings[shadingsIndex++] = 1. - 0.1 * (1 - shadingStrength * shadingStrength);
+        shadings[shadingsIndex++] = 1. + 0.1 * (1 - shadingStrength * shadingStrength);
+        if (this.segmentsAcross === 3) {
+            shadings[shadingsIndex++] = 1. + 0.1 * (1 - shadingStrength * shadingStrength);
+        }
         shadings[shadingsIndex] = 1;
         
         var dx = state.travelDir.y * this.dir;
@@ -473,24 +487,36 @@ LBSailSim.MeshWave.prototype = {
         _meshWavePositions[1] = state.position.y + dy * (state.wakeHalfWidth - this.dir * delta);
         _meshWavePositions[2] = 0;
 
-        _meshWavePositions[3] = state.position.x + dx * (state.wakeHalfWidth);
-        _meshWavePositions[4] = state.position.y + dy * (state.wakeHalfWidth);
-        _meshWavePositions[5] = state.waveHeight;
+        if (this.segmentsAcross === 3) {
+            var midDelta = delta / 4.;
+            _meshWavePositions[3] = state.position.x + dx * (state.wakeHalfWidth - this.dir * midDelta);
+            _meshWavePositions[4] = state.position.y + dy * (state.wakeHalfWidth - this.dir * midDelta);
+            _meshWavePositions[5] = state.waveHeight;
 
-        _meshWavePositions[6] = state.position.x + dx * (state.wakeHalfWidth + this.dir * delta);
-        _meshWavePositions[7] = state.position.y + dy * (state.wakeHalfWidth + this.dir * delta);
-        _meshWavePositions[8] = 0;
+            _meshWavePositions[6] = state.position.x + dx * (state.wakeHalfWidth + this.dir * midDelta);
+            _meshWavePositions[7] = state.position.y + dy * (state.wakeHalfWidth + this.dir * midDelta);
+            _meshWavePositions[8] = state.waveHeight;
+        }
+        else {
+            _meshWavePositions[3] = state.position.x + dx * (state.wakeHalfWidth);
+            _meshWavePositions[4] = state.position.y + dy * (state.wakeHalfWidth);
+            _meshWavePositions[5] = state.waveHeight;
+        }
 
-        // For the normals, we want to set the normals a the edges to point straight up,
+        _meshWavePositions[lastPointIndex] = state.position.x + dx * (state.wakeHalfWidth + this.dir * delta);
+        _meshWavePositions[lastPointIndex + 1] = state.position.y + dy * (state.wakeHalfWidth + this.dir * delta);
+        _meshWavePositions[lastPointIndex + 2] = 0;
+
+        // For the normals, we want to set the normals at the edges to point straight up,
         // to match the water's surface, and then to set the normals at the crest
         // to point a little outward.
         _meshWaveNormals[0] = 0;
         _meshWaveNormals[1] = 0;
         _meshWaveNormals[2] = 1;
 
-        _meshWaveNormals[6] = 0;
-        _meshWaveNormals[7] = 0;
-        _meshWaveNormals[8] = 1;
+        _meshWaveNormals[lastPointIndex] = 0;
+        _meshWaveNormals[lastPointIndex + 1] = 0;
+        _meshWaveNormals[lastPointIndex + 2] = 1;
         
         if (prevState) {
             // We have the axis going down:
@@ -499,8 +525,7 @@ LBSailSim.MeshWave.prototype = {
             back.set(
                     _meshWavePrevPositions[3] - _meshWavePositions[3],
                     _meshWavePrevPositions[4] - _meshWavePositions[4],
-                    _meshWavePrevPositions[5] - _meshWavePositions[5])
-                .normalize();
+                    _meshWavePrevPositions[5] - _meshWavePositions[5]);
 
             var normal;
             if (this.dir < 0) {
@@ -512,20 +537,42 @@ LBSailSim.MeshWave.prototype = {
             }
             else {
                 down.set(
-                        _meshWavePositions[6] - _meshWavePositions[3],
-                        _meshWavePositions[7] - _meshWavePositions[4],
-                        _meshWavePositions[8] - _meshWavePositions[5]);
+                        _meshWavePositions[lastPointIndex] - _meshWavePositions[secondLastPointIndex],
+                        _meshWavePositions[lastPointIndex + 1] - _meshWavePositions[secondLastPointIndex + 1],
+                        _meshWavePositions[lastPointIndex + 2] - _meshWavePositions[secondLastPointIndex + 2]);
                 normal = down.cross(back);
+
             }
             
             normal.normalize();
             normal.toArray(_meshWaveNormals, 3);
+                
+            if (this.sementsAcross === 3) {
+                if (this.dir < 0) {
+                    _meshWaveNormals[6] = -_meshWaveNormals[3];
+                    _meshWaveNormals[7] = -_meshWaveNormals[4];
+                    _meshWaveNormals[8] = _meshWaveNormals[5];
+                }
+                else {
+                    _meshWaveNormals[3] = -_meshWaveNormals[6];
+                    _meshWaveNormals[4] = -_meshWaveNormals[7];
+                    _meshWaveNormals[5] = _meshWaveNormals[8];
+                }
+            }
+            
         }
         else {
             _meshWaveNormals[3] = 0;
             _meshWaveNormals[4] = 0;
             _meshWaveNormals[5] = 1;
             _meshWavePositions[5] = 0;
+            
+            if (this.segmentsAcross === 3) {
+                _meshWaveNormals[6] = 0;
+                _meshWaveNormals[7] = 0;
+                _meshWaveNormals[8] = 1;
+                _meshWavePositions[8] = 0;
+            }
         }
         
         coordMapping.xyzToThreeJS(_meshWavePositions, 0, positions, valueIndex);
@@ -533,12 +580,18 @@ LBSailSim.MeshWave.prototype = {
         valueIndex += 3;
 
         coordMapping.xyzToThreeJS(_meshWavePositions, 3, positions, valueIndex);
-        coordMapping.xyzToThreeJS(_meshWaveNormals, 3, normals, valueIndex);
+//        coordMapping.xyzToThreeJS(_meshWaveNormals, 3, normals, valueIndex);
         valueIndex += 3;
 
         coordMapping.xyzToThreeJS(_meshWavePositions, 6, positions, valueIndex);
-        coordMapping.xyzToThreeJS(_meshWaveNormals, 6, normals, valueIndex);
+//        coordMapping.xyzToThreeJS(_meshWaveNormals, 6, normals, valueIndex);
         valueIndex += 3;
+        
+        if (this.segmentsAcross === 3) {
+            coordMapping.xyzToThreeJS(_meshWavePositions, 9, positions, valueIndex);
+            coordMapping.xyzToThreeJS(_meshWaveNormals, 9, normals, valueIndex);
+            valueIndex += 3;
+        }
         
         var tmp = _meshWavePrevPositions;
         _meshWavePrevPositions = _meshWavePositions;
