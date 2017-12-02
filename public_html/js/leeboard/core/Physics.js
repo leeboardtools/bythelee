@@ -1575,10 +1575,47 @@ LBPhysics.Trajectory = function(pointsToRecordCount) {
     this.currentTime = 0;
     
     this.splineCalculator = new LBMath.CatmullRomCalculator();
+    
+    this.callbacks = [];
 };
 
 var _trajectoryInterpolationStates = [];
 LBPhysics.Trajectory.prototype = {
+    /**
+     * Adds a callback object to the trajectory. The callback object must have the following
+     * methods defined:
+     * <pre><code>
+     *  Callback.prototype = {
+     *      trajectoryStateRecorded: function(trajectory, state) {}
+     *      trajectoryStateInterpolate: function(trajectory, splineCalculator, states, state) {}
+     *      trajectoryStateCopy: function(trajectory, dstState, srcState);
+     *  }
+     * Callback objects are normally used to add additional information to each state.
+     * Note that state objects are reused, so trajectoryStateRecorded() should make
+     * sure to reset any additional information added to the state.
+     * </code></pre>
+     * @param {type} callback
+     * @returns {Physics_L18.LBPhysics.Trajectory.prototype}
+     */
+    addCallback: function(callback) {
+        this.callbacks.push(callback);
+        return this;
+    },
+    
+    /**
+     * Removes a callback object from the trajectory.
+     * @param {Object} callback The callback object to remove.
+     * @returns {Boolean}   true if the callback was removed.
+     */
+    removeCallback: function(callback) {
+        var index = this.callbacks.indexOf(callback);
+        if (index >= 0) {
+            this.callbacks.splice(index, 1);
+            return true;
+        }
+        return false;
+    },
+    
     /**
      * Resets the trajectory to being empty.
      * @param {Number} [currentTime=0]  The baseline for the simulation time.
@@ -1647,6 +1684,10 @@ LBPhysics.Trajectory.prototype = {
         }
         
         state.quaternion.copy(quaternion);
+        
+        this.callbacks.forEach(function(callback) {
+            callback.trajectoryStateRecorded(this, state);
+        }, this);
     },
     
     
@@ -1732,6 +1773,10 @@ LBPhysics.Trajectory.prototype = {
                 .normalize();
         
         state.speed = splineCalculator.calc(states[0].speed, states[1].speed, states[2].speed, states[3].speed);
+        
+        this.callbacks.forEach(function(callback) {
+            callback.trajectoryStateInterpolate(this, splineCalculator, states, state);
+        }, this);
     },
     
     _copyState: function(dstState, srcState) {
@@ -1740,6 +1785,10 @@ LBPhysics.Trajectory.prototype = {
         dstState.quaternion.copy(srcState.quaternion);
         dstState.speed = srcState.speed;
         
+        this.callbacks.forEach(function(callback) {
+            callback.trajectoryStateCopy(this, dstState, srcState);
+        }, this);
+
         return dstState;
     },
     
@@ -1751,6 +1800,9 @@ LBPhysics.Trajectory.prototype = {
         if (this.stateBuffer) {
             this.stateBuffer.destroy();
             this.stateBuffer = null;
+            
+            this.callbacks.length = 0;
+            this.callbacks = null;
         }
     },
     

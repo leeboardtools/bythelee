@@ -90,6 +90,13 @@ LBMath.isNearEqual = function(a, b, tolerance) {
     else if (LBMath.isLikeZero(b)) {
         return false;
     }
+    else if (!Number.isFinite(a)) {
+        // Do want to keep track of the sign.
+        return a === b;
+    }
+    else if (!Number.isFinite(b)) {
+        return false;
+    }
     
     var scale = Math.pow(10., -Math.log10(Math.abs(a)));
     var scaledA = a * scale;

@@ -21,6 +21,22 @@ define(['lbutil', 'lbmath'], function (LBUtil, LBMath) {
 QUnit.module('Core-tests');
 
 QUnit.assert.nearEqual = function(value, expected, msg, tolerance) {
+    if (Array.isArray(value) && Array.isArray(expected)) {
+        if (value.length !== expected.length) {
+            this.pushResult({
+                result: false,
+                actual: value.length,
+                expected: expected.length,
+                message: msg + ' Array Lengths different'
+            });
+        }
+        else {
+            for (var i = 0; i < value.length; ++i) {
+                QUnit.assert.nearEqual(value[i], expected[i], msg, tolerance);
+            }
+        }
+        return;
+    }
     this.pushResult({
         result: LBMath.isNearEqual(value, expected, tolerance),
         actual: value,

@@ -397,6 +397,171 @@ QUnit.test("rect", function(assert) {
     checkRect(assert, rect, 45, 200, 55, 300, "setSize");
 });
 
+QUnit.test("rotation2D", function(assert) {
+    var rotation = new LBGeometry.Rotation2D();
+    var vec = new LBGeometry.Vector2(10, 5);
+    rotation.rotationDeg = 90;
+    
+    var vecTest = rotation.rotateVector2(vec);
+    checkVector2(assert, vecTest, -vec.y, vec.x, "rotate 90");
+    
+    rotation.invRotateVector2(vecTest, vecTest);
+    checkVector2(assert, vecTest, vec.x, vec.y, "inv rotate 90");
+    
+    rotation.rotationDeg = -90;
+    vecTest = rotation.rotateVector2(vec, vecTest);
+    checkVector2(assert, vecTest, vec.y, -vec.x, "rotate -90");
+    assert.nearEqual(rotation.rotationRad, -LBMath.PI_2, "rotationRad -90");
+    
+    rotation.invRotateVector2(vecTest, vecTest);
+    checkVector2(assert, vecTest, vec.x, vec.y, "inv rotate 90");
+    
+    rotation.rotationDeg = -180;
+    vecTest = rotation.rotateVector2(vec, vecTest);
+    checkVector2(assert, vecTest, -vec.x, -vec.y, "rotate -180");
+    
+    rotation.invRotateVector2(vecTest, vecTest);
+    checkVector2(assert, vecTest, vec.x, vec.y, "inv rotate -180");
+    
+    rotation.rotationDeg = 180;
+    vecTest = rotation.rotateVector2(vec, vecTest);
+    checkVector2(assert, vecTest, -vec.x, -vec.y, "rotate 180");
+    
+    rotation.invRotateVector2(vecTest, vecTest);
+    checkVector2(assert, vecTest, vec.x, vec.y, "inv rotate 180");
+    
+    rotation.rotationDeg = 30;
+    vecTest = rotation.rotateVector2(vec, vecTest);
+    var rad = rotation.rotationDeg * LBMath.DEG_TO_RAD;
+    var refX = vec.x * Math.cos(rad) - vec.y * Math.sin(rad);
+    var refY = vec.x * Math.sin(rad) + vec.y * Math.cos(rad);
+    checkVector2(assert, vecTest, refX, refY, "rotate 30 deg");
+    
+    rotation.invRotateVector2(vecTest, vecTest);
+    checkVector2(assert, vecTest, vec.x, vec.y, "inv rotate 30");
+    
+    rotation.setFromVector2(new LBGeometry.Vector2(10, 10));
+    assert.equal(rotation.rotationDeg, 45, "setFromVector2(10,10)");
+
+    rotation.setFromVector2(new LBGeometry.Vector2(-10, 10));
+    assert.equal(rotation.rotationDeg, 135, "setFromVector2(-10,10)");
+
+    rotation.setFromVector2(new LBGeometry.Vector2(-10, -10));
+    assert.equal(rotation.rotationDeg, -135, "setFromVector2(-10,-10)");
+
+    rotation.setFromVector2(new LBGeometry.Vector2(10, -10));
+    assert.equal(rotation.rotationDeg, -45, "setFromVector2(10,-10)");
+});
+
+QUnit.test("ellipse", function(assert) {
+    var ellipse = new LBGeometry.Ellipse(10, 5);
+    
+    assert.equal(ellipse.rotationDeg, 0, "rotationDeg=0");
+    
+    var result = ellipse.getYsForX(10);
+    assert.nearEqual(result, [0], "x=10");
+    
+    result = ellipse.getYsForX(-10, result);
+    assert.nearEqual(result, [0], "x=-10");
+    
+    result = ellipse.getYsForX(-11, result);
+    assert.nearEqual(result, [], "x=-11");
+    
+    result = ellipse.getYsForX(11, result);
+    assert.nearEqual(result, [], "x=11");
+    
+    result = ellipse.getYsForX(0, result);
+    assert.nearEqual(result, [5, -5], "x=0");
+    
+    var refX = 5;
+    var refY = ellipse.yAxis / ellipse.xAxis * Math.sqrt(ellipse.xAxis * ellipse.xAxis - refX * refX);
+    result = ellipse.getYsForX(5, result);
+    assert.nearEqual(result, [refY, -refY], "x=5");
+
+    result = ellipse.getYsForX(-5, result);
+    assert.nearEqual(result, [refY, -refY], "x=-5");
+    
+    
+    ellipse.getXsForY(5, result);
+    assert.nearEqual(result, [0], "y=5");
+
+    ellipse.getXsForY(-5, result);
+    assert.nearEqual(result, [0], "y=-5");
+    
+    ellipse.getXsForY(6, result);
+    assert.nearEqual(result, [], "y=6");
+    
+    ellipse.getXsForY(-6, result);
+    assert.nearEqual(result, [], "y=-6");
+    
+    ellipse.getXsForY(0, result);
+    assert.nearEqual(result, [10, -10], "y=0");
+
+    ellipse.getXsForY(refY, result);
+    assert.nearEqual(result, [refX, -refX], "y=" + refY);
+    
+    
+    ellipse.getSlopeAtX(0, result);
+    assert.nearEqual(result, [0], "slope at x=0");
+    
+    ellipse.getSlopeAtX(10, result);
+    assert.nearEqual(result, [Number.POSITIVE_INFINITY], "slope at x=10");
+    
+    ellipse.getSlopeAtX(-10, result);
+    assert.nearEqual(result, [Number.POSITIVE_INFINITY], "slope at x=-10");
+    
+    var dydx = - refX * ellipse.yAxis * ellipse.yAxis / (refY * ellipse.xAxis * ellipse.xAxis);
+    ellipse.getSlopeAtX(refX, result);
+    assert.nearEqual(result, [dydx, -dydx], "slope at x=" + refX);
+
+    ellipse.getSlopeAtX(-refX, result);
+    assert.nearEqual(result, [-dydx, dydx], "slope at x=" + -refX);
+    
+    ellipse.getSlopeAtY(0, result);
+    assert.nearEqual(result, [Number.POSITIVE_INFINITY], "slope at y=0");
+    
+    ellipse.getSlopeAtY(5, result);
+    assert.nearEqual(result, [0], "slope at y=5");
+
+    ellipse.getSlopeAtY(-5, result);
+    assert.nearEqual(result, [0], "slope at y=-5");
+
+    ellipse.getSlopeAtY(refY, result);
+    assert.nearEqual(result, [dydx, -dydx], "slope at y=" + refY);
+
+    ellipse.getSlopeAtY(-refY, result);
+    assert.nearEqual(result, [-dydx, dydx], "slope at x=" + -refY);
+    
+    
+    ellipse.getPointsWithTangent(0, result);
+    assert.nearEqual(result, [0, 5, 0, -5], "points with tangent 0");
+
+    ellipse.getPointsWithTangent(Number.POSITIVE_INFINITY, result);
+    assert.nearEqual(result, [10, 0, -10, 0], "points with tangent infinity");
+
+    ellipse.getPointsWithTangent(Number.NEGATIVE_INFINITY, result);
+    assert.nearEqual(result, [10, 0, -10, 0], "points with tangent -infinity");
+    
+    ellipse.getPointsWithTangent(dydx, result);
+    assert.nearEqual(result, [refX, refY, -refX, -refY], "points with tangent " + dydx);
+    
+    ellipse.getPointsWithTangent(-dydx, result);
+    assert.nearEqual(result, [refX, -refY, -refX, refY], "points with tangent " + -dydx);
+    
+
+    assert.ok(ellipse.isPointInEllipse(10,0), "isPointInEllipse 10,0");
+    assert.notOk(ellipse.isPointInEllipse(10.00001,0), "isPointInEllipse 10.00001,0");
+    assert.ok(ellipse.isPointInEllipse(-10,0), "isPointInEllipse -10,0");
+    assert.notOk(ellipse.isPointInEllipse(-10.00001,0), "isPointInEllipse -10.00001,0");
+
+    assert.ok(ellipse.isPointInEllipse(8,1), "isPointInEllipse 8,1");
+
+    assert.ok(ellipse.isPointInEllipse(0,5), "isPointInEllipse 0,5");
+    assert.notOk(ellipse.isPointInEllipse(0,5.00001), "isPointInEllipse 0,5.00001");
+    assert.ok(ellipse.isPointInEllipse(0,-5), "isPointInEllipse 0,-5");
+    assert.notOk(ellipse.isPointInEllipse(0,-5.00001), "isPointInEllipse 0,-5.00001");
+});
+
 return {
     checkVector2: checkVector2,
     checkVector3: checkVector3,
