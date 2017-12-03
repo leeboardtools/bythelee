@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsimbase', 'lbutil', 'lbmath', 'lbgeometry', 'lbvolume', 'lbphysics', 'lbdelft', 'lbdebug'],
-function(LBSailSim, LBUtil, LBMath, LBGeometry, LBVolume, LBPhysics, LBDelft, LBDebug) {
+define(['lbsailsimbase', 'lbutil', 'lbmath', 'lbgeometry', 'lbvolume', 'lbphysics', 'lbinterpolate', 'lbdelft', 'lbdebug'],
+function(LBSailSim, LBUtil, LBMath, LBGeometry, LBVolume, LBPhysics, LBInterpolate, LBDelft, LBDebug) {
     
     'use strict';
 
@@ -165,9 +165,6 @@ LBSailSim.Hull = function(vessel) {
      */
     this.resistanceForce = new LBGeometry.Vector3();
     
-    
-    this._storeMinPerpVertex = new LBGeometry.Vector3();
-    this._storeMaxPerpVertex = new LBGeometry.Vector3();
 };
 
 //var _workingPos = new LBGeometry.Vector3();
@@ -209,41 +206,12 @@ LBSailSim.Hull.prototype = {
         var xyPlane = _workingPlane.copy(LBGeometry.XY_PLANE);
         xyPlane.applyMatrix4(this.vessel.coordSystem.localXfrm);
         
-        _workingVelPerpendicular.x = -this.vessel.worldLinearVelocity.y;
-        _workingVelPerpendicular.y = this.vessel.worldLinearVelocity.x;
-        _workingVelPerpendicular.applyMatrix4Rotation(this.vessel.coordSystem.localXfrm);
-        _workingVelPerpendicular.normalize();
-
-        var minPerpVertex = undefined;
-        var minPerpDistance = Number.MAX_VALUE;
-        var maxPerpVertex = undefined;
-        var maxPerpDistance = -Number.MAX_VALUE;
+        this.wakeEdgeCalculator.startUpdateBuoyancy();
         
-        var me = this;
         this.immersedVolume = LBVolume.Volume.volumesOnSideOfPlane(this.vessel.volumes, xyPlane, false, this.centerOfBuoyancy,
-            function(volIndex, tetra) {
-                tetra.vertices.forEach(function(vertex) {
-                    if (LBMath.isLikeZero(xyPlane.distanceToPoint(vertex))) {
-                        var dot = vertex.dot(_workingVelPerpendicular);
-                        if (dot < minPerpDistance) {
-                            minPerpDistance = dot;
-                            minPerpVertex = me._storeMinPerpVertex.copy(vertex);
-                        }
-                        if (dot > maxPerpDistance) {
-                            maxPerpDistance = dot;
-                            maxPerpVertex = me._storeMaxPerpVertex.copy(vertex);
-                        }
-                    }
-                });
-            });
+            this.wakeEdgeCalculator.getBuoyancyWaterlineFunction(xyPlane));
 
-        if (maxPerpVertex) {
-            maxPerpVertex.applyMatrix4(this.vessel.coordSystem.worldXfrm);
-            minPerpVertex.applyMatrix4(this.vessel.coordSystem.worldXfrm);
-        }
-        
-        this.wakeEndPort = maxPerpVertex;
-        this.wakeEndStbd = minPerpVertex;
+        this.wakeEdgeCalculator.endUpdateBuoyancy();
     },
     
     /**
@@ -343,9 +311,16 @@ LBSailSim.Hull.prototype = {
         force.set(0, 0, this.forceBuoyancy);
         resultant.addForce(force, this.worldCenterOfBuoyancy);
         
+        
+        this.wakeEdgeCalculator.update();
+        this.wakeEndPort = this.wakeEdgeCalculator.wakeEndPort;
+        this.wakeEndStbd = this.wakeEdgeCalculator.wakeEndStbd;
+        
         this.handleDebugFields(resultant);
         return resultant;
     },
+    
+    
 
     /**
      * Loads the hull parameters from properties in a data object.
@@ -389,6 +364,8 @@ LBSailSim.Hull.prototype = {
         this.debugForces = data.debugForces;
         
         LBGeometry.loadVector3(data.centerOfBuoyancy, this.centerOfBuoyancy);
+        
+        this.wakeEdgeCalculator = LBSailSim.WakeEdgeCalculator.createFromData(this, data.wakeEdgeCalculator);
         return this;
     },
 
@@ -398,10 +375,17 @@ LBSailSim.Hull.prototype = {
      * @returns {undefined}
      */
     destroy: function() {
-        this.centerOfBuoyancy = null;
-        this.vessel = null;
-        this.worldCenterOfBuoyancy= null;
-        this.worldCenterOfResistance = null;
+        if (this.vessel) {
+            this.centerOfBuoyancy = null;
+            this.vessel = null;
+            this.worldCenterOfBuoyancy= null;
+            this.worldCenterOfResistance = null;
+            
+            if (this.wakeEdgeCalculator) {
+                this.wakeEdgeCalculator.destroy();
+                this.wakeEdgeCalculator = null;
+            }
+        }
     },
 
     constructor: LBSailSim.Hull
@@ -526,6 +510,153 @@ LBSailSim.Hull.addDebugFields = function(name) {
     LBDebug.DataLog.addFieldVector3([name, 'lclCOM']);
     LBDebug.DataLog.addFieldVector3([name, 'lclCOB']);
     
+};
+
+
+/**
+ * Class used to compute the edges where a wake leaves the hull.
+ * @constructor
+ * @param {module:LBSailSim.Hull} hull  The hull this is for.
+ * @returns {module:LBSailSim.WakeEdgeCalculator}
+ */
+LBSailSim.WakeEdgeCalculator = function(hull) {
+    this.hull = hull;
+};
+
+LBSailSim.WakeEdgeCalculator.prototype = {
+    startUpdateBuoyancy: function() {
+        this._storeMinPerpVertex = this._storeMinPerpVertex || new LBGeometry.Vector3();
+        this._storeMaxPerpVertex = this._storeMaxPerpVertex || new LBGeometry.Vector3();
+        
+        var vessel = this.hull.vessel;
+        _workingVelPerpendicular.x = -vessel.worldLinearVelocity.y;
+        _workingVelPerpendicular.y = vessel.worldLinearVelocity.x;
+        _workingVelPerpendicular.applyMatrix4Rotation(vessel.coordSystem.localXfrm);
+        _workingVelPerpendicular.normalize();
+
+        this.minPerpVertex = undefined;
+        this.minPerpDistance = Number.MAX_VALUE;
+        this.maxPerpVertex = undefined;
+        this.maxPerpDistance = -Number.MAX_VALUE;
+    },
+    
+    getBuoyancyWaterlineFunction: function(xyPlane) {
+        var me = this;
+        return function(volIndex, tetra) {
+            tetra.vertices.forEach(function(vertex) {
+                if (LBMath.isLikeZero(xyPlane.distanceToPoint(vertex))) {
+                    var dot = vertex.dot(_workingVelPerpendicular);
+                    if (dot < me.minPerpDistance) {
+                        me.minPerpDistance = dot;
+                        me.minPerpVertex = me._storeMinPerpVertex.copy(vertex);
+                    }
+                    if (dot > me.maxPerpDistance) {
+                        me.maxPerpDistance = dot;
+                        me.maxPerpVertex = me._storeMaxPerpVertex.copy(vertex);
+                    }
+                }
+            });
+        };
+    },
+    
+    endUpdateBuoyancy: function() {
+        if (this.maxPerpVertex) {
+            var vessel = this.hull.vessel;
+            this.maxPerpVertex.applyMatrix4(vessel.coordSystem.worldXfrm);
+            this.minPerpVertex.applyMatrix4(vessel.coordSystem.worldXfrm);
+        }
+        
+        this.wakeEndPort = this.maxPerpVertex;
+        this.wakeEndStbd = this.minPerpVertex;
+    },
+    
+    load: function(data) {
+        
+    },
+    
+    update: function() {
+    },
+    
+    destroy: function() {
+        if (this.hull) {
+            this._storeMinPerpVertex = null;
+            this._storeMaxPerpVertex = null;
+            this.minPerpVertex = null;
+            this.maxPerpVertex = null;
+            this.wakeEndPort = null;
+            this.wakeEndStbd = null;
+            
+            this.hull = null;
+        }
+    },
+    constructor: LBSailSim.WakeEdgeCalculator
+};
+
+var _interpWakeEdgeCalculatorValues = [];
+
+LBSailSim.InterpWakeEdgeCalculator = function(hull) {
+    this.hull = hull;
+    this.interpolator = new LBInterpolate.MultiDim();
+    this.wakeEndPort = new LBGeometry.Vector3();
+    this.wakeEndStbd = new LBGeometry.Vector3();
+};
+
+LBSailSim.InterpWakeEdgeCalculator.prototype = {
+    startUpdateBuoyancy: function() {
+    },
+    
+    getBuoyancyWaterlineFunction: function(xyPlane) {
+        return undefined;
+    },
+    
+    endUpdateBuoyancy: function() {
+    },
+    
+    load: function(data) {
+        this.interpolator.setFromSingleArray(data.interpData, 2);
+    },
+    
+    update: function() {
+        var vessel = this.hull.vessel;
+        var leewayDeg = vessel.getLeewayDeg();
+        var values = this.interpolator.calcValue(leewayDeg, _interpWakeEdgeCalculatorValues);
+        this.wakeEndPort.set(values[0], values[1], 0);
+        
+        leewayDeg = LBMath.wrapDegrees(leewayDeg + 180);
+        this.interpolator.calcValue(leewayDeg, values);
+        this.wakeEndStbd.set(values[0], values[1], 0);
+        
+        vessel.obj3D.localToWorld(this.wakeEndPort);
+        this.wakeEndPort.z = 0;
+        
+        vessel.obj3D.localToWorld(this.wakeEndStbd);
+        this.wakeEndStbd.z = 0;
+    },
+    
+    destroy: function() {
+        if (this.hull) {
+            this.wakeEndPort = null;
+            this.wakeEndStbd = null;
+            
+            this.hull = null;
+        }
+    },
+    constructor: LBSailSim.WakeEdgeCalculator
+};
+
+
+LBSailSim.WakeEdgeCalculator.createFromData = function(hull, data) {
+    var calculator;
+    if (data.className) {
+        calculator = LBUtil.newClassInstanceFromData(data);
+        calculator.hull = hull;
+    }
+    else {
+        calculator = new LBSailSim.WakeEdgeCalculator(hull);
+    }
+    
+    calculator.load(data);
+    return calculator;
 };
 
 return LBSailSim;

@@ -1148,7 +1148,8 @@ LBSailSim.Vessel.prototype.getKnots = function() {
 
 /**
  * Returns the leeway angle in degrees. The leeway angle is the angular difference between
- * the velocity direction and the x-axis of the vessel.
+ * the velocity direction and the x-axis of the vessel. Negative angles mean the vessel is
+ * drifting to starboard.
  * @param {Boolean} isRound If true the leeway angle is rounded before wrapping.
  * @returns {Number}    The leeway angle in degrees.
  */

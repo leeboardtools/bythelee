@@ -15,8 +15,8 @@
  */
 
 
-define(['lbgeometry-three', 'lbmath', 'lbutil'], 
-function(LBGeometry, LBMath, LBUtil) {
+define(['lbgeometry-three', 'lbmath', 'lbutil', 'lbinterpolate'], 
+function(LBGeometry, LBMath, LBUtil, LBInterpolate) {
     
     'use strict';
 
@@ -765,6 +765,6 @@ LBGeometry.Ellipse.prototype = {
     
     constructor: LBGeometry.Ellipse
 };
-    
+
 return LBGeometry;
 });

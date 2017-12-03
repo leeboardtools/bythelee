@@ -253,6 +253,9 @@ LBSailSim.MeshWakes = function(wakes) {
     
     this.maxWaveHeight = 0.05;
     
+    this.useShading = false;
+    this.useShimmering = true;
+    
     // TEST!!!
     //this.segmentCount = 4;
     //this.wakeDuration = 2;
@@ -322,8 +325,8 @@ LBSailSim.VesselWake = function(meshWakes, material, vessel) {
     this.meshWakes = meshWakes;
     this.vessel = vessel;
     
-    this.portWave = new LBSailSim.MeshWave(meshWakes, material, -1);
-    this.stbdWave = new LBSailSim.MeshWave(meshWakes, material, 1);
+    this.portWave = new LBSailSim.MeshWave(meshWakes, material, -1, 'port', vessel);
+    this.stbdWave = new LBSailSim.MeshWave(meshWakes, material, 1, 'stbd', vessel);
     
     this._allocatedTrajectoryStates = [];
     this.trajectoryStates = [];
@@ -363,7 +366,7 @@ LBSailSim.VesselWake.prototype = {
                 state.wakeHalfWidth = _wakeSpeedScale * state.speed * t;
 
                 state.waveHeight = maxWaveHeight * LBMath.smoothstep(-maxWaveHeightSpeed, maxWaveHeightSpeed, state.speed);
-                state.waveLength = 25 * state.waveHeight;
+                state.waveLength = 50 * state.waveHeight;
                 
                 // Taper down the wake towards the end.
                 state.waveHeight *= 1 - LBMath.smoothstep(heightTaperTimeStart, this.meshWakes.wakeDuration, t);
@@ -398,9 +401,12 @@ LBSailSim.VesselWake.prototype = {
  * @param {module:LBSailSim.MeshWakes} meshWakes   The mesh wakes object creating this.
  * @param {module:THREE.Material} material The material for the mesh.
  * @param {Number} dir  The direction, -1 for the port side, +1 for the starboard side.
+ * @param {String} name The unique name of the wave, used to key the wave's info stored
+ * in the states.
+ * @param {module:LBSailSim.Vessel} vessel The vessel this wake is for.
  * @return {module:LBSailSim.MeshWave}
  */
-LBSailSim.MeshWave = function(meshWakes, material, dir) {
+LBSailSim.MeshWave = function(meshWakes, material, dir, name, vessel) {
     this.meshWakes = meshWakes;
     this.material = material;
     
@@ -413,6 +419,11 @@ LBSailSim.MeshWave = function(meshWakes, material, dir) {
     this.meshWakes.wakes.scene3D.add(this.mesh);
     
     this.dir = dir;
+    
+    this.name = name;
+    
+    this.vessel = vessel;
+    this.vessel.trajectory.addCallback(this);
 };
 
 var _meshWavePrevPositions = [];
@@ -420,8 +431,50 @@ var _meshWavePositions = [];
 var _meshWaveNormals = [];
 var _meshWaveVector3A = new LBGeometry.Vector3();
 var _meshWaveVector3B = new LBGeometry.Vector3();
+var _meshWaveDefWaveData = {
+    xOffset: 0,
+    yOffset: 0
+};
 
 LBSailSim.MeshWave.prototype = {
+    trajectoryStateRecorded: function(trajectory, state) {
+        // Grab the port or starboard point from the hull.
+        var xOffset = 0;
+        var yOffset = 0;
+        
+        if (this.vessel.hull) {
+            var wakeEnd = (this.dir < 0) ? this.vessel.hull.wakeEndPort : this.vessel.hull.wakeEndStbd;
+            if (wakeEnd) {
+                xOffset = wakeEnd.x - state.position.x;
+                yOffset = wakeEnd.y - state.position.y;
+            }
+        }
+        
+        var waveData = state[this.name] = state[this.name] || {};
+        waveData.xOffset = xOffset;
+        waveData.yOffset = yOffset;
+    },
+    
+    trajectoryStateInterpolate: function(trajectory, splineCalculator, states, state) {
+        var srcWaveData0 = states[0][this.name] || _meshWaveDefWaveData;
+        var srcWaveData1 = states[1][this.name] || _meshWaveDefWaveData;
+        var srcWaveData2 = states[2][this.name] || _meshWaveDefWaveData;
+        var srcWaveData3 = states[3][this.name] || _meshWaveDefWaveData;
+
+        var dstWaveData = state[this.name] = state[this.name] || {};
+        dstWaveData.xOffset = splineCalculator.calc(srcWaveData0.xOffset, srcWaveData1.xOffset, srcWaveData2.xOffset, srcWaveData3.xOffset);
+        dstWaveData.yOffset = splineCalculator.calc(srcWaveData0.yOffset, srcWaveData1.yOffset, srcWaveData2.yOffset, srcWaveData3.yOffset);
+    },
+    
+    trajectoryStateCopy: function(trajectory, dstState, srcState) {
+        var srcWaveData = srcState[this.name] || _meshWaveDefWaveData;
+
+        var dstWaveData = dstState[this.name] = dstState[this.name] || {};
+        dstWaveData.xOffset = srcWaveData.xOffset;
+        dstWaveData.yOffset = srcWaveData.yOffset;
+    },
+    
+    
     update: function(trajectoryStates, vessel) {
 
         var positionAttribute = this.geometry.getAttribute('position');
@@ -435,6 +488,9 @@ LBSailSim.MeshWave.prototype = {
         var shadingAttribute = this.meshWakes.wakes.sailEnv.water3D.getWakeShadingAttribute(this.geometry);
         var shadings = shadingAttribute.array;
         
+        var shimmeringAttribute = this.meshWakes.wakes.sailEnv.water3D.getWakeShimmeringAttribute(this.geometry);
+        var shimmerings = shimmeringAttribute.array;
+        
         var currentTime = vessel.trajectory.currentTime;
         var stateCount = trajectoryStates.length;
         var valueIndex = 0;
@@ -445,7 +501,7 @@ LBSailSim.MeshWave.prototype = {
             var state = trajectoryStates[i];
             var dt = currentTime - state.time;
             
-            valueIndex = this._updateValuesFromState(dt, state, positions, normals, shadings, valueIndex, 
+            valueIndex = this._updateValuesFromState(dt, state, positions, normals, shadings, shimmerings, valueIndex, 
                     delta, prevState);
             prevState = state;
             delta = 0.25 * state.waveLength;
@@ -453,7 +509,8 @@ LBSailSim.MeshWave.prototype = {
 
         positionAttribute.needsUpdate = true;
         normalAttribute.needsUpdate = true;
-        shadingAttribute.needsUpdate = true;
+        shadingAttribute.needsUpdate = this.meshWakes.useShading;
+        shimmeringAttribute.needsUpdate = this.meshWakes.useShimmering;
         
         if (this.geometry.boundingBox) {
             this.geometry.computeBoundingBox();
@@ -463,7 +520,7 @@ LBSailSim.MeshWave.prototype = {
         }
     },
     
-    _updateValuesFromState: function(dt, state, positions, normals, shadings, valueIndex, delta, prevState) {
+    _updateValuesFromState: function(dt, state, positions, normals, shadings, shimmerings, valueIndex, delta, prevState) {
         var coordMapping = this.meshWakes.wakes.scene3D.coordMapping;
         var secondLastPointIndex = 3;
         var lastPointIndex = 6;
@@ -472,39 +529,62 @@ LBSailSim.MeshWave.prototype = {
             lastPointIndex += 3;
         }
         
-        var shadingsIndex = valueIndex / 3;
-        var shadingStrength = 1 - state.waveHeight / this.meshWakes.maxWaveHeight;
-        shadings[shadingsIndex++] = 1;
-        shadings[shadingsIndex++] = 1. + 0.1 * (1 - shadingStrength * shadingStrength);
-        if (this.segmentsAcross === 3) {
-            shadings[shadingsIndex++] = 1. + 0.1 * (1 - shadingStrength * shadingStrength);
+        var centerX = state.position.x;
+        var centerY = state.position.y;
+        var waveData = state[this.name];
+        if (waveData) {
+            centerX += waveData.xOffset;
+            centerY += waveData.yOffset;
         }
-        shadings[shadingsIndex] = 1;
+        
+        if (this.meshWakes.useShading) {
+            var shadingsIndex = valueIndex / 3;
+            var shadingStrength = 1 - state.waveHeight / this.meshWakes.maxWaveHeight;
+            shadingStrength = 1. + 0.05 * (1 - shadingStrength * shadingStrength);
+            shadings[shadingsIndex++] = 1;
+            shadings[shadingsIndex++] = shadingStrength;
+            if (this.segmentsAcross === 3) {
+                shadings[shadingsIndex++] = shadingStrength;
+            }
+            shadings[shadingsIndex] = 1;
+        }
+        
+        if (this.meshWakes.useShimmering) {
+            var shimmeringsIndex = valueIndex / 3;
+            var shimmeringStrength = 1 - state.waveHeight / this.meshWakes.maxWaveHeight;
+            shimmeringStrength = 1. - 0.1 * (1 - shimmeringStrength * shimmeringStrength);
+            shimmerings[shimmeringsIndex++] = 1;
+            shimmerings[shimmeringsIndex++] = shimmeringStrength;
+            if (this.segmentsAcross === 3) {
+                shimmerings[shimmeringsIndex++] = shimmeringStrength;
+            }
+            shimmerings[shimmeringsIndex] = 1;
+        }
         
         var dx = state.travelDir.y * this.dir;
         var dy = -state.travelDir.x * this.dir;
-        _meshWavePositions[0] = state.position.x + dx * (state.wakeHalfWidth - this.dir * delta);
-        _meshWavePositions[1] = state.position.y + dy * (state.wakeHalfWidth - this.dir * delta);
+        _meshWavePositions[0] = centerX + dx * (state.wakeHalfWidth - this.dir * delta);
+        _meshWavePositions[1] = centerY + dy * (state.wakeHalfWidth - this.dir * delta);
         _meshWavePositions[2] = 0;
 
         if (this.segmentsAcross === 3) {
             var midDelta = delta / 4.;
-            _meshWavePositions[3] = state.position.x + dx * (state.wakeHalfWidth - this.dir * midDelta);
-            _meshWavePositions[4] = state.position.y + dy * (state.wakeHalfWidth - this.dir * midDelta);
+            _meshWavePositions[3] = centerX + dx * (state.wakeHalfWidth - this.dir * midDelta);
+            _meshWavePositions[4] = centerY + dy * (state.wakeHalfWidth - this.dir * midDelta);
             _meshWavePositions[5] = state.waveHeight;
 
-            _meshWavePositions[6] = state.position.x + dx * (state.wakeHalfWidth + this.dir * midDelta);
-            _meshWavePositions[7] = state.position.y + dy * (state.wakeHalfWidth + this.dir * midDelta);
+            _meshWavePositions[6] = centerX + dx * (state.wakeHalfWidth + this.dir * midDelta);
+            _meshWavePositions[7] = centerY + dy * (state.wakeHalfWidth + this.dir * midDelta);
             _meshWavePositions[8] = state.waveHeight;
         }
         else {
-            _meshWavePositions[3] = state.position.x + dx * (state.wakeHalfWidth);
-            _meshWavePositions[4] = state.position.y + dy * (state.wakeHalfWidth);
+            _meshWavePositions[3] = centerX + dx * (state.wakeHalfWidth);
+            _meshWavePositions[4] = centerY + dy * (state.wakeHalfWidth);
             _meshWavePositions[5] = state.waveHeight;
         }
 
-        _meshWavePositions[lastPointIndex] = state.position.x + dx * (state.wakeHalfWidth + this.dir * delta);
-        _meshWavePositions[lastPointIndex + 1] = state.position.y + dy * (state.wakeHalfWidth + this.dir * delta);
+        _meshWavePositions[lastPointIndex] = centerX + dx * (state.wakeHalfWidth + this.dir * delta);
+        _meshWavePositions[lastPointIndex + 1] = centerY + dy * (state.wakeHalfWidth + this.dir * delta);
         _meshWavePositions[lastPointIndex + 2] = 0;
 
         // For the normals, we want to set the normals at the edges to point straight up,
@@ -607,6 +687,11 @@ LBSailSim.MeshWave.prototype = {
             this.geometry = null;
             this.material = null;
             this.meshWakes = null;
+            
+            if (this.vessel) {
+                this.vessel.trajectory.removeCallback(this);
+                this.vessel = null;
+            }
         }
     },
     

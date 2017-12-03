@@ -51,6 +51,11 @@ npm install express-generator -g
 TODO:
 
 
+Clean up waternormals.jpg, there are some lines in it. Also need to tweak the timing of the
+noise in the shader.
+
+Change boundaries to apply an invisible force instead of wind/current.
+
 
 Course:
 Start Line

@@ -35,6 +35,7 @@ var require = {
         'lbforces': 'leeboard/core/Forces',
         'lbgeometry-three': 'leeboard/core/Geometry-THREE',
         'lbgeometry': 'leeboard/core/Geometry',
+        'lbinterpolate': 'leeboard/core/Interpolate',
         'lbmath': 'leeboard/core/Math',
         'lbphysics': 'leeboard/core/Physics',
         'lbphysicslink': 'leeboard/core/PhysicsLink',

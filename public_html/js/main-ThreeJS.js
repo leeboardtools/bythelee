@@ -72,7 +72,7 @@ function LBMyApp() {
     });
     
     // TEST!!!
-    //this.otherBoats.length = 0;
+    this.otherBoats.length = 0;
     
     var mainViewContainer = document.getElementById('main_view');
     this.mainView = new LBUI3d.View3D(this.mainScene, mainViewContainer);

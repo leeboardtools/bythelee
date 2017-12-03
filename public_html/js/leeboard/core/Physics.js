@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-define(['lbutil', 'lbmath', 'lbgeometry', 'lbvolume'],
-function(LBUtil, LBMath, LBGeometry, LBVolume) {
+define(['lbutil', 'lbmath', 'lbgeometry', 'lbvolume', 'lbinterpolate'],
+function(LBUtil, LBMath, LBGeometry, LBVolume, LBInterpolate) {
 
     'use strict';
     
@@ -1574,7 +1574,7 @@ LBPhysics.Trajectory = function(pointsToRecordCount) {
     this.stateBuffer = new LBUtil.RollingBuffer(pointsToRecordCount);
     this.currentTime = 0;
     
-    this.splineCalculator = new LBMath.CatmullRomCalculator();
+    this.splineCalculator = new LBInterpolate.CatmullRomCalculator();
     
     this.callbacks = [];
 };
