@@ -254,7 +254,8 @@ LBSailSim.MeshWakes = function(wakes) {
     this.maxWaveHeight = 0.05;
     
     this.useShading = false;
-    this.useShimmering = true;
+    this.useShading = true;
+    this.useShimmering = !this.useShading;
     
     // TEST!!!
     //this.segmentCount = 4;
@@ -540,11 +541,11 @@ LBSailSim.MeshWave.prototype = {
         if (this.meshWakes.useShading) {
             var shadingsIndex = valueIndex / 3;
             var shadingStrength = 1 - state.waveHeight / this.meshWakes.maxWaveHeight;
-            shadingStrength = 1. + 0.05 * (1 - shadingStrength * shadingStrength);
+            shadingStrength = 0.1 * (1 - shadingStrength * shadingStrength);
             shadings[shadingsIndex++] = 1;
-            shadings[shadingsIndex++] = shadingStrength;
+            shadings[shadingsIndex++] = 1 + shadingStrength;
             if (this.segmentsAcross === 3) {
-                shadings[shadingsIndex++] = shadingStrength;
+                shadings[shadingsIndex++] = 1;
             }
             shadings[shadingsIndex] = 1;
         }

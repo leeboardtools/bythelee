@@ -56,6 +56,8 @@ noise in the shader.
 
 Change boundaries to apply an invisible force instead of wind/current.
 
+Map:
+2D. How to draw? Sprites?
 
 Course:
 Start Line

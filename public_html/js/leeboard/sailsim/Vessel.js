@@ -336,9 +336,10 @@ LBSailSim.Vessel = function(sailEnv, obj3D) {
     this.trajectory = new LBPhysics.Trajectory(sailEnv.trajectoryPointsToRecord);
 };
 
-LBSailSim.Vessel._workingVector3A = new LBGeometry.Vector3();
-LBSailSim.Vessel._workingVector3B = new LBGeometry.Vector3();
-LBSailSim.Vessel._workingEuler = new LBGeometry.Euler();
+var _workingVector3A = new LBGeometry.Vector3();
+var _workingVector3B = new LBGeometry.Vector3();
+var _workingEuler = new LBGeometry.Euler();
+var _workingResultant = new LBPhysics.Resultant3D();
 
 LBSailSim.Vessel.prototype = Object.create(LBPhysics.RigidBody.prototype);
 LBSailSim.Vessel.prototype.constructor = LBSailSim.Vessel;
@@ -934,6 +935,12 @@ LBSailSim.Vessel.prototype.updateForces = function(dt) {
         }
     });
     
+    _workingResultant.zero();
+    if (this.sailEnv.boundaries.getBoundaryForce(this.obj3D.position.x, this.obj3D.position.y, _workingResultant.force)) {
+        _workingResultant.applPoint.set(this.getTotalCenterOfMass());
+        this.addWorldResultant(_workingResultant);
+    }
+    
     this.handleDebugFields();
     
     return this;
@@ -943,10 +950,10 @@ LBSailSim.Vessel.prototype.handleDebugFields = function() {
     if (this.debugForces) {
         var dbgField = LBDebug.DataLog.getField(this.name);
         if (dbgField) {
-            var pos = this.obj3D.getWorldPosition(LBSailSim.Vessel._workingVector3A);
+            var pos = this.obj3D.getWorldPosition(_workingVector3A);
             dbgField.setSubFieldValue('wPos', pos);
             
-            var rot = this.obj3D.getWorldRotation(LBSailSim.Vessel._workingEuler);
+            var rot = this.obj3D.getWorldRotation(_workingEuler);
             dbgField.setSubFieldValue('wRot', rot);
             
             dbgField.setSubFieldValue('wResultant', this.resultant);
@@ -1158,7 +1165,7 @@ LBSailSim.Vessel.prototype.getLeewayDeg = function(isRound) {
         return 0;
     }
     
-    var rot = this.obj3D.getWorldRotation(LBSailSim.Vessel._workingEuler);
+    var rot = this.obj3D.getWorldRotation(_workingEuler);
     var heading = rot.z * LBMath.RAD_TO_DEG + 180;
     var boatDir = Math.atan2(this.worldLinearVelocity.y, this.worldLinearVelocity.x) * LBMath.RAD_TO_DEG;
     var leeway = LBMath.subDegrees(boatDir, heading);
@@ -1210,17 +1217,17 @@ LBSailSim.Vessel.prototype.getApparentWindVelocityMPS = function() {
 };
 
 LBSailSim.Vessel.prototype._getFoilForceMag = function(foils, localDir) {
-    var dir = LBSailSim.Vessel._workingVector3B.copy(localDir);
+    var dir = _workingVector3B.copy(localDir);
     this.obj3D.localToWorld(dir);
     
-    var origin = LBSailSim.Vessel._workingVector3A.zero();
+    var origin = _workingVector3A.zero();
     this.obj3D.localToWorld(origin);
     
     dir.sub(origin);
     dir.z = 0;
     dir.normalize();
 
-    var force = LBSailSim.Vessel._workingVector3A;
+    var force = _workingVector3A;
     force.zero();
     foils.forEach(function(foil) {
         force.add(foil.getResultant().force);

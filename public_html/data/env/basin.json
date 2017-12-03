@@ -34,6 +34,8 @@
     "boundaries": {
         "windVelDistanceScale": 0.25,
         "currentDistanceScale": 0.05,
+        "forceDistanceScale": 1,
+        "forceDistancePower": 1.5,
         "noSailSections": [
             {
                 "floatingObject": {

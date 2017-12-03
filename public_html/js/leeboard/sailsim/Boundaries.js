@@ -50,6 +50,21 @@ LBSailSim.Boundaries = function(sailEnv) {
      */
     this.currentDistanceScale = 0.1;
     
+    
+    /**
+     * The amount by which to multiply the distance over the boundary to obtain the
+     * resisting general force.
+     * @member {Number}
+     */
+    this.forceDistanceScale = 1;
+
+    /**
+     * The power to which the resisting force scale (forceDistanceScale * distance) is
+     * raised to obtain the resisting general force.
+     * @member {Number}
+     */
+    this.forceDistancePower = 0;
+    
     /**
      * The no sail sections. Each individual section is an object composed of connected segments.
      * @member {Object[]}
@@ -97,6 +112,8 @@ LBSailSim.Boundaries.prototype = {
         
         this.windVelDistanceScale = data.windVelDistanceScale || this.windVelDistanceScale;
         this.currentDistanceScale = data.currentDistanceScale || this.currentDistanceScale;
+        this.forceDistanceScale = data.forceDistanceScale || this.forceDistanceScale;
+        this.forceDistancePower = data.forceDistancePower || this.forceDistancePower;
         
         return this;
     },
@@ -243,10 +260,14 @@ LBSailSim.Boundaries.prototype = {
         return dx * dx + dy * dy;
     },
     
-    _handleNoSailVel: function(velDistanceScale, vel) {
+    _handleNoSailVel: function(velDistanceScale, vel, velDistancePower) {
         if (this._boundsInfo.type === LBSailSim.Boundaries.TYPE_NO_SAIL) {
+            var scale = this._boundsInfo.distanceIn * velDistanceScale;
+            if (velDistancePower) {
+                scale = Math.pow(scale, velDistancePower);
+            }
             vel.copy(this._boundsInfo.direction)
-                    .multiplyScalar(this._boundsInfo.distanceIn * velDistanceScale);
+                    .multiplyScalar(scale);
             return true;
         }
         return false;
@@ -260,12 +281,12 @@ LBSailSim.Boundaries.prototype = {
      * @returns {Boolean}   true if there is an influencing boundary.
      */
     getBoundaryWindVel: function(x, y, windVel) {
-        if (this._findBoundsInfo(x, y)) {
+/*        if (this._findBoundsInfo(x, y)) {
             if (this._handleNoSailVel(this.windVelDistanceScale, windVel)) {
                 return true;
             }
         }
-        return false;
+*/        return false;
     },
     
     
@@ -277,8 +298,25 @@ LBSailSim.Boundaries.prototype = {
      * @returns {Boolean}   true if there is an influencing boundary.
      */
     getBoundaryCurrent: function(x, y, current) {
-        if (this._findBoundsInfo(x, y)) {
+/*        if (this._findBoundsInfo(x, y)) {
             if (this._handleNoSailVel(this.currentDistanceScale, current)) {
+                return true;
+            }
+        }
+*/        return false;
+    },
+    
+    
+    /**
+     * Obtains an influencing boundary current for a point, if any.
+     * @param {Number} x    The x coordinate.
+     * @param {Number} y    The y coordinate.
+     * @param {LBGeometry.Vector2} force  Object set to the influencing boundary force, must be defined.
+     * @returns {Boolean}   true if there is an influencing boundary.
+     */
+    getBoundaryForce: function(x, y, force) {
+        if (this._findBoundsInfo(x, y)) {
+            if (this._handleNoSailVel(this.forceDistanceScale, force, this.forceDistancePower)) {
                 return true;
             }
         }

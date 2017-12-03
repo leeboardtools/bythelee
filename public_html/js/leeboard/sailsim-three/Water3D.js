@@ -199,7 +199,7 @@ LBSailSim.WaterShader = function(water3D, options) {
     
     this.wakesMaterial = this.createShaderMaterial(surfaceShader);
     // Can't use true normals unless we have more than 2 segments across the wake mesh.
-    this.wakesMaterial.uniforms.trueNormalFactor.value = 0.25;
+    //this.wakesMaterial.uniforms.trueNormalFactor.value = 0.25;
     this.water3D.wakesMaterial = this.wakesMaterial;
 
     this.maxPuffsHeight = 0.05;
