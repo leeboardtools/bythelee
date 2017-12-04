@@ -4,7 +4,7 @@ This is the home of **By The Lee**, LeeboardTools' Javascript sailing simulator.
 
 And of course, maybe one day it will also be used to create a game or two for those off-season months.
 
-At the moment the **By The Lee** app can be run from http://leeboardtools.github.io.
+At the moment the **By The Lee** app can be run from http://leeboardtools.github.io or http://leeboardtools.com (which simply points to http://leeboardtools.github.io).
 
 ## The Executive Summary ##
 **By The Lee** is written entirely in Javascript. The app is separated into a core library, a sailing simulator engine and a UI.
@@ -22,6 +22,12 @@ The following open source Javascript libraries are currently used:
 * [tween.js](https://github.com/tweenjs/tween.js/) is used to provide tweening, such as the automatic motion tracking of the wake particles.
 
 * [QUnit](http://qunitjs.com/) is used as the unit test framework.
+
+* [Node.js](https://nodejs.org/) provides the server framework, which isn't currently used in the http://leeboardtools.github.io, but will be used for any future multi-player support.
+
+* [Express](https://expressjs.com/) is also part of the server framework.
+
+* [Socket.IO](https://socket.io/) is also part of the server framework, and will be used to handle the multi-player transactions.
 
 The HUD display and controls are all implemented using HTML elements.
 
@@ -56,7 +62,15 @@ Within public\_html we have:
 * textures: Various textures.
 * textures/three-js: This contains textures taken from the three.js examples.
 
+At the top-level folder, there is a Node.js file, app.js, which is used to run the server, should you so desire. With the server you can set up the server on your local network by running app.js from within NetBeans, or typing:
 
+`node app.js`
+
+from the command line at the top-level folder. The IP address and port the server is listening on is displayed in the console. With the server running, you can then connect to ByTheLee by simply typing the IP address followed by the port in a browser on a computer connected to the local network. For example, on my home network the server reports:
+
+`10.0.0.7:3000`
+
+Type that in your browser window to connect locally.
 
 ### Unit Tests ###
 There are a bunch of unit tests, all found within the public\_html/test folder. These are based upon [QUnit](https://qunitjs.com/). The tests themselves are run from the unit-tests.html file in public\_html.
