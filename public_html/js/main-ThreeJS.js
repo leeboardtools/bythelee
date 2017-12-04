@@ -1158,7 +1158,7 @@ LBMyApp.prototype.toggleRunPause = function() {
  * 
  * @returns {undefined}
  */
-LBMyApp.prototype.startRace = function() {
+LBMyApp.prototype.startRace = function(courseName, mode) {
     if (!this.race) {
         var element = document.getElementById('race_display');
         element.style.visibility = "visible";

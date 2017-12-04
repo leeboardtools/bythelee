@@ -61,8 +61,7 @@ Map:
 
 Race Course To do:
 - Detect and penalize mark collisions.
-- Change color
-
+- Be able to move buoys based upon the course.
 
 Multi-player
 

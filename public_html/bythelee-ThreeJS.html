@@ -439,6 +439,20 @@ and open the template in the editor.
                 background-color: darkgray;
             }
             
+            .menu_text {
+                font-size: 1.75rem;
+                color: darkblue;
+                cursor: pointer;
+                padding: 1px;
+                
+                border-width: 1px;
+                border-style: none;
+            }
+            
+            .menu_text:hover {
+                background-color: darkgray;
+            }
+            
             /* A menu button that's aligned horizontally */
             .horiz_menu_button {
                 float: left;
@@ -490,6 +504,12 @@ and open the template in the editor.
                 width: 50%;
                 padding: 5px;
                 
+            }
+            
+            #race_menu {
+                position: absolute;
+                left: 28rem;
+                padding: 5px;
             }
             
             #race_display {
@@ -615,16 +635,16 @@ and open the template in the editor.
                     </div>
                     <div class="dropdown_items">
                         <div id="app_wind_back" class="dropdown_item menu_button" onclick="myApp.windBack()">
-                            <i class="material-icons">&#xE419;</i>
+                            <i class="material-icons">rotate_left</i>
                         </div>
                         <div id="app_wind_veer" class="dropdown_item menu_button" onclick="myApp.windVeer()">
-                            <i class="material-icons">&#xE41A;</i>
+                            <i class="material-icons">rotate_right</i>
                         </div>
                         <div id="app_wind_increase" class="dropdown_item menu_button" onclick="myApp.windIncrease()">
-                            <i class="material-icons">&#xE5D8;</i>
+                            <i class="material-icons">arrow_upward</i>
                         </div>
                         <div id="app_wind_decrease" class="dropdown_item menu_button" onclick="myApp.windDecrease()">
-                            <i class="material-icons">&#xE5DB;</i>
+                            <i class="material-icons">arrow_downward</i>
                         </div>
                     </div>
                 </div>
@@ -665,11 +685,20 @@ and open the template in the editor.
                     <div id="menu_run_pause" class="menu_button horiz_menu_button" onclick="myApp.toggleRunPause()">
                         <i class="material-icons">pause</i>
                     </div>
-                    <div id="menu_race" class="menu_button horiz_menu_button" onclick="myApp.startRace()">
-                        <i class="material-icons">assistant_photo</i>
-                    </div>
                 </div>
                 
+                
+                <div id="race_menu" class="dropdown">
+                    <div class="dropdown_btn menu_button">
+                        <i class="material-icons">assistant_photo</i>
+                    </div>
+                    <div class="dropdown_items">
+                        <div id="practice_race" class="dropdown_item menu_text" onclick="myApp.startRace('Windward - Leeward', 'practice')">
+                            Practice Windward Leeward
+                        </div>
+                    </div>
+                </div>
+
                 <div id="race_display">
                     <div id="time_display" class="race_status">-00:00:00.0</div>
                     <div id="marks_status" class="race_status">15/15</div>
@@ -793,14 +822,6 @@ and open the template in the editor.
                 </div>
             </div>
             
-            <!--
-            Top menu items:
-            Full Screen
-            Settings
-            Toggle Force Arrows
-            Toggle Velocity Arrows
-            -->
-
             <div>
                 <div id="pip_map_btn" class="pip_btn" onclick="myApp.toggleMap()"><i class="material-icons">map</i></div>
                 <div id="pip_map" class="pip_view_map"></div>
@@ -815,124 +836,6 @@ and open the template in the editor.
             </div>
             
         </div>
-            <!--
-            <i class="material-icons">map</i>
-            <i class="material-icons">&#xE55B;</i>
-            
-            <i class="material-icons">fullscreen</i>
-            <i class="material-icons">&#xE5D0;</i>
-            
-            <i class="material-icons">fullscreen_exit</i>
-            <i class="material-icons">&#xE5D1;</i>
-            
-            <i class="material-icons">chevron_left</i>
-            <i class="material-icons">&#xE5CB;</i>
-            
-            <i class="material-icons">chevron_right</i>
-            <i class="material-icons">&#xE5CC;</i>
-            
-            Chevron up...
-            <i class="material-icons">expand_less</i>
-            <i class="material-icons">&#xE5CE;</i>
-            
-            Chevron down...
-            <i class="material-icons">expand_more</i>
-            <i class="material-icons">&#xE5CF;</i>
-            
-            <i class="material-icons">rotate_left</i>
-            <i class="material-icons">&#xE419;</i>
-            
-            <i class="material-icons">rotate_right</i>
-            <i class="material-icons">&#xE41A;</i>
-            
-            <i class="material-icons">add</i>
-            <i class="material-icons">&#xE145;</i>
-            
-            <i class="material-icons">add_box</i>
-            <i class="material-icons">&#xE146;</i>
-            
-            <i class="material-icons">add_circle</i>
-            <i class="material-icons">&#xE147;</i>
-            
-            <i class="material-icons">add_circle_outline</i>
-            <i class="material-icons">&#xE148;</i>
-            
-            <i class="material-icons">remove</i>
-            <i class="material-icons">&#xE15B;</i>
-            
-            <i class="material-icons">remove_circle</i>
-            <i class="material-icons">&#xE15C;</i>
-            
-            <i class="material-icons">remove_circle_outline</i>
-            <i class="material-icons">&#xE15D;</i>
-            
-            <i class="material-icons">redo</i>
-            <i class="material-icons">&#xE15A;</i>
-            
-            <i class="material-icons">undo</i>
-            <i class="material-icons">&#xE166;</i>
-            
-            <i class="material-icons">directions_boat</i>
-            <i class="material-icons">&#xE532;</i>
-            
-            <i class="material-icons">navigation</i>
-            <i class="material-icons">&#xE55D;</i>
-            
-            <i class="material-icons">arrow_back</i>
-            <i class="material-icons">&#xE5C4;</i>
-            
-            <i class="material-icons">arrow_forward</i>
-            <i class="material-icons">&#xE5C8;</i>
-            
-            <i class="material-icons">arrow_downward</i>
-            <i class="material-icons">&#xE5DB;</i>
-            
-            <i class="material-icons">arrow_upward</i>
-            <i class="material-icons">&#xE5D8;</i>
-            
-            <i class="material-icons">do_not_disturb</i>
-            <i class="material-icons">&#xE612;</i>
-            
-            <i class="material-icons">settings</i>
-            <i class="material-icons">&#xE8B8;</i>
-            
-            <i class="material-icons">power</i>
-            <i class="material-icons">&#xE63C;</i>
-            
-            <i class="material-icons">flash_on</i>
-            <i class="material-icons">&#xE3E7;</i>
-            
-            Propeller...
-            <i class="material-icons">toys</i>
-            <i class="material-icons">&#xE332;</i>
-            
-            Arrows pointing towards each other
-            <i class="material-icons">compare_arrows</i>
-            <i class="material-icons">&#xE915;</i>
-            
-            <i class="material-icons">trending_up</i>
-            <i class="material-icons">&#xE8E5;</i>
-            
-            <i class="material-icons">trending_down</i>
-            <i class="material-icons">&#xE8E3;</i>
-            
-            <i class="material-icons">pan_tool</i>
-            <i class="material-icons">&#xE925;</i>
-            
-            Left-Right-Up-Down arrows
-            <i class="material-icons">open_with</i>
-            <i class="material-icons">&#xE89F;</i>
-            
-            <i class="material-icons">3d_rotation</i>
-            <i class="material-icons">&#xE84D;</i>
-            
-            <i class="material-icons">pause</i>
-            <i class="material-icons">&#xE034;</i>
-            
-            <i class="material-icons">play_arrow</i>
-            <i class="material-icons">&#xE037;</i>
-            -->
-
         <div id="fatal_error">
             <div id="fatal_error_frame">
                 <div id="fatal_error_title" class="fatal_error fatal_error_msg"></div>
@@ -976,6 +879,10 @@ and open the template in the editor.
                 <tr>
                     <td><i class="material-icons">pause</i></td>
                     <td>Pause/run</td>
+                </tr>
+                <tr>
+                    <td><i class="material-icons">assistant_photo</i></td>
+                    <td>Racing</td>
                 </tr>
                 <tr>
                     <td><i class="material-icons">map</i></td>
