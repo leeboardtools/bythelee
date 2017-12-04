@@ -219,6 +219,12 @@ LBSailSim.SailEnvTHREE.prototype._boatReturned = function(boat) {
 };
 
 
+/**
+ * Changes the display of a race course. This pretty much calls {@link module:LBSailSim.SailEnvTHREE.displayMark}
+ * for all the marks of the course.
+ * @param {module:LBRacing.Course} course   The race course.
+ * @param {Number} displayFlags Combination of {@link module:LBSailSim.CourseDisplayFlags}, 0 indicates hide everything.
+ */
 LBSailSim.SailEnvTHREE.prototype.displayCourse = function(course, displayFlags) {
     this.displayMark(course.start, displayFlags);
     
@@ -229,11 +235,23 @@ LBSailSim.SailEnvTHREE.prototype.displayCourse = function(course, displayFlags) 
     this.displayMark(course.finish, displayFlags);
 };
 
+/**
+ * Flags for controlling how race course components are displayed.
+ * @enum
+ */
 LBSailSim.CourseDisplayFlags = {
     CROSSING_LINES:         0x00000001,
     MARK_INDICATORS:        0x00000002
 };
 
+var _crossingLineDisplayZ = 0.1;
+var _markIndicatorDisplayZ = 10;
+
+/**
+ * Changes the display of a mark.
+ * @param {module:LBRacing.Mark} mark   The mark.
+ * @param {Number} displayFlags Combination of {@link module:LBSailSim.CourseDisplayFlags}, 0 indicates hide everything.
+ */
 LBSailSim.SailEnvTHREE.prototype.displayMark = function(mark, displayFlags) {
     displayFlags = displayFlags || 0;
     var scene3D = this.app3D.mainScene;
@@ -261,7 +279,7 @@ LBSailSim.SailEnvTHREE.prototype.displayMark = function(mark, displayFlags) {
                 var geometry = new THREE.BufferGeometry();
                 var basePos = mark.getMarkBasePosition();
                 var endPos = mark.getMarkEndPosition();
-                var z = 0.1;
+                var z = _crossingLineDisplayZ;
                 var vertices = new Float32Array([
                     basePos.x, basePos.y, z,
                     endPos.x, endPos.y, z
@@ -274,7 +292,7 @@ LBSailSim.SailEnvTHREE.prototype.displayMark = function(mark, displayFlags) {
             }
         }
         if (displayFlags & LBSailSim.CourseDisplayFlags.MARK_INDICATORS) {
-            var z = 10;
+            var z = _markIndicatorDisplayZ;
             if (!mark._lbMarkIndicatorMeshes) {
                 mark._lbMarkIndicatorMeshes = [];
                 var geometry = new THREE.BufferGeometry();
@@ -305,6 +323,68 @@ LBSailSim.SailEnvTHREE.prototype.displayMark = function(mark, displayFlags) {
                     mark._lbMarkIndicatorMeshes.push(mesh);
                 }
             }
+        }
+    }
+};
+
+
+/**
+ * Call to update the display of a race course.
+ * @param {module:LBRacing.Course} course   The race course.
+ */
+LBSailSim.SailEnvTHREE.prototype.updateCourseDisplay = function(course) {
+    this.updateMarkDisplay(course.start);
+    course.marks.forEach(function(mark) {
+        this.updateMarkDisplay(mark);
+    }, this);
+};
+
+/**
+ * Call to update the display of a mark.
+ * @param {module:LBRacing.Mark} mark   The mark.
+ */
+LBSailSim.SailEnvTHREE.prototype.updateMarkDisplay = function(mark) {
+    var scene3D = this.app3D.mainScene;
+    if (mark._lbCrossingLinesMesh) {
+        var positionAttribute = mark._lbCrossingLinesMesh.geometry.getAttribute('position');
+        var positions = positionAttribute.array;
+        var basePos = mark.getMarkBasePosition();
+        var endPos = mark.getMarkEndPosition();
+        positions[0] = basePos.x;
+        positions[1] = basePos.y;
+        positions[2] = positions[5] = _crossingLineDisplayZ;
+        positions[3] = endPos.x;
+        positions[4] = endPos.y;
+        scene3D.coordMapping.xyzToThreeJS(positions, 0, positions, 0);
+        scene3D.coordMapping.xyzToThreeJS(positions, 3, positions, 3);
+        
+        positionAttribute.needsUpdate = true;
+    }
+    
+    if (mark._lbMarkIndicatorMeshes) {
+        var pos = mark.getMarkBasePosition();
+        var positionAttribute = mark._lbMarkIndicatorMeshes[0].geometry.getAttribute('position');
+        var positions = positionAttribute.array;
+        positions[0] = positions[3] = pos.x;
+        positions[1] = positions[4] = pos.y;
+        positions[2] = 0;
+        positions[5] = _markIndicatorDisplayZ;
+        
+        scene3D.coordMapping.xyzToThreeJS(positions, 0, positions, 0);
+        scene3D.coordMapping.xyzToThreeJS(positions, 3, positions, 3);
+        positionAttribute.needsUpdate = true;
+        
+        if (mark._lbMarkIndicatorMeshes.length > 1) {
+            pos = mark.getMarkEndPosition();
+            positionAttribute = mark._lbMarkIndicatorMeshes[1].geometry.getAttribute('position');
+            positions = positionAttribute.array;
+            positions[0] = positions[3] = pos.x;
+            positions[1] = positions[4] = pos.y;
+            positions[2] = 0;
+            positions[5] = _markIndicatorDisplayZ;
+            scene3D.coordMapping.xyzToThreeJS(positions, 0, positions, 0);
+            scene3D.coordMapping.xyzToThreeJS(positions, 3, positions, 3);
+            positionAttribute.needsUpdate = true;
         }
     }
 };

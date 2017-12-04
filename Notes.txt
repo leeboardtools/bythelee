@@ -54,34 +54,14 @@ TODO:
 Clean up waternormals.jpg, there are some lines in it. Also need to tweak the timing of the
 noise in the shader.
 
-Change boundaries to apply an invisible force instead of wind/current.
 
 Map:
 2D. How to draw? Sprites?
 
-Course:
-Start Line
-    - Port then stbd marks
 
-Mark List:
-    - Round to port
-    - Round to stbd
-    - Gate (port then stbd marks)
-
-Finish line
-    - Port then stbd marks
-
-Need to detect:
-    - Crossing of starting line.
-    - Crossing of finish line
-    - Contact with mark - 30 sec. penalty or do a turn?
-    Detecting contact:
-        Use Cannon.World.collisionMatrix.get(bodyA, bodyB)
-        Can have simple list of marks to check against. Primarily list of upcoming marks.
-        Once there is contact, record the penalty, and disable detection against that mark.
-    Determining passing of mark:
-        Round to port, round to stbd? Which side of velocity vector boat goes around the mark?
-
+Race Course To do:
+- Detect and penalize mark collisions.
+- Change color
 
 
 Multi-player

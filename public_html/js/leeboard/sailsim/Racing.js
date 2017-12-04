@@ -353,9 +353,6 @@ LBRacing.MarkTracker.prototype.update = function(dt) {
         // to start checking.
         if (boatSideOfLine === -passedSide) {
             this.competitorLastSideOfLine = boatSideOfLine;
-            
-            console.log("Mark " + this.mark.name + ":\tInit competitorLastSideOfLine:\t" + boatSideOfLine + "\t" 
-                    + "BoatPos:\t" + competitorCurrentPosition.x + "\t" + competitorCurrentPosition.y);
         }
     }
     else {
@@ -371,23 +368,13 @@ LBRacing.MarkTracker.prototype.update = function(dt) {
                         // We're done!
                         this.isMarkPassed = true;
                     }
-                    
-            console.log("Mark " + this.mark.name + ":\tPassed Mark:\t" + boatSideOfLine + "\t" 
-                    + "BoatPos:\t" + competitorCurrentPosition.x + "\t" + competitorCurrentPosition.y
-                    + "PrevBoatPos:\t" + this.competitorLastPosition.x + "\t" + this.competitorLastPosition.y
-                    + "BasePos:\t" + basePos.x + "\t" + basePos.y
-                    + "FarPos:\t" + farPos.x + "\t" + farPos.y
-                    + "Intersection:\t" + intersection[0] + "\t" + intersection[1]);
                 }
                 else {
                     --this.markPassedCount;
-
-            console.log("Mark " + this.mark.name + ":\tRe-passed Mark:\t" + boatSideOfLine + "\t" 
-                    + "BoatPos:\t" + competitorCurrentPosition.x + "\t" + competitorCurrentPosition.y
-                    + "PrevBoatPos:\t" + this.competitorLastPosition.x + "\t" + this.competitorLastPosition.y
-                    + "BasePos:\t" + basePos.x + "\t" + basePos.y
-                    + "FarPos:\t" + farPos.x + "\t" + farPos.y
-                    + "Intersection:\t" + intersection[0] + "\t" + intersection[1]);
+                    if (!this.mark.prevMark) {
+                        // This lets you dip start....
+                        this.markPassedCount = Math.max(0, this.markPassedCount);
+                    }
                 }
             }
 
@@ -478,8 +465,8 @@ LBRacing.LineMark.prototype.getMarkCenterPosition = function() {
 };
 
 /**
- * Retrieves the base position of the mark. This defines one end of the mark's
- * crossing line, the line used to determine if a mark has been tentatively passed.
+ * @override
+ * @inheritdoc
  * @returns {module:LBGeometry.Vector2} The base position of the mark.
  */
 LBRacing.LineMark.prototype.getMarkBasePosition = function() {
@@ -487,8 +474,8 @@ LBRacing.LineMark.prototype.getMarkBasePosition = function() {
 };
 
 /**
- * Retrieves the end position of the mark. This defines the end of the mark's
- * crossing line, opposite the base position of the mark.
+ * @override
+ * @inheritdoc
  * @returns {module:LBGeometry.Vector2} The end position of the mark.
  */
 LBRacing.LineMark.prototype.getMarkEndPosition = function() {
@@ -496,6 +483,8 @@ LBRacing.LineMark.prototype.getMarkEndPosition = function() {
 };
 
 /**
+ * @override
+ * @inheritdoc
  * @returns {Boolean}   true if the crossing line is a line segment and the competitor
  * has to pass between the base and end positions, otherwise it is a ray starting
  * from base.
@@ -505,10 +494,8 @@ LBRacing.LineMark.prototype.isCrossingLineSegment = function() {
 };
 
 /**
- * Returns the result from {@link module:LBGeometry.whichSideOfLine} when {@link module:LBRacing.Mark#getMarkBasePosition}
- * is the from argument and {@link module:LBRacing.Mark#getMarkEndPosition} is the to argument that
- * determines the side where the competitor's position is when the crossing line
- * has been crossed.
+ * @override
+ * @inheritdoc
  * @returns {module:LBGeometry.LINE_SIDE_LEFT|module:LBGeometry.LINE_SIDE_RIGHT}
  */
 LBRacing.LineMark.prototype.getCrossingLinePassedSide = function() {
@@ -570,8 +557,8 @@ LBRacing.RoundingMark.prototype.getMarkCenterPosition = function() {
 };
 
 /**
- * Retrieves the base position of the mark. This defines one end of the mark's
- * crossing line, the line used to determine if a mark has been tentatively passed.
+ * @override
+ * @inheritdoc
  * @returns {module:LBGeometry.Vector2} The base position of the mark.
  */
 LBRacing.RoundingMark.prototype.getMarkBasePosition = function() {
@@ -582,8 +569,8 @@ var _roundingMarkPrevDelta = new LBGeometry.Vector2();
 var _roundingMarkNextDelta = new LBGeometry.Vector2();
 
 /**
- * Retrieves the end position of the mark. This defines the end of the mark's
- * crossing line, opposite the base position of the mark.
+ * @override
+ * @inheritdoc
  * @returns {module:LBGeometry.Vector2} The end position of the mark.
  */
 LBRacing.RoundingMark.prototype.getMarkEndPosition = function() {
@@ -631,6 +618,8 @@ LBRacing.RoundingMark.prototype.getMarkEndPosition = function() {
 };
 
 /**
+ * @override
+ * @inheritdoc
  * @returns {Boolean}   true if the crossing line is a line segment and the competitor
  * has to pass between the base and end positions, otherwise it is a ray starting
  * from base.
@@ -640,10 +629,8 @@ LBRacing.RoundingMark.prototype.isCrossingLineSegment = function() {
 };
 
 /**
- * Returns the result from {@link module:LBGeometry.whichSideOfLine} when {@link module:LBRacing.Mark#getMarkBasePosition}
- * is the from argument and {@link module:LBRacing.Mark#getMarkEndPosition} is the to argument that
- * determines the side where the competitor's position is when the crossing line
- * has been crossed.
+ * @override
+ * @inheritdoc
  * @returns {module:LBGeometry.LINE_SIDE_LEFT|module:LBGeometry.LINE_SIDE_RIGHT}
  */
 LBRacing.RoundingMark.prototype.getCrossingLinePassedSide = function() {
@@ -651,6 +638,12 @@ LBRacing.RoundingMark.prototype.getCrossingLinePassedSide = function() {
 };
 
 
+/**
+ * @override
+ * @inheritdoc
+ * @param {type} dt
+ * @returns {undefined}
+ */
 LBRacing.RoundingMark.prototype.update = function(dt) {
     this.needsRefresh = true;
 };

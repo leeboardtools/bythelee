@@ -1212,7 +1212,7 @@ LBMyApp.prototype.startRace = function() {
                     }
                     
                     // TEST!!!
-                    displayFlags |= LBSailSim.CourseDisplayFlags.CROSSING_LINES;
+                    //displayFlags |= LBSailSim.CourseDisplayFlags.CROSSING_LINES;
                     
                     me.sailEnv.displayMark(me.race.allMarks[markIndex], displayFlags);
                 }
@@ -1251,6 +1251,7 @@ LBMyApp.prototype.updateRace = function() {
                 + ":" + LBUtil.padLeadingDigits('00', minutes.toFixed(0)) + ":" + LBUtil.padLeadingDigits('00.0', seconds.toFixed(1));
         this.timeDisplayElement.innerHTML = timeDisplay;
         
+        this.sailEnv.updateCourseDisplay(this.race.course);
     }
 };
 

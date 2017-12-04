@@ -753,8 +753,8 @@ LBGeometry.Ellipse.prototype = {
     /**
      * Retrieves the points on the ellipse that have a given slope.
      * @param {Number} dydx
-     * @param {type} store
-     * @returns {Array|Geometry_L19.LBGeometry.Ellipse.prototype.getPointsWithTangentLocal.store|@var;store}
+     * @param {Number[]} [store]    If defined the array to receive the results.
+     * @returns {Number[]}  The array containing the point coordinates.
      */
     getPointsWithTangent: function(dydx, store) {
         store = store || [];
