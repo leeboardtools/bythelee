@@ -15,8 +15,8 @@
  */
 
 
-define(['lbsailsim', 'lbcannonphysicslink', 'lbrandom', 'lbui3d', 'lbgeometry', 'lbwater3d', 'lbsky3d', 'lbwakes3d', 'lbwind3d', 'tween'], 
-function(LBSailSim, LBCannonPhysicsLink, LBRandom, LBUI3d, LBGeometry, LBWater3D, LBSky3D, LBWakes3D, LBWind3D, TWEEN) {
+define(['lbsailsim', 'lbcannonphysicslink', 'lbrandom', 'lbui3d', 'lbgeometry', 'lbwater3d', 'lbsky3d', 'lbwakes3d', 'lbwind3d', 'tween', 'three'], 
+function(LBSailSim, LBCannonPhysicsLink, LBRandom, LBUI3d, LBGeometry, LBWater3D, LBSky3D, LBWakes3D, LBWind3D, TWEEN, THREE) {
     
     'use strict';
 
@@ -218,6 +218,98 @@ LBSailSim.SailEnvTHREE.prototype._boatReturned = function(boat) {
     this.physicsLink.removeRigidBody(boat);
 };
 
+
+LBSailSim.SailEnvTHREE.prototype.displayCourse = function(course, displayFlags) {
+    this.displayMark(course.start, displayFlags);
+    
+    course.marks.forEach(function(mark) {
+        this.displayMark(mark, displayFlags);
+    }, this);
+    
+    this.displayMark(course.finish, displayFlags);
+};
+
+LBSailSim.CourseDisplayFlags = {
+    CROSSING_LINES:         0x00000001,
+    MARK_INDICATORS:        0x00000002
+};
+
+LBSailSim.SailEnvTHREE.prototype.displayMark = function(mark, displayFlags) {
+    displayFlags = displayFlags || 0;
+    var scene3D = this.app3D.mainScene;
+    if (!displayFlags) {
+        if (mark._lbCrossingLinesMesh) {
+            scene3D.remove(mark._lbCrossingLinesMesh);
+            mark._lbCrossingLinesMesh = undefined;
+        }
+        if (mark._lbMarkIndicatorMeshes) {
+            scene3D.remove(mark._lbMarkIndicatorMeshes);
+            mark._lbMarkIndicatorMeshes = undefined;
+        }
+    }
+    else {
+        if (!this.markDisplayMaterial) {
+            this.markDisplayMaterial = new THREE.LineBasicMaterial({
+                transparent: true,
+                opacity: 0.25,
+                linewidth: 5,
+                color: 0xFFFF00
+            });
+        }
+        if (displayFlags & LBSailSim.CourseDisplayFlags.CROSSING_LINES) {
+            if (!mark._lbCrossingLinesMesh) {
+                var geometry = new THREE.BufferGeometry();
+                var basePos = mark.getMarkBasePosition();
+                var endPos = mark.getMarkEndPosition();
+                var z = 0.1;
+                var vertices = new Float32Array([
+                    basePos.x, basePos.y, z,
+                    endPos.x, endPos.y, z
+                ]);
+                scene3D.coordMapping.xyzToThreeJS(vertices, 0, vertices, 0);
+                scene3D.coordMapping.xyzToThreeJS(vertices, 3, vertices, 3);
+                geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+                mark._lbCrossingLinesMesh = new THREE.Line(geometry, this.markDisplayMaterial);
+                scene3D.add(mark._lbCrossingLinesMesh);
+            }
+        }
+        if (displayFlags & LBSailSim.CourseDisplayFlags.MARK_INDICATORS) {
+            var z = 10;
+            if (!mark._lbMarkIndicatorMeshes) {
+                mark._lbMarkIndicatorMeshes = [];
+                var geometry = new THREE.BufferGeometry();
+                var pos = mark.getMarkBasePosition();
+                var vertices = new Float32Array([
+                    pos.x, pos.y, 0,
+                    pos.x, pos.y, z
+                ]);
+                scene3D.coordMapping.xyzToThreeJS(vertices, 0, vertices, 0);
+                scene3D.coordMapping.xyzToThreeJS(vertices, 3, vertices, 3);
+                geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+                var mesh = new THREE.Line(geometry, this.markDisplayMaterial);
+                scene3D.add(mesh);
+                mark._lbMarkIndicatorMeshes.push(mesh);
+                
+                if (mark.isCrossingLineSegment()) {
+                    var geometry = new THREE.BufferGeometry();
+                    var pos = mark.getMarkEndPosition();
+                    var vertices = new Float32Array([
+                        pos.x, pos.y, 0,
+                        pos.x, pos.y, z
+                    ]);
+                    scene3D.coordMapping.xyzToThreeJS(vertices, 0, vertices, 0);
+                    scene3D.coordMapping.xyzToThreeJS(vertices, 3, vertices, 3);
+                    geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+                    var mesh = new THREE.Line(geometry, this.markDisplayMaterial);
+                    scene3D.add(mesh);
+                    mark._lbMarkIndicatorMeshes.push(mesh);
+                }
+            }
+        }
+    }
+};
+
+
 /**
  * The main simulation update method, call from the {@link module:LBUI3d.App3D}'s update() method.
  * @param {Number} dt   The time step.
@@ -288,6 +380,8 @@ LBSailSim.SailEnvTHREE.copyVectorToTHREE = LBUI3d.ZIsUpCoordMapping.vector3ToThr
 LBSailSim.SailEnvTHREE.copyQuaternionToTHREE = LBUI3d.ZIsUpCoordMapping.quaternionToThreeJS;;
 
 LBSailSim.SailEnvTHREE.copyEulerToTHREE = LBUI3d.ZIsUpCoordMapping.eulerToThreeJS;;
+
+
 
 return LBSailSim;
 });

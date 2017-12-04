@@ -23,6 +23,50 @@ function(LBGeometry, LBMath, LBUtil, LBInterpolate) {
 // This file holds geometry stuff that is not specifically THREE.js based.
 
 
+var _parametricLineIntersectionLHS = [];
+var _parametricLineIntersectionRHS = [];
+
+
+/**
+ * Calculates the intersection point between two lines in parametric terms, that is,
+ * the parametric variables t and u of:
+ *  ptA = fromA + t * (toA - fromA)
+ *  ptB = fromB + u * (toB - fromB)
+ * @param {module:LBGeometry.Vector2} fromA
+ * @param {module:LBGeometry.Vector2} toA
+ * @param {module:LBGeometry.Vector2} fromB
+ * @param {module:LBGeometry.Vector2} toB
+ * @param {Number[]} [store]    If defined an array to store the result into.
+ * @returns {Number[]}  The array containing the result, with result[0] = t and result[1] = u,
+ * if the lines are parallel then result.length === 0.
+ */
+LBGeometry.calcParametricLineIntersection = function(fromA, toA, fromB, toB, store) {
+    var dxA = toA.x - fromA.x;
+    var dyA = toA.y - fromA.y;
+    var dxB = toB.x - fromB.x;
+    var dyB = toB.y - fromB.y;
+    
+    // Solving:
+    //  fromA.x + t * dxA = fromB.x + u * dxB
+    //  fromA.y + t * dyA = fromB.y + u * dyB
+    // Or:
+    //  dxA * t - dxB * u = fromB.x - fromA.x
+    //  dyA * t - dyB * u = fromB.y - fromA.y
+    var lhs = _parametricLineIntersectionLHS;
+    var rhs = _parametricLineIntersectionRHS;
+    
+    lhs[0] = dxA;
+    lhs[1] = -dxB;
+    lhs[2] = dyA;
+    lhs[3] = -dyB;
+    
+    rhs[0] = fromB.x - fromA.x;
+    rhs[1] = fromB.y - fromA.y;
+    
+    return LBMath.solve2x2Mat(lhs, rhs, store);
+};
+
+
 /**
  * Helper that represents a 2D rotation. Positive angles rotate the +x axis towards
  * the +y axis.

@@ -114,17 +114,20 @@
     ],
     
     "floating": {
+        "posNameToLoad": "posA",
         "objects": [
             {
                 "name": "Windward Buoy A",
                 "def": "buoy_cylinder_purple",
                 "pos": {"x": 60, "y": 250, "include": "buoy_cylinder_z" },
+                "posA": {"x": 20, "y": 50, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
                 "name": "Leeward Buoy A",
                 "def": "buoy_cylinder_yellow",
                 "pos": {"x": 70, "y": -100, "include": "buoy_cylinder_z" },
+                "posA": {"x": 30, "y": -20, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
@@ -143,12 +146,14 @@
                 "name": "Port Pin A",
                 "def": "buoy_cylinder_port_pin",
                 "pos": {"x": 50, "y": 50, "include": "buoy_cylinder_z" },
+                "posA": {"x": 10, "y": 10, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {
                 "name": "Starboard Pin A",
                 "def": "buoy_cylinder_stbd_pin",
                 "pos": {"x": 80, "y": 50, "include": "buoy_cylinder_z" },
+                "posA": {"x": 40, "y": 10, "include": "buoy_cylinder_z" },
                 "include": "buoy_cylinder_object"
             },
             {

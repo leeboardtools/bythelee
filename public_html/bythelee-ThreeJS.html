@@ -491,6 +491,22 @@ and open the template in the editor.
                 padding: 5px;
                 
             }
+            
+            #race_display {
+                padding: 5px;
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 4rem;
+		font-family: monospace;
+                text-align: center;
+                color: #00000088;
+                visibility: hidden;
+            }
+            
+            .race_status {
+                display: inline;
+            }
 
             /* One of the two PIP views along the bottom of the screen */
             .pip_view_bottom {
@@ -649,6 +665,14 @@ and open the template in the editor.
                     <div id="menu_run_pause" class="menu_button horiz_menu_button" onclick="myApp.toggleRunPause()">
                         <i class="material-icons">pause</i>
                     </div>
+                    <div id="menu_race" class="menu_button horiz_menu_button" onclick="myApp.startRace()">
+                        <i class="material-icons">assistant_photo</i>
+                    </div>
+                </div>
+                
+                <div id="race_display">
+                    <div id="time_display" class="race_status">-00:00:00.0</div>
+                    <div id="marks_status" class="race_status">15/15</div>
                 </div>
                 
                 <div id="hud_boat" class="hud_display">

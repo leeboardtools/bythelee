@@ -228,4 +228,16 @@ QUnit.test( "finiteDiffBackFirst", function( assert ) {
 });
 
 
+QUnit.test( "solve2x2Mat", function( assert ) {
+    var lhs = [1, 2, 3, 4];
+    var rhs = [5, 6];
+    var result = LBMath.solve2x2Mat(lhs, rhs);
+    assert.nearEqual(lhs[0] * result[0] + lhs[1] * result[1], rhs[0], "1*x + 2*y = 5");
+    assert.nearEqual(lhs[2] * result[0] + lhs[3] * result[1], rhs[1], "3*x + 4*y = 6");
+    
+    result = LBMath.solve2x2Mat([1, 2, 3, 6], [5, 6]);
+    assert.equal(result.length, 0, 'singular');
+});
+
+
 });

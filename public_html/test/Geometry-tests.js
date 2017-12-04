@@ -562,6 +562,23 @@ QUnit.test("ellipse", function(assert) {
     assert.notOk(ellipse.isPointInEllipse(0,-5.00001), "isPointInEllipse 0,-5.00001");
 });
 
+
+QUnit.test("parametricLineIntersection", function(assert) {
+    var fromA = new LBGeometry.Vector2(10, 0);
+    var toA = new LBGeometry.Vector2(20, 0);
+    
+    var fromB = new LBGeometry.Vector2(10, 1);
+    var toB = new LBGeometry.Vector2(20, 1);
+    
+    var result = LBGeometry.calcParametricLineIntersection(fromA, toA, fromB, toB);
+    assert.equal(result.length, 0, "parallel lines");
+    
+    fromB.set(12, 5);
+    toB.set(12, 15);
+    LBGeometry.calcParametricLineIntersection(fromA, toA, fromB, toB, result);
+    assert.nearEqual(result, [0.2, -0.5], "intersection");
+});
+
 return {
     checkVector2: checkVector2,
     checkVector3: checkVector3,

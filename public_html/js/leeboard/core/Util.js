@@ -185,6 +185,18 @@ LBUtil.isVar = function(v) {
 
 
 /**
+ * Adds leading zeroes to a value to padd it to a given number of digits.
+ * @param {String} fullPadding  The fully padded representation, as in '0000' to pad
+ * a number like '0012'.
+ * @param {NUmber} value    The value to be padded, this should normally be a whole number.
+ * @returns {String}
+ */
+LBUtil.padLeadingDigits = function(fullPadding, value) {
+    var s = fullPadding + value;
+    return s.substr(s.length - fullPadding.length);
+};
+
+/**
  * Looks through the elements of an array for the first one with a property called 'name'
  * whose value matches a given name.
  * @param {object[]} array    The array to search.

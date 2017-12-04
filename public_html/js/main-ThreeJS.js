@@ -107,7 +107,10 @@ function LBMyApp() {
     this.hudResiduaryForceElement = document.getElementById('hud_f_residuary');
     this.hudInducedKeelForceElement = document.getElementById('hud_f_induced_keel');
     this.hudInducedSailForceElement = document.getElementById('hud_f_induced_sail');
-    
+
+    this.raceDisplayElement = document.getElementById('race_display');
+    this.timeDisplayElement = document.getElementById('time_display');
+    this.markStatusElement = document.getElementById('marks_status');
 
     this.rudderSliderElement = document.getElementById('rudder_slider');
     this.rudderControl = document.getElementById('rudder');
@@ -132,7 +135,9 @@ function LBMyApp() {
     this.updateCameraViewButton();
     
     // TEST!!!
-    this.debugTimeRecorder = new LBDebug.TimeRecorder();
+    if (this.socket) {
+        this.debugTimeRecorder = new LBDebug.TimeRecorder();
+    }
 };
 
 LBMyApp.prototype = Object.create(LBUI3d.App3D.prototype);
@@ -253,7 +258,7 @@ LBMyApp.prototype.loadEnvCompleted = function() {
     assetLoader.loadJSON(name, fileName, function(data) {
         if (data.courses) {
             try {
-                this.raceCourses = LBRacing.Course.loadCoursesFromData(me.sailEnv, data.courses);
+                me.raceCourses = LBRacing.Course.loadCoursesFromData(me.sailEnv, data.courses);
             }
             catch (err) {
                 // Ignore course loading failures...
@@ -552,6 +557,7 @@ LBMyApp.prototype.update = function(dt) {
     if (this.race) {
         this.debugTimeRecorder.start('race.update');
         this.race.update(dt);
+        this.updateRace();
         this.debugTimeRecorder.end('race.update');
     }
     
@@ -1146,6 +1152,108 @@ LBMyApp.prototype.toggleRunPause = function() {
     var elements = element.getElementsByTagName('i');
     elements[0].innerHTML = (this.isPaused()) ? "&#xE037;" : "&#xE034;";
 };
+
+
+/**
+ * 
+ * @returns {undefined}
+ */
+LBMyApp.prototype.startRace = function() {
+    if (!this.race) {
+        var element = document.getElementById('race_display');
+        element.style.visibility = "visible";
+        
+        var course = this.raceCourses[0];
+        
+        this.sailEnv.displayCourse(course, LBSailSim.CourseDisplayFlags.MARK_INDICATORS);
+        this.sailEnv.displayMark(course.start, LBSailSim.CourseDisplayFlags.CROSSING_LINES);
+        
+        this.race = new LBRacing.Race(this.sailEnv, course);
+        var competitor = this.race.addCompetitor(this.myBoat);
+        
+        var me = this;
+        competitor.addStateChangeCallback(function(competitor) {
+            switch (competitor.state) {
+                case LBRacing.CompetitorStates.PRE_START :
+                    me.raceDisplayElement.style.color = "#CC0000AA";
+                    break;
+                    
+                case LBRacing.CompetitorStates.STARTING :
+                case LBRacing.CompetitorStates.RACING :
+                    me.raceDisplayElement.style.color = "#00AA00AA";
+                    break;
+                    
+                case LBRacing.CompetitorStates.FINISHED :
+                    me.raceDisplayElement.style.color = "#000088AA";
+                    break;
+                    
+                case LBRacing.CompetitorStates.RETIRED :
+                case LBRacing.CompetitorStates.DISQUALIFIED :
+                    me.raceDisplayElement.style.color = "#880000AA";
+                    break;
+            }
+        });
+        
+        competitor.addMarkPassedCallback(function(competitor) {
+            var markIndex = competitor.currentMarkIndex;
+            if (competitor.currentMarkTracker) {
+                if ((competitor.currentMarkTracker.markPassedCount === 1)
+                 && (markIndex < me.race.allMarks.length)) {
+                    ++markIndex;
+                }
+            }
+            if (markIndex > 0) {
+                // Hide everything and only show the next mark.
+                me.sailEnv.displayCourse(me.race.course, 0);
+                if (markIndex < me.race.allMarks.length) {
+                    var displayFlags = LBSailSim.CourseDisplayFlags.MARK_INDICATORS;
+                    if (me.race.allMarks[markIndex] === me.race.course.finish) {
+                        displayFlags |= LBSailSim.CourseDisplayFlags.CROSSING_LINES;
+                    }
+                    
+                    // TEST!!!
+                    displayFlags |= LBSailSim.CourseDisplayFlags.CROSSING_LINES;
+                    
+                    me.sailEnv.displayMark(me.race.allMarks[markIndex], displayFlags);
+                }
+                else {
+                    // TODO: Show FINISH/flash the result.
+                }
+            }
+            
+            var statusMsg = markIndex + "/" + me.race.allMarks.length;
+            me.markStatusElement.innerHTML = statusMsg;
+        });
+    }
+    
+    this.race.startPreRace();
+};
+
+LBMyApp.prototype.updateRace = function() {
+    if (this.race) {
+        var sign = Math.sign(this.race.elapsedTime);
+        var elapsedTime = sign * this.race.elapsedTime;
+        if ((sign < 0) && (elapsedTime <= 10)) {
+            this.raceDisplayElement.style.color = "#AAAA00AA";
+            this.sailEnv.displayCourse(this.race.course, 0);
+            this.sailEnv.displayMark(this.race.course.start, LBSailSim.CourseDisplayFlags.MARK_INDICATORS | LBSailSim.CourseDisplayFlags.CROSSING_LINES);
+        }
+        
+        var hours = Math.floor(elapsedTime / 3600);
+        elapsedTime -= hours * 3600;
+        
+        var minutes = Math.floor(elapsedTime / 60);
+        elapsedTime -= minutes * 60;
+        
+        var seconds = elapsedTime;
+        
+        var timeDisplay = ((sign < 0) ? "-" : "+") + LBUtil.padLeadingDigits('00', hours.toFixed(0)) 
+                + ":" + LBUtil.padLeadingDigits('00', minutes.toFixed(0)) + ":" + LBUtil.padLeadingDigits('00.0', seconds.toFixed(1));
+        this.timeDisplayElement.innerHTML = timeDisplay;
+        
+    }
+};
+
 
 /**
  * 

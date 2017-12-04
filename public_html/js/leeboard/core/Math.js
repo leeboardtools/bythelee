@@ -593,5 +593,30 @@ LBMath.finiteDiffBackFirst = function(dt, f0, fm1, fm2, fm3, fm4) {
  */
 LBMath.finiteDiffBackFirst.MAX_TERMS = 5;
 
+
+/**
+ * Solves a 2x2 matrix.
+ * @param {Number[]} lhs    The 2x2 matrix to solve. The equation being solved is:
+ * <pre><code>
+ *      lhs[0] * result[0] + lhs[1] * result[1] = rhs[0]
+ *      lhs[2] * result[0] + lhs[3] * result[1] = rhs[1]
+ * </code></pre>
+ * @param {Number[]} rhs    The 2 element right hand side.
+ * @param {Number[]} [store] If defined the array to receive the results.
+ * @returns {Number[]}  The array containing the two solutions, an empty array if
+ * lhs is singular.
+ */
+LBMath.solve2x2Mat = function(lhs, rhs, store) {
+    store = store || [];
+    store.length = 0;
+    
+    var den = lhs[0] * lhs[3] - lhs[1] * lhs[2];
+    if (!LBMath.isLikeZero(den)) {
+        store[0] = (lhs[3] * rhs[0] - lhs[1] * rhs[1]) / den;
+        store[1] = (lhs[0] * rhs[1] - lhs[2] * rhs[0]) / den;
+    }
+    return store;
+};
+
 return LBMath;
 });

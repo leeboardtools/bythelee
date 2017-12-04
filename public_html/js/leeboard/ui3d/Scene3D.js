@@ -66,7 +66,14 @@ LBUI3d.Scene3D.prototype = {
      * @returns {module:LBUI3d.Scene3D}    this.
      */
     remove: function() {
-        this.scene.remove.apply(this.scene, arguments);
+        if ((arguments.length === 1) && (Array.isArray(arguments[0]))) {
+            arguments[0].forEach(function(obj) {
+                this.scene.remove(obj);
+            }, this);
+        }
+        else {
+            this.scene.remove.apply(this.scene, arguments);
+        }
     },
     
     constructor: LBUI3d.Scene3D

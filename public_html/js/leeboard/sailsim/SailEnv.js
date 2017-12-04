@@ -233,6 +233,7 @@ LBSailSim.Env.prototype = {
     
     _loadFloating: function(data) {
         if (data.objects) {
+            this.posNameToLoad = data.posNameToLoad || 'pos';
             data.objects.forEach(this.loadFloatingObject, this);
         }
     },
@@ -263,8 +264,10 @@ LBSailSim.Env.prototype = {
         rigidBody.name = data.name;
         
         LBForces.Buoyancy.loadRigidBodySettings(rigidBody, objectDef);
-        if (data.pos) {
-            LBGeometry.loadVector3(data.pos, rigidBody.obj3D.position);
+        
+        var posData = data[this.posNameToLoad] || data.pos;
+        if (posData) {
+            LBGeometry.loadVector3(posData, rigidBody.obj3D.position);
         }
         
         rigidBody.obj3D.updateMatrixWorld(true);
