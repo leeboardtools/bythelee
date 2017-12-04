@@ -196,6 +196,67 @@ LBUtil.padLeadingDigits = function(fullPadding, value) {
     return s.substr(s.length - fullPadding.length);
 };
 
+function secondsPadding(decimalPlaces) {
+    if (decimalPlaces > 0) {
+        var padding = "00.";
+        while (--decimalPlaces >= 0) {
+            padding += "0";
+        }
+        return padding;
+    }
+    return "00";
+}
+
+
+/**
+ * Builds a string showing seconds in the form +|-hh:mm:ss.s
+ * @param {Number} seconds  The seconds to be represented.
+ * @param {Number} [decimalPlaces=0]    The number of decimal places to display the seconds to.
+ * @param {Boolean} [alwaysSign=false]  If true a sign is always displayed.
+ * @returns {String}
+ */
+LBUtil.secondsToString_hhmmss = function(seconds, decimalPlaces, alwaysSign) {
+    var sign = Math.sign(seconds);
+    seconds = seconds * sign;
+
+    var hours = Math.floor(seconds / 3600);
+    seconds -= hours * 3600;
+
+    var minutes = Math.floor(seconds / 60);
+    seconds -= minutes * 60;
+
+    decimalPlaces = decimalPlaces || 0;
+    var signText = (sign < 0) ? "-" : ((alwaysSign) ? "+" : "");
+    var timeDisplay = signText
+            + LBUtil.padLeadingDigits('00', hours.toFixed(0)) 
+            + ":" + LBUtil.padLeadingDigits('00', minutes.toFixed(0)) 
+            + ":" + LBUtil.padLeadingDigits(secondsPadding(decimalPlaces), seconds.toFixed(decimalPlaces));
+    return timeDisplay;
+};
+
+/**
+ * Builds a string showing seconds in the form +|-mm:ss.s
+ * @param {Number} seconds  The seconds to be represented.
+ * @param {Number} [decimalPlaces=0]    The number of decimal places to display the seconds to.
+ * @param {Boolean} [alwaysSign=false]  If true a sign is always displayed.
+ * @returns {String}
+ */
+LBUtil.secondsToString_mmss = function(seconds, decimalPlaces, alwaysSign) {
+    var sign = Math.sign(seconds);
+    seconds = seconds * sign;
+
+    var minutes = Math.floor(seconds / 60);
+    seconds -= minutes * 60;
+
+    decimalPlaces = decimalPlaces || 0;
+    var signText = (sign < 0) ? "-" : ((alwaysSign) ? "+" : "");
+    var timeDisplay = signText
+            + LBUtil.padLeadingDigits('00', minutes.toFixed(0)) 
+            + ":" + LBUtil.padLeadingDigits(secondsPadding(decimalPlaces), seconds.toFixed(decimalPlaces));
+    return timeDisplay;
+};
+
+
 /**
  * Looks through the elements of an array for the first one with a property called 'name'
  * whose value matches a given name.

@@ -235,7 +235,14 @@ LBRacing.Mark.prototype.getCrossingLinePassedSide = function() {
     throw "LBRacing.Mark.getMarkEndPosition() not implemented!";
 };
 
-
+/**
+ * Determines if a competitor is touching the mark.
+ * @param {module:LBRacing.Competitor} competitor   The competitor.
+ * @returns {Boolean}   true if competitor is in contact with the mark.
+ */
+LBRacing.Mark.prototype.isContactWithMark = function(competitor) {
+    throw "LBRacing.Mark.isContactWithMark() not implemented!";
+};
 
 /**
  * Removes the mark from use.
@@ -353,6 +360,8 @@ LBRacing.MarkTracker.prototype.update = function(dt) {
         // to start checking.
         if (boatSideOfLine === -passedSide) {
             this.competitorLastSideOfLine = boatSideOfLine;
+            console.log("Mark:\t" + this.mark.name
+                    + "\tInitialBoatSideOfLine:\t" + boatSideOfLine);
         }
     }
     else {
@@ -376,10 +385,23 @@ LBRacing.MarkTracker.prototype.update = function(dt) {
                         this.markPassedCount = Math.max(0, this.markPassedCount);
                     }
                 }
+                
+                console.log("Mark:\t" + this.mark.name 
+                        + "\tBoatSideOfLine:\t" + boatSideOfLine 
+                        + "\tmarkPassedCount:\t"
+                        + "\tintersection:\t" + intersection[0] + "\t" + intersection[1]
+                        + "\tbasePos:\t" + basePos.x + "\t" + basePos.y
+                        + "\tfarPos:\t" + farPos.x + "\t" + farPos.y
+                        + "\tcurrentPos:\t" + competitorCurrentPosition.x + "\t" + competitorCurrentPosition.y
+                        + "\tprevPos:\t" + this.competitorLastPosition.x + "\t" + this.competitorLastPosition.y);
             }
 
             this.competitorLastSideOfLine = boatSideOfLine;
         }
+    }
+    
+    if (!this.isMarkTouched) {
+        this.isMarkTouched = this.mark.isContactWithMark(this.competitor);
     }
     
     if ((this.markPassedCount === 1) && !this.isMarkPassed) {
@@ -502,6 +524,17 @@ LBRacing.LineMark.prototype.getCrossingLinePassedSide = function() {
     return LBGeometry.LINE_SIDE_LEFT;
 };
 
+/**
+ * @override
+ * @inheritdoc
+ * @param {type} competitor
+ * @returns {undefined}
+ */
+LBRacing.LineMark.prototype.isContactWithMark = function(competitor) {
+    var physicsLink = this.sailEnv.physicsLink;
+    return physicsLink.areBodiesInContact(competitor.boat, this.portObject)
+        || physicsLink.areBodiesInContact(competitor.boat, this.stbdObject);
+};
 
 
 /**
@@ -641,13 +674,24 @@ LBRacing.RoundingMark.prototype.getCrossingLinePassedSide = function() {
 /**
  * @override
  * @inheritdoc
+ * @param {type} competitor
+ * @returns {undefined}
+ */
+LBRacing.RoundingMark.prototype.isContactWithMark = function(competitor) {
+    var physicsLink = this.sailEnv.physicsLink;
+    return physicsLink.areBodiesInContact(competitor.boat, this.mark);
+};
+
+
+/**
+ * @override
+ * @inheritdoc
  * @param {type} dt
  * @returns {undefined}
  */
 LBRacing.RoundingMark.prototype.update = function(dt) {
     this.needsRefresh = true;
 };
-
 
 
 
@@ -682,6 +726,8 @@ LBRacing.Race = function(sailEnv, course, options) {
     this.preStartDuration = LBUtil.isVar(options.preStartDuration) ? options.preStartDuration : 10;
     this.secondsToStart = -1;
     this.startTime = 0;
+    
+    this.markTouchPenaltyTime = LBUtil.isVar(options.markTouchPenaltyTime) ? options.markTouchPenaltyTime : 30;
     
     this.stateChangeCallbacks = [];
 };
@@ -1050,7 +1096,7 @@ LBRacing.Competitor.prototype.removeStateChangeCallback = function(callback) {
 
 /**
  * Adds a function that gets called back whenever the current mark's passed state
- * changes.
+ * changes. This is also called when the mark touched state changes.
  * @param {Function} callback   The callback function, it takes one argument, this.
  * @returns {module:LBRacing.Competitor}    this.
  */
@@ -1161,9 +1207,13 @@ LBRacing.Competitor.prototype.update = function(dt) {
         case LBRacing.CompetitorStates.STARTING :
         case LBRacing.CompetitorStates.RACING :
             var wasProvisionallyPassed = (this.currentMarkTracker.markPassedCount === 1);
+            var wasMarkTouched = this.currentMarkTracker.isMarkTouched;
+            
             this.currentMarkTracker.update(dt);
+            
             var isProvisionallyPassed = (this.currentMarkTracker.markPassedCount === 1);
-            if (isProvisionallyPassed !== wasProvisionallyPassed) {
+            var isMarkTouched = this.currentMarkTracker.isMarkTouched;
+            if ((isProvisionallyPassed !== wasProvisionallyPassed) || (isMarkTouched != wasMarkTouched)) {
                 this.markPassedCallbacks.forEach(function(callback) {
                     callback(this);
                 }, this);

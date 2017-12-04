@@ -22,21 +22,6 @@ require( ['lbui3d', 'lbutil', 'lbdebug', 'lbmath', 'lbassets', 'lbsailsimthree',
         
         
     'use strict';
-    
-/**
- * 
- * @param {Element} slider
- * @returns {unresolved}
- */    
-function setupSlider(slider) {
-    if (slider) {
-        // This prevents the slider from handling arrow keys, which we do ourselves.
-        slider.addEventListener('keydown', function(event) {
-            event.preventDefault();
-        });
-    }
-    return slider;
-}    
 
 
 /**
@@ -111,6 +96,7 @@ function LBMyApp() {
     this.raceDisplayElement = document.getElementById('race_display');
     this.timeDisplayElement = document.getElementById('time_display');
     this.markStatusElement = document.getElementById('marks_status');
+    this.penaltyStatusElement = document.getElementById('penalty_status');
 
     this.rudderSliderElement = document.getElementById('rudder_slider');
     this.rudderControl = document.getElementById('rudder');
@@ -139,6 +125,23 @@ function LBMyApp() {
         this.debugTimeRecorder = new LBDebug.TimeRecorder();
     }
 };
+
+    
+/**
+ * 
+ * @param {Element} slider
+ * @returns {unresolved}
+ */    
+function setupSlider(slider) {
+    if (slider) {
+        // This prevents the slider from handling arrow keys, which we do ourselves.
+        slider.addEventListener('keydown', function(event) {
+            event.preventDefault();
+        });
+    }
+    return slider;
+}    
+
 
 LBMyApp.prototype = Object.create(LBUI3d.App3D.prototype);
 LBMyApp.prototype.constructor = LBMyApp;
@@ -1171,10 +1174,16 @@ LBMyApp.prototype.startRace = function(courseName, mode) {
         this.race = new LBRacing.Race(this.sailEnv, course);
         var competitor = this.race.addCompetitor(this.myBoat);
         
+        this.isMarkTouched = [];
+        this.isMarkTouched.fill(false, 0, this.race.allMarks.length);
+        this.penaltyTime = 0;
+        
         var me = this;
         competitor.addStateChangeCallback(function(competitor) {
             switch (competitor.state) {
                 case LBRacing.CompetitorStates.PRE_START :
+                    me.isMarkTouched.fill(false, 0, me.race.allMarks.length);
+                    me.penaltyTime = 0;
                     me.raceDisplayElement.style.color = "#CC0000AA";
                     break;
                     
@@ -1185,6 +1194,7 @@ LBMyApp.prototype.startRace = function(courseName, mode) {
                     
                 case LBRacing.CompetitorStates.FINISHED :
                     me.raceDisplayElement.style.color = "#000088AA";
+                    me.showRaceResults();
                     break;
                     
                 case LBRacing.CompetitorStates.RETIRED :
@@ -1197,10 +1207,23 @@ LBMyApp.prototype.startRace = function(courseName, mode) {
         competitor.addMarkPassedCallback(function(competitor) {
             var markIndex = competitor.currentMarkIndex;
             if (competitor.currentMarkTracker) {
+                if (competitor.currentMarkTracker.isMarkTouched) {
+                    if (!me.isMarkTouched[markIndex]) {
+                        me.isMarkTouched[markIndex] = true;
+                        if (me.race.markTouchPenaltyTime) {
+                            me.penaltyStatusElement.style.visibility = 'visible';
+                            me.penaltyTime += me.race.markTouchPenaltyTime;
+                            
+                            me.penaltyStatusElement.innerHTML = LBUtil.secondsToString_mmss(me.penaltyTime) + " PENALTY";
+                        }
+                    }
+                }
+
                 if ((competitor.currentMarkTracker.markPassedCount === 1)
                  && (markIndex < me.race.allMarks.length)) {
                     ++markIndex;
                 }
+                
             }
             if (markIndex > 0) {
                 // Hide everything and only show the next mark.
@@ -1217,7 +1240,6 @@ LBMyApp.prototype.startRace = function(courseName, mode) {
                     me.sailEnv.displayMark(me.race.allMarks[markIndex], displayFlags);
                 }
                 else {
-                    // TODO: Show FINISH/flash the result.
                 }
             }
             
@@ -1231,30 +1253,52 @@ LBMyApp.prototype.startRace = function(courseName, mode) {
 
 LBMyApp.prototype.updateRace = function() {
     if (this.race) {
-        var sign = Math.sign(this.race.elapsedTime);
-        var elapsedTime = sign * this.race.elapsedTime;
-        if ((sign < 0) && (elapsedTime <= 10)) {
+        var elapsedTime = this.race.elapsedTime;
+        if ((elapsedTime < 0) && (elapsedTime >= -10)) {
             this.raceDisplayElement.style.color = "#AAAA00AA";
             this.sailEnv.displayCourse(this.race.course, 0);
             this.sailEnv.displayMark(this.race.course.start, LBSailSim.CourseDisplayFlags.MARK_INDICATORS | LBSailSim.CourseDisplayFlags.CROSSING_LINES);
         }
-        
-        var hours = Math.floor(elapsedTime / 3600);
-        elapsedTime -= hours * 3600;
-        
-        var minutes = Math.floor(elapsedTime / 60);
-        elapsedTime -= minutes * 60;
-        
-        var seconds = elapsedTime;
-        
-        var timeDisplay = ((sign < 0) ? "-" : "+") + LBUtil.padLeadingDigits('00', hours.toFixed(0)) 
-                + ":" + LBUtil.padLeadingDigits('00', minutes.toFixed(0)) + ":" + LBUtil.padLeadingDigits('00.0', seconds.toFixed(1));
-        this.timeDisplayElement.innerHTML = timeDisplay;
+        this.timeDisplayElement.innerHTML = LBUtil.secondsToString_hhmmss(elapsedTime, 1, true);
         
         this.sailEnv.updateCourseDisplay(this.race.course);
     }
 };
 
+LBMyApp.prototype.showRaceResults = function() {
+    var element = document.getElementById('race_results');
+    element.style.visibility = "visible";
+    
+    var racingTime = this.race.getCompetitor(this.myBoat).timeOfFinish - this.race.startTime;
+    var penaltyTime = this.penaltyTime;
+    var totalTime = racingTime + penaltyTime;
+    
+    element = document.getElementById('race_racing_time');
+    element.innerHTML = LBUtil.secondsToString_hhmmss(racingTime, 1);
+    
+    element = document.getElementById('race_penalty_time');
+    element.innerHTML = LBUtil.secondsToString_hhmmss(penaltyTime, 1);
+    
+    element = document.getElementById('race_total_time');
+    element.innerHTML = LBUtil.secondsToString_hhmmss(totalTime, 1);
+    
+};
+
+LBMyApp.prototype.endRace = function() {
+    var element = document.getElementById('race_display');
+    element.style.visibility = "hidden";
+    
+    this.penaltyStatusElement.style.visibility = "hidden";
+    
+    element = document.getElementById('race_results');
+    element.style.visibility = "hidden";
+    
+    if (this.race) {
+        this.sailEnv.displayCourse(this.race.course, 0);
+        this.race.destroy();
+        this.race = null;
+    }
+};
 
 /**
  * 

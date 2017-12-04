@@ -527,7 +527,34 @@ and open the template in the editor.
             .race_status {
                 display: inline;
             }
-
+            
+            .good_results {
+                color: #00AA00CC;
+            }
+            .penalty {
+                color: #CC0000CC;
+            }
+            
+            .final_results {
+                color: #000088CC;
+            }
+            
+            #penalty_status {
+                display: inline;
+                visibility: hidden;
+            }
+            
+            #race_results {
+                cursor: pointer;
+                font-size: 4rem;
+                position: absolute;
+		font-family: monospace;
+                left: 50%;
+                top: 50%;
+                transform: translateX(-50%) translateY(-50%);
+                visibility: hidden;               
+            }
+            
             /* One of the two PIP views along the bottom of the screen */
             .pip_view_bottom {
                 position: absolute;
@@ -702,6 +729,7 @@ and open the template in the editor.
                 <div id="race_display">
                     <div id="time_display" class="race_status">-00:00:00.0</div>
                     <div id="marks_status" class="race_status">15/15</div>
+                    <div id="penalty_status" class="race_status penalty">00:00 PENALTY</div>
                 </div>
                 
                 <div id="hud_boat" class="hud_display">
@@ -911,6 +939,20 @@ and open the template in the editor.
                             and <a href='https://socket.io/' target='_blank'>Socket.IO</a> for serving up network stuff</td></tr>
                 </table>
                 </td></tr>
+            </table>
+        </div>
+        
+        <div id="race_results" onclick="myApp.endRace()">
+            <table>
+                <tr class="good_results">
+                    <td>Racing Time:</td><td id="race_racing_time">00:00:00.0</td>
+                </tr>
+                <tr class="penalty">
+                    <td>Penalty Time:</td><td id="race_penalty_time">00:00:00.0</td>
+                </tr>
+                <tr class="final_results">
+                    <td>Final Time:</td><td id="race_total_time">00:00:00.0</td>
+                </tr>
             </table>
         </div>
 

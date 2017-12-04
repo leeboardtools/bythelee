@@ -137,6 +137,17 @@ LBPhysicsLink.Link.prototype = {
     _rigidBodyRemoved: function(rigidBody) {
     },
     
+    
+    /**
+     * Determines if two bodies are in contact.
+     * @param {module:LBPhysics.RigidBody} bodyA    The first body.
+     * @param {module:LBPhysics.RigidBody} bodyB    The second body.
+     * @returns {Boolean}
+     */
+    areBodiesInContact: function(bodyA, bodyB) {
+        throw "LBPhysicsLink.Link#areBodiesInContact not implemented!";
+    },
+    
 
     /**
      * Adds a {@link module:LBForces.ForceGenerator} to the manager.

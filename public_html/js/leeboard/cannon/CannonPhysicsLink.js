@@ -91,6 +91,13 @@ LBCannonPhysicsLink.Link.prototype._rigidBodyRemoved = function(rigidBody) {
     }
 };
 
+LBCannonPhysicsLink.Link.prototype.areBodiesInContact = function(bodyA, bodyB) {
+    if (bodyA._lbCannonBody && bodyB._lbCannonBody) {
+        return this.cWorld.collisionMatrix.get(bodyA._lbCannonBody, bodyB._lbCannonBody);
+    }
+    return false;
+};
+
 // @inheritdoc..
 LBCannonPhysicsLink.Link.prototype.timeStep = function() {
     return this.dt;
